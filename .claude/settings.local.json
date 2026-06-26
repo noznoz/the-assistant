@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(\\(Get-Command node -ErrorAction SilentlyContinue\\).Source; \\(Get-Command npm -ErrorAction SilentlyContinue\\).Source)",
+      "mcp__visualize__read_me",
+      "mcp__visualize__show_widget",
+      "mcp__Claude_Preview__preview_start",
+      "PowerShell(Get-Command node, npm, npx -ErrorAction SilentlyContinue | Select-Object Name, Source; Get-ChildItem \"C:\\\\Program Files\\\\nodejs\" -ErrorAction SilentlyContinue | Select-Object -First 5; Get-ChildItem \"$env:APPDATA\\\\npm\" -ErrorAction SilentlyContinue | Select-Object -First 5; $env:PATH -split ';' | Where-Object { $_ -match 'node|npm' })",
+      "PowerShell(Get-Command npm -ErrorAction SilentlyContinue)",
+      "PowerShell(node --version 2>&1)",
+      "PowerShell(npm --version 2>&1)",
+      "PowerShell($env:PATH = [System.Environment]::GetEnvironmentVariable\\(\"PATH\", \"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"PATH\", \"User\"\\); npm --version)",
+      "Skill(run)",
+      "Skill(run:*)",
+      "Bash(grep -Hm1 ^description: 'C:/Users/nizar/Claude/Projects/Riding App/mobile/.claude/skills/*/SKILL.md')",
+      "Bash(\"C:/Program Files/nodejs/node.exe\" \"C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js\" install @supabase/supabase-js)",
+      "Bash(\"C:/Program Files/nodejs/node.exe\" node_modules/vite/bin/vite.js build)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git -c 'user.name=Road Heaven' -c user.email=nizar.bukhari@gmail.com commit -m ' *)",
+      "Bash(grep -c \"\\\\.env$\")"
+    ]
+  }
+}
