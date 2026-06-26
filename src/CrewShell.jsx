@@ -5,7 +5,6 @@ import Trips from './tabs/Trips.jsx'
 import Gear from './tabs/Gear.jsx'
 import Riders from './tabs/Riders.jsx'
 import Challenges from './tabs/Challenges.jsx'
-import HelmetIcon from './components/HelmetIcon.jsx'
 
 // The shared app UI. Works for both demo (in-memory) and live (Supabase) modes;
 // the only difference is the `account` descriptor and where the data comes from.
@@ -41,7 +40,7 @@ export default function CrewShell({
         padding: '12px 16px', paddingTop: 'calc(12px + env(safe-area-inset-top))',
         display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, position: 'relative',
       }}>
-        <span style={{ color: 'var(--orange)', display: 'flex' }}><HelmetIcon size={26} /></span>
+        <img src="/icon-192.png" alt="" style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
         <span style={{ fontWeight: 700, fontSize: 18, letterSpacing: 1, color: 'var(--orange)' }}>ROAD HEAVEN</span>
 
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
