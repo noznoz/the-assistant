@@ -209,6 +209,7 @@ export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentR
         myBikes={myBikes}
         onBack={() => setSelected(null)}
         onJoin={(bike) => handleJoin(trip.id, bike)}
+        onWithdraw={() => handleReject(trip.id, currentRider)}
         onConfirm={() => handleConfirmAttendance(trip.id)}
         onApprove={(name) => handleApprove(trip.id, name)}
         onReject={(name) => handleReject(trip.id, name)}
@@ -518,7 +519,7 @@ function TripCard({ trip, mine, past, onSelect, onJoin, onReactivate }) {
   )
 }
 
-function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleReminder, onUpdateTrip, myBikes = [], onBack, onJoin, onConfirm, onApprove, onReject, onReactivate, onDelete }) {
+function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleReminder, onUpdateTrip, myBikes = [], onBack, onJoin, onWithdraw, onConfirm, onApprove, onReject, onReactivate, onDelete }) {
   const participants = trip.participations || []
   const pendingHere = isAdmin ? participants.filter(p => p.status === 'attended') : []
   const photos = trip.photos || []
@@ -647,14 +648,20 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
         </div>
       )}
       {trip.status === 'upcoming' && mine && (
-        <div style={{ background: '#0a2a0a', border: '1px solid #4caf50', borderRadius: 10, padding: '10px 14px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 16 }}>✓</span>
-          <div>
-            <p style={{ fontSize: 13, fontWeight: 600, color: '#4caf50' }}>You're in</p>
-            <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-              Status: {STATUS_LABEL[mine.status]}{mine.bike ? ` · Riding ${mine.bike}` : ''}
-            </p>
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ background: '#0a2a0a', border: '1px solid #4caf50', borderRadius: 10, padding: '10px 14px', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 16 }}>✓</span>
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 600, color: '#4caf50' }}>You're in</p>
+              <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                Status: {STATUS_LABEL[mine.status]}{mine.bike ? ` · Riding ${mine.bike}` : ''}
+              </p>
+            </div>
           </div>
+          <button
+            onClick={onWithdraw}
+            style={{ width: '100%', fontSize: 13, fontWeight: 600, color: '#e57373', background: '#1a0a0a', border: '1px solid #e57373', borderRadius: 10, padding: '10px 0' }}
+          >Withdraw from this ride</button>
         </div>
       )}
       {trip.status === 'completed' && mine?.status === 'requested' && (

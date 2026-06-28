@@ -761,10 +761,9 @@ function RiderDetail({ rider, riders, trips, updateTrip, posts, challenges = [],
                       <button
                         onClick={() => handleWithdraw(trip.id)}
                         style={{
-                          width: '100%', marginTop: -4, marginBottom: 8,
-                          fontSize: 12, fontWeight: 600, color: 'var(--text-muted)',
-                          border: '1px solid var(--border)', borderRadius: 8, padding: '6px 0',
-                          background: 'transparent',
+                          width: '100%', marginTop: 4, marginBottom: 8,
+                          fontSize: 12, fontWeight: 600, color: '#e57373',
+                          background: '#1a0a0a', border: '1px solid #e57373', borderRadius: 8, padding: '7px 0',
                         }}
                       >Withdraw from ride</button>
                     )}
