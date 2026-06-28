@@ -241,7 +241,7 @@ export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentR
           <div style={{ marginBottom: 10 }}>
             <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Date</label>
             <input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
-              style={{ width: '100%', background: '#111', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', color: 'var(--text)', fontSize: 13 }} />
+              style={{ width: '100%', background: '#111', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', color: 'var(--text)', fontSize: 13, colorScheme: 'dark' }} />
           </div>
 
           {/* Gathering Time + Rolling Time side by side */}
@@ -249,12 +249,12 @@ export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentR
             <div style={{ flex: 1 }}>
               <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Gathering Time</label>
               <input type="time" value={form.gatherTime} onChange={e => setForm(f => ({ ...f, gatherTime: e.target.value }))}
-                style={{ width: '100%', background: '#111', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', color: 'var(--text)', fontSize: 13 }} />
+                style={{ width: '100%', background: '#111', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', color: 'var(--text)', fontSize: 13, colorScheme: 'dark' }} />
             </div>
             <div style={{ flex: 1 }}>
               <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Rolling Time</label>
               <input type="time" value={form.rollTime} onChange={e => setForm(f => ({ ...f, rollTime: e.target.value }))}
-                style={{ width: '100%', background: '#111', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', color: 'var(--text)', fontSize: 13 }} />
+                style={{ width: '100%', background: '#111', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', color: 'var(--text)', fontSize: 13, colorScheme: 'dark' }} />
             </div>
           </div>
 
