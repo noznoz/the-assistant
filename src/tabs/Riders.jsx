@@ -266,6 +266,7 @@ function RiderDetail({ rider, riders, trips, updateTrip, posts, challenges = [],
   const [bikeForm, setBikeForm] = useState(EMPTY_BIKE)
   const [expandedBike, setExpandedBike] = useState(null)
   const [accDraft, setAccDraft] = useState({})
+  const [editingAcc, setEditingAcc] = useState(null) // { bikeId, accId, text }
   const [helmetName, setHelmetName] = useState('')
   const [helmetFile, setHelmetFile] = useState(null)
   const [helmetPreview, setHelmetPreview] = useState(null)
@@ -351,6 +352,13 @@ function RiderDetail({ rider, riders, trips, updateTrip, posts, challenges = [],
   function removeAccessory(bikeId, accId) {
     onUpdate({ garage: rider.garage.map(b => b.id === bikeId
       ? { ...b, accessories: (b.accessories || []).filter(a => a.id !== accId) } : b) })
+  }
+
+  function updateAccessory(bikeId, accId, text) {
+    if (!text.trim()) return
+    onUpdate({ garage: rider.garage.map(b => b.id === bikeId
+      ? { ...b, accessories: (b.accessories || []).map(a => a.id === accId ? { ...a, text: text.trim() } : a) } : b) })
+    setEditingAcc(null)
   }
 
   function pickHelmetPhoto(e) {
@@ -619,13 +627,33 @@ function RiderDetail({ rider, riders, trips, updateTrip, posts, challenges = [],
                       <p style={{ fontSize: 11, color: 'var(--text-muted)', letterSpacing: 1, marginBottom: 8 }}>🛠️ ACCESSORIES & MODS</p>
                       {accessories.length === 0 && <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>None added yet.</p>}
                       {accessories.map(a => (
-                        <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#111', borderRadius: 8, padding: '7px 10px', marginBottom: 6 }}>
-                          <span style={{ color: 'var(--orange)', fontSize: 12 }}>▸</span>
-                          <span style={{ flex: 1, fontSize: 13 }}>{a.text}</span>
-                          {canEdit && (
-                            <button onClick={() => removeAccessory(bike.id, a.id)} style={{ color: 'var(--text-muted)', fontSize: 13 }}>✕</button>
-                          )}
-                        </div>
+                        editingAcc?.bikeId === bike.id && editingAcc?.accId === a.id ? (
+                          <div key={a.id} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+                            <input
+                              value={editingAcc.text}
+                              onChange={e => setEditingAcc(s => ({ ...s, text: e.target.value }))}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') updateAccessory(bike.id, a.id, editingAcc.text)
+                                if (e.key === 'Escape') setEditingAcc(null)
+                              }}
+                              autoFocus
+                              style={{ flex: 1, background: '#111', border: '1px solid var(--orange)', borderRadius: 8, padding: '7px 10px', color: 'var(--text)', fontSize: 13, outline: 'none' }}
+                            />
+                            <button onClick={() => updateAccessory(bike.id, a.id, editingAcc.text)} style={{ background: 'var(--orange)', color: '#fff', fontWeight: 700, fontSize: 13, padding: '0 12px', borderRadius: 8 }}>Save</button>
+                            <button onClick={() => setEditingAcc(null)} style={{ color: 'var(--text-muted)', fontSize: 13, padding: '0 4px' }}>✕</button>
+                          </div>
+                        ) : (
+                          <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#111', borderRadius: 8, padding: '7px 10px', marginBottom: 6 }}>
+                            <span style={{ color: 'var(--orange)', fontSize: 12 }}>▸</span>
+                            <span style={{ flex: 1, fontSize: 13 }}>{a.text}</span>
+                            {canEdit && (
+                              <>
+                                <button onClick={() => setEditingAcc({ bikeId: bike.id, accId: a.id, text: a.text })} style={{ color: 'var(--text-muted)', fontSize: 14, padding: '0 2px' }}>✏️</button>
+                                <button onClick={() => removeAccessory(bike.id, a.id)} style={{ color: 'var(--text-muted)', fontSize: 13, padding: '0 2px' }}>✕</button>
+                              </>
+                            )}
+                          </div>
+                        )
                       ))}
                       {canEdit && (
                         <div style={{ display: 'flex', gap: 8, marginTop: 6, marginBottom: 12 }}>
