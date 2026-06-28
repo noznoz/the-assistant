@@ -107,7 +107,7 @@ function DemoApp() {
       removeGear={id => setGear(prev => prev.filter(g => g.id !== id))}
       riders={riders}
       onUpdateRider={(id, patch) => setRiders(prev => prev.map(r => r.id === id ? { ...r, ...patch } : r))}
-      messages={messages}
+      messages={messages.filter(m => m.rider === currentRider)}
       onSendMessage={sendMessage}
       onMarkRead={markRead}
       onDeleteMessage={deleteMessage}
@@ -164,17 +164,23 @@ function LiveApp() {
   async function sendMessage({ text, recipients, from }) {
     const base = Date.now()
     const createdAt = new Date().toLocaleString()
+    const sentId = base + recipients.length + Math.random()
+    const sentData = { type: 'sent_message', rider: from, from, text, recipients, createdAt, read: true }
+
+    // Optimistic: show in Sent immediately without waiting for Supabase
+    notifications.setItems(prev => [{ id: sentId, ...sentData }, ...prev])
+
     const receivedInserts = recipients.map((name, i) => {
       const id = base + i + Math.random()
       const data = { type: 'message', rider: name, from, text, createdAt, read: false }
       return supabase.from('notifications').insert({ id, recipient_name: name, data })
     })
-    const sentId = base + recipients.length + Math.random()
-    const sentData = { type: 'sent_message', rider: from, from, text, recipients, createdAt, read: true }
     await Promise.all([
       ...receivedInserts,
       supabase.from('notifications').insert({ id: sentId, recipient_name: from, data: sentData }),
     ])
+    // Sync to confirm server state
+    notifications.refetch()
   }
 
   function markRead(id) {
