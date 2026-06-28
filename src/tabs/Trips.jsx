@@ -57,7 +57,7 @@ function notifyBrowser(title, body) {
   }
 }
 
-export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentRider, isAdmin, addNotification, myBikes = [] }) {
+export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentRider, isAdmin, addNotification, myBikes = [], riders = [] }) {
   const [selected, setSelected] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [reminders, setReminders] = useState({}) // { [`${tripId}:${rider}`]: true }
@@ -84,20 +84,41 @@ export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentR
       return next
     })
   }
-  const EMPTY_FORM = { name: '', date: '', gatherTime: '', rollTime: '', distance: '', classification: 'Day Ride', from: '', to: '', meeting: '', comment: '', notes: '', external: false, completed: false }
+  const EMPTY_FORM = { name: '', date: '', gatherTime: '', rollTime: '', distance: '', classification: 'Day Ride', from: '', to: '', meeting: '', comment: '', notes: '', external: false, completed: false, visibility: 'public', allowedRiders: [] }
+  const [riderSearch, setRiderSearch] = useState('')
   const [form, setForm] = useState(EMPTY_FORM)
 
   function handleAdd() {
     if (!form.name || !form.date) return
-    const { external, completed, ...rest } = form
+    const { external, completed, visibility, allowedRiders, ...rest } = form
     addTrip({
       id: Date.now(), ...rest,
       external,
       status: completed ? 'completed' : 'upcoming',
       participations: [{ riderName: currentRider, status: completed ? 'approved' : 'requested' }],
+      visibility: visibility || 'public',
+      allowedRiders: visibility === 'private' ? allowedRiders : [],
+      createdBy: currentRider,
     })
     setForm(EMPTY_FORM)
+    setRiderSearch('')
     setShowForm(false)
+  }
+
+  function toggleAllowedRider(name) {
+    setForm(f => ({
+      ...f,
+      allowedRiders: f.allowedRiders.includes(name)
+        ? f.allowedRiders.filter(n => n !== name)
+        : [...f.allowedRiders, name],
+    }))
+  }
+
+  function canSeeTrip(trip) {
+    if (!trip.visibility || trip.visibility === 'public') return true
+    if (isAdmin) return true
+    if (trip.createdBy === currentRider) return true
+    return (trip.allowedRiders || []).includes(currentRider)
   }
 
   function myParticipation(trip) {
@@ -151,6 +172,8 @@ export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentR
       notes: trip.notes || '',
       external: trip.external || false,
       completed: false,
+      visibility: trip.visibility || 'public',
+      allowedRiders: trip.allowedRiders || [],
     })
     setShowForm(true)
     setSelected(null)
@@ -188,8 +211,8 @@ export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentR
     )
   }
 
-  const upcoming = trips.filter(t => t.status === 'upcoming')
-  const past = trips.filter(t => t.status === 'completed')
+  const upcoming = trips.filter(t => t.status === 'upcoming').filter(canSeeTrip)
+  const past = trips.filter(t => t.status === 'completed').filter(canSeeTrip)
 
   return (
     <div style={{ padding: 16 }}>
@@ -328,6 +351,70 @@ export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentR
           <CheckRow checked={form.completed} onToggle={() => setForm(f => ({ ...f, completed: !f.completed }))}
             label="✅ Already happened (log a past ride)" hint="Adds it straight to Past Rides, you marked as attended" />
 
+          {/* Visibility */}
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Visibility</label>
+            <div style={{ display: 'flex', gap: 8, marginBottom: form.visibility === 'private' ? 10 : 0 }}>
+              {[['public', '🌍 Public'], ['private', '🔒 Private']].map(([val, label]) => {
+                const active = form.visibility === val
+                return (
+                  <button
+                    key={val}
+                    onClick={() => setForm(f => ({ ...f, visibility: val, allowedRiders: [] }))}
+                    style={{
+                      flex: 1, padding: '8px 0', borderRadius: 8, fontWeight: 600, fontSize: 12,
+                      background: active ? (val === 'private' ? '#1a0a0a' : '#0a1a0a') : '#111',
+                      color: active ? (val === 'private' ? '#e57373' : '#4caf50') : 'var(--text-muted)',
+                      border: `1px solid ${active ? (val === 'private' ? '#e57373' : '#4caf50') : 'var(--border)'}`,
+                    }}
+                  >{label}</button>
+                )
+              })}
+            </div>
+
+            {/* Private rider picker */}
+            {form.visibility === 'private' && (
+              <div style={{ background: '#0d0d0d', border: '1px solid var(--border)', borderRadius: 8, padding: 10 }}>
+                <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>Select riders who can see this trip</p>
+                <input
+                  value={riderSearch}
+                  onChange={e => setRiderSearch(e.target.value)}
+                  placeholder="Search riders..."
+                  style={{ width: '100%', background: '#111', border: '1px solid var(--border)', borderRadius: 8, padding: '7px 10px', color: 'var(--text)', fontSize: 13, marginBottom: 8 }}
+                />
+                <div style={{ maxHeight: 180, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  {riders
+                    .filter(r => r.name !== currentRider)
+                    .filter(r => !riderSearch || r.name.toLowerCase().includes(riderSearch.toLowerCase()))
+                    .map(r => {
+                      const sel = form.allowedRiders.includes(r.name)
+                      return (
+                        <button
+                          key={r.id}
+                          onClick={() => toggleAllowedRider(r.name)}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 10,
+                            padding: '7px 10px', borderRadius: 8, textAlign: 'left',
+                            background: sel ? 'rgba(229,115,115,0.12)' : '#111',
+                            border: `1px solid ${sel ? '#e57373' : 'var(--border)'}`,
+                          }}
+                        >
+                          <span style={{ fontSize: 18 }}>{r.avatar || '👤'}</span>
+                          <span style={{ flex: 1, fontSize: 13 }}>{r.name}</span>
+                          {sel && <span style={{ color: '#e57373', fontWeight: 700 }}>✓</span>}
+                        </button>
+                      )
+                    })}
+                </div>
+                {form.allowedRiders.length > 0 && (
+                  <p style={{ fontSize: 11, color: '#e57373', marginTop: 6 }}>
+                    {form.allowedRiders.length} rider{form.allowedRiders.length !== 1 ? 's' : ''} selected
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
           <button onClick={handleAdd}
             style={{ width: '100%', background: 'var(--orange)', color: '#fff', fontWeight: 600, fontSize: 14, padding: 10, borderRadius: 8, marginTop: 4 }}>
             {form.completed ? 'Log This Ride' : form.external ? 'Add External Trip' : 'Add Trip'}
@@ -365,6 +452,9 @@ function TripCard({ trip, mine, past, onSelect, onJoin, onReactivate }) {
             <h3 style={{ fontSize: 15, fontWeight: 700 }}>{trip.name}</h3>
             {trip.classification && <ClassBadge value={trip.classification} />}
             {trip.external && <ExternalBadge />}
+            {trip.visibility === 'private' && (
+              <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 6, background: '#1a0505', color: '#e57373', border: '1px solid #4a1010' }}>🔒 Private</span>
+            )}
           </div>
           <span style={{ fontSize: 18, color: 'var(--text-muted)' }}>›</span>
         </div>

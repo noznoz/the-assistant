@@ -1,12 +1,13 @@
 const TABS = [
-  { id: 'feed',       label: 'Feed',       icon: '📰' },
-  { id: 'trips',      label: 'Trips',      icon: '🗺️' },
-  { id: 'challenges', label: 'Challenges', icon: '🏆' },
-  { id: 'gear',       label: 'Gear',       icon: '🧤' },
-  { id: 'riders',     label: 'Riders',     icon: '👤' },
+  { id: 'feed',       label: 'Feed',      icon: '📰' },
+  { id: 'trips',      label: 'Trips',     icon: '🗺️' },
+  { id: 'challenges', label: 'Goals',     icon: '🏆' },
+  { id: 'gear',       label: 'Gear',      icon: '🧤' },
+  { id: 'riders',     label: 'Riders',    icon: '👤' },
+  { id: 'inbox',      label: 'Inbox',     icon: '✉️' },
 ]
 
-export default function BottomNav({ active, onChange }) {
+export default function BottomNav({ active, onChange, unreadMessages = 0 }) {
   return (
     <nav style={{
       display: 'flex',
@@ -18,6 +19,7 @@ export default function BottomNav({ active, onChange }) {
     }}>
       {TABS.map(t => {
         const isActive = t.id === active
+        const badge = t.id === 'inbox' && unreadMessages > 0 ? unreadMessages : 0
         return (
           <button
             key={t.id}
@@ -28,7 +30,7 @@ export default function BottomNav({ active, onChange }) {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 3,
+              gap: 2,
               color: isActive ? 'var(--orange)' : 'var(--text-muted)',
               transition: 'color 0.15s',
               position: 'relative',
@@ -37,13 +39,25 @@ export default function BottomNav({ active, onChange }) {
             {isActive && (
               <span style={{
                 position: 'absolute',
-                top: 0, left: '20%', right: '20%', height: 2,
+                top: 0, left: '15%', right: '15%', height: 2,
                 background: 'var(--orange)',
                 borderRadius: '0 0 2px 2px',
               }} />
             )}
-            <span style={{ fontSize: 20 }}>{t.icon}</span>
-            <span style={{ fontSize: 10, fontWeight: isActive ? 600 : 400, letterSpacing: 0.5 }}>{t.label}</span>
+            <span style={{ fontSize: 18, position: 'relative' }}>
+              {t.icon}
+              {badge > 0 && (
+                <span style={{
+                  position: 'absolute', top: -4, right: -6,
+                  background: 'var(--orange)', color: '#fff',
+                  fontSize: 8, fontWeight: 700, borderRadius: '50%',
+                  minWidth: 14, height: 14,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  padding: '0 2px',
+                }}>{badge > 9 ? '9+' : badge}</span>
+              )}
+            </span>
+            <span style={{ fontSize: 9, fontWeight: isActive ? 600 : 400, letterSpacing: 0.3 }}>{t.label}</span>
           </button>
         )
       })}

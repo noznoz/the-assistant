@@ -47,8 +47,26 @@ function DemoApp() {
   const [gear, setGear] = useState(INITIAL_GEAR)
   const [riders, setRiders] = useState(INITIAL_RIDERS)
   const [notifications, setNotifications] = useState([])
+  const [messages, setMessages] = useState([])
 
   const myNotifications = notifications.filter(n => n.rider === currentRider)
+
+  function sendMessage({ text, recipients, from }) {
+    const batch = recipients.map(name => ({
+      id: `msg-${Date.now()}-${name}`,
+      type: 'message',
+      rider: name,
+      from,
+      text,
+      createdAt: new Date().toLocaleString(),
+      read: false,
+    }))
+    setMessages(prev => [...batch, ...prev])
+  }
+
+  function markRead(id) {
+    setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m))
+  }
 
   return (
     <CrewShell
@@ -73,6 +91,9 @@ function DemoApp() {
       removeGear={id => setGear(prev => prev.filter(g => g.id !== id))}
       riders={riders}
       onUpdateRider={(id, patch) => setRiders(prev => prev.map(r => r.id === id ? { ...r, ...patch } : r))}
+      messages={messages}
+      onSendMessage={sendMessage}
+      onMarkRead={markRead}
       account={{
         mode: 'demo',
         riderNames: RIDER_NAMES,
@@ -113,10 +134,31 @@ function LiveApp() {
     await supabase.from('notifications').insert({ id: n.id, recipient_name: n.rider, data: n })
   }
   async function clearMyNotifications() {
-    await supabase.from('notifications').delete().eq('recipient_name', currentRider)
-    notifications.setItems(prev => prev.filter(x => x.rider !== currentRider))
+    // Only delete system notifications, not inbox messages
+    const toDelete = notifications.items
+      .filter(n => n.rider === currentRider && n.type !== 'message')
+      .map(n => n.id)
+    if (toDelete.length) {
+      await supabase.from('notifications').delete().in('id', toDelete)
+      notifications.setItems(prev => prev.filter(x => !(x.rider === currentRider && x.type !== 'message')))
+    }
   }
-  const myNotifications = notifications.items.filter(n => n.rider === currentRider)
+
+  async function sendMessage({ text, recipients, from }) {
+    await Promise.all(recipients.map(name => {
+      const id = `msg-${Date.now()}-${name}-${Math.random().toString(36).slice(2, 7)}`
+      const data = { id, type: 'message', rider: name, from, text, createdAt: new Date().toLocaleString(), read: false }
+      return supabase.from('notifications').insert({ id, recipient_name: name, data })
+    }))
+  }
+
+  function markRead(id) {
+    notifications.update(id, { read: true })
+  }
+
+  const allMyNotifs = notifications.items.filter(n => n.rider === currentRider)
+  const myNotifications = allMyNotifs.filter(n => n.type !== 'message')
+  const myMessages = allMyNotifs.filter(n => n.type === 'message')
 
   return (
     <CrewShell
@@ -142,6 +184,9 @@ function LiveApp() {
       removeGear={gear.remove}
       riders={riders}
       onUpdateRider={updateRiderData}
+      messages={myMessages}
+      onSendMessage={sendMessage}
+      onMarkRead={markRead}
       onRefresh={onRefresh}
       account={{
         mode: 'live',

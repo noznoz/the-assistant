@@ -6,6 +6,7 @@ import Trips from './tabs/Trips.jsx'
 import Gear from './tabs/Gear.jsx'
 import Riders from './tabs/Riders.jsx'
 import Challenges from './tabs/Challenges.jsx'
+import Inbox from './tabs/Inbox.jsx'
 
 // The shared app UI. Works for both demo (in-memory) and live (Supabase) modes;
 // the only difference is the `account` descriptor and where the data comes from.
@@ -17,6 +18,7 @@ export default function CrewShell({
   challenges, addChallenge, updateChallenge,
   gear, addGear, updateGear, removeGear,
   riders, onUpdateRider,
+  messages, onSendMessage, onMarkRead,
   account,
   onRefresh,
 }) {
@@ -154,7 +156,7 @@ export default function CrewShell({
           <Trips
             trips={trips} updateTrip={updateTrip} addTrip={addTrip} removeTrip={removeTrip}
             currentRider={currentRider} isAdmin={isAdmin} addNotification={addNotification}
-            myBikes={myBikes}
+            myBikes={myBikes} riders={riders}
           />
         )}
         {tab === 'challenges' && (
@@ -178,9 +180,18 @@ export default function CrewShell({
             onNavigateToFeed={() => setTab('feed')} onNavigateToChallenges={() => setTab('challenges')}
           />
         )}
+        {tab === 'inbox' && (
+          <Inbox
+            currentRider={currentRider} isAdmin={isAdmin}
+            riders={riders}
+            messages={messages || []}
+            onSendMessage={onSendMessage}
+            onMarkRead={onMarkRead}
+          />
+        )}
       </main>
 
-      <BottomNav active={tab} onChange={setTab} />
+      <BottomNav active={tab} onChange={setTab} unreadMessages={(messages || []).filter(m => m.rider === currentRider && !m.read).length} />
     </div>
   )
 }
