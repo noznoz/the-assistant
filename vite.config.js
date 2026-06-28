@@ -8,6 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: { skipWaiting: true, clientsClaim: true },
       manifest: {
         name: 'Road Heaven',
         short_name: 'Road Heaven',
