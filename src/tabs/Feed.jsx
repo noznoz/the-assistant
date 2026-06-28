@@ -23,7 +23,29 @@ function PostCard({ post, currentRider, isAdmin, onAddReply, onLike, onDelete, o
   const [replyText, setReplyText] = useState('')
   const [editing, setEditing] = useState(false)
   const [editText, setEditText] = useState(post.text)
+  const [lightbox, setLightbox] = useState(false)
+  const [saving, setSaving] = useState(false)
   const inputRef = useRef()
+
+  async function saveImage() {
+    if (saving) return
+    setSaving(true)
+    try {
+      const res = await fetch(post.image)
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'road-heaven-photo.jpg'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch {
+      window.open(post.image, '_blank')
+    }
+    setSaving(false)
+  }
 
   function submitReply() {
     if (!replyText.trim()) return
@@ -44,6 +66,49 @@ function PostCard({ post, currentRider, isAdmin, onAddReply, onLike, onDelete, o
   }
 
   return (
+    <>
+    {lightbox && (
+      <div
+        onClick={() => setLightbox(false)}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 200,
+          background: 'rgba(0,0,0,0.95)',
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center',
+        }}
+      >
+        <button
+          onClick={() => setLightbox(false)}
+          style={{
+            position: 'absolute', top: 'calc(16px + env(safe-area-inset-top))', right: 16,
+            fontSize: 22, color: '#fff', background: 'rgba(255,255,255,0.15)',
+            borderRadius: '50%', width: 36, height: 36,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >✕</button>
+
+        <img
+          src={post.image}
+          alt="Post"
+          onClick={e => e.stopPropagation()}
+          style={{
+            maxWidth: '100%', maxHeight: 'calc(100dvh - 120px)',
+            objectFit: 'contain', borderRadius: 6,
+          }}
+        />
+
+        <button
+          onClick={e => { e.stopPropagation(); saveImage() }}
+          style={{
+            position: 'absolute', bottom: 'calc(24px + env(safe-area-inset-bottom))',
+            background: saving ? '#555' : 'var(--orange)',
+            color: '#fff', fontWeight: 700, fontSize: 14,
+            padding: '12px 32px', borderRadius: 28,
+            boxShadow: '0 2px 12px rgba(0,0,0,0.4)',
+          }}
+        >{saving ? 'Saving…' : '⬇ Save Photo'}</button>
+      </div>
+    )}
     <div style={{
       background: 'var(--card)',
       border: `1px solid ${isAdmin ? 'rgba(255,107,0,0.2)' : 'var(--border)'}`,
@@ -120,9 +185,11 @@ function PostCard({ post, currentRider, isAdmin, onAddReply, onLike, onDelete, o
           <img
             src={post.image}
             alt="Post"
+            onClick={() => setLightbox(true)}
             style={{
               width: '100%', maxHeight: 260, objectFit: 'cover',
               borderRadius: 8, marginTop: 10, display: 'block',
+              cursor: 'pointer',
             }}
           />
         )}
@@ -221,6 +288,7 @@ function PostCard({ post, currentRider, isAdmin, onAddReply, onLike, onDelete, o
         </div>
       )}
     </div>
+    </>
   )
 }
 
