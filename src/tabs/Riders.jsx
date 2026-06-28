@@ -277,6 +277,8 @@ function RiderDetail({ rider, riders, trips, posts, challenges = [], canEdit, on
   const [helmetPreview, setHelmetPreview] = useState(null)
   const [savingHelmet, setSavingHelmet] = useState(false)
   const helmetRef = useRef()
+  const helmetPhotoRef = useRef()
+  const [uploadingHelmId, setUploadingHelmId] = useState(null)
   const [editing, setEditing] = useState(false)
   const [edit, setEdit] = useState(null)
 
@@ -378,6 +380,15 @@ function RiderDetail({ rider, riders, trips, posts, challenges = [], canEdit, on
     onUpdate({ helmets: (rider.helmets || []).filter(h => h.id !== id) })
   }
 
+  async function addHelmetPhoto(e) {
+    const f = e.target.files[0]
+    if (!f || !uploadingHelmId) return
+    const photo = await uploadImage(f, 'helmets')
+    onUpdate({ helmets: (rider.helmets || []).map(h => h.id === uploadingHelmId ? { ...h, photo } : h) })
+    setUploadingHelmId(null)
+    if (helmetPhotoRef.current) helmetPhotoRef.current.value = ''
+  }
+
   async function handleBikePhoto(e, bikeId) {
     const files = Array.from(e.target.files)
     if (!files.length) return
@@ -428,7 +439,9 @@ function RiderDetail({ rider, riders, trips, posts, challenges = [], canEdit, on
       {/* Header: avatar / name / role / bio */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 18 }}>
         <div style={{ position: 'relative', marginBottom: 12 }}>
-          <Avatar rider={rider} size={90} />
+          <div onClick={() => rider.photo && onLightbox(rider.photo)} style={{ cursor: rider.photo ? 'pointer' : 'default' }}>
+            <Avatar rider={rider} size={90} />
+          </div>
           {canEdit && (
             <button onClick={() => photoRef.current.click()}
               style={{ position: 'absolute', bottom: 0, right: 0, background: 'var(--orange)', borderRadius: '50%', width: 28, height: 28, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid var(--bg)' }}
@@ -669,6 +682,8 @@ function RiderDetail({ rider, riders, trips, posts, challenges = [], canEdit, on
             🪖 HELMET COLLECTION {(rider.helmets || []).length > 0 && `(${(rider.helmets || []).length})`}
           </p>
 
+          <input ref={helmetPhotoRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={addHelmetPhoto} />
+
           {canEdit && (
             <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 14 }}>
               <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
@@ -706,7 +721,15 @@ function RiderDetail({ rider, riders, trips, posts, challenges = [], canEdit, on
                     <img src={h.photo} alt={h.name} onClick={() => onLightbox(h.photo)}
                       style={{ width: '100%', height: 120, objectFit: 'cover', display: 'block', cursor: 'pointer' }} />
                   ) : (
-                    <div style={{ height: 120, background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 44 }}>🪖</div>
+                    <div
+                      onClick={() => { if (canEdit) { setUploadingHelmId(h.id); helmetPhotoRef.current?.click() } }}
+                      style={{ height: 120, background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 44, position: 'relative', cursor: canEdit ? 'pointer' : 'default' }}
+                    >
+                      🪖
+                      {canEdit && (
+                        <span style={{ position: 'absolute', bottom: 6, right: 6, background: 'var(--orange)', borderRadius: '50%', width: 24, height: 24, fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📷</span>
+                      )}
+                    </div>
                   )}
                   <div style={{ padding: '10px 12px', fontSize: 13, fontWeight: 600 }}>{h.name}</div>
                   {canEdit && (
