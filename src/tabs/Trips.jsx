@@ -84,7 +84,7 @@ export default function Trips({ trips, updateTrip, addTrip, currentRider, isAdmi
       return next
     })
   }
-  const EMPTY_FORM = { name: '', date: '', distance: '', classification: 'Day Ride', from: '', to: '', meeting: '', notes: '', external: false, completed: false }
+  const EMPTY_FORM = { name: '', date: '', gatherTime: '', rollTime: '', distance: '', classification: 'Day Ride', from: '', to: '', meeting: '', comment: '', notes: '', external: false, completed: false }
   const [form, setForm] = useState(EMPTY_FORM)
 
   function handleAdd() {
@@ -207,14 +207,41 @@ export default function Trips({ trips, updateTrip, addTrip, currentRider, isAdmi
 
       {showForm && (
         <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-          {[['Trip name','name'],['Date','date'],['Distance (km)','distance']].map(([label, key]) => (
-            <div key={key} style={{ marginBottom: 10 }}>
-              <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>{label}</label>
-              <input value={form[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-                placeholder={key === 'distance' ? 'e.g. 320 km' : undefined}
+          {/* Trip name */}
+          <div style={{ marginBottom: 10 }}>
+            <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Trip name</label>
+            <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+              style={{ width: '100%', background: '#111', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', color: 'var(--text)', fontSize: 13 }} />
+          </div>
+
+          {/* Date — calendar picker */}
+          <div style={{ marginBottom: 10 }}>
+            <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Date</label>
+            <input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
+              style={{ width: '100%', background: '#111', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', color: 'var(--text)', fontSize: 13 }} />
+          </div>
+
+          {/* Gathering Time + Rolling Time side by side */}
+          <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+            <div style={{ flex: 1 }}>
+              <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Gathering Time</label>
+              <input type="time" value={form.gatherTime} onChange={e => setForm(f => ({ ...f, gatherTime: e.target.value }))}
                 style={{ width: '100%', background: '#111', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', color: 'var(--text)', fontSize: 13 }} />
             </div>
-          ))}
+            <div style={{ flex: 1 }}>
+              <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Rolling Time</label>
+              <input type="time" value={form.rollTime} onChange={e => setForm(f => ({ ...f, rollTime: e.target.value }))}
+                style={{ width: '100%', background: '#111', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', color: 'var(--text)', fontSize: 13 }} />
+            </div>
+          </div>
+
+          {/* Distance */}
+          <div style={{ marginBottom: 10 }}>
+            <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Distance (km)</label>
+            <input value={form.distance} onChange={e => setForm(f => ({ ...f, distance: e.target.value }))}
+              placeholder="e.g. 320 km"
+              style={{ width: '100%', background: '#111', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', color: 'var(--text)', fontSize: 13 }} />
+          </div>
 
           {/* Classification */}
           <div style={{ marginBottom: 10 }}>
@@ -260,9 +287,15 @@ export default function Trips({ trips, updateTrip, addTrip, currentRider, isAdmi
             </div>
           )}
 
-          <div style={{ marginBottom: 12 }}>
+          <div style={{ marginBottom: 10 }}>
             <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Notes</label>
             <textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={2}
+              style={{ width: '100%', background: '#111', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', color: 'var(--text)', fontSize: 13, resize: 'none' }} />
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Comment (shown in WhatsApp share)</label>
+            <textarea value={form.comment} onChange={e => setForm(f => ({ ...f, comment: e.target.value }))} rows={2}
+              placeholder="e.g. Dress code: all black. Bring water!"
               style={{ width: '100%', background: '#111', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', color: 'var(--text)', fontSize: 13, resize: 'none' }} />
           </div>
 
@@ -280,7 +313,7 @@ export default function Trips({ trips, updateTrip, addTrip, currentRider, isAdmi
       )}
 
       {upcoming.map(trip => (
-        <TripCard key={trip.id} trip={trip} mine={myParticipation(trip)} onSelect={() => setSelected(trip.id)} />
+        <TripCard key={trip.id} trip={trip} mine={myParticipation(trip)} onSelect={() => setSelected(trip.id)} onJoin={() => handleJoin(trip.id, '')} />
       ))}
 
       {past.length > 0 && (
@@ -295,45 +328,64 @@ export default function Trips({ trips, updateTrip, addTrip, currentRider, isAdmi
   )
 }
 
-function TripCard({ trip, mine, past, onSelect }) {
+function TripCard({ trip, mine, past, onSelect, onJoin }) {
   const approved = (trip.participations || []).filter(p => p.status === 'approved').length
   const total = (trip.participations || []).length
   return (
-    <button onClick={onSelect} style={{
-      width: '100%', textAlign: 'left',
+    <div style={{
       background: 'var(--card)', border: `1px solid ${past ? 'var(--border)' : 'var(--orange)'}`,
-      borderRadius: 12, padding: 16, marginBottom: 12, opacity: past ? 0.7 : 1, display: 'block',
+      borderRadius: 12, marginBottom: 12, opacity: past ? 0.7 : 1, overflow: 'hidden',
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 8 }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700 }}>{trip.name}</h3>
-          {trip.classification && <ClassBadge value={trip.classification} />}
-          {trip.external && <ExternalBadge />}
+      <button onClick={onSelect} style={{ width: '100%', textAlign: 'left', padding: 16, display: 'block' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 8 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700 }}>{trip.name}</h3>
+            {trip.classification && <ClassBadge value={trip.classification} />}
+            {trip.external && <ExternalBadge />}
+          </div>
+          <span style={{ fontSize: 18, color: 'var(--text-muted)' }}>›</span>
         </div>
-        <span style={{ fontSize: 18, color: 'var(--text-muted)' }}>›</span>
-      </div>
-      <div style={{ display: 'flex', gap: 16, marginBottom: 8 }}>
-        <Stat icon="📅" label={trip.date} />
-        <Stat icon="📍" label={trip.distance} />
-      </div>
-      {trip.from && trip.to && (
-        <p style={{ fontSize: 12, marginBottom: 8 }}>
-          <span style={{ color: 'var(--orange)' }}>{trip.from}</span>
-          <span style={{ color: 'var(--text-muted)', margin: '0 6px' }}>→</span>
-          <span style={{ color: 'var(--gold)' }}>{trip.to}</span>
-        </p>
-      )}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-          {past ? `${approved} approved` : `${total} joined`}
-        </span>
-        {mine && (
-          <span style={{ fontSize: 10, fontWeight: 700, color: STATUS_COLOR[mine.status] }}>
-            {STATUS_LABEL[mine.status]}
-          </span>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 6 }}>
+          <Stat icon="📅" label={trip.date} />
+          {trip.gatherTime && <Stat icon="🕐" label={`Gather ${trip.gatherTime}`} />}
+          {trip.rollTime && <Stat icon="🏍️" label={`Roll ${trip.rollTime}`} />}
+          {trip.distance && <Stat icon="📏" label={trip.distance} />}
+        </div>
+        {trip.from && trip.to && (
+          <p style={{ fontSize: 12, marginBottom: 6 }}>
+            <span style={{ color: 'var(--orange)' }}>{trip.from}</span>
+            <span style={{ color: 'var(--text-muted)', margin: '0 6px' }}>→</span>
+            <span style={{ color: 'var(--gold)' }}>{trip.to}</span>
+          </p>
         )}
-      </div>
-    </button>
+        {trip.comment && (
+          <p style={{ fontSize: 12, color: '#4fc3f7', marginBottom: 6 }}>💬 {trip.comment}</p>
+        )}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+            {past ? `${approved} approved` : `${total} joined`}
+          </span>
+          {mine && (
+            <span style={{ fontSize: 10, fontWeight: 700, color: STATUS_COLOR[mine.status] }}>
+              {STATUS_LABEL[mine.status]}
+            </span>
+          )}
+        </div>
+      </button>
+      {/* Quick join button — only for upcoming trips where rider hasn't joined yet */}
+      {!past && !mine && onJoin && (
+        <button
+          onClick={e => { e.stopPropagation(); onJoin() }}
+          style={{
+            width: '100%', background: 'var(--orange)', color: '#fff',
+            fontWeight: 700, fontSize: 14, padding: '10px 0',
+            borderTop: '1px solid rgba(255,255,255,0.08)',
+          }}
+        >
+          🏍️ Join This Ride
+        </button>
+      )}
+    </div>
   )
 }
 
@@ -385,9 +437,16 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
         <h2 style={{ fontSize: 18, fontWeight: 700 }}>{trip.name}</h2>
         <button
-          onClick={() => shareToWhatsApp(
-            `🏍️ *${trip.name}*\n📅 ${trip.date} · ${trip.distance}\n📍 ${trip.from} → ${trip.to}\n🤝 ${trip.meeting}${trip.notes ? `\n\n${trip.notes}` : ''}`
-          )}
+          onClick={() => shareToWhatsApp([
+            `🏍️ *${trip.name}*`,
+            `📅 ${trip.date}${trip.gatherTime ? ` · Gather ${trip.gatherTime}` : ''}${trip.rollTime ? ` · Roll ${trip.rollTime}` : ''}`,
+            trip.distance ? `📏 ${trip.distance}` : '',
+            trip.from && trip.to ? `📍 ${trip.from} → ${trip.to}` : '',
+            trip.meeting ? `🤝 Meeting point: ${trip.meeting}` : '',
+            trip.comment ? `\n💬 ${trip.comment}` : '',
+            trip.notes ? `📝 ${trip.notes}` : '',
+            `\n👉 Join the crew: https://road-heaven.vercel.app`,
+          ].filter(Boolean).join('\n'))}
           style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#25D366', fontWeight: 600, fontSize: 13, flexShrink: 0, marginLeft: 12 }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -397,11 +456,23 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
           Share
         </button>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginBottom: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginBottom: 8 }}>
         <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{trip.date} · {trip.distance}</p>
         {trip.classification && <ClassBadge value={trip.classification} size="lg" />}
         {trip.external && <ExternalBadge />}
       </div>
+      {(trip.gatherTime || trip.rollTime) && (
+        <div style={{ display: 'flex', gap: 16, marginBottom: 12 }}>
+          {trip.gatherTime && <Stat icon="🕐" label={`Gather ${trip.gatherTime}`} />}
+          {trip.rollTime && <Stat icon="🏍️" label={`Roll ${trip.rollTime}`} />}
+        </div>
+      )}
+      {trip.comment && (
+        <div style={{ background: '#0a1a2a', border: '1px solid #1a3a5a', borderRadius: 10, padding: '10px 14px', marginBottom: 12 }}>
+          <p style={{ fontSize: 12, color: '#4fc3f7', marginBottom: 2, fontWeight: 700, letterSpacing: 0.5 }}>💬 COMMENT</p>
+          <p style={{ fontSize: 13, color: '#ddd', lineHeight: 1.6 }}>{trip.comment}</p>
+        </div>
+      )}
 
       {/* Weather + add to calendar */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
