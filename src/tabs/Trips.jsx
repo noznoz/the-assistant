@@ -57,7 +57,7 @@ function notifyBrowser(title, body) {
   }
 }
 
-export default function Trips({ trips, updateTrip, addTrip, currentRider, isAdmin, addNotification, myBikes = [] }) {
+export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentRider, isAdmin, addNotification, myBikes = [] }) {
   const [selected, setSelected] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [reminders, setReminders] = useState({}) // { [`${tripId}:${rider}`]: true }
@@ -183,6 +183,7 @@ export default function Trips({ trips, updateTrip, addTrip, currentRider, isAdmi
         onApprove={(name) => handleApprove(trip.id, name)}
         onReject={(name) => handleReject(trip.id, name)}
         onReactivate={() => handleReactivate(trip)}
+        onDelete={() => removeTrip(trip.id)}
       />
     )
   }
@@ -412,7 +413,7 @@ function TripCard({ trip, mine, past, onSelect, onJoin, onReactivate }) {
   )
 }
 
-function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleReminder, onUpdateTrip, myBikes = [], onBack, onJoin, onConfirm, onApprove, onReject, onReactivate }) {
+function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleReminder, onUpdateTrip, myBikes = [], onBack, onJoin, onConfirm, onApprove, onReject, onReactivate, onDelete }) {
   const participants = trip.participations || []
   const pendingHere = isAdmin ? participants.filter(p => p.status === 'attended') : []
   const photos = trip.photos || []
@@ -453,9 +454,17 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
 
   return (
     <div style={{ padding: 16 }}>
-      <button onClick={onBack} style={{ color: 'var(--orange)', fontSize: 14, fontWeight: 600, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
-        ‹ Back
-      </button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <button onClick={onBack} style={{ color: 'var(--orange)', fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+          ‹ Back
+        </button>
+        {isAdmin && (
+          <button onClick={() => { if (window.confirm('Delete this trip?')) { onDelete(); onBack() } }}
+            style={{ fontSize: 12, fontWeight: 600, color: '#e57373', border: '1px solid #e57373', borderRadius: 8, padding: '5px 12px' }}>
+            🗑 Delete Trip
+          </button>
+        )}
+      </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
         <h2 style={{ fontSize: 18, fontWeight: 700 }}>{trip.name}</h2>

@@ -11,7 +11,7 @@ import Challenges from './tabs/Challenges.jsx'
 export default function CrewShell({
   currentRider, isAdmin,
   myNotifications, clearMyNotifications, addNotification,
-  trips, updateTrip, addTrip,
+  trips, updateTrip, addTrip, removeTrip,
   posts, addPost, updatePost, removePost,
   challenges, addChallenge, updateChallenge,
   gear, addGear, updateGear, removeGear,
@@ -122,7 +122,7 @@ export default function CrewShell({
         )}
         {tab === 'trips' && (
           <Trips
-            trips={trips} updateTrip={updateTrip} addTrip={addTrip}
+            trips={trips} updateTrip={updateTrip} addTrip={addTrip} removeTrip={removeTrip}
             currentRider={currentRider} isAdmin={isAdmin} addNotification={addNotification}
             myBikes={myBikes}
           />

@@ -118,6 +118,7 @@ function LiveApp() {
       trips={trips.items}
       updateTrip={trips.update}
       addTrip={trips.upsert}
+      removeTrip={trips.remove}
       posts={posts.items}
       addPost={posts.upsert}
       updatePost={posts.update}
