@@ -32,7 +32,12 @@ export default function Marketplace({ listings = [], currentRider, isAdmin, onAd
     return (
       <NewListingForm
         currentRider={currentRider}
-        onSave={item => { onAddListing(item); setShowForm(false) }}
+        onSave={item => {
+          onAddListing(item)
+          setShowForm(false)
+          setTypeFilter('all')
+          setCatFilter('All')
+        }}
         onCancel={() => setShowForm(false)}
       />
     )
@@ -456,10 +461,13 @@ function NewListingForm({ currentRider, onSave, onCancel }) {
     if (photoRef.current) photoRef.current.value = ''
   }
 
+  const priceOk = form.type === 'sale' ? !!parseFloat(form.price) : !!parseFloat(form.startingBid)
+  const canSubmit = form.title.trim() && form.description.trim() && priceOk
+
   function handleSubmit() {
-    if (!form.title.trim() || !form.description.trim()) return
-    const price = form.type === 'sale' ? parseFloat(form.price) || null : null
-    const startingBid = form.type === 'auction' ? parseFloat(form.startingBid) || null : null
+    if (!canSubmit) return
+    const price = form.type === 'sale' ? parseFloat(form.price) : null
+    const startingBid = form.type === 'auction' ? parseFloat(form.startingBid) : null
     const buyNowPrice = form.buyNowPrice ? parseFloat(form.buyNowPrice) || null : null
     onSave({
       id: Date.now(),
@@ -589,10 +597,10 @@ function NewListingForm({ currentRider, onSave, onCancel }) {
       </div>
 
       <button onClick={handleSubmit}
-        disabled={!form.title.trim() || !form.description.trim()}
+        disabled={!canSubmit}
         style={{
           width: '100%', background: 'var(--orange)', color: '#fff', fontWeight: 700, fontSize: 15,
-          padding: 14, borderRadius: 10, opacity: (!form.title.trim() || !form.description.trim()) ? 0.5 : 1,
+          padding: 14, borderRadius: 10, opacity: canSubmit ? 1 : 0.5,
         }}>
         Post Listing
       </button>
