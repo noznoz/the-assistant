@@ -136,6 +136,27 @@ export default function Trips({ trips, updateTrip, addTrip, currentRider, isAdmi
     })
   }
 
+  function handleReactivate(trip) {
+    setForm({
+      name: trip.name,
+      date: '',
+      gatherTime: trip.gatherTime || '',
+      rollTime: trip.rollTime || '',
+      distance: trip.distance || '',
+      classification: trip.classification || 'Day Ride',
+      from: trip.from || '',
+      to: trip.to || '',
+      meeting: trip.meeting || '',
+      comment: trip.comment || '',
+      notes: trip.notes || '',
+      external: trip.external || false,
+      completed: false,
+    })
+    setShowForm(true)
+    setSelected(null)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   // Admin: all pending attended confirmations across all trips
   const pendingApprovals = isAdmin
     ? trips.flatMap(t => (t.participations || [])
@@ -161,6 +182,7 @@ export default function Trips({ trips, updateTrip, addTrip, currentRider, isAdmi
         onConfirm={() => handleConfirmAttendance(trip.id)}
         onApprove={(name) => handleApprove(trip.id, name)}
         onReject={(name) => handleReject(trip.id, name)}
+        onReactivate={() => handleReactivate(trip)}
       />
     )
   }
@@ -320,7 +342,7 @@ export default function Trips({ trips, updateTrip, addTrip, currentRider, isAdmi
         <>
           <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-muted)', margin: '20px 0 12px', letterSpacing: 1 }}>PAST RIDES</h2>
           {past.map(trip => (
-            <TripCard key={trip.id} trip={trip} mine={myParticipation(trip)} past onSelect={() => setSelected(trip.id)} />
+            <TripCard key={trip.id} trip={trip} mine={myParticipation(trip)} past onSelect={() => setSelected(trip.id)} onReactivate={() => handleReactivate(trip)} />
           ))}
         </>
       )}
@@ -328,7 +350,7 @@ export default function Trips({ trips, updateTrip, addTrip, currentRider, isAdmi
   )
 }
 
-function TripCard({ trip, mine, past, onSelect, onJoin }) {
+function TripCard({ trip, mine, past, onSelect, onJoin, onReactivate }) {
   const approved = (trip.participations || []).filter(p => p.status === 'approved').length
   const total = (trip.participations || []).length
   return (
@@ -374,22 +396,23 @@ function TripCard({ trip, mine, past, onSelect, onJoin }) {
       </button>
       {/* Quick join button — only for upcoming trips where rider hasn't joined yet */}
       {!past && !mine && onJoin && (
-        <button
-          onClick={e => { e.stopPropagation(); onJoin() }}
-          style={{
-            width: '100%', background: 'var(--orange)', color: '#fff',
-            fontWeight: 700, fontSize: 14, padding: '10px 0',
-            borderTop: '1px solid rgba(255,255,255,0.08)',
-          }}
-        >
+        <button onClick={e => { e.stopPropagation(); onJoin() }}
+          style={{ width: '100%', background: 'var(--orange)', color: '#fff', fontWeight: 700, fontSize: 14, padding: '10px 0', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           🏍️ Join This Ride
+        </button>
+      )}
+      {/* Rerun button on past trips */}
+      {past && onReactivate && (
+        <button onClick={e => { e.stopPropagation(); onReactivate() }}
+          style={{ width: '100%', background: '#1a1a1a', color: 'var(--gold)', fontWeight: 700, fontSize: 13, padding: '10px 0', borderTop: '1px solid var(--border)' }}>
+          🔁 Rerun This Trip
         </button>
       )}
     </div>
   )
 }
 
-function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleReminder, onUpdateTrip, myBikes = [], onBack, onJoin, onConfirm, onApprove, onReject }) {
+function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleReminder, onUpdateTrip, myBikes = [], onBack, onJoin, onConfirm, onApprove, onReject, onReactivate }) {
   const participants = trip.participations || []
   const pendingHere = isAdmin ? participants.filter(p => p.status === 'attended') : []
   const photos = trip.photos || []
@@ -533,6 +556,12 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
         <div style={{ background: '#0a2a0a', border: '1px solid #4caf50', borderRadius: 10, padding: '10px 14px', marginBottom: 16 }}>
           <p style={{ fontSize: 13, fontWeight: 600, color: '#4caf50' }}>✓ Attendance approved</p>
         </div>
+      )}
+      {trip.status === 'completed' && (
+        <button onClick={onReactivate}
+          style={{ width: '100%', marginBottom: 16, fontWeight: 700, fontSize: 14, padding: 12, borderRadius: 10, background: '#1a1500', border: '1px solid var(--gold)', color: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          🔁 Rerun This Trip with a New Date
+        </button>
       )}
 
       {/* Reminder toggle for upcoming rides */}
