@@ -84,7 +84,7 @@ export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentR
       return next
     })
   }
-  const EMPTY_FORM = { name: '', date: '', gatherTime: '', rollTime: '', distance: '', classification: 'Day Ride', from: '', to: '', meeting: '', comment: '', notes: '', external: false, completed: false, visibility: 'public', allowedRiders: [] }
+  const EMPTY_FORM = { name: '', date: '', gatherTime: '', rollTime: '', distance: '', classification: 'Day Ride', from: '', fromLat: null, fromLng: null, to: '', toLat: null, toLng: null, meeting: '', meetingLat: null, meetingLng: null, comment: '', notes: '', external: false, completed: false, visibility: 'public', allowedRiders: [] }
   const [riderSearch, setRiderSearch] = useState('')
   const [form, setForm] = useState(EMPTY_FORM)
 
@@ -99,6 +99,7 @@ export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentR
       visibility: visibility || 'public',
       allowedRiders: visibility === 'private' ? allowedRiders : [],
       createdBy: currentRider,
+      meetingUrl: form.meetingLat ? `https://www.google.com/maps?q=${form.meetingLat},${form.meetingLng}` : null,
     })
     setForm(EMPTY_FORM)
     setRiderSearch('')
@@ -166,8 +167,14 @@ export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentR
       distance: trip.distance || '',
       classification: trip.classification || 'Day Ride',
       from: trip.from || '',
+      fromLat: trip.fromLat || null,
+      fromLng: trip.fromLng || null,
       to: trip.to || '',
+      toLat: trip.toLat || null,
+      toLng: trip.toLng || null,
       meeting: trip.meeting || '',
+      meetingLat: trip.meetingLat || null,
+      meetingLng: trip.meetingLng || null,
       comment: trip.comment || '',
       notes: trip.notes || '',
       external: trip.external || false,
@@ -300,12 +307,20 @@ export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentR
             </select>
           </div>
 
-          {[['From (search a place)','from'],['To (search a place)','to'],['Meeting point','meeting']].map(([label, key]) => (
+          {[
+            ['From (search a place)', 'from', 'fromLat', 'fromLng', 'e.g. Phoenix, AZ'],
+            ['To (search a place)',   'to',   'toLat',   'toLng',   'e.g. Sedona, AZ'],
+            ['Meeting point',         'meeting', 'meetingLat', 'meetingLng', 'e.g. Hog Heaven Diner, Phoenix'],
+          ].map(([label, key, latKey, lngKey, ph]) => (
             <div key={key} style={{ marginBottom: 10 }}>
               <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>{label}</label>
-              <PlaceInput value={form[key]} onChange={val => setForm(f => ({ ...f, [key]: val }))}
-                placeholder={key === 'from' ? 'e.g. Phoenix, AZ' : key === 'to' ? 'e.g. Sedona, AZ' : 'e.g. Hog Heaven Diner, Phoenix'}
-                style={{ width: '100%', background: '#111', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', color: 'var(--text)', fontSize: 13 }} />
+              <PlaceInput
+                value={form[key]}
+                onChange={val => setForm(f => ({ ...f, [key]: val }))}
+                onCoords={c => setForm(f => ({ ...f, [latKey]: c?.lat ?? null, [lngKey]: c?.lng ?? null }))}
+                placeholder={ph}
+                style={{ width: '100%', background: '#111', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', color: 'var(--text)', fontSize: 13 }}
+              />
             </div>
           ))}
 
@@ -565,6 +580,7 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
             trip.distance ? `📏 ${trip.distance}` : '',
             trip.from && trip.to ? `📍 ${trip.from} → ${trip.to}` : '',
             trip.meeting ? `🤝 Meeting point: ${trip.meeting}` : '',
+            trip.meetingLat ? `📍 Maps: https://www.google.com/maps?q=${trip.meetingLat},${trip.meetingLng}` : '',
             trip.comment ? `\n💬 ${trip.comment}` : '',
             trip.notes ? `📝 ${trip.notes}` : '',
             `\n👉 Join the crew: https://road-heaven.vercel.app`,
@@ -713,10 +729,43 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
       {trip.meeting && (
         <div style={{ marginBottom: 12 }}>
           <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, padding: 12, marginBottom: 8 }}>
-            <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2 }}>MEETING POINT</p>
-            <p style={{ fontSize: 14 }}>🤝 {trip.meeting}</p>
+            <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>MEETING POINT</p>
+            <p style={{ fontSize: 14, marginBottom: 10 }}>🤝 {trip.meeting}</p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <a
+                href={trip.meetingLat
+                  ? `https://www.google.com/maps/dir/?api=1&destination=${trip.meetingLat},${trip.meetingLng}`
+                  : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trip.meeting)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  background: '#0a1a0a', border: '1px solid #4caf50', borderRadius: 8,
+                  padding: '8px 0', fontSize: 12, fontWeight: 600, color: '#4caf50',
+                }}
+              >📍 Get Directions</a>
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(
+                  `🤝 Meeting point: ${trip.meeting}\n📍 ${
+                    trip.meetingLat
+                      ? `https://www.google.com/maps?q=${trip.meetingLat},${trip.meetingLng}`
+                      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trip.meeting)}`
+                  }`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  background: '#0a1a10', border: '1px solid #25D366', borderRadius: 8,
+                  padding: '8px 0', fontSize: 12, fontWeight: 600, color: '#25D366',
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.533 5.859L.057 23.428a.75.75 0 0 0 .916.916l5.569-1.476A11.953 11.953 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.712 9.712 0 0 1-4.953-1.355l-.355-.211-3.676.974.974-3.564-.229-.368A9.712 9.712 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>
+                Share
+              </a>
+            </div>
           </div>
-          <PlaceMap query={trip.meeting} height={180} />
+          <PlaceMap query={trip.meetingLat ? `${trip.meetingLat},${trip.meetingLng}` : trip.meeting} height={180} />
         </div>
       )}
 
