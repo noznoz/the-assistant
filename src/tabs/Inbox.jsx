@@ -9,7 +9,7 @@ export default function Inbox({ currentRider, isAdmin, riders, messages, onSendM
   const [riderSearch, setRiderSearch] = useState('')
   const [openMsg, setOpenMsg] = useState(null)
 
-  const sort = list => [...list].sort((a, b) => (String(b.id) > String(a.id) ? 1 : -1))
+  const sort = list => [...list].sort((a, b) => b.id - a.id)
 
   const inbox = sort(messages.filter(m => m.type !== 'sent_message'))
   const sent  = sort(messages.filter(m => m.type === 'sent_message'))

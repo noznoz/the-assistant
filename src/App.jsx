@@ -52,24 +52,25 @@ function DemoApp() {
   const myNotifications = notifications.filter(n => n.rider === currentRider)
 
   function sendMessage({ text, recipients, from }) {
-    const ts = Date.now()
-    const received = recipients.map(name => ({
-      id: `msg-${ts}-${name}`,
+    const base = Date.now()
+    const createdAt = new Date().toLocaleString()
+    const received = recipients.map((name, i) => ({
+      id: base + i + Math.random(),
       type: 'message',
       rider: name,
       from,
       text,
-      createdAt: new Date().toLocaleString(),
+      createdAt,
       read: false,
     }))
     const sentCopy = {
-      id: `sent-${ts}`,
+      id: base + recipients.length + Math.random(),
       type: 'sent_message',
       rider: from,
       from,
       text,
       recipients,
-      createdAt: new Date().toLocaleString(),
+      createdAt,
       read: true,
     }
     setMessages(prev => [sentCopy, ...received, ...prev])
@@ -161,14 +162,15 @@ function LiveApp() {
   }
 
   async function sendMessage({ text, recipients, from }) {
-    const ts = Date.now()
-    const receivedInserts = recipients.map(name => {
-      const id = `msg-${ts}-${name}-${Math.random().toString(36).slice(2, 7)}`
-      const data = { id, type: 'message', rider: name, from, text, createdAt: new Date().toLocaleString(), read: false }
+    const base = Date.now()
+    const createdAt = new Date().toLocaleString()
+    const receivedInserts = recipients.map((name, i) => {
+      const id = base + i + Math.random()
+      const data = { type: 'message', rider: name, from, text, createdAt, read: false }
       return supabase.from('notifications').insert({ id, recipient_name: name, data })
     })
-    const sentId = `sent-${ts}-${Math.random().toString(36).slice(2, 7)}`
-    const sentData = { id: sentId, type: 'sent_message', rider: from, from, text, recipients, createdAt: new Date().toLocaleString(), read: true }
+    const sentId = base + recipients.length + Math.random()
+    const sentData = { type: 'sent_message', rider: from, from, text, recipients, createdAt, read: true }
     await Promise.all([
       ...receivedInserts,
       supabase.from('notifications').insert({ id: sentId, recipient_name: from, data: sentData }),
