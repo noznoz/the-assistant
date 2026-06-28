@@ -191,6 +191,9 @@ export default function CrewShell({
             onDeleteMessage={onDeleteMessage}
           />
         )}
+        <div style={{ textAlign: 'center', padding: '20px 0 8px', fontSize: 11, color: 'var(--border)' }}>
+          Created by Nizar · V.100 · 2026
+        </div>
       </main>
 
       <BottomNav active={tab} onChange={setTab} unreadMessages={(messages || []).filter(m => m.rider === currentRider && !m.read).length} />
