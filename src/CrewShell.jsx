@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import BottomNav from './components/BottomNav.jsx'
 import { usePullToRefresh, PULL_THRESHOLD } from './lib/usePullToRefresh.js'
+import { subscribeToPush, getPushState } from './lib/pushNotifications.js'
 import Feed from './tabs/Feed.jsx'
 import Trips from './tabs/Trips.jsx'
 import Gear from './tabs/Gear.jsx'
@@ -211,12 +212,43 @@ function DemoMenu({ account, onClose }) {
 
 function LiveMenu({ account, onClose }) {
   const { name, email, isAdmin, pending = [], onApprove, onDecline, onSignOut } = account
+  const [pushState, setPushState] = useState('loading')
+
+  useEffect(() => { getPushState().then(setPushState) }, [])
+
+  async function handleEnableNotifs() {
+    const next = await subscribeToPush(name)
+    setPushState(next)
+  }
+
+  const pushLabel =
+    pushState === 'subscribed'  ? '🔔 Notifications on' :
+    pushState === 'denied'      ? '🔕 Notifications blocked' :
+    pushState === 'no-vapid'    ? null :
+    pushState === 'unsupported' ? null :
+    pushState === 'loading'     ? null :
+    '🔔 Enable notifications'
+
   return (
     <>
       <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)' }}>
         <p style={{ fontSize: 13, fontWeight: 700 }}>{name}</p>
         <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>{email}</p>
       </div>
+
+      {pushLabel && (
+        <button
+          onClick={pushState === 'default' ? handleEnableNotifs : undefined}
+          style={{
+            width: '100%', textAlign: 'left', padding: '10px 14px',
+            fontSize: 13, borderBottom: '1px solid var(--border)',
+            color: pushState === 'subscribed' ? 'var(--orange)' :
+                   pushState === 'denied'     ? 'var(--text-muted)' : 'var(--text)',
+            cursor: pushState === 'default' ? 'pointer' : 'default',
+          }}
+        >{pushLabel}</button>
+      )}
+
       {isAdmin && (
         <div style={{ borderBottom: '1px solid var(--border)' }}>
           <p style={{ fontSize: 11, color: 'var(--text-muted)', letterSpacing: 1, padding: '10px 14px 4px' }}>
