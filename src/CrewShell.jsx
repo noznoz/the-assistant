@@ -176,7 +176,7 @@ export default function CrewShell({
         {tab === 'riders' && (
           <Riders
             riders={riders} onUpdateRider={onUpdateRider}
-            trips={trips} posts={posts} challenges={challenges}
+            trips={trips} updateTrip={updateTrip} posts={posts} challenges={challenges}
             currentRider={currentRider} isAdmin={isAdmin}
             onNavigateToFeed={() => setTab('feed')} onNavigateToChallenges={() => setTab('challenges')}
           />

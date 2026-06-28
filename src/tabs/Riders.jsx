@@ -126,9 +126,8 @@ function getCrewBonds(rider, trips, allRiders) {
     .map(([name, count]) => ({ name, count, rider: allRiders.find(r => r.name === name) }))
 }
 
-export default function Riders({ riders = [], onUpdateRider, trips = [], posts = [], challenges = [], currentRider, isAdmin, onNavigateToFeed, onNavigateToChallenges }) {
+export default function Riders({ riders = [], onUpdateRider, trips = [], updateTrip, posts = [], challenges = [], currentRider, isAdmin, onNavigateToFeed, onNavigateToChallenges }) {
   const [selected, setSelected] = useState(null)
-  const [lightbox, setLightbox] = useState(null)
 
   if (selected) {
     const rider = riders.find(r => r.id === selected)
@@ -139,12 +138,12 @@ export default function Riders({ riders = [], onUpdateRider, trips = [], posts =
         rider={rider}
         riders={riders}
         trips={trips}
+        updateTrip={updateTrip}
         posts={posts}
         challenges={challenges}
         canEdit={canEdit}
         onBack={() => setSelected(null)}
         onUpdate={patch => onUpdateRider(selected, patch)}
-        onLightbox={setLightbox}
         onNavigateToFeed={onNavigateToFeed}
         onNavigateToChallenges={onNavigateToChallenges}
       />
@@ -227,12 +226,6 @@ export default function Riders({ riders = [], onUpdateRider, trips = [], posts =
         </button>
       ))}
 
-      {lightbox && (
-        <div onClick={() => setLightbox(null)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
-          <img src={lightbox} alt="" style={{ maxWidth: '95vw', maxHeight: '90vh', borderRadius: 8, objectFit: 'contain' }} />
-        </div>
-      )}
     </div>
   )
 }
@@ -263,10 +256,11 @@ const SECTIONS = [
   ['about', 'ℹ️', 'About'],
 ]
 
-function RiderDetail({ rider, riders, trips, posts, challenges = [], canEdit, onBack, onUpdate, onLightbox, onNavigateToFeed, onNavigateToChallenges }) {
+function RiderDetail({ rider, riders, trips, updateTrip, posts, challenges = [], canEdit, onBack, onUpdate, onNavigateToFeed, onNavigateToChallenges }) {
   const photoRef = useRef()
   const albumRef = useRef()
   const bikePhotoRefs = useRef({})
+  const [lightbox, setLightbox] = useState(null)
   const [section, setSection] = useState('feed')
   const [showGarageForm, setShowGarageForm] = useState(false)
   const [bikeForm, setBikeForm] = useState(EMPTY_BIKE)
@@ -380,6 +374,12 @@ function RiderDetail({ rider, riders, trips, posts, challenges = [], canEdit, on
     onUpdate({ helmets: (rider.helmets || []).filter(h => h.id !== id) })
   }
 
+  function handleWithdraw(tripId) {
+    const trip = trips.find(t => t.id === tripId)
+    if (!trip) return
+    updateTrip(tripId, { participations: (trip.participations || []).filter(p => p.riderName !== rider.name) })
+  }
+
   async function addHelmetPhoto(e) {
     const f = e.target.files[0]
     if (!f || !uploadingHelmId) return
@@ -439,7 +439,7 @@ function RiderDetail({ rider, riders, trips, posts, challenges = [], canEdit, on
       {/* Header: avatar / name / role / bio */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 18 }}>
         <div style={{ position: 'relative', marginBottom: 12 }}>
-          <div onClick={() => rider.photo && onLightbox(rider.photo)} style={{ cursor: rider.photo ? 'pointer' : 'default' }}>
+          <div onClick={() => rider.photo && setLightbox(rider.photo)} style={{ cursor: rider.photo ? 'pointer' : 'default' }}>
             <Avatar rider={rider} size={90} />
           </div>
           {canEdit && (
@@ -582,7 +582,7 @@ function RiderDetail({ rider, riders, trips, posts, challenges = [], canEdit, on
               <div key={bike.id} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, marginBottom: 10, overflow: 'hidden', opacity: sold ? 0.85 : 1 }}>
                 <div style={{ position: 'relative' }}>
                   {bike.photos.length > 0 ? (
-                    <img src={bike.photos[0].url} alt={bike.model} onClick={() => onLightbox(bike.photos[0].url)}
+                    <img src={bike.photos[0].url} alt={bike.model} onClick={() => setLightbox(bike.photos[0].url)}
                       style={{ width: '100%', height: 160, objectFit: 'cover', display: 'block', cursor: 'pointer', filter: sold ? 'grayscale(0.5)' : 'none' }} />
                   ) : (
                     <div style={{ height: 100, background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>🏍️</div>
@@ -642,7 +642,7 @@ function RiderDetail({ rider, riders, trips, posts, challenges = [], canEdit, on
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4, marginBottom: 10 }}>
                           {bike.photos.slice(1).map(p => (
                             <div key={p.id} style={{ position: 'relative', aspectRatio: '1' }}>
-                              <img src={p.url} alt="" onClick={() => onLightbox(p.url)}
+                              <img src={p.url} alt="" onClick={() => setLightbox(p.url)}
                                 style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6, cursor: 'pointer', display: 'block' }} />
                               {canEdit && (
                                 <button onClick={() => handleRemoveBikePhoto(bike.id, p.id)}
@@ -718,7 +718,7 @@ function RiderDetail({ rider, riders, trips, posts, challenges = [], canEdit, on
               {(rider.helmets || []).map(h => (
                 <div key={h.id} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', position: 'relative' }}>
                   {h.photo ? (
-                    <img src={h.photo} alt={h.name} onClick={() => onLightbox(h.photo)}
+                    <img src={h.photo} alt={h.name} onClick={() => setLightbox(h.photo)}
                       style={{ width: '100%', height: 120, objectFit: 'cover', display: 'block', cursor: 'pointer' }} />
                   ) : (
                     <div
@@ -754,7 +754,22 @@ function RiderDetail({ rider, riders, trips, posts, challenges = [], canEdit, on
               <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10, letterSpacing: 1 }}>UPCOMING RIDES ({upcomingTrips.length})</p>
               {upcomingTrips.map(trip => {
                 const p = (trip.participations || []).find(p => p.riderName === rider.name)
-                return <RideRow key={trip.id} trip={trip} status={p?.status} bike={p?.bike} />
+                return (
+                  <div key={trip.id}>
+                    <RideRow trip={trip} status={p?.status} bike={p?.bike} />
+                    {canEdit && updateTrip && (
+                      <button
+                        onClick={() => handleWithdraw(trip.id)}
+                        style={{
+                          width: '100%', marginTop: -4, marginBottom: 8,
+                          fontSize: 12, fontWeight: 600, color: 'var(--text-muted)',
+                          border: '1px solid var(--border)', borderRadius: 8, padding: '6px 0',
+                          background: 'transparent',
+                        }}
+                      >Withdraw from ride</button>
+                    )}
+                  </div>
+                )
               })}
             </div>
           )}
@@ -793,7 +808,7 @@ function RiderDetail({ rider, riders, trips, posts, challenges = [], canEdit, on
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4 }}>
               {rider.album.map(photo => (
                 <div key={photo.id} style={{ position: 'relative', aspectRatio: '1' }}>
-                  <img src={photo.url} alt="" onClick={() => onLightbox(photo.url)}
+                  <img src={photo.url} alt="" onClick={() => setLightbox(photo.url)}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6, cursor: 'pointer', display: 'block' }} />
                   {canEdit && (
                     <button onClick={() => removeAlbumPhoto(photo.id)}
@@ -803,6 +818,13 @@ function RiderDetail({ rider, riders, trips, posts, challenges = [], canEdit, on
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {lightbox && (
+        <div onClick={() => setLightbox(null)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <img src={lightbox} alt="" style={{ maxWidth: '95vw', maxHeight: '90vh', borderRadius: 8, objectFit: 'contain' }} />
         </div>
       )}
 
