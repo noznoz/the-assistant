@@ -20,6 +20,7 @@ html, body {
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
 }
 
 /* Constrain to an iPhone-width frame, centered on larger screens */
