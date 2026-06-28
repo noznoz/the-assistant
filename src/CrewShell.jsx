@@ -8,6 +8,7 @@ import Gear from './tabs/Gear.jsx'
 import Riders from './tabs/Riders.jsx'
 import Challenges from './tabs/Challenges.jsx'
 import Inbox from './tabs/Inbox.jsx'
+import Marketplace from './tabs/Marketplace.jsx'
 
 // The shared app UI. Works for both demo (in-memory) and live (Supabase) modes;
 // the only difference is the `account` descriptor and where the data comes from.
@@ -19,6 +20,7 @@ export default function CrewShell({
   challenges, addChallenge, updateChallenge,
   gear, addGear, updateGear, removeGear,
   riders, onUpdateRider,
+  listings, addListing, updateListing,
   messages, onSendMessage, onMarkRead, onDeleteMessage,
   account,
   onRefresh,
@@ -179,6 +181,15 @@ export default function CrewShell({
             trips={trips} updateTrip={updateTrip} posts={posts} challenges={challenges}
             currentRider={currentRider} isAdmin={isAdmin}
             onNavigateToFeed={() => setTab('feed')} onNavigateToChallenges={() => setTab('challenges')}
+          />
+        )}
+        {tab === 'market' && (
+          <Marketplace
+            listings={listings || []}
+            currentRider={currentRider}
+            isAdmin={isAdmin}
+            onAddListing={addListing}
+            onUpdateListing={updateListing}
           />
         )}
         {tab === 'inbox' && (

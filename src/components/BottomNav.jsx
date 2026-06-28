@@ -1,10 +1,11 @@
 const TABS = [
-  { id: 'feed',       label: 'Feed',      icon: '📰' },
-  { id: 'trips',      label: 'Trips',     icon: '🗺️' },
-  { id: 'challenges', label: 'Goals',     icon: '🏆' },
-  { id: 'gear',       label: 'Gear',      icon: '🧤' },
-  { id: 'riders',     label: 'Riders',    icon: '👤' },
-  { id: 'inbox',      label: 'Inbox',     icon: '✉️' },
+  { id: 'feed',        label: 'Feed',    icon: '📰' },
+  { id: 'trips',       label: 'Trips',   icon: '🗺️' },
+  { id: 'challenges',  label: 'Goals',   icon: '🏆' },
+  { id: 'gear',        label: 'Gear',    icon: '🧤' },
+  { id: 'market',      label: 'Market',  icon: '🏪' },
+  { id: 'riders',      label: 'Riders',  icon: '👤' },
+  { id: 'inbox',       label: 'Inbox',   icon: '✉️' },
 ]
 
 export default function BottomNav({ active, onChange, unreadMessages = 0 }) {
@@ -57,7 +58,7 @@ export default function BottomNav({ active, onChange, unreadMessages = 0 }) {
                 }}>{badge > 9 ? '9+' : badge}</span>
               )}
             </span>
-            <span style={{ fontSize: 9, fontWeight: isActive ? 600 : 400, letterSpacing: 0.3 }}>{t.label}</span>
+            <span style={{ fontSize: 8, fontWeight: isActive ? 600 : 400, letterSpacing: 0.3 }}>{t.label}</span>
           </button>
         )
       })}

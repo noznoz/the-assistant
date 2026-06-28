@@ -11,6 +11,7 @@ import { INITIAL_POSTS } from './data/posts.js'
 import { INITIAL_CHALLENGES } from './data/challenges.js'
 import { INITIAL_GEAR } from './data/gear.js'
 import { INITIAL_RIDERS } from './tabs/Riders.jsx'
+import { INITIAL_LISTINGS } from './data/marketplace.js'
 
 function Splash() {
   return (
@@ -46,6 +47,7 @@ function DemoApp() {
   const [challenges, setChallenges] = useState(INITIAL_CHALLENGES)
   const [gear, setGear] = useState(INITIAL_GEAR)
   const [riders, setRiders] = useState(INITIAL_RIDERS)
+  const [listings, setListings] = useState(INITIAL_LISTINGS)
   const [notifications, setNotifications] = useState([])
   const [messages, setMessages] = useState([])
 
@@ -107,6 +109,9 @@ function DemoApp() {
       removeGear={id => setGear(prev => prev.filter(g => g.id !== id))}
       riders={riders}
       onUpdateRider={(id, patch) => setRiders(prev => prev.map(r => r.id === id ? { ...r, ...patch } : r))}
+      listings={listings}
+      addListing={l => setListings(prev => [l, ...prev])}
+      updateListing={(id, patch) => setListings(prev => prev.map(l => l.id === id ? { ...l, ...patch } : l))}
       messages={messages.filter(m => m.rider === currentRider)}
       onSendMessage={sendMessage}
       onMarkRead={markRead}
@@ -134,6 +139,7 @@ function LiveApp() {
   const posts = useCollection('posts')
   const challenges = useCollection('challenges')
   const gear = useCollection('gear')
+  const marketplace = useCollection('marketplace')
   const notifications = useCollection('notifications')
   const { riders, pending, updateRiderData, setStatus } = useProfiles()
 
@@ -219,6 +225,9 @@ function LiveApp() {
       removeGear={gear.remove}
       riders={riders}
       onUpdateRider={updateRiderData}
+      listings={marketplace.items}
+      addListing={marketplace.upsert}
+      updateListing={marketplace.update}
       messages={myMessages}
       onSendMessage={sendMessage}
       onMarkRead={markRead}
