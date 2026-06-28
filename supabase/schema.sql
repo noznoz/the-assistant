@@ -59,6 +59,16 @@ create table if not exists public.notifications (
   created_at timestamptz not null default now()
 );
 
+-- Browser push subscriptions (one row per rider+device)
+create table if not exists public.push_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  rider_name text not null,
+  endpoint text not null,
+  subscription jsonb not null,          -- full PushSubscription JSON
+  created_at timestamptz not null default now(),
+  unique (rider_name, endpoint)
+);
+
 -- ---------------------------------------------------------------------
 -- INVITE CODES — anyone who signs up with a valid active code is
 -- auto-approved (skips the admin queue).
@@ -202,6 +212,12 @@ create policy gear_rw on public.gear
 -- NOTIFICATIONS
 drop policy if exists notifications_rw on public.notifications;
 create policy notifications_rw on public.notifications
+  for all to authenticated using (public.is_approved()) with check (public.is_approved());
+
+-- PUSH SUBSCRIPTIONS
+alter table public.push_subscriptions enable row level security;
+drop policy if exists push_subs_rw on public.push_subscriptions;
+create policy push_subs_rw on public.push_subscriptions
   for all to authenticated using (public.is_approved()) with check (public.is_approved());
 
 -- INVITE CODES: readable by authenticated (the redeem RPC checks validity);

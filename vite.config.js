@@ -7,8 +7,10 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
       registerType: 'autoUpdate',
-      workbox: { skipWaiting: true, clientsClaim: true },
       manifest: {
         name: 'Road Heaven',
         short_name: 'Road Heaven',
