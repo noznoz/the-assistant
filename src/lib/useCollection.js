@@ -26,7 +26,9 @@ export function useCollection(table, { enabled = true, orderBy = 'id', ascending
       .channel(`realtime:${table}`)
       .on('postgres_changes', { event: '*', schema: 'public', table }, () => refetch())
       .subscribe()
-    return () => { supabase.removeChannel(channel) }
+    // Fallback poll every 15s in case Realtime misses an event
+    const poll = setInterval(refetch, 15000)
+    return () => { supabase.removeChannel(channel); clearInterval(poll) }
   }, [table, enabled, refetch])
 
   // Insert or replace a whole item. `item` is `{ id, ...fields }`.
