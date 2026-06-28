@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import BottomNav from './components/BottomNav.jsx'
+import { usePullToRefresh, PULL_THRESHOLD } from './lib/usePullToRefresh.js'
 import Feed from './tabs/Feed.jsx'
 import Trips from './tabs/Trips.jsx'
 import Gear from './tabs/Gear.jsx'
@@ -17,8 +18,11 @@ export default function CrewShell({
   gear, addGear, updateGear, removeGear,
   riders, onUpdateRider,
   account,
+  onRefresh,
 }) {
   const [tab, setTab] = useState('feed')
+  const mainRef = useRef(null)
+  const { pullDistance, refreshing } = usePullToRefresh(mainRef, onRefresh)
 
   // The current rider's owned bikes — offered as ride-bike choices in Trips.
   const me = riders.find(r => r.name === currentRider)
@@ -113,7 +117,33 @@ export default function CrewShell({
         </div>
       )}
 
-      <main style={{ flex: 1, overflowY: 'auto', background: 'var(--bg)' }} onClick={closeAll}>
+      {/* Pull-to-refresh indicator */}
+      <div style={{
+        height: refreshing ? 44 : pullDistance,
+        transition: (!refreshing && pullDistance === 0) ? 'height 0.25s ease' : 'none',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'var(--bg)', flexShrink: 0, overflow: 'hidden',
+      }}>
+        {refreshing ? (
+          <div style={{
+            width: 22, height: 22, borderRadius: '50%',
+            border: '2.5px solid var(--border)',
+            borderTopColor: 'var(--orange)',
+            animation: 'ptr-spin 0.7s linear infinite',
+          }} />
+        ) : pullDistance > 8 ? (
+          <span style={{
+            fontSize: 18,
+            opacity: Math.min(1, pullDistance / PULL_THRESHOLD),
+            display: 'inline-block',
+            transform: pullDistance >= PULL_THRESHOLD ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.2s',
+            color: 'var(--orange)',
+          }}>↓</span>
+        ) : null}
+      </div>
+
+      <main ref={mainRef} style={{ flex: 1, overflowY: 'auto', background: 'var(--bg)', overscrollBehaviorY: 'contain' }} onClick={closeAll}>
         {tab === 'feed' && (
           <Feed
             currentRider={currentRider} isAdmin={isAdmin} addNotification={addNotification}

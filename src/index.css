@@ -45,3 +45,7 @@ a { color: inherit; text-decoration: none; }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+@keyframes ptr-spin {
+  to { transform: rotate(360deg); }
+}

@@ -99,6 +99,16 @@ function LiveApp() {
   const notifications = useCollection('notifications')
   const { riders, pending, updateRiderData, setStatus } = useProfiles()
 
+  async function onRefresh() {
+    await Promise.all([
+      posts.refetch(),
+      trips.refetch(),
+      challenges.refetch(),
+      gear.refetch(),
+      notifications.refetch(),
+    ])
+  }
+
   async function addNotification(n) {
     await supabase.from('notifications').insert({ id: n.id, recipient_name: n.rider, data: n })
   }
@@ -132,6 +142,7 @@ function LiveApp() {
       removeGear={gear.remove}
       riders={riders}
       onUpdateRider={updateRiderData}
+      onRefresh={onRefresh}
       account={{
         mode: 'live',
         name: profile.name,
