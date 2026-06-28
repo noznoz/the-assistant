@@ -18,7 +18,7 @@ export default function CrewShell({
   challenges, addChallenge, updateChallenge,
   gear, addGear, updateGear, removeGear,
   riders, onUpdateRider,
-  messages, onSendMessage, onMarkRead,
+  messages, onSendMessage, onMarkRead, onDeleteMessage,
   account,
   onRefresh,
 }) {
@@ -187,6 +187,7 @@ export default function CrewShell({
             messages={messages || []}
             onSendMessage={onSendMessage}
             onMarkRead={onMarkRead}
+            onDeleteMessage={onDeleteMessage}
           />
         )}
       </main>

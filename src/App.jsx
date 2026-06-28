@@ -52,8 +52,9 @@ function DemoApp() {
   const myNotifications = notifications.filter(n => n.rider === currentRider)
 
   function sendMessage({ text, recipients, from }) {
-    const batch = recipients.map(name => ({
-      id: `msg-${Date.now()}-${name}`,
+    const ts = Date.now()
+    const received = recipients.map(name => ({
+      id: `msg-${ts}-${name}`,
       type: 'message',
       rider: name,
       from,
@@ -61,11 +62,25 @@ function DemoApp() {
       createdAt: new Date().toLocaleString(),
       read: false,
     }))
-    setMessages(prev => [...batch, ...prev])
+    const sentCopy = {
+      id: `sent-${ts}`,
+      type: 'sent_message',
+      rider: from,
+      from,
+      text,
+      recipients,
+      createdAt: new Date().toLocaleString(),
+      read: true,
+    }
+    setMessages(prev => [sentCopy, ...received, ...prev])
   }
 
   function markRead(id) {
     setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m))
+  }
+
+  function deleteMessage(id) {
+    setMessages(prev => prev.filter(m => m.id !== id))
   }
 
   return (
@@ -94,6 +109,7 @@ function DemoApp() {
       messages={messages}
       onSendMessage={sendMessage}
       onMarkRead={markRead}
+      onDeleteMessage={deleteMessage}
       account={{
         mode: 'demo',
         riderNames: RIDER_NAMES,
@@ -145,20 +161,31 @@ function LiveApp() {
   }
 
   async function sendMessage({ text, recipients, from }) {
-    await Promise.all(recipients.map(name => {
-      const id = `msg-${Date.now()}-${name}-${Math.random().toString(36).slice(2, 7)}`
+    const ts = Date.now()
+    const receivedInserts = recipients.map(name => {
+      const id = `msg-${ts}-${name}-${Math.random().toString(36).slice(2, 7)}`
       const data = { id, type: 'message', rider: name, from, text, createdAt: new Date().toLocaleString(), read: false }
       return supabase.from('notifications').insert({ id, recipient_name: name, data })
-    }))
+    })
+    const sentId = `sent-${ts}-${Math.random().toString(36).slice(2, 7)}`
+    const sentData = { id: sentId, type: 'sent_message', rider: from, from, text, recipients, createdAt: new Date().toLocaleString(), read: true }
+    await Promise.all([
+      ...receivedInserts,
+      supabase.from('notifications').insert({ id: sentId, recipient_name: from, data: sentData }),
+    ])
   }
 
   function markRead(id) {
     notifications.update(id, { read: true })
   }
 
+  function deleteMessage(id) {
+    notifications.remove(id)
+  }
+
   const allMyNotifs = notifications.items.filter(n => n.rider === currentRider)
-  const myNotifications = allMyNotifs.filter(n => n.type !== 'message')
-  const myMessages = allMyNotifs.filter(n => n.type === 'message')
+  const myNotifications = allMyNotifs.filter(n => n.type !== 'message' && n.type !== 'sent_message')
+  const myMessages = allMyNotifs.filter(n => n.type === 'message' || n.type === 'sent_message')
 
   return (
     <CrewShell
@@ -187,6 +214,7 @@ function LiveApp() {
       messages={myMessages}
       onSendMessage={sendMessage}
       onMarkRead={markRead}
+      onDeleteMessage={deleteMessage}
       onRefresh={onRefresh}
       account={{
         mode: 'live',
