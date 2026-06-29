@@ -806,8 +806,13 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4 }}>
             {photos.map(ph => (
               <div key={ph.id} style={{ position: 'relative', aspectRatio: '1' }}>
-                <img src={ph.url} alt="" onClick={() => setPhotoLightbox(ph.url)}
+                <img src={ph.url} alt="" onClick={() => setPhotoLightbox(ph)}
                   style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6, cursor: 'pointer', display: 'block' }} />
+                {ph.by && (
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.72))', borderRadius: '0 0 6px 6px', padding: '10px 4px 3px', fontSize: 9, color: 'rgba(255,255,255,0.85)', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', pointerEvents: 'none' }}>
+                    {ph.by}
+                  </div>
+                )}
                 {(isAdmin || ph.by === currentRider) && (
                   <button onClick={() => removePhoto(ph.id)}
                     style={{ position: 'absolute', top: 3, right: 3, background: 'rgba(0,0,0,0.7)', color: '#fff', borderRadius: '50%', width: 20, height: 20, fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
@@ -820,8 +825,11 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
 
       {photoLightbox && (
         <div onClick={() => setPhotoLightbox(null)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
-          <img src={photoLightbox} alt="" style={{ maxWidth: '95vw', maxHeight: '90vh', borderRadius: 8, objectFit: 'contain' }} />
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <img src={photoLightbox.url} alt="" style={{ maxWidth: '95vw', maxHeight: '85vh', borderRadius: 8, objectFit: 'contain' }} />
+          {photoLightbox.by && (
+            <p style={{ marginTop: 12, fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>📷 {photoLightbox.by}</p>
+          )}
         </div>
       )}
 

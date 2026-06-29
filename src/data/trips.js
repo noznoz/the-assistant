@@ -16,6 +16,7 @@ export const TRIPS = [
       { riderName: 'RedRock Ray', status: 'requested' },
       { riderName: 'Diesel Dave', status: 'requested' },
     ],
+    photos: [],
   },
   {
     id: 2,
@@ -33,6 +34,7 @@ export const TRIPS = [
       { riderName: 'Diesel Dave', status: 'requested' },
       { riderName: 'Snake Pete', status: 'requested' },
     ],
+    photos: [],
   },
   {
     id: 3,
@@ -53,6 +55,7 @@ export const TRIPS = [
       { riderName: 'Snake Pete', status: 'requested' },
       { riderName: 'Iron Nate', status: 'requested' },
     ],
+    photos: [],
   },
   {
     id: 4,
@@ -70,6 +73,7 @@ export const TRIPS = [
       { riderName: 'Diesel Dave', status: 'approved' },
       { riderName: 'RedRock Ray', status: 'approved' },
     ],
+    photos: [],
   },
   {
     id: 5,
@@ -87,6 +91,7 @@ export const TRIPS = [
       { riderName: 'RedRock Ray', status: 'approved' },
       { riderName: 'Snake Pete', status: 'approved' },
     ],
+    photos: [],
   },
   {
     id: 6,
@@ -107,5 +112,6 @@ export const TRIPS = [
       { riderName: 'Snake Pete', status: 'attended' },
       { riderName: 'Iron Nate', status: 'attended' },
     ],
+    photos: [],
   },
 ]
