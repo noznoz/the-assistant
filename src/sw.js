@@ -1,6 +1,6 @@
 // Custom service worker: precache + push notifications
 
-const CACHE = 'rh-v2'
+const CACHE = 'rh-v3'
 const PRECACHE = self.__WB_MANIFEST || []
 
 self.addEventListener('install', e => {

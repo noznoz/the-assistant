@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import CrewShell from './CrewShell.jsx'
 import { useAuth } from './lib/AuthContext.jsx'
 import { useCollection } from './lib/useCollection.js'
@@ -14,9 +14,25 @@ import { INITIAL_RIDERS } from './tabs/Riders.jsx'
 import { INITIAL_LISTINGS } from './data/marketplace.js'
 
 function Splash() {
+  const [slow, setSlow] = useState(false)
+  useEffect(() => {
+    const t = setTimeout(() => setSlow(true), 5000)
+    return () => clearTimeout(t)
+  }, [])
   return (
-    <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
+    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, background: 'var(--bg)' }}>
       <span style={{ fontSize: 38 }}>🏍️</span>
+      {slow && (
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>Taking longer than usual…</p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{ fontSize: 13, fontWeight: 600, color: 'var(--orange)', border: '1px solid var(--orange)', borderRadius: 8, padding: '8px 20px' }}
+          >
+            Tap to retry
+          </button>
+        </div>
+      )}
     </div>
   )
 }

@@ -18,7 +18,12 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (!isConfigured) { setLoading(false); return }
 
+    // If getSession + profile load takes longer than 6s (offline / slow network),
+    // unblock the UI so the app doesn't hang on the splash screen forever.
+    const bail = setTimeout(() => setLoading(false), 6000)
+
     supabase.auth.getSession().then(async ({ data }) => {
+      clearTimeout(bail)
       setSession(data.session)
       await loadProfile(data.session?.user?.id)
       setLoading(false)
@@ -28,7 +33,7 @@ export function AuthProvider({ children }) {
       setSession(sess)
       await loadProfile(sess?.user?.id)
     })
-    return () => sub.subscription.unsubscribe()
+    return () => { clearTimeout(bail); sub.subscription.unsubscribe() }
   }, [loadProfile])
 
   // Keep this user's profile live (status flips from pending → approved, etc.)
