@@ -257,6 +257,7 @@ function ChallengeDetail({ challenge, currentRider, isAdmin, addNotification, ro
       rider: riderName,
       text: `${ch.creator} invited you to the challenge "${ch.title}" — win the ${ch.prizeName}! ${ch.awardType === 'trophy' ? ch.trophy : '🖼️'}`,
       time: 'just now',
+      tab: 'challenges',
     })
     setShowInvite(false)
   }
@@ -268,6 +269,7 @@ function ChallengeDetail({ challenge, currentRider, isAdmin, addNotification, ro
       rider: riderName,
       text: `${ch.creator} awarded you "${ch.prizeName}" ${ch.awardType === 'trophy' ? ch.trophy : '🏆'} in the "${ch.title}" challenge! 🎉`,
       time: 'just now',
+      tab: 'challenges',
     })
   }
 

@@ -357,6 +357,7 @@ export default function Feed({ currentRider, isAdmin, addNotification, posts, ad
         rider,
         text: `${currentRider} replied to "${post.rider}'s post": "${text.slice(0, 60)}${text.length > 60 ? '…' : ''}"`,
         time: 'just now',
+        tab: 'feed',
       })
     })
   }

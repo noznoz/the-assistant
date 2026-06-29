@@ -89,15 +89,54 @@ export default function CrewShell({
             </div>
             {myNotifications.length === 0 ? (
               <div style={{ padding: '20px 14px', fontSize: 13, color: 'var(--text-muted)', textAlign: 'center' }}>No notifications yet</div>
-            ) : myNotifications.map(n => (
-              <div key={n.id} style={{ padding: '10px 14px', borderBottom: '1px solid var(--border)', display: 'flex', gap: 10 }}>
-                <span style={{ fontSize: 18, flexShrink: 0 }}>💬</span>
-                <div>
-                  <p style={{ fontSize: 13, lineHeight: 1.4 }}>{n.text}</p>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{n.time}</span>
-                </div>
-              </div>
-            ))}
+            ) : myNotifications.map(n => {
+              const TAB_META = {
+                feed:       { icon: '📰', label: 'Feed' },
+                trips:      { icon: '🗺️', label: 'Trips' },
+                challenges: { icon: '🏆', label: 'Goals' },
+                gear:       { icon: '🧤', label: 'Gear' },
+                market:     { icon: '🏪', label: 'Market' },
+                inbox:      { icon: '✉️', label: 'Inbox' },
+              }
+              const meta = TAB_META[n.tab]
+              return (
+                <button
+                  key={n.id}
+                  onClick={() => { if (n.tab) { setTab(n.tab); setShowNotifications(false) } }}
+                  style={{
+                    width: '100%', textAlign: 'left',
+                    padding: '11px 14px', borderBottom: '1px solid var(--border)',
+                    display: 'flex', gap: 10, alignItems: 'flex-start',
+                    cursor: n.tab ? 'pointer' : 'default',
+                    background: 'transparent',
+                  }}
+                >
+                  <span style={{ fontSize: 18, flexShrink: 0, marginTop: 1 }}>
+                    {meta ? meta.icon : '🔔'}
+                  </span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 13, lineHeight: 1.45, color: 'var(--text)', marginBottom: 5, wordBreak: 'break-word' }}>
+                      {n.text}
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{n.time}</span>
+                      {meta && (
+                        <span style={{
+                          fontSize: 9, fontWeight: 700, letterSpacing: 0.5,
+                          color: 'var(--orange)', background: '#2a1a0a',
+                          border: '1px solid var(--orange)', borderRadius: 4, padding: '1px 5px',
+                        }}>
+                          {meta.label.toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {n.tab && (
+                    <span style={{ fontSize: 16, color: 'var(--orange)', flexShrink: 0, alignSelf: 'center' }}>›</span>
+                  )}
+                </button>
+              )
+            })}
           </div>
         )}
 

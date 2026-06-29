@@ -78,6 +78,7 @@ export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentR
           rider: currentRider,
           text: `🔔 Reminder set for "${trip.name}" on ${trip.date}. Meet at ${trip.meeting || 'TBD'}.`,
           time: 'just now',
+          tab: 'trips',
         })
         notifyBrowser(`Reminder set: ${trip.name}`, `${trip.date} · meet at ${trip.meeting || 'TBD'}`)
       }

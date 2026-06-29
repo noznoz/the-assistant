@@ -58,6 +58,7 @@ export default function Gear({ gear = [], addGear, updateGear, removeGear, curre
         rider: item.taggedRider,
         text: `🛒 ${currentRider} tagged you to check out "${item.name}"${item.cost ? ` ($${item.cost})` : ''} in Gear.`,
         time: 'just now',
+        tab: 'gear',
       })
     }
     setForm(EMPTY); setImageFile(null); setPreview(null)
