@@ -214,8 +214,8 @@ export const INITIAL_LISTINGS = [
     currentBid: 210,
     currentBidder: 'Iron Nate',
     bids: [
-      { rider: 'Steel Lisa', amount: 150, time: '4 days ago' },
-      { rider: 'Iron Nate', amount: 210, time: '2 days ago' },
+      { rider: 'Steel Lisa', amount: 150, date: 'Jun 24, 2026 · 11:30 AM' },
+      { rider: 'Iron Nate', amount: 210, date: 'Jun 27, 2026 · 2:15 PM' },
     ],
     images: [],
     location: 'Sedona, AZ',

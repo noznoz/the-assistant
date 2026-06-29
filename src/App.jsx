@@ -108,6 +108,7 @@ function DemoApp() {
       isAdmin={isAdmin}
       myNotifications={myNotifications}
       clearMyNotifications={() => setNotifications(prev => prev.filter(n => n.rider !== currentRider))}
+      removeNotification={id => setNotifications(prev => prev.filter(n => n.id !== id))}
       addNotification={n => setNotifications(prev => [n, ...prev])}
       trips={trips}
       updateTrip={(id, patch) => setTrips(prev => prev.map(t => t.id === id ? { ...t, ...patch } : t))}
@@ -223,6 +224,7 @@ function LiveApp() {
       isAdmin={isAdmin}
       myNotifications={myNotifications}
       clearMyNotifications={clearMyNotifications}
+      removeNotification={notifications.remove}
       addNotification={addNotification}
       trips={trips.items}
       updateTrip={trips.update}

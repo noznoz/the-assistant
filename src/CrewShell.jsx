@@ -14,7 +14,7 @@ import Marketplace from './tabs/Marketplace.jsx'
 // the only difference is the `account` descriptor and where the data comes from.
 export default function CrewShell({
   currentRider, isAdmin,
-  myNotifications, clearMyNotifications, addNotification,
+  myNotifications, clearMyNotifications, removeNotification, addNotification,
   trips, updateTrip, addTrip, removeTrip,
   posts, addPost, updatePost, removePost,
   challenges, addChallenge, updateChallenge,
@@ -102,7 +102,10 @@ export default function CrewShell({
               return (
                 <button
                   key={n.id}
-                  onClick={() => { if (n.tab) { setTab(n.tab); setShowNotifications(false) } }}
+                  onClick={() => {
+                    if (n.tab) { setTab(n.tab); setShowNotifications(false) }
+                    removeNotification?.(n.id)
+                  }}
                   style={{
                     width: '100%', textAlign: 'left',
                     padding: '11px 14px', borderBottom: '1px solid var(--border)',
