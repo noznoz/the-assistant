@@ -197,13 +197,25 @@ function ItemDetail({ listing, currentRider, isAdmin, onBack, onUpdate, onBuyNow
   const [lightbox, setLightbox] = useState(null)
   const [bidAmount, setBidAmount] = useState('')
   const [bidError, setBidError] = useState('')
-  const [confirm, setConfirm] = useState(null) // 'buyNow' | 'bid'
+  const [offerAmount, setOfferAmount] = useState('')
+  const [offerNote, setOfferNote] = useState('')
+  const [offerError, setOfferError] = useState('')
+  const [confirm, setConfirm] = useState(null) // 'buyNow' | 'bid' | 'offer'
   const photoRef = useRef()
   const isMine = listing.seller === currentRider
   const isAuction = listing.type === 'auction'
   const tl = timeLeft(listing.endDate)
   const active = listing.status === 'active'
   const minBid = (listing.currentBid || listing.startingBid || 0) + 1
+  const offers = listing.offers || []
+  const pendingOffers = offers.filter(o => o.status === 'pending')
+  const myPendingOffer = offers.find(o => o.rider === currentRider && o.status === 'pending')
+
+  function nowDateStr() {
+    const now = new Date()
+    return now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
+      ' · ' + now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+  }
 
   async function handleAddPhoto(e) {
     const f = e.target.files[0]
@@ -222,7 +234,7 @@ function ItemDetail({ listing, currentRider, isAdmin, onBack, onUpdate, onBuyNow
 
   function confirmBid() {
     const amount = parseFloat(bidAmount)
-    const newBid = { rider: currentRider, amount, time: 'just now' }
+    const newBid = { rider: currentRider, amount, date: nowDateStr() }
     onUpdate({
       currentBid: amount,
       currentBidder: currentRider,
@@ -232,6 +244,34 @@ function ItemDetail({ listing, currentRider, isAdmin, onBack, onUpdate, onBuyNow
     setConfirm(null)
   }
 
+  function handleOffer() {
+    const amount = parseFloat(offerAmount)
+    if (!amount || amount <= 0) { setOfferError('Enter a valid offer amount'); return }
+    setOfferError('')
+    setConfirm('offer')
+  }
+
+  function confirmOffer() {
+    const amount = parseFloat(offerAmount)
+    const newOffer = { rider: currentRider, amount, note: offerNote.trim() || null, date: nowDateStr(), status: 'pending' }
+    onUpdate({ offers: [...offers, newOffer] })
+    setOfferAmount('')
+    setOfferNote('')
+    setConfirm(null)
+  }
+
+  function acceptOffer(index) {
+    const offer = offers[index]
+    const updatedOffers = offers.map((o, i) =>
+      i === index ? { ...o, status: 'accepted' } : o.status === 'pending' ? { ...o, status: 'declined' } : o
+    )
+    onUpdate({ status: 'sold', soldTo: offer.rider, soldPrice: offer.amount, offers: updatedOffers })
+  }
+
+  function declineOffer(index) {
+    onUpdate({ offers: offers.map((o, i) => i === index ? { ...o, status: 'declined' } : o) })
+  }
+
   function confirmBuyNow() {
     onBuyNow()
     setConfirm(null)
@@ -239,6 +279,21 @@ function ItemDetail({ listing, currentRider, isAdmin, onBack, onUpdate, onBuyNow
 
   function markSold() {
     onUpdate({ status: 'sold' })
+  }
+
+  // Unified activity: bids + offers sorted newest first
+  const allActivity = [
+    ...(listing.bids || []).map(b => ({ ...b, _type: 'bid' })),
+    ...offers.map(o => ({ ...o, _type: 'offer' })),
+  ].sort((a, b) => {
+    const parse = s => s ? new Date(s.replace(' · ', ' ')) : new Date(0)
+    return parse(b.date) - parse(a.date)
+  })
+
+  const OFFER_STATUS_STYLE = {
+    pending:  { color: 'var(--gold)',    bg: '#2a2200', border: '#5a4800' },
+    accepted: { color: '#4caf50',         bg: '#0a2a0a', border: '#2a4a2a' },
+    declined: { color: 'var(--text-muted)', bg: 'var(--card)', border: 'var(--border)' },
   }
 
   return (
@@ -313,7 +368,11 @@ function ItemDetail({ listing, currentRider, isAdmin, onBack, onUpdate, onBuyNow
       {listing.status === 'sold' && (
         <div style={{ background: '#0a2a0a', border: '1px solid #4caf50', borderRadius: 10, padding: 14, marginBottom: 16, textAlign: 'center' }}>
           <p style={{ fontSize: 16, fontWeight: 700, color: '#4caf50' }}>✓ SOLD</p>
-          {listing.soldTo && <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>Sold to {listing.soldTo}</p>}
+          {listing.soldTo && (
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+              Sold to {listing.soldTo}{listing.soldPrice ? ` · $${listing.soldPrice.toLocaleString()}` : ''}
+            </p>
+          )}
         </div>
       )}
 
@@ -341,7 +400,7 @@ function ItemDetail({ listing, currentRider, isAdmin, onBack, onUpdate, onBuyNow
 
               {!isMine && tl !== 'Ended' && (
                 <div>
-                  <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                  <div style={{ display: 'flex', gap: 8, marginBottom: bidError ? 4 : 10 }}>
                     <input
                       type="number"
                       value={bidAmount}
@@ -358,7 +417,7 @@ function ItemDetail({ listing, currentRider, isAdmin, onBack, onUpdate, onBuyNow
 
                   {listing.buyNowPrice && (
                     <button onClick={() => setConfirm('buyNow')}
-                      style={{ width: '100%', background: '#4caf50', color: '#fff', fontWeight: 700, fontSize: 15, padding: '12px 0', borderRadius: 10 }}>
+                      style={{ width: '100%', background: '#4caf50', color: '#fff', fontWeight: 700, fontSize: 16, padding: '14px 0', borderRadius: 10, letterSpacing: 0.5 }}>
                       ⚡ Buy Now — ${listing.buyNowPrice.toLocaleString()}
                     </button>
                   )}
@@ -367,12 +426,12 @@ function ItemDetail({ listing, currentRider, isAdmin, onBack, onUpdate, onBuyNow
             </div>
           ) : (
             <div>
-              <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>PRICE</p>
+              <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>ASKING PRICE</p>
               <p style={{ fontSize: 30, fontWeight: 700, color: 'var(--orange)', marginBottom: 14 }}>${listing.price?.toLocaleString()}</p>
               {!isMine && (
                 <button onClick={() => setConfirm('buyNow')}
-                  style={{ width: '100%', background: '#4caf50', color: '#fff', fontWeight: 700, fontSize: 15, padding: '14px 0', borderRadius: 10 }}>
-                  ⚡ Buy Now
+                  style={{ width: '100%', background: '#4caf50', color: '#fff', fontWeight: 700, fontSize: 16, padding: '14px 0', borderRadius: 10, letterSpacing: 0.5 }}>
+                  ⚡ Buy Now — ${listing.price?.toLocaleString()}
                 </button>
               )}
             </div>
@@ -380,22 +439,75 @@ function ItemDetail({ listing, currentRider, isAdmin, onBack, onUpdate, onBuyNow
         </div>
       )}
 
-      {/* Bid history */}
-      {isAuction && listing.bids.length > 0 && (
-        <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 14px', marginBottom: 16 }}>
-          <p style={{ fontSize: 11, color: 'var(--text-muted)', letterSpacing: 1, marginBottom: 10 }}>BID HISTORY</p>
-          {listing.bids.map((b, i) => (
-            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 8, marginBottom: 8, borderBottom: i < listing.bids.length - 1 ? '1px solid var(--border)' : 'none' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                {i === 0 && <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--orange)', background: '#2a1a0a', border: '1px solid var(--orange)', borderRadius: 6, padding: '1px 6px' }}>LEADING</span>}
-                <span style={{ fontSize: 13, fontWeight: i === 0 ? 700 : 400 }}>{b.rider}</span>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: i === 0 ? 'var(--orange)' : 'var(--text-muted)' }}>${b.amount.toLocaleString()}</span>
-                <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{b.time}</div>
-              </div>
+      {/* Make an Offer — non-sellers on active listings */}
+      {!isMine && active && !myPendingOffer && (
+        <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+          <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 12 }}>💬 Make an Offer</p>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+            <div style={{ position: 'relative', flex: 1 }}>
+              <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: 14 }}>$</span>
+              <input
+                type="number"
+                value={offerAmount}
+                onChange={e => { setOfferAmount(e.target.value); setOfferError('') }}
+                placeholder="Your offer"
+                style={{ width: '100%', background: '#111', border: `1px solid ${offerError ? '#e57373' : 'var(--border)'}`, borderRadius: 8, padding: '10px 12px 10px 22px', color: 'var(--text)', fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
+              />
             </div>
-          ))}
+            <button onClick={handleOffer}
+              style={{ background: 'var(--orange)', color: '#fff', fontWeight: 700, fontSize: 13, padding: '0 16px', borderRadius: 8, flexShrink: 0 }}>
+              Offer
+            </button>
+          </div>
+          {offerError && <p style={{ fontSize: 11, color: '#e57373', marginBottom: 8 }}>{offerError}</p>}
+          <input
+            value={offerNote}
+            onChange={e => setOfferNote(e.target.value)}
+            placeholder="Add a note (optional) — pickup, trade, etc."
+            style={{ width: '100%', background: '#111', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 12px', color: 'var(--text)', fontSize: 13, outline: 'none', boxSizing: 'border-box' }}
+          />
+        </div>
+      )}
+
+      {/* My pending offer status */}
+      {!isMine && myPendingOffer && (
+        <div style={{ background: '#2a2200', border: '1px solid #5a4800', borderRadius: 10, padding: '12px 14px', marginBottom: 16 }}>
+          <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--gold)', marginBottom: 4 }}>⏳ Your offer is pending</p>
+          <p style={{ fontSize: 13 }}>${myPendingOffer.amount.toLocaleString()}{myPendingOffer.note ? ` · "${myPendingOffer.note}"` : ''}</p>
+          <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{myPendingOffer.date}</p>
+        </div>
+      )}
+
+      {/* Seller: pending offers */}
+      {isMine && active && pendingOffers.length > 0 && (
+        <div style={{ background: 'var(--card)', border: '1px solid var(--gold)', borderRadius: 12, padding: '12px 14px', marginBottom: 16 }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--gold)', letterSpacing: 1, marginBottom: 10 }}>
+            OFFERS RECEIVED ({pendingOffers.length})
+          </p>
+          {pendingOffers.map((o, i) => {
+            const realIndex = offers.indexOf(o)
+            return (
+              <div key={i} style={{ borderBottom: i < pendingOffers.length - 1 ? '1px solid var(--border)' : 'none', paddingBottom: i < pendingOffers.length - 1 ? 12 : 0, marginBottom: i < pendingOffers.length - 1 ? 12 : 0 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 6 }}>
+                  <div>
+                    <p style={{ fontSize: 13, fontWeight: 700 }}>{o.rider} <span style={{ fontWeight: 400, color: 'var(--orange)' }}>— ${o.amount.toLocaleString()}</span></p>
+                    {o.note && <p style={{ fontSize: 12, color: '#ccc', marginTop: 2 }}>"{o.note}"</p>}
+                    <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{o.date}</p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={() => acceptOffer(realIndex)}
+                    style={{ flex: 1, padding: '8px 0', borderRadius: 8, background: '#0a2a0a', border: '1px solid #4caf50', color: '#4caf50', fontSize: 13, fontWeight: 700 }}>
+                    ✓ Accept
+                  </button>
+                  <button onClick={() => declineOffer(realIndex)}
+                    style={{ flex: 1, padding: '8px 0', borderRadius: 8, background: '#1a0a0a', border: '1px solid #e57373', color: '#e57373', fontSize: 13, fontWeight: 600 }}>
+                    ✕ Decline
+                  </button>
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
 
@@ -407,6 +519,52 @@ function ItemDetail({ listing, currentRider, isAdmin, onBack, onUpdate, onBuyNow
         </button>
       )}
 
+      {/* Unified activity history */}
+      {allActivity.length > 0 && (
+        <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 14px', marginBottom: 16 }}>
+          <p style={{ fontSize: 11, color: 'var(--text-muted)', letterSpacing: 1, marginBottom: 10 }}>ACTIVITY</p>
+          {allActivity.map((item, i) => {
+            const isBid = item._type === 'bid'
+            const statusStyle = !isBid ? OFFER_STATUS_STYLE[item.status] || OFFER_STATUS_STYLE.pending : null
+            const isLeadingBid = isBid && i === allActivity.findIndex(a => a._type === 'bid')
+            return (
+              <div key={i} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+                paddingBottom: 10, marginBottom: 10,
+                borderBottom: i < allActivity.length - 1 ? '1px solid var(--border)' : 'none',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, flex: 1, minWidth: 0 }}>
+                  <span style={{ fontSize: 14, flexShrink: 0, marginTop: 1 }}>{isBid ? '🔨' : '💬'}</span>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: 13, fontWeight: 600 }}>{item.rider}</span>
+                      {isLeadingBid && (
+                        <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--orange)', background: '#2a1a0a', border: '1px solid var(--orange)', borderRadius: 4, padding: '1px 5px' }}>LEADING</span>
+                      )}
+                      {!isBid && (
+                        <span style={{ fontSize: 9, fontWeight: 700, borderRadius: 4, padding: '1px 5px', color: statusStyle.color, background: statusStyle.bg, border: `1px solid ${statusStyle.border}` }}>
+                          {item.status.toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    {!isBid && item.note && (
+                      <p style={{ fontSize: 11, color: '#aaa', marginTop: 2, fontStyle: 'italic' }}>"{item.note}"</p>
+                    )}
+                    <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{item.date}</p>
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 8 }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: isBid ? (isLeadingBid ? 'var(--orange)' : 'var(--text-muted)') : statusStyle.color }}>
+                    ${item.amount.toLocaleString()}
+                  </span>
+                  <p style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 2 }}>{isBid ? 'BID' : 'OFFER'}</p>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
       {/* Confirm dialog */}
       {confirm && (
         <div onClick={() => setConfirm(null)}
@@ -414,19 +572,24 @@ function ItemDetail({ listing, currentRider, isAdmin, onBack, onUpdate, onBuyNow
           <div onClick={e => e.stopPropagation()}
             style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: 24, width: '100%', maxWidth: 340 }}>
             <p style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>
-              {confirm === 'buyNow' ? '⚡ Confirm Purchase' : '🔨 Confirm Bid'}
+              {confirm === 'buyNow' ? '⚡ Confirm Purchase' : confirm === 'bid' ? '🔨 Confirm Bid' : '💬 Confirm Offer'}
             </p>
             <p style={{ fontSize: 13, color: '#ccc', lineHeight: 1.6, marginBottom: 16 }}>
               {confirm === 'buyNow'
                 ? `Buy "${listing.title}" for $${(listing.buyNowPrice || listing.price)?.toLocaleString()}?`
-                : `Place bid of $${parseFloat(bidAmount).toLocaleString()} on "${listing.title}"?`}
+                : confirm === 'bid'
+                ? `Place bid of $${parseFloat(bidAmount).toLocaleString()} on "${listing.title}"?`
+                : `Send offer of $${parseFloat(offerAmount).toLocaleString()} to ${listing.seller}?`}
             </p>
+            {confirm === 'offer' && offerNote.trim() && (
+              <p style={{ fontSize: 12, color: '#aaa', fontStyle: 'italic', marginBottom: 14 }}>Note: "{offerNote}"</p>
+            )}
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => setConfirm(null)}
                 style={{ flex: 1, padding: '10px 0', borderRadius: 8, border: '1px solid var(--border)', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)' }}>Cancel</button>
-              <button onClick={confirm === 'buyNow' ? confirmBuyNow : confirmBid}
-                style={{ flex: 1, padding: '10px 0', borderRadius: 8, background: confirm === 'buyNow' ? '#4caf50' : 'var(--orange)', color: '#fff', fontWeight: 700, fontSize: 13 }}>
-                {confirm === 'buyNow' ? 'Buy Now' : 'Place Bid'}
+              <button onClick={confirm === 'buyNow' ? confirmBuyNow : confirm === 'bid' ? confirmBid : confirmOffer}
+                style={{ flex: 1, padding: '10px 0', borderRadius: 8, background: confirm === 'buyNow' ? '#4caf50' : confirm === 'offer' ? 'var(--gold)' : 'var(--orange)', color: confirm === 'offer' ? '#111' : '#fff', fontWeight: 700, fontSize: 13 }}>
+                {confirm === 'buyNow' ? 'Buy Now' : confirm === 'bid' ? 'Place Bid' : 'Send Offer'}
               </button>
             </div>
           </div>
@@ -483,6 +646,7 @@ function NewListingForm({ currentRider, onSave, onCancel }) {
       currentBidder: null,
       buyNowPrice,
       bids: [],
+      offers: [],
       images,
       location: form.location.trim(),
       postedAt: 'just now',
