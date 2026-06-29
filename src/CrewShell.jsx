@@ -155,6 +155,14 @@ export default function CrewShell({
         )}
       </header>
 
+      {/* Backdrop — closes any open dropdown when tapping outside it */}
+      {(showNotifications || showMenu) && (
+        <div
+          onClick={closeAll}
+          style={{ position: 'fixed', inset: 0, zIndex: 49, background: 'transparent' }}
+        />
+      )}
+
       {account.mode === 'demo' && (
         <div style={{
           background: '#1a1500', borderBottom: '1px solid #2a2000',
