@@ -1,14 +1,17 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, lazy, Suspense } from 'react'
 import BottomNav from './components/BottomNav.jsx'
 import { usePullToRefresh, PULL_THRESHOLD } from './lib/usePullToRefresh.js'
 import { subscribeToPush, getPushState } from './lib/pushNotifications.js'
-import Feed from './tabs/Feed.jsx'
-import Trips from './tabs/Trips.jsx'
-import Gear from './tabs/Gear.jsx'
-import Riders from './tabs/Riders.jsx'
-import Challenges from './tabs/Challenges.jsx'
-import Inbox from './tabs/Inbox.jsx'
-import Marketplace from './tabs/Marketplace.jsx'
+
+// Code-split each tab — only the active tab's JS is fetched, instead of
+// every tab shipping in one upfront bundle.
+const Feed = lazy(() => import('./tabs/Feed.jsx'))
+const Trips = lazy(() => import('./tabs/Trips.jsx'))
+const Gear = lazy(() => import('./tabs/Gear.jsx'))
+const Riders = lazy(() => import('./tabs/Riders.jsx'))
+const Challenges = lazy(() => import('./tabs/Challenges.jsx'))
+const Inbox = lazy(() => import('./tabs/Inbox.jsx'))
+const Marketplace = lazy(() => import('./tabs/Marketplace.jsx'))
 
 // The shared app UI. Works for both demo (in-memory) and live (Supabase) modes;
 // the only difference is the `account` descriptor and where the data comes from.
@@ -199,6 +202,11 @@ export default function CrewShell({
       </div>
 
       <main ref={mainRef} style={{ flex: 1, overflowY: 'auto', background: 'var(--bg)', overscrollBehaviorY: 'contain' }} onClick={closeAll}>
+        <Suspense fallback={
+          <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}>
+            <span style={{ fontSize: 28 }}>🏍️</span>
+          </div>
+        }>
         {tab === 'feed' && (
           <Feed
             currentRider={currentRider} isAdmin={isAdmin} addNotification={addNotification}
@@ -252,6 +260,7 @@ export default function CrewShell({
             onDeleteMessage={onDeleteMessage}
           />
         )}
+        </Suspense>
         <div style={{ textAlign: 'center', padding: '20px 0 8px', fontSize: 11, color: 'var(--border)' }}>
           Created by Nizar · V.100 · 2026
         </div>

@@ -224,7 +224,7 @@ function GearCard({ item, currentRider, isAdmin, onToggle, onShare, onRemove }) 
       borderRadius: 12, marginBottom: 10, overflow: 'hidden', opacity: owned ? 0.7 : 1,
     }}>
       {item.image && (
-        <img src={item.image} alt={item.name} style={{ width: '100%', maxHeight: 180, objectFit: 'cover', display: 'block' }} />
+        <img src={item.image} alt={item.name} loading="lazy" decoding="async" style={{ width: '100%', maxHeight: 180, objectFit: 'cover', display: 'block' }} />
       )}
       <div style={{ padding: 14 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>

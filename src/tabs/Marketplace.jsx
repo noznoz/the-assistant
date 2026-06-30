@@ -145,7 +145,7 @@ function ListingCard({ listing, onSelect, sold }) {
           minHeight: 100,
         }}>
           {listing.images?.[0]
-            ? <img src={listing.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+            ? <img src={listing.images[0]} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
             : categoryIcon(listing.category)}
         </div>
 
@@ -311,7 +311,7 @@ function ItemDetail({ listing, currentRider, isAdmin, onBack, onUpdate, onBuyNow
             {listing.images.length > 1 && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4 }}>
                 {listing.images.slice(1).map((url, i) => (
-                  <img key={i} src={url} alt="" onClick={() => setLightbox(url)}
+                  <img key={i} src={url} alt="" onClick={() => setLightbox(url)} loading="lazy" decoding="async"
                     style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 8, cursor: 'pointer', display: 'block' }} />
                 ))}
               </div>
@@ -672,7 +672,7 @@ function NewListingForm({ currentRider, onSave, onCancel }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 8 }}>
             {images.map((url, i) => (
               <div key={i} style={{ position: 'relative', aspectRatio: '1' }}>
-                <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8, display: 'block' }} />
+                <img src={url} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8, display: 'block' }} />
                 <button onClick={() => setImages(imgs => imgs.filter((_, j) => j !== i))}
                   style={{ position: 'absolute', top: 3, right: 3, background: 'rgba(0,0,0,0.7)', color: '#fff', borderRadius: '50%', width: 20, height: 20, fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
               </div>

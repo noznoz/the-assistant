@@ -10,7 +10,7 @@ import { TRIPS } from './data/trips.js'
 import { INITIAL_POSTS } from './data/posts.js'
 import { INITIAL_CHALLENGES } from './data/challenges.js'
 import { INITIAL_GEAR } from './data/gear.js'
-import { INITIAL_RIDERS } from './tabs/Riders.jsx'
+import { INITIAL_RIDERS } from './data/riders.js'
 import { INITIAL_LISTINGS } from './data/marketplace.js'
 
 function Splash() {

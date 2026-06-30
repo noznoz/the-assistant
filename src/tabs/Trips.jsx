@@ -806,7 +806,7 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4 }}>
             {photos.map(ph => (
               <div key={ph.id} style={{ position: 'relative', aspectRatio: '1' }}>
-                <img src={ph.url} alt="" onClick={() => setPhotoLightbox(ph)}
+                <img src={ph.url} alt="" onClick={() => setPhotoLightbox(ph)} loading="lazy" decoding="async"
                   style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6, cursor: 'pointer', display: 'block' }} />
                 {ph.by && (
                   <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.72))', borderRadius: '0 0 6px 6px', padding: '10px 4px 3px', fontSize: 9, color: 'rgba(255,255,255,0.85)', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', pointerEvents: 'none' }}>

@@ -177,6 +177,8 @@ function PostCard({ post, currentRider, isAdmin, onAddReply, onLike, onDelete, o
             src={post.image}
             alt="Post"
             onClick={() => setLightbox(true)}
+            loading="lazy"
+            decoding="async"
             style={{
               width: '100%', maxHeight: 260, objectFit: 'cover',
               borderRadius: 8, marginTop: 10, display: 'block',

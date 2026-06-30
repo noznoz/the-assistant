@@ -64,7 +64,7 @@ export default function Challenges({ currentRider, isAdmin, addNotification, cha
           >
             {/* Award visual */}
             {ch.awardType === 'banner' && ch.bannerImage ? (
-              <img src={ch.bannerImage} alt="" style={{ width: '100%', height: 120, objectFit: 'cover', display: 'block' }} />
+              <img src={ch.bannerImage} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: 120, objectFit: 'cover', display: 'block' }} />
             ) : (
               <div style={{ height: 90, background: 'linear-gradient(135deg, #2a1a0a, #1a1a1a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48 }}>
                 {ch.trophy}
@@ -289,7 +289,7 @@ function ChallengeDetail({ challenge, currentRider, isAdmin, addNotification, ro
 
       {/* Award visual */}
       {ch.awardType === 'banner' && ch.bannerImage ? (
-        <img src={ch.bannerImage} alt="" style={{ width: '100%', height: 180, objectFit: 'cover', borderRadius: 12, display: 'block', marginBottom: 16 }} />
+        <img src={ch.bannerImage} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: 180, objectFit: 'cover', borderRadius: 12, display: 'block', marginBottom: 16 }} />
       ) : (
         <div style={{ height: 140, background: 'linear-gradient(135deg, #2a1a0a, #1a1a1a)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 70, marginBottom: 16 }}>
           {ch.trophy}
