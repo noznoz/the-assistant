@@ -55,17 +55,33 @@ export default function App() {
 /* ------------------------------------------------------------------ */
 const RIDER_NAMES = INITIAL_RIDERS.map(r => r.name)
 
+// Persist demo state in localStorage so joins/posts/awards survive page reloads.
+function usePersisted(key, seed) {
+  const [state, setState] = useState(() => {
+    try {
+      const stored = localStorage.getItem(key)
+      return stored ? JSON.parse(stored) : seed
+    } catch {
+      return seed
+    }
+  })
+  useEffect(() => {
+    try { localStorage.setItem(key, JSON.stringify(state)) } catch {}
+  }, [key, state])
+  return [state, setState]
+}
+
 function DemoApp() {
-  const [currentRider, setCurrentRider] = useState(RIDER_NAMES[0])
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [trips, setTrips] = useState(TRIPS)
-  const [posts, setPosts] = useState(INITIAL_POSTS)
-  const [challenges, setChallenges] = useState(INITIAL_CHALLENGES)
-  const [gear, setGear] = useState(INITIAL_GEAR)
-  const [riders, setRiders] = useState(INITIAL_RIDERS)
-  const [listings, setListings] = useState(INITIAL_LISTINGS)
-  const [notifications, setNotifications] = useState([])
-  const [messages, setMessages] = useState([])
+  const [currentRider, setCurrentRider] = usePersisted('demo:currentRider', RIDER_NAMES[0])
+  const [isAdmin, setIsAdmin] = usePersisted('demo:isAdmin', false)
+  const [trips, setTrips] = usePersisted('demo:trips', TRIPS)
+  const [posts, setPosts] = usePersisted('demo:posts', INITIAL_POSTS)
+  const [challenges, setChallenges] = usePersisted('demo:challenges', INITIAL_CHALLENGES)
+  const [gear, setGear] = usePersisted('demo:gear', INITIAL_GEAR)
+  const [riders, setRiders] = usePersisted('demo:riders', INITIAL_RIDERS)
+  const [listings, setListings] = usePersisted('demo:listings', INITIAL_LISTINGS)
+  const [notifications, setNotifications] = usePersisted('demo:notifications', [])
+  const [messages, setMessages] = usePersisted('demo:messages', [])
 
   const myNotifications = notifications.filter(n => n.rider === currentRider)
 
