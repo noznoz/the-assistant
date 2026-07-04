@@ -1,10 +1,15 @@
 import { useState, useRef, useEffect } from 'react'
 
 const GOOGLE_KEY = import.meta.env.VITE_GOOGLE_MAPS_KEY
+// Set VITE_GOOGLE_MAPS_EMBED_ONLY=1 when the API key is restricted to the
+// (free, unlimited) Maps Embed API: skips loading the paid Places library so
+// the free OpenStreetMap autocomplete fallback takes over in the trip form.
+const EMBED_ONLY = !!import.meta.env.VITE_GOOGLE_MAPS_EMBED_ONLY
 
 // Load the Google Maps JS + Places library once, shared across all instances.
 let mapsReady = null
 function ensureGoogleMaps() {
+  if (EMBED_ONLY) return Promise.reject('embed-only')
   if (!GOOGLE_KEY || GOOGLE_KEY === 'YOUR_API_KEY_HERE') return Promise.reject('no key')
   if (window.google?.maps?.places) return Promise.resolve()
   if (!mapsReady) {

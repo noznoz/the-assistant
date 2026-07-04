@@ -86,6 +86,29 @@ In the Supabase dashboard: **Database → Webhooks → Create a new hook**
 
 Android/Chrome works the same way but without the Home-Screen requirement.
 
+## 8. Google Maps (free, Embed-only setup)
+
+Trip pages show live route/meeting-point maps via the **Maps Embed API**,
+which Google offers **free with unlimited usage**. You don't need the paid
+Places API — the trip form's location autocomplete falls back to free
+OpenStreetMap search automatically.
+
+1. [console.cloud.google.com](https://console.cloud.google.com) → create a
+   project → **APIs & Services → Library** → enable **Maps Embed API** only.
+2. **Credentials → Create credentials → API key.** Edit the key:
+   - Website restriction: your domain (e.g. `road-heaven.vercel.app/*`)
+   - API restriction: **Maps Embed API** only (so the key is worthless if leaked)
+3. In your hosting env set both, then redeploy:
+   ```
+   VITE_GOOGLE_MAPS_KEY=<your key>
+   VITE_GOOGLE_MAPS_EMBED_ONLY=1
+   ```
+
+Want Google's own autocomplete instead of OpenStreetMap's? Also enable
+**Maps JavaScript API** + **Places API** on the key and remove
+`VITE_GOOGLE_MAPS_EMBED_ONLY`. (Requires billing enabled on the Google Cloud
+project; ~10k autocomplete calls/month are free.)
+
 ---
 
 ### Notes / current limits
