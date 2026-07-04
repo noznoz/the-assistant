@@ -46,6 +46,10 @@ export default function App() {
   // Backend configured → real shared app with auth + approval gate.
   if (auth.loading) return <Splash />
   if (!auth.session) return <AuthScreen />
+  // Session restored but profile still fetching — keep the splash up.
+  // Rendering PendingScreen here would flash "waiting for approval" at
+  // approved users on every cold launch.
+  if (!auth.profile && auth.profileLoading) return <Splash />
   if (!auth.isApproved) return <PendingScreen />
   return <LiveApp />
 }

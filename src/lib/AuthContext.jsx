@@ -8,11 +8,27 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(isConfigured)
+  const [profileLoading, setProfileLoading] = useState(isConfigured)
 
   const loadProfile = useCallback(async (userId) => {
-    if (!userId) { setProfile(null); return }
-    const { data } = await supabase.from('profiles').select('*').eq('id', userId).single()
-    setProfile(data || null)
+    if (!userId) { setProfile(null); setProfileLoading(false); return }
+    setProfileLoading(true)
+    try {
+      // Retry transient failures — a cold PWA launch on mobile often has the
+      // radio still waking up, and a single failed fetch here must NOT bounce
+      // an approved user to the pending screen.
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single()
+        if (data) { setProfile(data); return }
+        // PGRST116 = no row exists: this user genuinely has no profile yet.
+        if (error?.code === 'PGRST116') { setProfile(null); return }
+        if (attempt < 2) await new Promise(r => setTimeout(r, 1000 * (attempt + 1)))
+      }
+      // All retries failed (offline / network error): keep whatever profile we
+      // already have instead of clobbering it with null.
+    } finally {
+      setProfileLoading(false)
+    }
   }, [])
 
   useEffect(() => {
@@ -87,6 +103,7 @@ export function AuthProvider({ children }) {
   const value = {
     isConfigured,
     loading,
+    profileLoading,
     session,
     user: session?.user ?? null,
     profile,

@@ -3,7 +3,7 @@ import { useAuth } from '../lib/AuthContext.jsx'
 import Shell, { field, primaryBtn } from './Shell.jsx'
 
 export default function PendingScreen() {
-  const { profile, signOut, redeemInvite } = useAuth()
+  const { profile, signOut, redeemInvite, refreshProfile } = useAuth()
   const [invite, setInvite] = useState('')
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState(null)
@@ -16,13 +16,33 @@ export default function PendingScreen() {
     setBusy(false)
   }
 
+  // Profile fetch failed (offline / bad connection) — this is a connection
+  // problem, not an approval problem. Offer a retry instead of a false "pending".
+  if (!profile) {
+    return (
+      <Shell>
+        <div style={{ textAlign: 'center', marginBottom: 16 }}>
+          <div style={{ fontSize: 40, marginBottom: 10 }}>📡</div>
+          <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 6 }}>Can't reach the crew</h2>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+            We couldn't load your account — check your connection and try again.
+          </p>
+        </div>
+        <button onClick={refreshProfile} style={primaryBtn}>Retry</button>
+        <button onClick={signOut} style={{
+          width: '100%', fontSize: 13, color: 'var(--text-muted)', padding: 10, marginTop: 10,
+        }}>Sign out</button>
+      </Shell>
+    )
+  }
+
   return (
     <Shell>
       <div style={{ textAlign: 'center', marginBottom: 16 }}>
         <div style={{ fontSize: 40, marginBottom: 10 }}>⏳</div>
         <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 6 }}>Waiting for approval</h2>
         <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-          Hey {profile?.name}, your request to join is in. A crew admin will approve you shortly —
+          Hey {profile.name}, your request to join is in. A crew admin will approve you shortly —
           this screen updates automatically the moment they do.
         </p>
       </div>
