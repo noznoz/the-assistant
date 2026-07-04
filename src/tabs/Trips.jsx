@@ -21,6 +21,39 @@ const CLASSIFICATIONS = [
 ]
 const CLASS_MAP = Object.fromEntries(CLASSIFICATIONS.map(c => [c.value, c]))
 
+/* --- Closed trips ---------------------------------------------------- */
+// A trip whose date has passed is closed: nobody can join anymore, but its
+// details and rider list stay viewable.
+function parseTripEndDate(dateStr) {
+  if (!dateStr) return null
+  const s = String(dateStr).trim()
+  // Form-created trips: "YYYY-MM-DD" — parse as a LOCAL date, not UTC
+  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s)
+  if (iso) return new Date(+iso[1], +iso[2] - 1, +iso[3])
+  // Seeded/legacy formats like "Jul 12, 2025"; ranges like "Aug 4–10, 2025"
+  // collapse to the last day of the range.
+  const t = Date.parse(s.replace(/(\d+)\s*[–—-]\s*(\d+)/, '$2'))
+  return Number.isNaN(t) ? null : new Date(t)
+}
+
+export function isTripClosed(trip) {
+  if (trip?.status !== 'upcoming') return false
+  const end = parseTripEndDate(trip.date)
+  if (!end) return false
+  // Closed from midnight AFTER the trip's (last) day — the ride day itself still counts.
+  return Date.now() >= new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1).getTime()
+}
+
+function ClosedBadge() {
+  return (
+    <span style={{
+      fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 6,
+      background: '#1a1a1a', color: 'var(--text-muted)', border: '1px solid var(--border)',
+      whiteSpace: 'nowrap',
+    }}>🔒 Closed</span>
+  )
+}
+
 function ExternalBadge() {
   return (
     <span style={{
@@ -130,6 +163,7 @@ export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentR
 
   function handleJoin(tripId, bike) {
     const trip = trips.find(t => t.id === tripId)
+    if (!trip || isTripClosed(trip)) return // date passed — joining is closed
     updateTrip(tripId, {
       participations: [...(trip.participations || []), { riderName: currentRider, status: 'requested', bike: bike || null }],
     })
@@ -221,8 +255,10 @@ export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentR
     )
   }
 
-  const upcoming = trips.filter(t => t.status === 'upcoming').filter(canSeeTrip)
-  const past = trips.filter(t => t.status === 'completed').filter(canSeeTrip)
+  const visible = trips.filter(canSeeTrip)
+  const upcoming = visible.filter(t => t.status === 'upcoming' && !isTripClosed(t))
+  const closedTrips = visible.filter(t => t.status === 'upcoming' && isTripClosed(t))
+  const past = visible.filter(t => t.status === 'completed')
 
   return (
     <div style={{ padding: 16 }}>
@@ -444,6 +480,15 @@ export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentR
         <TripCard key={trip.id} trip={trip} mine={myParticipation(trip)} onSelect={() => setSelected(trip.id)} onJoin={() => handleJoin(trip.id, '')} />
       ))}
 
+      {closedTrips.length > 0 && (
+        <>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-muted)', margin: '20px 0 12px', letterSpacing: 1 }}>🔒 CLOSED RIDES</h2>
+          {closedTrips.map(trip => (
+            <TripCard key={trip.id} trip={trip} mine={myParticipation(trip)} closed onSelect={() => setSelected(trip.id)} onReactivate={() => handleReactivate(trip)} />
+          ))}
+        </>
+      )}
+
       {past.length > 0 && (
         <>
           <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-muted)', margin: '20px 0 12px', letterSpacing: 1 }}>PAST RIDES</h2>
@@ -456,19 +501,20 @@ export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentR
   )
 }
 
-function TripCard({ trip, mine, past, onSelect, onJoin, onReactivate }) {
+function TripCard({ trip, mine, past, closed, onSelect, onJoin, onReactivate }) {
   const approved = (trip.participations || []).filter(p => p.status === 'approved').length
   const total = (trip.participations || []).length
   return (
     <div style={{
-      background: 'var(--card)', border: `1px solid ${past ? 'var(--border)' : 'var(--orange)'}`,
-      borderRadius: 12, marginBottom: 12, opacity: past ? 0.7 : 1, overflow: 'hidden',
+      background: 'var(--card)', border: `1px solid ${past || closed ? 'var(--border)' : 'var(--orange)'}`,
+      borderRadius: 12, marginBottom: 12, opacity: past ? 0.7 : closed ? 0.85 : 1, overflow: 'hidden',
     }}>
       <button onClick={onSelect} style={{ width: '100%', textAlign: 'left', padding: 16, display: 'block' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 8 }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
             <h3 style={{ fontSize: 15, fontWeight: 700 }}>{trip.name}</h3>
             {trip.classification && <ClassBadge value={trip.classification} />}
+            {closed && <ClosedBadge />}
             {trip.external && <ExternalBadge />}
             {trip.visibility === 'private' && (
               <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 6, background: '#1a0505', color: '#e57373', border: '1px solid #4a1010' }}>🔒 Private</span>
@@ -503,15 +549,15 @@ function TripCard({ trip, mine, past, onSelect, onJoin, onReactivate }) {
           )}
         </div>
       </button>
-      {/* Quick join button — only for upcoming trips where rider hasn't joined yet */}
-      {!past && !mine && onJoin && (
+      {/* Quick join button — only for open upcoming trips where rider hasn't joined yet */}
+      {!past && !closed && !mine && onJoin && (
         <button onClick={e => { e.stopPropagation(); onJoin() }}
           style={{ width: '100%', background: 'var(--orange)', color: '#fff', fontWeight: 700, fontSize: 14, padding: '10px 0', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           🏍️ Join This Ride
         </button>
       )}
-      {/* Rerun button on past trips */}
-      {past && onReactivate && (
+      {/* Rerun button on past/closed trips */}
+      {(past || closed) && onReactivate && (
         <button onClick={e => { e.stopPropagation(); onReactivate() }}
           style={{ width: '100%', background: '#1a1a1a', color: 'var(--gold)', fontWeight: 700, fontSize: 13, padding: '10px 0', borderTop: '1px solid var(--border)' }}>
           🔁 Rerun This Trip
@@ -524,6 +570,7 @@ function TripCard({ trip, mine, past, onSelect, onJoin, onReactivate }) {
 function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleReminder, onUpdateTrip, myBikes = [], onBack, onJoin, onWithdraw, onConfirm, onApprove, onReject, onReactivate, onDelete }) {
   const participants = trip.participations || []
   const pendingHere = isAdmin ? participants.filter(p => p.status === 'attended') : []
+  const closed = isTripClosed(trip)
   const photos = trip.photos || []
 
   const [weather, setWeather] = useState(null)
@@ -635,8 +682,19 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
         </button>
       </div>
 
+      {/* Closed notice — date passed, joining is over but details stay viewable */}
+      {closed && (
+        <div style={{ background: '#1a1a1a', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 18 }}>🔒</span>
+          <div>
+            <p style={{ fontSize: 13, fontWeight: 700 }}>This ride is closed</p>
+            <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>The date has passed — no new joins. Rider list below.</p>
+          </div>
+        </div>
+      )}
+
       {/* My action button */}
-      {trip.status === 'upcoming' && !mine && (
+      {trip.status === 'upcoming' && !closed && !mine && (
         <div style={{ marginBottom: 16 }}>
           {myBikes.length > 0 && (
             <div style={{ marginBottom: 10 }}>
@@ -657,16 +715,18 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
           <div style={{ background: '#0a2a0a', border: '1px solid #4caf50', borderRadius: 10, padding: '10px 14px', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: 16 }}>✓</span>
             <div>
-              <p style={{ fontSize: 13, fontWeight: 600, color: '#4caf50' }}>You're in</p>
+              <p style={{ fontSize: 13, fontWeight: 600, color: '#4caf50' }}>{closed ? 'You were on this ride' : "You're in"}</p>
               <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                 Status: {STATUS_LABEL[mine.status]}{mine.bike ? ` · Riding ${mine.bike}` : ''}
               </p>
             </div>
           </div>
-          <button
-            onClick={onWithdraw}
-            style={{ width: '100%', fontSize: 13, fontWeight: 600, color: '#e57373', background: '#1a0a0a', border: '1px solid #e57373', borderRadius: 10, padding: '10px 0' }}
-          >Withdraw from this ride</button>
+          {!closed && (
+            <button
+              onClick={onWithdraw}
+              style={{ width: '100%', fontSize: 13, fontWeight: 600, color: '#e57373', background: '#1a0a0a', border: '1px solid #e57373', borderRadius: 10, padding: '10px 0' }}
+            >Withdraw from this ride</button>
+          )}
         </div>
       )}
       {trip.status === 'completed' && mine?.status === 'requested' && (
@@ -684,15 +744,15 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
           <p style={{ fontSize: 13, fontWeight: 600, color: '#4caf50' }}>✓ Attendance approved</p>
         </div>
       )}
-      {trip.status === 'completed' && (
+      {(trip.status === 'completed' || closed) && (
         <button onClick={onReactivate}
           style={{ width: '100%', marginBottom: 16, fontWeight: 700, fontSize: 14, padding: 12, borderRadius: 10, background: '#1a1500', border: '1px solid var(--gold)', color: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
           🔁 Rerun This Trip with a New Date
         </button>
       )}
 
-      {/* Reminder toggle for upcoming rides */}
-      {trip.status === 'upcoming' && (
+      {/* Reminder toggle for open upcoming rides */}
+      {trip.status === 'upcoming' && !closed && (
         <button onClick={onToggleReminder}
           style={{
             width: '100%', marginBottom: 16, fontWeight: 600, fontSize: 14, padding: 12, borderRadius: 10,
