@@ -48,6 +48,44 @@ npm run build      # outputs dist/
 Set the same `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` env vars in your host.
 Because it's a PWA, everyone can "Add to Home Screen" for an app-like icon.
 
+## 7. Push notifications (iPhone & Android)
+
+The app creates in-app notifications for new posts, new rides, ride photos,
+ride comments, replies, and challenge events. To also deliver them as real
+phone push notifications, wire up the pipeline once:
+
+### a. VAPID keys
+Generate a key pair (or use `npx web-push generate-vapid-keys`):
+- **Public key** → set as `VITE_VAPID_PUBLIC_KEY` in your hosting env
+  (Vercel: Project → Settings → Environment Variables), then **redeploy**.
+  Without it the "Enable notifications" button stays hidden in the app menu.
+- **Private key** → never goes in the repo; it's a Supabase secret (next step).
+
+### b. Deploy the send-push Edge Function
+With the [Supabase CLI](https://supabase.com/docs/guides/cli) logged in:
+```
+supabase link --project-ref <YOUR_PROJECT_REF>
+supabase secrets set VAPID_PUBLIC_KEY=<public key> VAPID_PRIVATE_KEY=<private key>
+supabase functions deploy send-push --no-verify-jwt
+```
+(`SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are injected automatically.)
+
+### c. Fire it on every new notification
+In the Supabase dashboard: **Database → Webhooks → Create a new hook**
+- Name: `push-on-notification` · Table: `notifications` · Events: **Insert**
+- Type: **Supabase Edge Function** → pick `send-push`
+- Create. Every notification row inserted now triggers a push to that rider's
+  subscribed devices.
+
+### d. What each rider does on their phone (iOS requirements)
+1. iPhone must be on **iOS 16.4 or newer**.
+2. Open the site in Safari → Share → **Add to Home Screen** (pushes only work
+   from the installed app, never from a Safari tab).
+3. Open the installed app → header menu (name ▾) → tap **🔔 Enable notifications**
+   and accept the permission prompt.
+
+Android/Chrome works the same way but without the Home-Screen requirement.
+
 ---
 
 ### Notes / current limits

@@ -78,14 +78,24 @@ function ClassBadge({ value, size = 'sm' }) {
   )
 }
 
-// Fire a real browser/PWA notification if the user has granted permission
+// Fire a real browser/PWA notification if the user has granted permission.
+// iOS does NOT support the `new Notification()` constructor — notifications
+// must go through the service worker registration, so try that first.
+async function showNotification(title, body) {
+  try {
+    const reg = await navigator.serviceWorker?.ready
+    if (reg?.showNotification) { reg.showNotification(title, { body, icon: '/icon-192.png' }); return }
+  } catch {}
+  try { new Notification(title, { body, icon: '/icon-192.png' }) } catch {}
+}
+
 function notifyBrowser(title, body) {
   if (typeof window === 'undefined' || !('Notification' in window)) return
   if (Notification.permission === 'granted') {
-    new Notification(title, { body, icon: '/icon-192.png' })
+    showNotification(title, body)
   } else if (Notification.permission !== 'denied') {
     Notification.requestPermission().then(p => {
-      if (p === 'granted') new Notification(title, { body, icon: '/icon-192.png' })
+      if (p === 'granted') showNotification(title, body)
     })
   }
 }
@@ -136,6 +146,20 @@ export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentR
       createdBy: currentRider,
       meetingUrl: form.meetingLat ? `https://www.google.com/maps?q=${form.meetingLat},${form.meetingLng}` : null,
     })
+    // Announce new upcoming rides to the crew (private rides → invitees only)
+    if (!completed) {
+      const recipients = (visibility === 'private' ? allowedRiders : riders.map(r => r.name))
+        .filter(n => n && n !== currentRider)
+      recipients.forEach(name => {
+        addNotification?.({
+          id: Date.now() + Math.random(),
+          rider: name,
+          text: `🏍️ New ride: "${form.name}" on ${form.date} — tap Trips to join`,
+          time: 'just now',
+          tab: 'trips',
+        })
+      })
+    }
     setForm(EMPTY_FORM)
     setRiderSearch('')
     setShowForm(false)
@@ -251,6 +275,7 @@ export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentR
         onReject={(name) => handleReject(trip.id, name)}
         onReactivate={() => handleReactivate(trip)}
         onDelete={() => removeTrip(trip.id)}
+        onNotify={addNotification}
       />
     )
   }
@@ -569,7 +594,7 @@ function TripCard({ trip, mine, past, closed, onSelect, onJoin, onReactivate }) 
   )
 }
 
-function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleReminder, onUpdateTrip, myBikes = [], onBack, onJoin, onWithdraw, onConfirm, onApprove, onReject, onReactivate, onDelete }) {
+function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleReminder, onUpdateTrip, myBikes = [], onBack, onJoin, onWithdraw, onConfirm, onApprove, onReject, onReactivate, onDelete, onNotify }) {
   const participants = trip.participations || []
   const pendingHere = isAdmin ? participants.filter(p => p.status === 'attended') : []
   const closed = isTripClosed(trip)
@@ -604,6 +629,7 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
         by: currentRider,
       })))
       onUpdateTrip({ photos: [...photos, ...added] })
+      notifyRideCrew(`📸 ${currentRider} added ${added.length} photo${added.length > 1 ? 's' : ''} to "${trip.name}"`)
     } finally {
       setUploading(false)
       if (photoRef.current) photoRef.current.value = ''
@@ -612,6 +638,22 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
 
   function removePhoto(id) {
     onUpdateTrip({ photos: photos.filter(p => p.id !== id) })
+  }
+
+  // Everyone on the ride (plus its creator), except the actor themselves
+  function notifyRideCrew(text) {
+    const names = new Set(participants.map(p => p.riderName))
+    if (trip.createdBy) names.add(trip.createdBy)
+    names.delete(currentRider)
+    names.forEach(name => {
+      onNotify?.({
+        id: Date.now() + Math.random(),
+        rider: name,
+        text,
+        time: 'just now',
+        tab: 'trips',
+      })
+    })
   }
 
   function postComment() {
@@ -625,6 +667,7 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
         at: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
       }],
     })
+    notifyRideCrew(`💬 ${currentRider} on "${trip.name}": "${text.slice(0, 60)}${text.length > 60 ? '…' : ''}"`)
     setChatText('')
   }
 

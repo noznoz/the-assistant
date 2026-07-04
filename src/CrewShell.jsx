@@ -227,6 +227,7 @@ export default function CrewShell({
           <Feed
             currentRider={currentRider} isAdmin={isAdmin} addNotification={addNotification}
             posts={posts} addPost={addPost} updatePost={updatePost} removePost={removePost}
+            roster={riders}
           />
         )}
         {tab === 'trips' && (

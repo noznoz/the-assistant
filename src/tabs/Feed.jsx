@@ -277,7 +277,7 @@ function PostCard({ post, currentRider, isAdmin, onAddReply, onLike, onDelete, o
   )
 }
 
-export default function Feed({ currentRider, isAdmin, addNotification, posts, addPost, updatePost, removePost }) {
+export default function Feed({ currentRider, isAdmin, addNotification, posts, addPost, updatePost, removePost, roster = [] }) {
   const [newText, setNewText] = useState('')
   const [preview, setPreview] = useState(null)
   const [imageFile, setImageFile] = useState(null)
@@ -302,16 +302,32 @@ export default function Feed({ currentRider, isAdmin, addNotification, posts, ad
     setPosting(true)
     try {
       const image = imageFile ? await uploadImage(imageFile, 'posts') : null
+      const text = newText.trim()
       await addPost({
         id: Date.now(),
         rider: currentRider,
         avatar: RIDER_AVATARS[currentRider] || '🤘',
         time: 'just now',
-        text: newText.trim(),
+        text,
         image,
         likes: 0,
         tag: 'ride report',
         replies: [],
+      })
+      // Let the rest of the crew know there's a new post
+      const summary = text
+        ? `${currentRider} posted: "${text.slice(0, 60)}${text.length > 60 ? '…' : ''}"`
+        : `${currentRider} shared a photo in the feed`
+      roster.forEach(r => {
+        if (r.name !== currentRider) {
+          addNotification?.({
+            id: Date.now() + Math.random(),
+            rider: r.name,
+            text: `📰 ${summary}`,
+            time: 'just now',
+            tab: 'feed',
+          })
+        }
       })
       setNewText('')
       clearImage()
