@@ -5,6 +5,8 @@ import { fetchTripWeather } from '../lib/weather.js'
 import { downloadTripICS } from '../lib/calendar.js'
 import { uploadImage } from '../lib/upload.js'
 import PlaceInput from '../components/PlaceInput.jsx'
+import Avatar from '../components/Avatar.jsx'
+import { MentionInput, MentionText, findMentions } from '../components/Mentions.jsx'
 
 const STATUS_LABEL = { requested: 'Joined', attended: 'Attendance Confirmed', approved: 'Approved ✓' }
 const STATUS_COLOR = { requested: 'var(--text-muted)', attended: 'var(--gold)', approved: '#4caf50' }
@@ -276,6 +278,7 @@ export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentR
         onReactivate={() => handleReactivate(trip)}
         onDelete={() => removeTrip(trip.id)}
         onNotify={addNotification}
+        riders={riders}
       />
     )
   }
@@ -594,7 +597,9 @@ function TripCard({ trip, mine, past, closed, onSelect, onJoin, onReactivate }) 
   )
 }
 
-function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleReminder, onUpdateTrip, myBikes = [], onBack, onJoin, onWithdraw, onConfirm, onApprove, onReject, onReactivate, onDelete, onNotify }) {
+function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleReminder, onUpdateTrip, myBikes = [], onBack, onJoin, onWithdraw, onConfirm, onApprove, onReject, onReactivate, onDelete, onNotify, riders = [] }) {
+  const riderByName = Object.fromEntries(riders.map(r => [r.name, r]))
+  const riderNames = riders.map(r => r.name)
   const participants = trip.participations || []
   const pendingHere = isAdmin ? participants.filter(p => p.status === 'attended') : []
   const closed = isTripClosed(trip)
@@ -640,11 +645,13 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
     onUpdateTrip({ photos: photos.filter(p => p.id !== id) })
   }
 
-  // Everyone on the ride (plus its creator), except the actor themselves
-  function notifyRideCrew(text) {
+  // Everyone on the ride (plus its creator), except the actor and anyone
+  // in `skip` (riders already notified another way, e.g. tagged).
+  function notifyRideCrew(text, skip = new Set()) {
     const names = new Set(participants.map(p => p.riderName))
     if (trip.createdBy) names.add(trip.createdBy)
     names.delete(currentRider)
+    skip.forEach(n => names.delete(n))
     names.forEach(name => {
       onNotify?.({
         id: Date.now() + Math.random(),
@@ -667,7 +674,21 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
         at: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
       }],
     })
-    notifyRideCrew(`💬 ${currentRider} on "${trip.name}": "${text.slice(0, 60)}${text.length > 60 ? '…' : ''}"`)
+    // Tagged riders get a personal notification even if they're not on the ride;
+    // the ride crew gets the generic comment notification.
+    const snippet = `"${text.slice(0, 60)}${text.length > 60 ? '…' : ''}"`
+    const tagged = new Set(findMentions(text, riderNames))
+    tagged.delete(currentRider)
+    tagged.forEach(name => {
+      onNotify?.({
+        id: Date.now() + Math.random(),
+        rider: name,
+        text: `🏷️ ${currentRider} tagged you on "${trip.name}": ${snippet}`,
+        time: 'just now',
+        tab: 'trips',
+      })
+    })
+    notifyRideCrew(`💬 ${currentRider} on "${trip.name}": ${snippet}`, tagged)
     setChatText('')
   }
 
@@ -971,9 +992,12 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             padding: '8px 0', borderBottom: '1px solid var(--border)', gap: 8,
           }}>
-            <div style={{ minWidth: 0 }}>
-              <span style={{ fontSize: 13 }}>{p.riderName}</span>
-              {p.bike && <div style={{ fontSize: 11, color: 'var(--gold)' }}>🏍️ {p.bike}</div>}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+              <Avatar rider={riderByName[p.riderName]} size={28} border="var(--border)" />
+              <div style={{ minWidth: 0 }}>
+                <span style={{ fontSize: 13 }}>{p.riderName}</span>
+                {p.bike && <div style={{ fontSize: 11, color: 'var(--gold)' }}>🏍️ {p.bike}</div>}
+              </div>
             </div>
             <span style={{ fontSize: 11, fontWeight: 600, color: STATUS_COLOR[p.status], flexShrink: 0 }}>
               {STATUS_LABEL[p.status]}
@@ -989,18 +1013,22 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
           💬 RIDE DISCUSSION{discussion.length > 0 ? ` (${discussion.length})` : ''}
         </p>
         {discussion.map(c => (
-          <div key={c.id} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, padding: '8px 12px', marginBottom: 8 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: c.by === currentRider ? 'var(--orange)' : 'var(--gold)' }}>{c.by}</span>
-              <span style={{ fontSize: 10, color: 'var(--text-muted)', flexShrink: 0 }}>
-                {c.at}
-                {(c.by === currentRider || isAdmin) && (
-                  <button onClick={() => removeComment(c.id)}
-                    style={{ marginLeft: 8, color: 'var(--text-muted)', fontSize: 11 }}>✕</button>
-                )}
-              </span>
+          <div key={c.id} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 8 }}>
+            <Avatar rider={riderByName[c.by]} size={30} border="var(--border)" />
+            <div style={{ flex: 1, minWidth: 0, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, padding: '8px 12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: c.by === currentRider ? 'var(--orange)' : 'var(--gold)' }}>{c.by}</span>
+                <span style={{ fontSize: 10, color: 'var(--text-muted)', flexShrink: 0 }}>
+                  {c.at}
+                  {(c.by === currentRider || isAdmin) && (
+                    <button onClick={() => removeComment(c.id)}
+                      style={{ marginLeft: 8, color: 'var(--text-muted)', fontSize: 11 }}>✕</button>
+                  )}
+                </span>
+              </div>
+              <MentionText text={c.text} names={riderNames}
+                style={{ fontSize: 13, marginTop: 4, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }} />
             </div>
-            <p style={{ fontSize: 13, marginTop: 4, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{c.text}</p>
           </div>
         ))}
         {discussion.length === 0 && (
@@ -1009,10 +1037,12 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
           </p>
         )}
         <div style={{ display: 'flex', gap: 8 }}>
-          <input value={chatText} onChange={e => setChatText(e.target.value)}
+          <MentionInput value={chatText} onChange={e => setChatText(e.target.value)}
+            names={riderNames}
             onKeyDown={e => { if (e.key === 'Enter') postComment() }}
-            placeholder={closed ? 'Share how the ride went…' : 'Say something about this ride…'}
-            style={{ flex: 1, minWidth: 0, background: '#111', border: '1px solid var(--border)', borderRadius: 8, padding: '10px 12px', color: 'var(--text)', fontSize: 13, outline: 'none' }} />
+            placeholder={closed ? 'Share how the ride went… (@ to tag)' : 'Say something about this ride… (@ to tag)'}
+            containerStyle={{ flex: 1, minWidth: 0 }}
+            style={{ width: '100%', background: '#111', border: '1px solid var(--border)', borderRadius: 8, padding: '10px 12px', color: 'var(--text)', fontSize: 13, outline: 'none' }} />
           <button onClick={postComment} disabled={!chatText.trim()}
             style={{ background: 'var(--orange)', color: '#fff', fontWeight: 700, fontSize: 13, padding: '0 16px', borderRadius: 8, opacity: chatText.trim() ? 1 : 0.5 }}>
             Send

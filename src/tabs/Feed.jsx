@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react'
 import { RIDER_AVATARS } from '../data/posts.js'
 import { uploadImage } from '../lib/upload.js'
+import Avatar from '../components/Avatar.jsx'
+import { MentionInput, MentionText, findMentions } from '../components/Mentions.jsx'
 
 
 const TAG_COLORS = {
@@ -9,7 +11,9 @@ const TAG_COLORS = {
   'event':       { bg: '#2a1a0a', color: 'var(--gold)' },
 }
 
-function PostCard({ post, currentRider, isAdmin, onAddReply, onLike, onDelete, onEdit, onDeleteReply }) {
+function PostCard({ post, currentRider, isAdmin, onAddReply, onLike, onDelete, onEdit, onDeleteReply, roster = [] }) {
+  const byName = Object.fromEntries(roster.map(r => [r.name, r]))
+  const names = roster.map(r => r.name)
   const [showReplies, setShowReplies] = useState(false)
   const [replyText, setReplyText] = useState('')
   const [editing, setEditing] = useState(false)
@@ -108,12 +112,7 @@ function PostCard({ post, currentRider, isAdmin, onAddReply, onLike, onDelete, o
       {/* Post header */}
       <div style={{ padding: 16, paddingBottom: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-          <div style={{
-            width: 40, height: 40, borderRadius: '50%',
-            background: '#2a2a2a', border: '2px solid var(--orange)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 20, flexShrink: 0,
-          }}>{post.avatar}</div>
+          <Avatar rider={byName[post.rider]} emoji={post.avatar} size={40} />
           <div>
             <div style={{ fontWeight: 600, fontSize: 14 }}>{post.rider}</div>
             <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{post.time}</div>
@@ -168,7 +167,8 @@ function PostCard({ post, currentRider, isAdmin, onAddReply, onLike, onDelete, o
           </div>
         ) : (
           post.text && (
-            <p style={{ fontSize: 14, lineHeight: 1.6, color: '#ddd', marginBottom: post.image ? 10 : 0 }}>{post.text}</p>
+            <MentionText text={post.text} names={names}
+              style={{ fontSize: 14, lineHeight: 1.6, color: '#ddd', marginBottom: post.image ? 10 : 0 }} />
           )
         )}
 
@@ -216,18 +216,14 @@ function PostCard({ post, currentRider, isAdmin, onAddReply, onLike, onDelete, o
           )}
           {post.replies.map(r => (
             <div key={r.id} style={{ display: 'flex', gap: 10, marginBottom: 12, alignItems: 'flex-start' }}>
-              <div style={{
-                width: 32, height: 32, borderRadius: '50%',
-                background: '#2a2a2a', border: '1.5px solid var(--border)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 16, flexShrink: 0,
-              }}>{r.avatar}</div>
+              <Avatar rider={byName[r.rider]} emoji={r.avatar} size={32} border="var(--border)" />
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 2 }}>
                   <span style={{ fontWeight: 600, fontSize: 13 }}>{r.rider}</span>
                   <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{r.time}</span>
                 </div>
-                <p style={{ fontSize: 13, color: '#ccc', lineHeight: 1.5 }}>{r.text}</p>
+                <MentionText text={r.text} names={names}
+                  style={{ fontSize: 13, color: '#ccc', lineHeight: 1.5 }} />
               </div>
               {isAdmin && (
                 <button
@@ -241,20 +237,16 @@ function PostCard({ post, currentRider, isAdmin, onAddReply, onLike, onDelete, o
 
           {/* Reply input */}
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 4 }}>
-            <div style={{
-              width: 32, height: 32, borderRadius: '50%',
-              background: '#2a2a2a', border: '1.5px solid var(--orange)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 16, flexShrink: 0,
-            }}>{RIDER_AVATARS[currentRider] || '🤘'}</div>
-            <input
-              ref={inputRef}
+            <Avatar rider={byName[currentRider]} emoji={RIDER_AVATARS[currentRider]} size={32} />
+            <MentionInput
               value={replyText}
               onChange={e => setReplyText(e.target.value)}
+              names={names}
               onKeyDown={handleKeyDown}
-              placeholder={`Reply as ${currentRider.split(' ')[0]}…`}
+              placeholder={`Reply as ${currentRider.split(' ')[0]}… (@ to tag)`}
+              containerStyle={{ flex: 1 }}
               style={{
-                flex: 1, background: 'var(--surface)', border: '1px solid var(--border)',
+                width: '100%', background: 'var(--surface)', border: '1px solid var(--border)',
                 borderRadius: 20, padding: '8px 14px', color: 'var(--text)', fontSize: 13,
                 outline: 'none',
               }}
@@ -314,20 +306,23 @@ export default function Feed({ currentRider, isAdmin, addNotification, posts, ad
         tag: 'ride report',
         replies: [],
       })
-      // Let the rest of the crew know there's a new post
+      // Tagged riders get a personal notification; the rest of the crew a generic one
+      const tagged = new Set(findMentions(text, roster.map(r => r.name)))
+      tagged.delete(currentRider)
       const summary = text
         ? `${currentRider} posted: "${text.slice(0, 60)}${text.length > 60 ? '…' : ''}"`
         : `${currentRider} shared a photo in the feed`
       roster.forEach(r => {
-        if (r.name !== currentRider) {
-          addNotification?.({
-            id: Date.now() + Math.random(),
-            rider: r.name,
-            text: `📰 ${summary}`,
-            time: 'just now',
-            tab: 'feed',
-          })
-        }
+        if (r.name === currentRider) return
+        addNotification?.({
+          id: Date.now() + Math.random(),
+          rider: r.name,
+          text: tagged.has(r.name)
+            ? `🏷️ ${currentRider} tagged you in a post: "${text.slice(0, 60)}${text.length > 60 ? '…' : ''}"`
+            : `📰 ${summary}`,
+          time: 'just now',
+          tab: 'feed',
+        })
       })
       setNewText('')
       clearImage()
@@ -367,8 +362,10 @@ export default function Feed({ currentRider, isAdmin, addNotification, posts, ad
 
     updatePost(postId, { replies: [...post.replies, newReply] })
 
-    // Notify the post author and previous repliers (excluding currentRider)
-    const toNotify = new Set()
+    // Tagged riders get a personal notification; author + previous repliers a generic one
+    const tagged = new Set(findMentions(text, roster.map(r => r.name)))
+    tagged.delete(currentRider)
+    const toNotify = new Set(tagged)
     if (post.rider !== currentRider) toNotify.add(post.rider)
     post.replies.forEach(r => { if (r.rider !== currentRider) toNotify.add(r.rider) })
 
@@ -376,7 +373,9 @@ export default function Feed({ currentRider, isAdmin, addNotification, posts, ad
       addNotification({
         id: Date.now() + Math.random(),
         rider,
-        text: `${currentRider} replied to "${post.rider}'s post": "${text.slice(0, 60)}${text.length > 60 ? '…' : ''}"`,
+        text: tagged.has(rider)
+          ? `🏷️ ${currentRider} tagged you in a reply: "${text.slice(0, 60)}${text.length > 60 ? '…' : ''}"`
+          : `${currentRider} replied to "${post.rider}'s post": "${text.slice(0, 60)}${text.length > 60 ? '…' : ''}"`,
         time: 'just now',
         tab: 'feed',
       })
@@ -394,19 +393,17 @@ export default function Feed({ currentRider, isAdmin, addNotification, posts, ad
         marginBottom: 16,
       }}>
         <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
-          <div style={{
-            width: 36, height: 36, borderRadius: '50%',
-            background: '#2a2a2a', border: '2px solid var(--orange)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 18, flexShrink: 0,
-          }}>{RIDER_AVATARS[currentRider] || '🤘'}</div>
-          <textarea
+          <Avatar rider={roster.find(r => r.name === currentRider)} emoji={RIDER_AVATARS[currentRider]} size={36} />
+          <MentionInput
+            textarea
             value={newText}
             onChange={e => setNewText(e.target.value)}
-            placeholder="What's rolling through your mind, brother?"
+            names={roster.map(r => r.name)}
+            placeholder="What's rolling through your mind, brother? (@ to tag)"
             rows={3}
+            containerStyle={{ flex: 1 }}
             style={{
-              flex: 1, background: 'transparent', border: 'none',
+              width: '100%', background: 'transparent', border: 'none',
               outline: 'none', color: 'var(--text)', fontSize: 14, resize: 'none',
             }}
           />
@@ -473,6 +470,7 @@ export default function Feed({ currentRider, isAdmin, addNotification, posts, ad
           onDelete={handleDelete}
           onEdit={handleEdit}
           onDeleteReply={handleDeleteReply}
+          roster={roster}
         />
       ))}
     </div>
