@@ -541,6 +541,8 @@ function TripCard({ trip, mine, past, closed, onSelect, onJoin, onReactivate }) 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
             {past ? `${approved} approved` : `${total} joined`}
+            {(trip.discussion || []).length > 0 && ` · 💬 ${trip.discussion.length}`}
+            {(trip.photos || []).length > 0 && ` · 📸 ${trip.photos.length}`}
           </span>
           {mine && (
             <span style={{ fontSize: 10, fontWeight: 700, color: STATUS_COLOR[mine.status] }}>
@@ -572,11 +574,13 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
   const pendingHere = isAdmin ? participants.filter(p => p.status === 'attended') : []
   const closed = isTripClosed(trip)
   const photos = trip.photos || []
+  const discussion = trip.discussion || []
 
   const [weather, setWeather] = useState(null)
   const [photoLightbox, setPhotoLightbox] = useState(null)
   const [uploading, setUploading] = useState(false)
   const [chosenBike, setChosenBike] = useState(myBikes[0] || '')
+  const [chatText, setChatText] = useState('')
   const photoRef = useRef()
 
   useEffect(() => {
@@ -608,6 +612,24 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
 
   function removePhoto(id) {
     onUpdateTrip({ photos: photos.filter(p => p.id !== id) })
+  }
+
+  function postComment() {
+    const text = chatText.trim()
+    if (!text) return
+    onUpdateTrip({
+      discussion: [...discussion, {
+        id: Date.now() + Math.random(),
+        by: currentRider,
+        text,
+        at: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+      }],
+    })
+    setChatText('')
+  }
+
+  function removeComment(id) {
+    onUpdateTrip({ discussion: discussion.filter(c => c.id !== id) })
   }
 
   return (
@@ -915,6 +937,44 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
             </span>
           </div>
         ))}
+      </div>
+
+      {/* Ride discussion — open on every trip; on closed rides this and the
+          gallery are the only actions left. */}
+      <div style={{ marginTop: 20 }}>
+        <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8, letterSpacing: 1 }}>
+          💬 RIDE DISCUSSION{discussion.length > 0 ? ` (${discussion.length})` : ''}
+        </p>
+        {discussion.map(c => (
+          <div key={c.id} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, padding: '8px 12px', marginBottom: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: c.by === currentRider ? 'var(--orange)' : 'var(--gold)' }}>{c.by}</span>
+              <span style={{ fontSize: 10, color: 'var(--text-muted)', flexShrink: 0 }}>
+                {c.at}
+                {(c.by === currentRider || isAdmin) && (
+                  <button onClick={() => removeComment(c.id)}
+                    style={{ marginLeft: 8, color: 'var(--text-muted)', fontSize: 11 }}>✕</button>
+                )}
+              </span>
+            </div>
+            <p style={{ fontSize: 13, marginTop: 4, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{c.text}</p>
+          </div>
+        ))}
+        {discussion.length === 0 && (
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+            {closed ? 'How was the ride? Share your stories below.' : 'No messages yet — start the conversation.'}
+          </p>
+        )}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <input value={chatText} onChange={e => setChatText(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') postComment() }}
+            placeholder={closed ? 'Share how the ride went…' : 'Say something about this ride…'}
+            style={{ flex: 1, minWidth: 0, background: '#111', border: '1px solid var(--border)', borderRadius: 8, padding: '10px 12px', color: 'var(--text)', fontSize: 13, outline: 'none' }} />
+          <button onClick={postComment} disabled={!chatText.trim()}
+            style={{ background: 'var(--orange)', color: '#fff', fontWeight: 700, fontSize: 13, padding: '0 16px', borderRadius: 8, opacity: chatText.trim() ? 1 : 0.5 }}>
+            Send
+          </button>
+        </div>
       </div>
     </div>
   )
