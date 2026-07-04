@@ -1,11 +1,26 @@
-import { useState, useRef, useEffect, lazy, Suspense } from 'react'
+import { useState, useRef, useEffect, lazy, Suspense, Component } from 'react'
 import BottomNav from './components/BottomNav.jsx'
 import { usePullToRefresh, PULL_THRESHOLD } from './lib/usePullToRefresh.js'
 import { subscribeToPush, getPushState } from './lib/pushNotifications.js'
+import Feed from './tabs/Feed.jsx'
 
-// Code-split each tab — only the active tab's JS is fetched, instead of
-// every tab shipping in one upfront bundle.
-const Feed = lazy(() => import('./tabs/Feed.jsx'))
+class ErrorBoundary extends Component {
+  state = { err: null }
+  static getDerivedStateFromError(err) { return { err } }
+  render() {
+    if (this.state.err) return (
+      <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-muted)' }}>
+        <div style={{ fontSize: 32, marginBottom: 12 }}>⚠️</div>
+        <p style={{ fontSize: 14 }}>Something went wrong loading this tab.</p>
+        <button onClick={() => this.setState({ err: null })}
+          style={{ marginTop: 12, color: 'var(--orange)', fontSize: 13, fontWeight: 600 }}>Try again</button>
+      </div>
+    )
+    return this.props.children
+  }
+}
+
+// Code-split each non-default tab — Feed is static so the home screen has no spinner.
 const Trips = lazy(() => import('./tabs/Trips.jsx'))
 const Gear = lazy(() => import('./tabs/Gear.jsx'))
 const Riders = lazy(() => import('./tabs/Riders.jsx'))
@@ -202,6 +217,7 @@ export default function CrewShell({
       </div>
 
       <main ref={mainRef} style={{ flex: 1, overflowY: 'auto', background: 'var(--bg)', overscrollBehaviorY: 'contain' }} onClick={closeAll}>
+        <ErrorBoundary>
         <Suspense fallback={
           <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}>
             <span style={{ fontSize: 28 }}>🏍️</span>
@@ -261,6 +277,7 @@ export default function CrewShell({
           />
         )}
         </Suspense>
+        </ErrorBoundary>
         <div style={{ textAlign: 'center', padding: '20px 0 8px', fontSize: 11, color: 'var(--border)' }}>
           Created by Nizar · V.100 · 2026
         </div>

@@ -60,13 +60,21 @@ function usePersisted(key, seed) {
   const [state, setState] = useState(() => {
     try {
       const stored = localStorage.getItem(key)
-      return stored ? JSON.parse(stored) : seed
+      // `stored !== null` guards against localStorage returning the string "null"
+      // which is truthy and would cause JSON.parse("null") = null to replace the seed.
+      return stored !== null ? (JSON.parse(stored) ?? seed) : seed
     } catch {
       return seed
     }
   })
   useEffect(() => {
-    try { localStorage.setItem(key, JSON.stringify(state)) } catch {}
+    try {
+      // Strip session-local blob: URLs before persisting — they become dead
+      // references after a page reload, breaking any photos uploaded in demo mode.
+      localStorage.setItem(key, JSON.stringify(state, (_, v) =>
+        typeof v === 'string' && v.startsWith('blob:') ? null : v
+      ))
+    } catch {}
   }, [key, state])
   return [state, setState]
 }
@@ -129,6 +137,7 @@ function DemoApp() {
       trips={trips}
       updateTrip={(id, patch) => setTrips(prev => prev.map(t => t.id === id ? { ...t, ...patch } : t))}
       addTrip={t => setTrips(prev => [t, ...prev])}
+      removeTrip={id => setTrips(prev => prev.filter(t => t.id !== id))}
       posts={posts}
       addPost={p => setPosts(prev => [p, ...prev])}
       updatePost={(id, patch) => setPosts(prev => prev.map(p => p.id === id ? { ...p, ...patch } : p))}

@@ -124,23 +124,26 @@ function CreateChallenge({ currentRider, onCancel, onCreate }) {
   async function submit() {
     if (!form.title.trim() || !form.prizeName.trim() || busy) return
     setBusy(true)
-    const bannerImage = awardType === 'banner' && bannerFile
-      ? await uploadImage(bannerFile, 'challenges')
-      : null
-    await onCreate({
-      id: Date.now(),
-      title: form.title.trim(),
-      description: form.description.trim(),
-      creator: currentRider,
-      awardType,
-      trophy: awardType === 'trophy' ? trophy : '🏆',
-      bannerImage,
-      prizeName: form.prizeName.trim(),
-      deadline: form.deadline.trim() || 'No deadline',
-      status: 'open',
-      participants: [{ riderName: currentRider, status: 'joined' }],
-    })
-    setBusy(false)
+    try {
+      const bannerImage = awardType === 'banner' && bannerFile
+        ? await uploadImage(bannerFile, 'challenges')
+        : null
+      await onCreate({
+        id: Date.now(),
+        title: form.title.trim(),
+        description: form.description.trim(),
+        creator: currentRider,
+        awardType,
+        trophy: awardType === 'trophy' ? trophy : '🏆',
+        bannerImage,
+        prizeName: form.prizeName.trim(),
+        deadline: form.deadline.trim() || 'No deadline',
+        status: 'open',
+        participants: [{ riderName: currentRider, status: 'joined' }],
+      })
+    } finally {
+      setBusy(false)
+    }
   }
 
   const labelStyle = { fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 5, letterSpacing: 0.5 }

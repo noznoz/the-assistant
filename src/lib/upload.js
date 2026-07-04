@@ -3,31 +3,37 @@ import { supabase } from './supabase.js'
 const MAX_DIMENSION = 1600
 const JPEG_QUALITY = 0.82
 
-// Downscale + re-encode a photo client-side before it ever hits the network.
-// Camera photos can be 3-5MB+ at full resolution — way more than any UI
-// thumbnail needs — so this keeps uploads fast and list/gallery scrolling smooth.
-// Falls back to the original file if anything about the resize fails.
 async function compressImage(file) {
-  if (!file.type?.startsWith('image/') || file.type === 'image/gif') return file
+  if (!file.type.startsWith('image/') || file.type === 'image/gif') return file
+  // Skip decode+re-encode for already-small files — avoid pointless CPU work
+  if (file.size < 600_000) return file
 
   try {
     const bitmap = await createImageBitmap(file)
-    const scale = Math.min(1, MAX_DIMENSION / Math.max(bitmap.width, bitmap.height))
-    if (scale === 1 && file.size < 600_000) {
-      bitmap.close?.()
-      return file // already small enough, skip re-encoding
-    }
+    const { width, height } = bitmap
+    // Guard against zero-dimension bitmaps (malformed files) — would produce corrupt 0×0 JPEG
+    if (!width || !height) { bitmap.close(); return file }
 
+    const scale = Math.min(1, MAX_DIMENSION / Math.max(width, height))
     const canvas = document.createElement('canvas')
-    canvas.width = Math.round(bitmap.width * scale)
-    canvas.height = Math.round(bitmap.height * scale)
+    canvas.width = Math.round(width * scale)
+    canvas.height = Math.round(height * scale)
     const ctx = canvas.getContext('2d')
+    // Guard against null context (GPU memory pressure on low-end devices)
+    if (!ctx) { bitmap.close(); canvas.width = 0; return file }
+
+    // White fill before drawing — transparent PNG pixels composite against the
+    // canvas default (transparent black), which JPEG bakes in as black patches.
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
     ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
-    bitmap.close?.()
+    bitmap.close()
 
     const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', JPEG_QUALITY))
+    canvas.width = 0 // release backing pixel buffer immediately
+
     if (!blob || blob.size >= file.size) return file
-    return new File([blob], file.name?.replace(/\.\w+$/, '.jpg') || 'photo.jpg', { type: 'image/jpeg' })
+    return new File([blob], file.name.replace(/\.\w+$/, '.jpg') || 'photo.jpg', { type: 'image/jpeg' })
   } catch {
     return file
   }
@@ -39,7 +45,7 @@ export async function uploadImage(file, folder = 'misc') {
   if (!file) return null
   const upload = await compressImage(file)
   try {
-    const ext = (upload.name?.split('.').pop() || 'jpg').toLowerCase()
+    const ext = (upload.name.split('.').pop() || 'jpg').toLowerCase()
     const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
     const { error } = await supabase.storage.from('media').upload(path, upload, {
       cacheControl: '3600',
@@ -49,7 +55,7 @@ export async function uploadImage(file, folder = 'misc') {
     const { data } = supabase.storage.from('media').getPublicUrl(path)
     return data.publicUrl
   } catch (e) {
-    console.warn('Image upload failed, using local preview:', e.message)
+    console.warn('Image upload failed, using local preview:', e?.message)
     return URL.createObjectURL(upload)
   }
 }

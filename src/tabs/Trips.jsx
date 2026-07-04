@@ -97,6 +97,7 @@ export default function Trips({ trips, updateTrip, addTrip, removeTrip, currentR
       external,
       status: completed ? 'completed' : 'upcoming',
       participations: [{ riderName: currentRider, status: completed ? 'approved' : 'requested' }],
+      photos: [],
       visibility: visibility || 'public',
       allowedRiders: visibility === 'private' ? allowedRiders : [],
       createdBy: currentRider,
@@ -545,14 +546,17 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
     const files = Array.from(e.target.files)
     if (!files.length) return
     setUploading(true)
-    const added = await Promise.all(files.map(async f => ({
-      id: Date.now() + Math.random(),
-      url: await uploadImage(f, 'trips'),
-      by: currentRider,
-    })))
-    onUpdateTrip({ photos: [...photos, ...added] })
-    setUploading(false)
-    if (photoRef.current) photoRef.current.value = ''
+    try {
+      const added = await Promise.all(files.map(async f => ({
+        id: Date.now() + Math.random(),
+        url: await uploadImage(f, 'trips'),
+        by: currentRider,
+      })))
+      onUpdateTrip({ photos: [...photos, ...added] })
+    } finally {
+      setUploading(false)
+      if (photoRef.current) photoRef.current.value = ''
+    }
   }
 
   function removePhoto(id) {

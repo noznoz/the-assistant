@@ -670,8 +670,8 @@ function NewListingForm({ currentRider, onSave, onCancel }) {
         <label style={labelStyle}>PHOTOS</label>
         {images.length > 0 && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 8 }}>
-            {images.map((url, i) => (
-              <div key={i} style={{ position: 'relative', aspectRatio: '1' }}>
+            {images.map((url) => (
+              <div key={url} style={{ position: 'relative', aspectRatio: '1' }}>
                 <img src={url} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8, display: 'block' }} />
                 <button onClick={() => setImages(imgs => imgs.filter((_, j) => j !== i))}
                   style={{ position: 'absolute', top: 3, right: 3, background: 'rgba(0,0,0,0.7)', color: '#fff', borderRadius: '50%', width: 20, height: 20, fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>

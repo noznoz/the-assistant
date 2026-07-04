@@ -509,7 +509,7 @@ function RiderDetail({ rider, riders, trips, updateTrip, posts, challenges = [],
             return (
               <div key={bike.id} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, marginBottom: 10, overflow: 'hidden', opacity: sold ? 0.85 : 1 }}>
                 <div style={{ position: 'relative' }}>
-                  {bike.photos.length > 0 ? (
+                  {(bike.photos || []).length > 0 ? (
                     <img src={bike.photos[0].url} alt={bike.model} onClick={() => setLightbox(bike.photos[0].url)} loading="lazy" decoding="async"
                       style={{ width: '100%', height: 160, objectFit: 'cover', display: 'block', cursor: 'pointer', filter: sold ? 'grayscale(0.5)' : 'none' }} />
                   ) : (

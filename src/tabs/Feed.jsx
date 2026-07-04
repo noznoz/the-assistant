@@ -300,21 +300,24 @@ export default function Feed({ currentRider, isAdmin, addNotification, posts, ad
   async function handlePost() {
     if ((!newText.trim() && !imageFile) || posting) return
     setPosting(true)
-    const image = imageFile ? await uploadImage(imageFile, 'posts') : null
-    await addPost({
-      id: Date.now(),
-      rider: currentRider,
-      avatar: RIDER_AVATARS[currentRider] || '🤘',
-      time: 'just now',
-      text: newText.trim(),
-      image,
-      likes: 0,
-      tag: 'ride report',
-      replies: [],
-    })
-    setNewText('')
-    clearImage()
-    setPosting(false)
+    try {
+      const image = imageFile ? await uploadImage(imageFile, 'posts') : null
+      await addPost({
+        id: Date.now(),
+        rider: currentRider,
+        avatar: RIDER_AVATARS[currentRider] || '🤘',
+        time: 'just now',
+        text: newText.trim(),
+        image,
+        likes: 0,
+        tag: 'ride report',
+        replies: [],
+      })
+      setNewText('')
+      clearImage()
+    } finally {
+      setPosting(false)
+    }
   }
 
   function handleLike(id) {
