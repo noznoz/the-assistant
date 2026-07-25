@@ -1,0 +1,116 @@
+/* ============================================================================
+   Lulu — Design System tokens & base styles
+   An original, premium, executive visual identity.
+   Brand: deep "midnight" ink + warm "amber" accent (calm, confident, Apple-calm)
+   ========================================================================== */
+
+:root {
+  /* ---- Brand palette ---- */
+  --brand-500: #C8963E;   /* amber gold — primary accent */
+  --brand-400: #D8AC55;
+  --brand-600: #A9772B;
+  --brand-tint: rgba(200, 150, 62, 0.12);
+
+  /* ---- Semantic status colors ---- */
+  --ok: #2E9E6B;
+  --ok-tint: rgba(46, 158, 107, 0.14);
+  --warn: #D9822B;
+  --warn-tint: rgba(217, 130, 43, 0.14);
+  --danger: #D64545;
+  --danger-tint: rgba(214, 69, 69, 0.14);
+  --info: #3E7BC8;
+  --info-tint: rgba(62, 123, 200, 0.14);
+
+  /* ---- Radii ---- */
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 22px;
+  --r-xl: 28px;
+  --r-pill: 999px;
+
+  /* ---- Spacing scale ---- */
+  --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px;
+  --s5: 20px; --s6: 24px; --s7: 32px; --s8: 40px;
+
+  /* ---- Typography ---- */
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
+          "Helvetica Neue", "Noto Sans Arabic", Arial, sans-serif;
+  --fs-display: 30px;
+  --fs-title: 22px;
+  --fs-h: 17px;
+  --fs-body: 15px;
+  --fs-sm: 13px;
+  --fs-xs: 11px;
+
+  /* ---- Motion ---- */
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur: 0.28s;
+
+  /* ---- Elevation ---- */
+  --shadow-1: 0 1px 2px rgba(16, 18, 24, 0.06), 0 4px 16px rgba(16, 18, 24, 0.05);
+  --shadow-2: 0 8px 30px rgba(16, 18, 24, 0.12);
+}
+
+/* ---- Light theme (default) ---- */
+:root, [data-theme="light"] {
+  --bg: #F4F1EC;          /* warm parchment */
+  --bg-2: #ECE7DF;
+  --surface: #FFFFFF;
+  --surface-2: #FBFAF7;
+  --elevated: #FFFFFF;
+  --ink: #1B1A17;         /* near-black warm ink */
+  --ink-2: #4A4740;
+  --ink-3: #857F73;
+  --line: rgba(27, 26, 23, 0.09);
+  --line-2: rgba(27, 26, 23, 0.14);
+  --scrim: rgba(20, 18, 14, 0.36);
+}
+
+/* ---- Dark theme ---- */
+[data-theme="dark"] {
+  --bg: #0E0F12;
+  --bg-2: #14161A;
+  --surface: #191B20;
+  --surface-2: #1F2229;
+  --elevated: #21242C;
+  --ink: #F3F1EC;
+  --ink-2: #B9B6AE;
+  --ink-3: #7E7C75;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-2: rgba(255, 255, 255, 0.14);
+  --scrim: rgba(0, 0, 0, 0.55);
+  --brand-tint: rgba(216, 172, 85, 0.16);
+  --shadow-1: 0 1px 2px rgba(0,0,0,0.4), 0 6px 20px rgba(0,0,0,0.35);
+  --shadow-2: 0 12px 40px rgba(0,0,0,0.55);
+}
+
+/* ============================================================================
+   Base
+   ========================================================================== */
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: var(--fs-body);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
+}
+[dir="rtl"] body { font-family: var(--font); }
+
+button { font-family: inherit; cursor: pointer; }
+input, textarea, select { font-family: inherit; font-size: var(--fs-body); color: var(--ink); }
+a { color: var(--brand-600); }
+h1,h2,h3,h4 { margin: 0; font-weight: 700; letter-spacing: -0.02em; }
+p { margin: 0; }
+::selection { background: var(--brand-tint); }
+
+/* Numbers align nicely for money */
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* Scrollbars: subtle */
+::-webkit-scrollbar { width: 0; height: 0; }
