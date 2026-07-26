@@ -6,8 +6,9 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { findPriority, findStatus, findType } from '../../lib/domain.js'
 import { isToday, isOverdue, relativeDay, fmtTime } from '../../lib/format.js'
-import { share, formatTask, formatFollowUp, copyText, whatsappToPerson, formatAssignment, personDigits } from '../../lib/share.js'
+import { share, formatTask, formatFollowUp, copyText, whatsappToPerson, formatAssignment, formatNudge, personDigits } from '../../lib/share.js'
 import { completeTask } from '../../lib/recurrence.js'
+import { pointsFor, awardPoints } from '../../lib/points.js'
 import TaskEditor from './TaskEditor.jsx'
 
 const VIEWS = [
@@ -52,6 +53,8 @@ export default function TasksScreen({ param, go }) {
   const toggleComplete = (task) => {
     const done = task.status === 'completed'
     const spawned = completeTask(task, tasks)
+    const assignee = people.items.find(p => p.id === task.assigneeId) || people.items.find(p => p.name === task.assignedTo)
+    if (assignee) awardPoints(assignee, done ? -pointsFor(task) : pointsFor(task), people)
     if (!done) toast.show(spawned ? t('repeatsToast') : '✓ ' + t('completed'))
   }
 
@@ -150,10 +153,17 @@ function TaskActionSheet({ task, lang, settings, people = [], onClose, onEdit, o
       <div className="stack">
         <Button block icon="check" onClick={onComplete}>{task.status === 'completed' ? t('st_new') : t('markComplete')}</Button>
         {canSend && (
-          <Button block icon="whatsapp" variant="brand"
-            onClick={() => whatsappToPerson(assignee, formatAssignment(task, assignee, lang, settings))}>
-            {t('sendOnWhatsApp')} · {assignee.name}
-          </Button>
+          <>
+            <Button block icon="whatsapp" variant="brand"
+              onClick={() => whatsappToPerson(assignee, formatAssignment(task, assignee, lang, settings))}>
+              {t('sendOnWhatsApp')} · {assignee.name}
+            </Button>
+            {(task.status === 'waiting_someone' || task.type === 'request' || task.type === 'follow_up') && (
+              <Button block icon="bell" onClick={() => whatsappToPerson(assignee, formatNudge(task, assignee, lang, settings))}>
+                {t('nudge')} · {assignee.name}
+              </Button>
+            )}
+          </>
         )}
         <Button block icon="whatsapp" variant={canSend ? '' : 'brand'} onClick={() => share(formatTask(task, lang, settings))}>{t('shareWhatsApp')}</Button>
         {(task.type === 'follow_up' || task.type === 'request' || task.status === 'waiting_someone') &&

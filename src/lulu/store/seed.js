@@ -50,7 +50,9 @@ export function maybeSeed() {
 
   const exp = [
     { amount: 450, category: 'moto_acc', merchant: 'Touratech', method: 'credit', date: todayISO(), classification: 'personal', relatedVehicle: vRaven.id, note: 'Crash bars + tank bag' },
-    { amount: 280, category: 'fuel', merchant: 'Aramco', method: 'apple_pay', date: todayISO(), relatedVehicle: vAlmas.id },
+    { amount: 280, category: 'fuel', merchant: 'Aramco', method: 'apple_pay', date: todayISO(), relatedVehicle: vAlmas.id, liters: 62, odometer: 24800 },
+    { amount: 265, category: 'fuel', merchant: 'Aramco', method: 'apple_pay', date: d(-14), relatedVehicle: vAlmas.id, liters: 58, odometer: 24240 },
+    { amount: 275, category: 'fuel', merchant: 'Sasco', method: 'apple_pay', date: d(-27), relatedVehicle: vAlmas.id, liters: 60, odometer: 23700 },
     { amount: 1450, category: 'vehicle_maint', merchant: 'BMW Motorrad', method: 'credit', date: d(-15), relatedVehicle: vRaven.id },
     { amount: 3200, category: 'vehicle_maint', merchant: 'Land Rover Riyadh', method: 'company', date: d(-40), relatedVehicle: vAlmas.id },
     { amount: 620, category: 'dining', merchant: 'Myazu', method: 'credit', date: d(-2), classification: 'personal' },

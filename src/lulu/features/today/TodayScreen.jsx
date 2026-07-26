@@ -4,7 +4,9 @@ import { Card, Section, Ring, Stat, Chip, Button, useToast } from '../../ui/prim
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { greetingKey, fmtLongDate, isToday, isOverdue, daysUntil, money } from '../../lib/format.js'
+import { hijriDate } from '../../lib/prayer.js'
 import { buildBrief } from '../../lib/brief.js'
+import PrayerCard from './PrayerCard.jsx'
 import { share, formatAgenda } from '../../lib/share.js'
 import { findPriority } from '../../lib/domain.js'
 import TaskEditor from '../tasks/TaskEditor.jsx'
@@ -71,7 +73,7 @@ export default function TodayScreen({ go }) {
     <>
       <div className="topbar">
         <div style={{ flex: 1 }}>
-          <div className="sub">{fmtLongDate(new Date(), lang)}</div>
+          <div className="sub">{fmtLongDate(new Date(), lang)}{hijriDate(new Date(), lang) ? ` · ${hijriDate(new Date(), lang)}` : ''}</div>
         </div>
         <button className="iconbtn" onClick={() => go('notifications')} aria-label={t('notifications')}><Icon name="bell" size={18} /></button>
         <button className="iconbtn" onClick={() => go('search')} aria-label={t('search')}><Icon name="search" size={18} /></button>
@@ -94,6 +96,8 @@ export default function TodayScreen({ go }) {
             </button>
           </div>
         </div>
+
+        <PrayerCard />
 
         {/* Progress + stats */}
         <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 12, marginTop: 14, alignItems: 'stretch' }}>

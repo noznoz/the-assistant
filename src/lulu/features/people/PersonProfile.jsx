@@ -5,8 +5,9 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { RELATIONSHIPS, findPriority, label } from '../../lib/domain.js'
 import { relativeDay, fmtTime } from '../../lib/format.js'
-import { whatsappToPerson, formatAssignment, personDigits } from '../../lib/share.js'
+import { whatsappToPerson, formatAssignment, formatNudge, formatNudgeList, personDigits } from '../../lib/share.js'
 import { completeTask } from '../../lib/recurrence.js'
+import { pointsFor, awardPoints } from '../../lib/points.js'
 import PersonEditor from './PersonEditor.jsx'
 import TaskEditor from '../tasks/TaskEditor.jsx'
 
@@ -14,6 +15,7 @@ export default function PersonProfile({ person, onBack, onDeleted }) {
   const { t, lang } = useT()
   const { settings } = useSettings()
   const tasks = useCollection('tasks')
+  const people = useCollection('people')
   const [editor, setEditor] = useState(false)      // edit person
   const [assigning, setAssigning] = useState(false) // task editor
   const toast = useToast()
@@ -29,6 +31,15 @@ export default function PersonProfile({ person, onBack, onDeleted }) {
   const digits = personDigits(person)
 
   const sendTask = (task) => whatsappToPerson(person, formatAssignment(task, person, lang, settings))
+  const nudge = (task) => { whatsappToPerson(person, formatNudge(task, person, lang, settings)); toast.show(t('nudgedToast')) }
+  const nudgeAll = () => { whatsappToPerson(person, formatNudgeList(open, person, lang, settings)); toast.show(t('nudgedToast')) }
+  const points = Number(person.points) || 0
+  const toggle = (task) => {
+    const wasDone = task.status === 'completed'
+    completeTask(task, tasks)
+    awardPoints(person, wasDone ? -pointsFor(task) : pointsFor(task), people)
+    toast.show(wasDone ? '↩︎' : `✓ +${pointsFor(task)} ${t('pts')}`)
+  }
 
   return (
     <>
@@ -45,6 +56,7 @@ export default function PersonProfile({ person, onBack, onDeleted }) {
           <div className="muted" style={{ fontSize: 13 }}>
             {[rel ? label(rel, lang) : '', person.jobTitle, person.company].filter(Boolean).join(' · ')}
           </div>
+          {points > 0 && <Chip tint="t-brand" style={{ marginTop: 6 }}><Icon name="sparkle" size={12} /> {points} {t('pts')}</Chip>}
         </div>
 
         {/* Quick contact actions */}
@@ -55,9 +67,10 @@ export default function PersonProfile({ person, onBack, onDeleted }) {
           {person.email && <ContactBtn icon="mail" label={t('email')} onClick={() => window.open(`mailto:${person.email}`)} />}
         </div>
 
-        <Button block variant="primary" icon="plus" style={{ marginTop: 12 }} onClick={() => setAssigning(true)}>
-          {t('assignTask')}
-        </Button>
+        <div className="row2" style={{ marginTop: 12 }}>
+          <Button variant="primary" icon="plus" onClick={() => setAssigning(true)}>{t('assignTask')}</Button>
+          <Button icon="whatsapp" disabled={open.length === 0} onClick={nudgeAll}>{t('nudgeAll')}</Button>
+        </div>
 
         {/* Their open tasks */}
         <Section title={t('theirTasks')} count={open.length} />
@@ -68,7 +81,7 @@ export default function PersonProfile({ person, onBack, onDeleted }) {
           const pr = findPriority(task.priority)
           return (
             <div className="li" key={task.id}>
-              <button className="check" onClick={() => { completeTask(task, tasks); toast.show('✓') }} aria-label={t('markComplete')} />
+              <button className="check" onClick={() => toggle(task)} aria-label={t('markComplete')} />
               <div className="body">
                 <div className="title">{task.title}</div>
                 <div className="meta">
@@ -76,7 +89,7 @@ export default function PersonProfile({ person, onBack, onDeleted }) {
                   {task.dueDate && <span>· {relativeDay(task.dueDate, lang)}{task.dueTime ? ` ${fmtTime(task.dueTime, lang)}` : ''}</span>}
                 </div>
               </div>
-              <button className="iconbtn" style={{ color: 'var(--ok)' }} aria-label={t('sendOnWhatsApp')} onClick={() => sendTask(task)}><Icon name="whatsapp" size={18} /></button>
+              <button className="iconbtn" style={{ color: 'var(--ok)' }} aria-label={t('nudge')} onClick={() => nudge(task)}><Icon name="whatsapp" size={18} /></button>
             </div>
           )
         })}

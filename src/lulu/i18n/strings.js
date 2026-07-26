@@ -101,6 +101,16 @@ export const STRINGS = {
     wrongPasscode: 'Wrong passcode', useFaceId: 'Use Face ID', usePasscode: 'Use passcode',
     lockedTitle: 'Locked', unlockWithFaceId: 'Unlock with Face ID',
     lockHint: 'Requires your passcode when you open or return to the app.',
+    // prayer times
+    prayerTimes: 'Prayer times', nextPrayer: 'Next', fajr: 'Fajr', sunrise: 'Sunrise',
+    dhuhr: 'Dhuhr', asr: 'Asr', maghrib: 'Maghrib', isha: 'Isha', inLabel: 'in',
+    // garage extras
+    emergencyInfo: 'Emergency info', fuelLog: 'Fuel', liters: 'Litres', odometer: 'Odometer',
+    economy: 'Economy', costPerKm: 'Cost / km', consumption: 'L / 100 km', serviceDue: 'Service due',
+    avgFill: 'Avg fill', totalFuel: 'Total fuel', fills: 'fills', showEmergency: 'Emergency card',
+    // family nudge + points
+    nudge: 'Nudge', nudgeAll: 'Nudge all pending', points: 'points', pts: 'pts',
+    leaderboard: 'Family leaderboard', nudgedToast: 'Follow-up opened', earned: 'earned',
   },
   ar: {
     today: 'اليوم', tasks: 'المهام', garage: 'المرآب', expenses: 'المصروفات', more: 'المزيد',
@@ -187,5 +197,15 @@ export const STRINGS = {
     wrongPasscode: 'رمز خاطئ', useFaceId: 'استخدام Face ID', usePasscode: 'استخدام الرمز',
     lockedTitle: 'مقفل', unlockWithFaceId: 'افتح بـ Face ID',
     lockHint: 'يطلب رمز المرور عند فتح التطبيق أو العودة إليه.',
+    // prayer times
+    prayerTimes: 'مواقيت الصلاة', nextPrayer: 'التالية', fajr: 'الفجر', sunrise: 'الشروق',
+    dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء', inLabel: 'بعد',
+    // garage extras
+    emergencyInfo: 'معلومات الطوارئ', fuelLog: 'الوقود', liters: 'لترات', odometer: 'العداد',
+    economy: 'الاستهلاك', costPerKm: 'التكلفة / كم', consumption: 'لتر / 100 كم', serviceDue: 'صيانة مستحقة',
+    avgFill: 'متوسط التعبئة', totalFuel: 'إجمالي الوقود', fills: 'تعبئات', showEmergency: 'بطاقة الطوارئ',
+    // family nudge + points
+    nudge: 'تذكير', nudgeAll: 'تذكير الكل', points: 'نقاط', pts: 'نقطة',
+    leaderboard: 'ترتيب العائلة', nudgedToast: 'تم فتح المتابعة', earned: 'حصل على',
   },
 }

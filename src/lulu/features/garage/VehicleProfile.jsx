@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Segmented, Card, Section, Button, Sheet, Field, Input, Chip, Empty, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Segmented, Card, Section, Stat, Button, Sheet, Field, Input, Chip, Empty, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { findVehicleType } from '../../lib/domain.js'
@@ -18,6 +18,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
   const [tab, setTab] = useState('overview')
   const [edit, setEdit] = useState(false)
   const [svcEditor, setSvcEditor] = useState(false)
+  const [emergency, setEmergency] = useState(false)
   const toast = useToast()
 
   const vt = findVehicleType(vehicle.type)
@@ -26,6 +27,30 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
   const myExpenses = expenses.items.filter(e => e.relatedVehicle === vehicle.id)
   const totalCost = myExpenses.reduce((s, e) => s + (+e.amount || 0), 0)
   const dd = daysUntil(vehicle.policyExpiry)
+
+  const parseKm = (s) => { const n = parseFloat(String(s || '').replace(/[^0-9.]/g, '')); return isNaN(n) ? null : n }
+  const currentKm = parseKm(vehicle.mileage)
+
+  // Service due — by date (<=30d) or by mileage (within 1000 km of next odo).
+  const serviceDue = myServices.map(s => {
+    const dDate = daysUntil(s.nextDate)
+    const nextKm = parseKm(s.nextOdo)
+    const kmLeft = (nextKm != null && currentKm != null) ? nextKm - currentKm : null
+    const due = (dDate != null && dDate <= 30) || (kmLeft != null && kmLeft <= 1000)
+    return { s, dDate, kmLeft, due }
+  }).filter(x => x.due).sort((a, b) => (a.dDate ?? 999) - (b.dDate ?? 999))
+
+  // Fuel economy from consecutive fill-ups that recorded an odometer.
+  const fuelExp = myExpenses.filter(e => e.category === 'fuel').sort((a, b) => (a.date || '').localeCompare(b.date || ''))
+  const fuelTotal = fuelExp.reduce((s, e) => s + (+e.amount || 0), 0)
+  const withOdo = fuelExp.filter(e => parseKm(e.odometer) != null)
+  let distance = 0, litersForDist = 0, costForDist = 0
+  for (let i = 1; i < withOdo.length; i++) {
+    const dkm = parseKm(withOdo[i].odometer) - parseKm(withOdo[i - 1].odometer)
+    if (dkm > 0) { distance += dkm; litersForDist += parseFloat(withOdo[i].liters) || 0; costForDist += (+withOdo[i].amount || 0) }
+  }
+  const consumption = distance > 0 && litersForDist > 0 ? (litersForDist / distance * 100) : null
+  const costPerKm = distance > 0 && costForDist > 0 ? (costForDist / distance) : null
 
   return (
     <>
@@ -48,12 +73,27 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
           <Segmented value={tab} onChange={setTab} options={[
             { value: 'overview', label: t('overview') },
             { value: 'maintenance', label: t('maintenance') },
+            { value: 'fuel', label: t('fuelLog') },
             { value: 'expenses', label: t('vehExpenses') },
           ]} />
         </div>
 
         {tab === 'overview' && (
           <>
+            {serviceDue.length > 0 && (
+              <Card style={{ marginBottom: 14, display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div className="lead t-warn" style={{ width: 42, height: 42, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="wrench" size={20} /></div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700 }}>{t('serviceDue')}</div>
+                  <div className="muted" style={{ fontSize: 13 }}>
+                    {serviceDue[0].s.work}
+                    {serviceDue[0].dDate != null ? ` · ${fmtDate(serviceDue[0].s.nextDate, lang, settings.dateFormat)}` : ''}
+                    {serviceDue[0].kmLeft != null ? ` · ${serviceDue[0].kmLeft <= 0 ? t('serviceDue') : `${Math.round(serviceDue[0].kmLeft)} km`}` : ''}
+                  </div>
+                </div>
+                <button className="btn sm" onClick={() => setTab('maintenance')}>{t('view')}</button>
+              </Card>
+            )}
             {vehicle.bio && <Card style={{ marginBottom: 14 }}><p style={{ fontStyle: 'italic', color: 'var(--ink-2)' }}>“{vehicle.bio}”</p></Card>}
             <Card className="stack">
               <Row k={t('brand')} v={vehicle.brand} />
@@ -80,8 +120,38 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
               </Card>
             )}
 
-            <Button block variant="brand" icon="whatsapp" style={{ marginTop: 16 }}
-              onClick={() => share(formatVehicle(vehicle, lang, settings))}>{t('shareWhatsApp')}</Button>
+            <div className="row2" style={{ marginTop: 16 }}>
+              <Button icon="shield" onClick={() => setEmergency(true)}>{t('showEmergency')}</Button>
+              <Button variant="brand" icon="whatsapp" onClick={() => share(formatVehicle(vehicle, lang, settings))}>{t('share')}</Button>
+            </div>
+          </>
+        )}
+
+        {tab === 'fuel' && (
+          <>
+            <div className="stat-grid">
+              <Stat label={t('totalFuel')} value={money(fuelTotal, cur, lang)} sub={`· ${fuelExp.length} ${t('fills')}`} />
+              <Stat label={t('economy')} value={consumption ? consumption.toFixed(1) : '—'} sub={consumption ? t('consumption') : ''} />
+            </div>
+            {costPerKm != null && (
+              <Card style={{ marginTop: 12, textAlign: 'center' }}>
+                <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase' }}>{t('costPerKm')}</div>
+                <div style={{ fontSize: 26, fontWeight: 750, marginTop: 4 }} className="tnum">{money(costPerKm, cur, lang)}</div>
+              </Card>
+            )}
+            <Section title={t('fuelLog')} count={fuelExp.length} action={t('add')} onAction={() => go('expenses')} />
+            {fuelExp.length === 0 ? (
+              <Empty icon="fuel" title={t('nothingHere')} text={t('addFiles')} />
+            ) : [...fuelExp].reverse().map(e => (
+              <div className="li" key={e.id}>
+                <div className="lead t-brand"><Icon name="fuel" size={18} /></div>
+                <div className="body">
+                  <div className="title">{money(e.amount, e.currency || cur, lang)}</div>
+                  <div className="meta">{fmtDate(e.date, lang, settings.dateFormat)}{e.liters ? ` · ${e.liters} ${t('liters')}` : ''}{e.odometer ? ` · ${e.odometer} km` : ''}</div>
+                </div>
+              </div>
+            ))}
+            <p className="hint center" style={{ marginTop: 12 }}>{t('liters')} + {t('odometer')} → {t('economy')}</p>
           </>
         )}
 
@@ -129,8 +199,31 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
 
       {edit && <VehicleEditor initial={vehicle} onClose={() => setEdit(false)} onSaved={() => toast.show(t('savedToast'))} />}
       {svcEditor && <ServiceEditor vehicleId={vehicle.id} onClose={() => setSvcEditor(false)} onSaved={() => toast.show(t('savedToast'))} />}
+      {emergency && (
+        <Sheet title={t('emergencyInfo')} onClose={() => setEmergency(false)}
+          footer={<Button block variant="brand" icon="whatsapp" onClick={() => share(formatVehicle(vehicle, lang, settings))}>{t('share')}</Button>}>
+          <div className="stack">
+            <EmRow k={t('vehicleName')} v={vehicle.name} big />
+            <EmRow k={t('plate')} v={vehicle.plate} big />
+            <EmRow k={t('vin')} v={vehicle.vin} />
+            <EmRow k={t('insurance')} v={vehicle.insuranceCompany} />
+            <EmRow k={t('policyExpiry')} v={vehicle.policyExpiry ? fmtDate(vehicle.policyExpiry, lang, settings.dateFormat) : ''} />
+            <EmRow k={isBoat ? t('engineHours') : t('mileage')} v={vehicle.mileage} />
+          </div>
+        </Sheet>
+      )}
       {toast.node}
     </>
+  )
+}
+
+function EmRow({ k, v, big }) {
+  if (!v) return null
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '9px 0', borderBottom: '1px solid var(--line)' }}>
+      <span className="muted" style={{ fontSize: 13, alignSelf: 'center' }}>{k}</span>
+      <span style={{ fontWeight: big ? 750 : 600, fontSize: big ? 18 : 14, textAlign: 'end' }}>{v}</span>
+    </div>
   )
 }
 

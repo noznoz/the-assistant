@@ -13,7 +13,7 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
   const [f, setF] = useState({
     amount: '', currency: settings.currency, category: 'other', merchant: '',
     method: 'credit', date: todayISO(), classification: 'personal',
-    reimbursable: false, relatedVehicle: '', note: '', ...initial,
+    reimbursable: false, relatedVehicle: '', note: '', liters: '', odometer: '', ...initial,
   })
   const [err, setErr] = useState('')
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
@@ -49,6 +49,13 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
         <Field label={t('merchant')}><Input value={f.merchant} onChange={set('merchant')} /></Field>
         <Field label={t('date')}><Input type="date" value={f.date} onChange={set('date')} /></Field>
       </div>
+
+      {f.category === 'fuel' && (
+        <div className="row2">
+          <Field label={t('liters')} hint={t('optional')}><Input type="number" inputMode="decimal" value={f.liters} onChange={set('liters')} placeholder="0" /></Field>
+          <Field label={t('odometer')} hint="km"><Input type="number" inputMode="numeric" value={f.odometer} onChange={set('odometer')} placeholder="0" /></Field>
+        </div>
+      )}
 
       <Field label={t('paymentMethod')}>
         <Select value={f.method} onChange={set('method')}

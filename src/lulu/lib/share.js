@@ -30,6 +30,34 @@ export function whatsappToPerson(person, text) {
   window.open(url, '_blank')
 }
 
+// A gentle reminder / nudge for a pending task.
+export function formatNudge(task, person, lang = 'en', settings = {}) {
+  const name = (person && person.name) || task.assignedTo || ''
+  if (lang === 'ar') {
+    return [
+      `مرحباً ${name} 👋`, '',
+      `تذكير بسيط بخصوص: *${task.title}*`,
+      task.dueDate ? `الموعد: ${fmtDate(task.dueDate, lang, settings.dateFormat)}` : '',
+      'ممتن لو تحدّثني عن آخر المستجدات 🙏',
+    ].filter(Boolean).join('\n')
+  }
+  return [
+    `Hi ${name} 👋`, '',
+    `Just a gentle reminder about: *${task.title}*`,
+    task.dueDate ? `Due: ${fmtDate(task.dueDate, lang, settings.dateFormat)}` : '',
+    'Could you let me know where it stands? 🙏',
+  ].filter(Boolean).join('\n')
+}
+
+// A reminder listing several open tasks for one person.
+export function formatNudgeList(tasks, person, lang = 'en', settings = {}) {
+  const name = (person && person.name) || ''
+  const hi = lang === 'ar' ? `مرحباً ${name} 👋` : `Hi ${name} 👋`
+  const intro = lang === 'ar' ? 'تذكير بالمهام المعلّقة:' : 'A reminder of your open tasks:'
+  const lines = tasks.map(x => `• ${x.title}${x.dueDate ? ` (${fmtDate(x.dueDate, lang, settings.dateFormat)})` : ''}`)
+  return [hi, '', intro, '', ...lines, '', lang === 'ar' ? 'شكراً 🙏' : 'Thank you 🙏'].join('\n')
+}
+
 // A warm "here's a task for you" message to send to the assignee.
 export function formatAssignment(task, person, lang = 'en', settings = {}) {
   const name = (person && person.name) || task.assignedTo || (lang === 'ar' ? '' : '')
