@@ -70,6 +70,13 @@ export const STRINGS = {
     capturePlaceholder: 'What’s on your mind?', capture: 'Capture', triage: 'Triage',
     savedToast: 'Saved', deletedToast: 'Deleted', copiedToast: 'Copied',
     monthlyBudget: 'Monthly budget', budget: 'Budget', spent: 'spent',
+    // documents / attachments
+    takePhoto: 'Take photo', chooseFile: 'Choose file', attachments: 'Files',
+    addFiles: 'Add photos or files', noAttachments: 'No files attached yet',
+    shareViaWhatsApp: 'Share via WhatsApp / Email', openFile: 'Open', download: 'Download',
+    shareHint: 'Opens the share sheet — pick WhatsApp, Mail, Messages and more.',
+    page: 'Page', addDocument: 'Add document', documentTitle: 'Document', preview: 'Preview',
+    downloadedToast: 'Downloaded', sharedToast: 'Shared',
   },
   ar: {
     today: 'اليوم', tasks: 'المهام', garage: 'المرآب', expenses: 'المصروفات', more: 'المزيد',
@@ -125,5 +132,12 @@ export const STRINGS = {
     capturePlaceholder: 'ما الذي يشغل بالك؟', capture: 'تسجيل', triage: 'فرز',
     savedToast: 'تم الحفظ', deletedToast: 'تم الحذف', copiedToast: 'تم النسخ',
     monthlyBudget: 'الميزانية الشهرية', budget: 'الميزانية', spent: 'مصروف',
+    // documents / attachments
+    takePhoto: 'التقاط صورة', chooseFile: 'اختيار ملف', attachments: 'الملفات',
+    addFiles: 'أضف صوراً أو ملفات', noAttachments: 'لا توجد ملفات مرفقة بعد',
+    shareViaWhatsApp: 'مشاركة عبر واتساب / البريد', openFile: 'فتح', download: 'تنزيل',
+    shareHint: 'تفتح قائمة المشاركة — اختر واتساب أو البريد أو الرسائل وغيرها.',
+    page: 'صفحة', addDocument: 'إضافة مستند', documentTitle: 'مستند', preview: 'معاينة',
+    downloadedToast: 'تم التنزيل', sharedToast: 'تمت المشاركة',
   },
 }
