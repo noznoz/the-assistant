@@ -85,6 +85,22 @@ export const STRINGS = {
     sendTaskHint: 'They receive the task on WhatsApp instantly.',
     assignedTasks: 'Assigned', openLabel: 'Open', unassigned: 'Unassigned',
     sendToAssignee: 'Send to assignee on WhatsApp', waitingOn: 'Waiting on',
+    // recurrence
+    rec: 'Repeat', rec_none: 'Does not repeat', rec_daily: 'Daily', rec_weekly: 'Weekly',
+    rec_monthly: 'Monthly', rec_yearly: 'Yearly', repeatsToast: 'Repeated · next one added',
+    // notifications
+    enableNotifications: 'Enable notifications', notificationsLabel: 'Notifications & badge',
+    notifHint: 'A daily brief plus alerts for due tasks and renewals when you open the app.',
+    notifDenied: 'Blocked in your browser settings — enable notifications for this site.',
+    notifOn: 'On', notifOff: 'Off',
+    // app lock
+    appLock: 'App lock', setPasscode: 'Set a passcode', changePasscode: 'Change passcode',
+    turnOffLock: 'Turn off lock', passcodeOn: 'Passcode lock is on',
+    createPasscode: 'Create a passcode', confirmPasscode: 'Re-enter to confirm',
+    enterPasscode: 'Enter your passcode', passcodeMismatch: 'Passcodes don’t match, try again',
+    wrongPasscode: 'Wrong passcode', useFaceId: 'Use Face ID', usePasscode: 'Use passcode',
+    lockedTitle: 'Locked', unlockWithFaceId: 'Unlock with Face ID',
+    lockHint: 'Requires your passcode when you open or return to the app.',
   },
   ar: {
     today: 'اليوم', tasks: 'المهام', garage: 'المرآب', expenses: 'المصروفات', more: 'المزيد',
@@ -155,5 +171,21 @@ export const STRINGS = {
     sendTaskHint: 'ستصلهم المهمة عبر واتساب فوراً.',
     assignedTasks: 'مُسندة', openLabel: 'مفتوحة', unassigned: 'غير مُسندة',
     sendToAssignee: 'إرسال للمسؤول عبر واتساب', waitingOn: 'بانتظار',
+    // recurrence
+    rec: 'التكرار', rec_none: 'بدون تكرار', rec_daily: 'يومياً', rec_weekly: 'أسبوعياً',
+    rec_monthly: 'شهرياً', rec_yearly: 'سنوياً', repeatsToast: 'تكرّرت · أُضيفت التالية',
+    // notifications
+    enableNotifications: 'تفعيل الإشعارات', notificationsLabel: 'الإشعارات والشارة',
+    notifHint: 'ملخص يومي وتنبيهات للمهام المستحقة والتجديدات عند فتح التطبيق.',
+    notifDenied: 'محظورة في إعدادات المتصفح — فعّل الإشعارات لهذا الموقع.',
+    notifOn: 'مُفعّل', notifOff: 'متوقف',
+    // app lock
+    appLock: 'قفل التطبيق', setPasscode: 'تعيين رمز مرور', changePasscode: 'تغيير الرمز',
+    turnOffLock: 'إيقاف القفل', passcodeOn: 'قفل الرمز مُفعّل',
+    createPasscode: 'أنشئ رمز مرور', confirmPasscode: 'أعد الإدخال للتأكيد',
+    enterPasscode: 'أدخل رمز المرور', passcodeMismatch: 'الرمزان غير متطابقين، حاول مجدداً',
+    wrongPasscode: 'رمز خاطئ', useFaceId: 'استخدام Face ID', usePasscode: 'استخدام الرمز',
+    lockedTitle: 'مقفل', unlockWithFaceId: 'افتح بـ Face ID',
+    lockHint: 'يطلب رمز المرور عند فتح التطبيق أو العودة إليه.',
   },
 }

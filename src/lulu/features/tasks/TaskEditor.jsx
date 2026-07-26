@@ -3,13 +3,15 @@ import { Sheet, Field, Input, TextArea, Select, Button, Chip } from '../../ui/pr
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { TASK_TYPES, STATUSES, PRIORITIES } from '../../lib/domain.js'
+import { RECURRENCE } from '../../lib/recurrence.js'
 import { todayISO } from '../../lib/format.js'
 import PersonEditor from '../people/PersonEditor.jsx'
 
 const empty = {
   title: '', description: '', type: 'task', classification: 'work',
   priority: 'medium', status: 'new', dueDate: '', dueTime: '',
-  project: '', requestedBy: '', assignedTo: '', assigneeId: '', tags: '', followUp: '', relatedVehicle: '',
+  project: '', requestedBy: '', assignedTo: '', assigneeId: '', tags: '',
+  followUp: '', recurrence: 'none', relatedVehicle: '',
 }
 
 export default function TaskEditor({ initial, onClose, onSaved }) {
@@ -104,7 +106,12 @@ export default function TaskEditor({ initial, onClose, onSaved }) {
           <Field label={t('project')}><Input value={f.project} onChange={set('project')} /></Field>
         </div>
 
-        <Field label={t('followUp')}><Input type="date" value={f.followUp} onChange={set('followUp')} /></Field>
+        <div className="row2">
+          <Field label={t('followUp')}><Input type="date" value={f.followUp} onChange={set('followUp')} /></Field>
+          <Field label={t('rec')}>
+            <Select value={f.recurrence} onChange={set('recurrence')} options={RECURRENCE.map(r => ({ value: r.id, label: t(r.key) }))} />
+          </Field>
+        </div>
 
         {vehicles.items.length > 0 && (
           <Field label={t('relatedVehicle')}>

@@ -6,6 +6,7 @@ import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { RELATIONSHIPS, findPriority, label } from '../../lib/domain.js'
 import { relativeDay, fmtTime } from '../../lib/format.js'
 import { whatsappToPerson, formatAssignment, personDigits } from '../../lib/share.js'
+import { completeTask } from '../../lib/recurrence.js'
 import PersonEditor from './PersonEditor.jsx'
 import TaskEditor from '../tasks/TaskEditor.jsx'
 
@@ -67,7 +68,7 @@ export default function PersonProfile({ person, onBack, onDeleted }) {
           const pr = findPriority(task.priority)
           return (
             <div className="li" key={task.id}>
-              <button className="check" onClick={() => { tasks.patch(task.id, { status: 'completed', completedAt: new Date().toISOString() }); toast.show('✓') }} aria-label={t('markComplete')} />
+              <button className="check" onClick={() => { completeTask(task, tasks); toast.show('✓') }} aria-label={t('markComplete')} />
               <div className="body">
                 <div className="title">{task.title}</div>
                 <div className="meta">

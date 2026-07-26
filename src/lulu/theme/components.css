@@ -304,3 +304,34 @@
 [data-theme="dark"] .ptr { color: var(--brand-400); }
 .ptr .arc { transition: transform 0.05s linear; }
 .ptr.spinning .arc { animation: spin 0.7s linear infinite; }
+
+/* ---- App lock ---- */
+.lock-screen {
+  position: fixed; inset: 0; z-index: 200; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: max(24px, env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom));
+  gap: 8px;
+}
+.lock-brand {
+  width: 66px; height: 66px; border-radius: 22px; margin-bottom: 8px;
+  background: linear-gradient(160deg, var(--brand-500), var(--brand-600)); color: #14110A;
+  display: grid; place-items: center; box-shadow: 0 10px 30px rgba(200,150,62,0.4);
+}
+.pinpad { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 300px; }
+.pinpad h2 { font-size: 20px; }
+.pinpad p { font-size: 13px; margin-top: 4px; }
+.pin-dots { display: flex; gap: 16px; margin: 22px 0 6px; }
+.pin-dots.shake { animation: shake 0.4s var(--ease); }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-8px)} 40%,80%{transform:translateX(8px)} }
+.pin-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--line-2); transition: all 0.15s var(--ease); }
+.pin-dot.on { background: var(--brand-500); border-color: var(--brand-500); }
+.pin-err { color: var(--danger); font-size: 13px; font-weight: 600; height: 18px; }
+.pin-keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 18px; width: 100%; justify-items: center; }
+.pin-key {
+  width: 72px; height: 72px; border-radius: 50%; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink); font-size: 26px; font-weight: 500;
+  transition: transform 0.1s var(--ease), background 0.15s;
+}
+.pin-key:active { transform: scale(0.92); background: var(--surface-2); }
+.pin-key.ghost { background: transparent; border-color: transparent; color: var(--brand-600); }
+[data-theme="dark"] .pin-key.ghost { color: var(--brand-400); }

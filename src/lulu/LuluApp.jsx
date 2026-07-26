@@ -1,14 +1,18 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import './theme/tokens.css'
 import './theme/components.css'
-import { StoreProvider, useStore } from './store/StoreProvider.jsx'
+import { StoreProvider, useStore, useSettings } from './store/StoreProvider.jsx'
 import { ThemeProvider } from './theme/ThemeProvider.jsx'
-import { I18nProvider } from './i18n/I18nProvider.jsx'
+import { I18nProvider, useT } from './i18n/I18nProvider.jsx'
 import { useRouter } from './lib/router.js'
 import { BottomNav } from './ui/AppShell.jsx'
 import ErrorBoundary from './ui/ErrorBoundary.jsx'
 import Icon from './ui/Icon.jsx'
 import { usePullToRefresh } from './ui/usePullToRefresh.js'
+import LockGate from './ui/LockGate.jsx'
+import { setBadge, maybeDailyBrief } from './lib/notify.js'
+import { buildBrief } from './lib/brief.js'
+import { isToday, isOverdue } from './lib/format.js'
 
 import TodayScreen from './features/today/TodayScreen.jsx'
 import TasksScreen from './features/tasks/TasksScreen.jsx'
@@ -29,7 +33,20 @@ const MAIN_TABS = ['today', 'tasks', 'garage', 'expenses', 'more']
 
 function Router() {
   const { route, tab, param, go } = useRouter('today')
-  const { reloadAll } = useStore()
+  const { data, reloadAll } = useStore()
+  const { settings } = useSettings()
+  const { lang } = useT()
+
+  // Keep the home-screen badge in sync with what needs attention, and fire the
+  // daily brief once per day — only when the user has enabled notifications.
+  useEffect(() => {
+    if (!settings.notifications) { setBadge(0); return }
+    const open = (data.tasks || []).filter(x => x.status !== 'completed' && x.status !== 'cancelled')
+    const attention = open.filter(x => isOverdue(x.dueDate) || isToday(x.dueDate) || x.status === 'waiting_me').length
+    setBadge(attention)
+    const brief = buildBrief({ tasks: data.tasks || [], expenses: data.expenses || [], vehicles: data.vehicles || [], settings, lang })
+    maybeDailyBrief(settings.name ? `Good morning, ${settings.name}` : 'Your morning brief', brief)
+  }, [data.tasks, data.expenses, data.vehicles, settings.notifications, lang])
 
   // Pull-to-refresh: re-read local data and check for a new app version.
   const onRefresh = useCallback(async () => {
@@ -91,7 +108,9 @@ export default function LuluApp() {
     <StoreProvider>
       <I18nProvider>
         <ThemeProvider>
-          <Router />
+          <LockGate>
+            <Router />
+          </LockGate>
         </ThemeProvider>
       </I18nProvider>
     </StoreProvider>

@@ -7,6 +7,7 @@ import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { findPriority, findStatus, findType } from '../../lib/domain.js'
 import { isToday, isOverdue, relativeDay, fmtTime } from '../../lib/format.js'
 import { share, formatTask, formatFollowUp, copyText, whatsappToPerson, formatAssignment, personDigits } from '../../lib/share.js'
+import { completeTask } from '../../lib/recurrence.js'
 import TaskEditor from './TaskEditor.jsx'
 
 const VIEWS = [
@@ -50,8 +51,8 @@ export default function TasksScreen({ param, go }) {
 
   const toggleComplete = (task) => {
     const done = task.status === 'completed'
-    tasks.patch(task.id, { status: done ? 'new' : 'completed', completedAt: done ? null : new Date().toISOString() })
-    if (!done) toast.show('✓ ' + t('completed'))
+    const spawned = completeTask(task, tasks)
+    if (!done) toast.show(spawned ? t('repeatsToast') : '✓ ' + t('completed'))
   }
 
   return (
