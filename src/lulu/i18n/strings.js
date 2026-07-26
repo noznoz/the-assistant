@@ -77,6 +77,14 @@ export const STRINGS = {
     shareHint: 'Opens the share sheet — pick WhatsApp, Mail, Messages and more.',
     page: 'Page', addDocument: 'Add document', documentTitle: 'Document', preview: 'Preview',
     downloadedToast: 'Downloaded', sharedToast: 'Shared',
+    // family / people / delegation
+    family: 'Family', addFamily: 'Add family member', assignTask: 'Assign a task',
+    theirTasks: 'Assigned tasks', noTasksAssigned: 'No tasks assigned yet',
+    sendOnWhatsApp: 'Send on WhatsApp', call: 'Call', message: 'Message', birthday: 'Birthday',
+    addNewPerson: '＋ Add new person…', assignedToast: 'Task assigned', photo: 'Photo',
+    sendTaskHint: 'They receive the task on WhatsApp instantly.',
+    assignedTasks: 'Assigned', openLabel: 'Open', unassigned: 'Unassigned',
+    sendToAssignee: 'Send to assignee on WhatsApp', waitingOn: 'Waiting on',
   },
   ar: {
     today: 'اليوم', tasks: 'المهام', garage: 'المرآب', expenses: 'المصروفات', more: 'المزيد',
@@ -139,5 +147,13 @@ export const STRINGS = {
     shareHint: 'تفتح قائمة المشاركة — اختر واتساب أو البريد أو الرسائل وغيرها.',
     page: 'صفحة', addDocument: 'إضافة مستند', documentTitle: 'مستند', preview: 'معاينة',
     downloadedToast: 'تم التنزيل', sharedToast: 'تمت المشاركة',
+    // family / people / delegation
+    family: 'العائلة', addFamily: 'إضافة فرد من العائلة', assignTask: 'إسناد مهمة',
+    theirTasks: 'المهام المسندة', noTasksAssigned: 'لا توجد مهام مسندة بعد',
+    sendOnWhatsApp: 'إرسال عبر واتساب', call: 'اتصال', message: 'مراسلة', birthday: 'تاريخ الميلاد',
+    addNewPerson: '＋ إضافة شخص جديد…', assignedToast: 'تم إسناد المهمة', photo: 'صورة',
+    sendTaskHint: 'ستصلهم المهمة عبر واتساب فوراً.',
+    assignedTasks: 'مُسندة', openLabel: 'مفتوحة', unassigned: 'غير مُسندة',
+    sendToAssignee: 'إرسال للمسؤول عبر واتساب', waitingOn: 'بانتظار',
   },
 }

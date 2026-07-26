@@ -19,6 +19,9 @@ export default function NotificationsScreen({ go }) {
     open.filter(x => isOverdue(x.dueDate)).forEach(x => out.push({ id: 't' + x.id, tint: 't-danger', icon: 'clock', title: x.title, meta: t('overdue'), go: 'tasks/overdue', sort: -1 }))
     open.filter(x => isToday(x.dueDate)).forEach(x => out.push({ id: 'd' + x.id, tint: 't-info', icon: 'today', title: x.title, meta: t('todaysTasks'), go: 'tasks/today', sort: 0 }))
     open.filter(x => x.status === 'waiting_me').forEach(x => out.push({ id: 'w' + x.id, tint: 't-warn', icon: 'flag', title: x.title, meta: t('waitingForMe'), go: 'tasks/waiting_me', sort: 1 }))
+    // Assigned/delegated tasks (to family or others) that need chasing.
+    open.filter(x => (x.assigneeId || x.assignedTo) && (isOverdue(x.dueDate) || isToday(x.dueDate) || x.status === 'waiting_someone'))
+      .forEach(x => out.push({ id: 'a' + x.id, tint: isOverdue(x.dueDate) ? 't-danger' : 't-warn', icon: 'people', title: x.title, meta: `${t('waitingOn')} ${x.assignedTo || ''}`.trim(), go: 'tasks/delegated', sort: isOverdue(x.dueDate) ? -0.5 : 1.5 }))
     vehicles.items.forEach(v => { const dd = daysUntil(v.policyExpiry); if (dd != null && dd <= 45) out.push({ id: 'v' + v.id, tint: dd <= 14 ? 't-danger' : 't-warn', icon: 'shield', title: `${v.nickname || v.name} — ${t('insurance')}`, meta: `${t('policyExpiry')}: ${fmtDate(v.policyExpiry, lang, settings.dateFormat)}`, go: `garage/${v.id}`, sort: dd }) })
     docs.items.forEach(d => { const dd = daysUntil(d.expiry); if (dd != null && dd <= 30) out.push({ id: 'doc' + d.id, tint: dd <= 7 ? 't-danger' : 't-warn', icon: 'doc', title: d.title, meta: `${t('policyExpiry')}: ${relativeDay(d.expiry, lang)}`, go: 'documents', sort: dd }) })
     return out.sort((a, b) => a.sort - b.sort)

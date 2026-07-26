@@ -6,7 +6,7 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { findPriority, findStatus, findType } from '../../lib/domain.js'
 import { isToday, isOverdue, relativeDay, fmtTime } from '../../lib/format.js'
-import { share, formatTask, formatFollowUp, copyText } from '../../lib/share.js'
+import { share, formatTask, formatFollowUp, copyText, whatsappToPerson, formatAssignment, personDigits } from '../../lib/share.js'
 import TaskEditor from './TaskEditor.jsx'
 
 const VIEWS = [
@@ -23,6 +23,7 @@ export default function TasksScreen({ param, go }) {
   const { t, lang } = useT()
   const { settings } = useSettings()
   const tasks = useCollection('tasks')
+  const people = useCollection('people')
   const [view, setView] = useState(VIEWS.some(v => v.id === param) ? param : 'all')
   const [q, setQ] = useState('')
   const [editor, setEditor] = useState(null)   // {} for new, task for edit
@@ -88,7 +89,7 @@ export default function TasksScreen({ param, go }) {
       {editor && <TaskEditor initial={editor.id ? editor : (editor.title !== undefined ? editor : {})} onClose={() => setEditor(null)} onSaved={() => toast.show(t('savedToast'))} />}
 
       {sheet?.task && (
-        <TaskActionSheet task={sheet.task} lang={lang} settings={settings}
+        <TaskActionSheet task={sheet.task} lang={lang} settings={settings} people={people.items}
           onClose={() => setSheet(null)}
           onEdit={() => { setEditor(sheet.task); setSheet(null) }}
           onComplete={() => { toggleComplete(sheet.task); setSheet(null) }}
@@ -134,18 +135,26 @@ function TaskRow({ task, lang, dateFormat, onToggle, onOpen }) {
   )
 }
 
-function TaskActionSheet({ task, lang, settings, onClose, onEdit, onComplete, onDuplicate, onDelete, onCopyFollowUp }) {
+function TaskActionSheet({ task, lang, settings, people = [], onClose, onEdit, onComplete, onDuplicate, onDelete, onCopyFollowUp }) {
   const { t } = useT()
   const type = findType(task.type)
+  const assignee = people.find(p => p.id === task.assigneeId) || people.find(p => p.name === task.assignedTo)
+  const canSend = assignee && personDigits(assignee)
   return (
     <Sheet title={task.title} onClose={onClose}>
       <div className="muted" style={{ marginTop: -6, marginBottom: 12, fontSize: 13 }}>
-        {type ? t(type.key) : ''}{task.project ? ` · ${task.project}` : ''}
+        {type ? t(type.key) : ''}{task.assignedTo ? ` · ${task.assignedTo}` : ''}{task.project ? ` · ${task.project}` : ''}
       </div>
       {task.description && <p style={{ marginBottom: 16 }}>{task.description}</p>}
       <div className="stack">
         <Button block icon="check" onClick={onComplete}>{task.status === 'completed' ? t('st_new') : t('markComplete')}</Button>
-        <Button block icon="whatsapp" variant="brand" onClick={() => share(formatTask(task, lang, settings))}>{t('shareWhatsApp')}</Button>
+        {canSend && (
+          <Button block icon="whatsapp" variant="brand"
+            onClick={() => whatsappToPerson(assignee, formatAssignment(task, assignee, lang, settings))}>
+            {t('sendOnWhatsApp')} · {assignee.name}
+          </Button>
+        )}
+        <Button block icon="whatsapp" variant={canSend ? '' : 'brand'} onClick={() => share(formatTask(task, lang, settings))}>{t('shareWhatsApp')}</Button>
         {(task.type === 'follow_up' || task.type === 'request' || task.status === 'waiting_someone') &&
           <Button block icon="sparkle" onClick={onCopyFollowUp}>Draft follow-up message</Button>}
         <div className="row2">

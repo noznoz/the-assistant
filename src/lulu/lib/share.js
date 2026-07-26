@@ -16,6 +16,28 @@ export function shareToWhatsApp(text) {
   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
 }
 
+// International digits from a person's WhatsApp/mobile number (no +, spaces…).
+export function personDigits(person) {
+  return String((person && (person.whatsapp || person.mobile)) || '').replace(/[^0-9]/g, '')
+}
+
+// Open WhatsApp addressed directly to a person (falls back to chooser).
+export function whatsappToPerson(person, text) {
+  const d = personDigits(person)
+  const url = d
+    ? `https://wa.me/${d}?text=${encodeURIComponent(text)}`
+    : `https://wa.me/?text=${encodeURIComponent(text)}`
+  window.open(url, '_blank')
+}
+
+// A warm "here's a task for you" message to send to the assignee.
+export function formatAssignment(task, person, lang = 'en', settings = {}) {
+  const name = (person && person.name) || task.assignedTo || (lang === 'ar' ? '' : '')
+  const hi = lang === 'ar' ? `مرحباً ${name}،` : `Hi ${name},`
+  const intro = lang === 'ar' ? 'مهمة لك:' : "Here's a task for you:"
+  return [hi, '', intro, '', formatTask(task, lang, settings)].join('\n')
+}
+
 export async function copyText(text) {
   try { await navigator.clipboard.writeText(text); return true } catch { return false }
 }
