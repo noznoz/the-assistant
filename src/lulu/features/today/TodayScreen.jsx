@@ -80,7 +80,7 @@ export default function TodayScreen({ go }) {
       <div className="screen">
         <div className="hero">
           <div className="greet">{t(greetingKey())}{settings.name ? ',' : ''}</div>
-          <h1>{settings.name || 'Lulu'}</h1>
+          <h1>{settings.name || 'The Assistant'}</h1>
         </div>
 
         {/* Morning brief */}

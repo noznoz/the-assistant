@@ -4,7 +4,7 @@ import { STRINGS } from '../i18n/strings.js'
 import { money, fmtDate, fmtLongDate, relativeDay } from './format.js'
 import { findStatus, findPriority, findCategory, findVehicleType, label } from './domain.js'
 
-export async function share(text, title = 'Lulu') {
+export async function share(text, title = 'The Assistant') {
   if (navigator.share) {
     try { await navigator.share({ title, text }); return }
     catch (e) { if (e && e.name === 'AbortError') return }
@@ -34,7 +34,7 @@ export function formatTask(task, lang = 'en', settings = {}) {
   if (task.dueDate) meta.push(`${t(lang, 'dueDate')}: ${fmtDate(task.dueDate, lang, settings.dateFormat)}`)
   if (task.assignedTo) meta.push(`${t(lang, 'assignedTo')}: ${task.assignedTo}`)
   if (meta.length) lines.push('', ...meta.map(m => `• ${m}`))
-  lines.push('', '— Lulu')
+  lines.push('', '— The Assistant')
   return lines.join('\n')
 }
 
@@ -78,7 +78,7 @@ export function formatAgenda(tasks, expenses, lang = 'en', settings = {}) {
   }
   const spent = expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0)
   if (expenses.length) lines.push(`💳 ${t(lang, 'todaysSpending')}: ${money(spent, cur, lang)}`, '')
-  lines.push('— Lulu')
+  lines.push('— The Assistant')
   return lines.join('\n')
 }
 
@@ -93,7 +93,7 @@ export function formatExpenseSummary(expenses, lang = 'en', settings = {}) {
   top.forEach(([cat, amt]) => {
     lines.push(`• ${label(findCategory(cat), lang) || cat}: ${money(amt, cur, lang)}`)
   })
-  lines.push('', '— Lulu')
+  lines.push('', '— The Assistant')
   return lines.join('\n')
 }
 
@@ -116,6 +116,6 @@ export function formatVehicle(v, lang = 'en', settings = {}) {
   facts.forEach(([k, val]) => lines.push(`• ${k}: ${val}`))
   if (v.currentValue) lines.push(`• ${t(lang, 'currentValue')}: ${money(v.currentValue, cur, lang)}`)
   if (v.bio) lines.push('', v.bio)
-  lines.push('', '— Lulu')
+  lines.push('', '— The Assistant')
   return lines.join('\n')
 }

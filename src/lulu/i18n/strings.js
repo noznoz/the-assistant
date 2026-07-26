@@ -63,7 +63,7 @@ export const STRINGS = {
     themeDark: 'Dark', security: 'Security', faceId: 'Require Face ID / passcode',
     cloudSync: 'Cloud sync', backup: 'Backup & restore', exportData: 'Export data',
     importData: 'Import data', deleteAll: 'Delete all data', aiProvider: 'AI provider',
-    about: 'About Lulu', name: 'Name',
+    about: 'The Assistant', name: 'Name',
     // empties / misc
     nothingHere: 'Nothing here yet', comingSoon: 'Coming soon',
     inboxSubtitle: 'Capture anything now, organise it later.',
@@ -119,7 +119,7 @@ export const STRINGS = {
     themeDark: 'داكن', security: 'الأمان', faceId: 'طلب Face ID / رمز المرور',
     cloudSync: 'المزامنة السحابية', backup: 'النسخ والاستعادة', exportData: 'تصدير البيانات',
     importData: 'استيراد البيانات', deleteAll: 'حذف كل البيانات', aiProvider: 'مزود الذكاء',
-    about: 'عن Lulu', name: 'الاسم',
+    about: 'عن التطبيق', name: 'الاسم',
     nothingHere: 'لا يوجد شيء بعد', comingSoon: 'قريباً',
     inboxSubtitle: 'سجّل أي شيء الآن، ونظّمه لاحقاً.',
     capturePlaceholder: 'ما الذي يشغل بالك؟', capture: 'تسجيل', triage: 'فرز',

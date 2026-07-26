@@ -18,7 +18,7 @@ export default function TripsScreen({ go }) {
     const veh = vehicles.items.find(v => v.id === trip.vehicleId)
     share([`🧭 *${trip.name}*`, trip.destination ? `📍 ${trip.destination}` : '',
       trip.start ? `${fmtDate(trip.start, lang, settings.dateFormat)} → ${fmtDate(trip.end, lang, settings.dateFormat)}` : '',
-      veh ? `🚗 ${veh.name}` : '', '', '— Lulu'].filter(Boolean).join('\n'))
+      veh ? `🚗 ${veh.name}` : '', '', '— The Assistant'].filter(Boolean).join('\n'))
   }
 
   return (

@@ -94,7 +94,7 @@ export default function SettingsScreen({ go }) {
 
         <Section title={t('aiProvider')} />
         <Card className="stack">
-          <Field label={t('aiProvider')} hint="Used later for the Lulu Assistant. Offline heuristics work today.">
+          <Field label={t('aiProvider')} hint="Used later for the assistant. Offline heuristics work today.">
             <Select value={settings.aiProvider} onChange={set('aiProvider')} options={[
               { value: 'none', label: 'Offline (built-in)' },
               { value: 'claude', label: 'Claude API' },

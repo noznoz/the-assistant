@@ -40,7 +40,7 @@ export default function ReportsScreen({ go }) {
       `👥 ${t('delegated')}: ${r.delegated.length}`,
       `💳 ${lang === 'ar' ? 'الإنفاق' : 'Spending'}: ${money(r.spend, cur, lang)}`,
       r.renewals.length ? `🛡️ ${t('renewals')}: ${r.renewals.length}` : '',
-      '', '— Lulu',
+      '', '— The Assistant',
     ].filter(Boolean).join('\n')
   }, [r, period, lang])
 

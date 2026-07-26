@@ -14,8 +14,8 @@ export default defineConfig({
       filename: 'sw.js',
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Lulu — Personal OS',
-        short_name: 'Lulu',
+        name: 'The Assistant',
+        short_name: 'The Assistant',
         description: 'Your premium personal operating system.',
         theme_color: '#F4F1EC',
         background_color: '#0E0F12',
