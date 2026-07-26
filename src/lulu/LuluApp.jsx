@@ -1,12 +1,14 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import './theme/tokens.css'
 import './theme/components.css'
-import { StoreProvider } from './store/StoreProvider.jsx'
+import { StoreProvider, useStore } from './store/StoreProvider.jsx'
 import { ThemeProvider } from './theme/ThemeProvider.jsx'
 import { I18nProvider } from './i18n/I18nProvider.jsx'
 import { useRouter } from './lib/router.js'
 import { BottomNav } from './ui/AppShell.jsx'
 import ErrorBoundary from './ui/ErrorBoundary.jsx'
+import Icon from './ui/Icon.jsx'
+import { usePullToRefresh } from './ui/usePullToRefresh.js'
 
 import TodayScreen from './features/today/TodayScreen.jsx'
 import TasksScreen from './features/tasks/TasksScreen.jsx'
@@ -27,6 +29,20 @@ const MAIN_TABS = ['today', 'tasks', 'garage', 'expenses', 'more']
 
 function Router() {
   const { route, tab, param, go } = useRouter('today')
+  const { reloadAll } = useStore()
+
+  // Pull-to-refresh: re-read local data and check for a new app version.
+  const onRefresh = useCallback(async () => {
+    reloadAll()
+    if ('serviceWorker' in navigator) {
+      try {
+        const reg = await navigator.serviceWorker.getRegistration()
+        if (reg) await reg.update()
+      } catch { /* ignore */ }
+    }
+    await new Promise((r) => setTimeout(r, 600))
+  }, [reloadAll])
+  const { pull, refreshing } = usePullToRefresh(onRefresh)
 
   const screen = (() => {
     switch (tab) {
@@ -53,8 +69,17 @@ function Router() {
     : ['inbox', 'people', 'documents', 'trips', 'reports', 'calendar', 'settings'].includes(tab) ? 'more'
     : tab
 
+  const progress = Math.min(1, pull / 72)
   return (
     <div className="app">
+      {(pull > 3 || refreshing) && (
+        <div className={`ptr ${refreshing ? 'spinning' : ''}`}
+          style={{ transform: `translate(-50%, ${Math.max(0, pull - 30)}px)`, opacity: refreshing ? 1 : progress }}>
+          <span className="arc" style={{ transform: refreshing ? undefined : `rotate(${pull * 3}deg)` }}>
+            <Icon name="refresh" size={20} />
+          </span>
+        </div>
+      )}
       <ErrorBoundary key={route}>{screen}</ErrorBoundary>
       <BottomNav tab={activeTab} go={go} />
     </div>

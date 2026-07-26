@@ -46,6 +46,7 @@ const P = {
   upload: 'M12 20V10m0 0L8 14m4-4l4 4M5 6h14',
   duplicate: 'M8 8V5a1 1 0 011-1h10a1 1 0 011 1v10a1 1 0 01-1 1h-3M4 9h10a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V10a1 1 0 011-1z',
   gauge: 'M12 13l4-4M5 19a9 9 0 1114 0H5z',
+  refresh: 'M4 11a8 8 0 0114-4.9L20 8M20 13a8 8 0 01-14 4.9L4 16M20 4v4h-4M4 20v-4h4',
 }
 
 export default function Icon({ name, size = 24, stroke = 2, style, className }) {
