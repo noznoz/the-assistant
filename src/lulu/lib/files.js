@@ -24,8 +24,38 @@ export function makeThumb(file, max = 260) {
   })
 }
 
+// Downscale a large image to a memory-safe size (longest edge <= max). Phone
+// photos are ~12MP (~48MB decoded) which can crash mobile Safari when several
+// are rendered; storing a ~2000px JPEG keeps documents legible and light.
+export function downscaleImage(file, max = 2000, quality = 0.85) {
+  return new Promise((resolve) => {
+    if (!file.type || !file.type.startsWith('image/') || file.type === 'image/gif') { resolve(file); return }
+    const url = URL.createObjectURL(file)
+    const img = new Image()
+    img.onload = () => {
+      const longest = Math.max(img.width, img.height)
+      if (longest <= max) { URL.revokeObjectURL(url); resolve(file); return }
+      const scale = max / longest
+      const w = Math.round(img.width * scale)
+      const h = Math.round(img.height * scale)
+      const c = document.createElement('canvas')
+      c.width = w; c.height = h
+      c.getContext('2d').drawImage(img, 0, 0, w, h)
+      URL.revokeObjectURL(url)
+      c.toBlob((blob) => {
+        if (!blob) { resolve(file); return }
+        const named = new File([blob], (file.name || 'photo').replace(/\.(png|heic|heif|webp)$/i, '') + '.jpg', { type: 'image/jpeg' })
+        resolve(named)
+      }, 'image/jpeg', quality)
+    }
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(file) }
+    img.src = url
+  })
+}
+
 // Persist a File to IndexedDB and return its metadata record.
-export async function saveAttachment(file) {
+export async function saveAttachment(rawFile) {
+  const file = await downscaleImage(rawFile)
   const id = uid()
   await putFile(id, file)
   const thumb = await makeThumb(file)

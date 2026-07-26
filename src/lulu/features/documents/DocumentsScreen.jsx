@@ -239,7 +239,7 @@ function DocumentViewer({ doc, onBack, onEdit, onDelete, onToast }) {
             {attachments.map((a, i) => (
               <div key={a.id} style={{ borderRadius: 'var(--r-lg)', overflow: 'hidden', border: '1px solid var(--line)', background: 'var(--surface)' }}>
                 {isImage(a) && urls[a.id] ? (
-                  <img src={urls[a.id]} alt={a.name} style={{ width: '100%', display: 'block' }} />
+                  <img src={urls[a.id]} alt={a.name} loading="lazy" decoding="async" style={{ width: '100%', display: 'block' }} />
                 ) : isPdf(a) ? (
                   <div style={{ padding: 20, display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div className="lead t-danger" style={{ width: 44, height: 44, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="doc" size={22} /></div>

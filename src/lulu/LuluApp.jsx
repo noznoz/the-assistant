@@ -6,6 +6,7 @@ import { ThemeProvider } from './theme/ThemeProvider.jsx'
 import { I18nProvider } from './i18n/I18nProvider.jsx'
 import { useRouter } from './lib/router.js'
 import { BottomNav } from './ui/AppShell.jsx'
+import ErrorBoundary from './ui/ErrorBoundary.jsx'
 
 import TodayScreen from './features/today/TodayScreen.jsx'
 import TasksScreen from './features/tasks/TasksScreen.jsx'
@@ -25,7 +26,7 @@ import SearchScreen from './features/search/SearchScreen.jsx'
 const MAIN_TABS = ['today', 'tasks', 'garage', 'expenses', 'more']
 
 function Router() {
-  const { tab, param, go } = useRouter('today')
+  const { route, tab, param, go } = useRouter('today')
 
   const screen = (() => {
     switch (tab) {
@@ -54,7 +55,7 @@ function Router() {
 
   return (
     <div className="app">
-      {screen}
+      <ErrorBoundary key={route}>{screen}</ErrorBoundary>
       <BottomNav tab={activeTab} go={go} />
     </div>
   )
