@@ -7,6 +7,7 @@ import { useCollection } from '../../store/StoreProvider.jsx'
 
 const ITEMS = [
   { id: 'inbox', icon: 'inbox', collection: 'inbox' },
+  { id: 'notes', icon: 'note', collection: 'notes' },
   { id: 'calendar', icon: 'calendar' },
   { id: 'people', icon: 'people', collection: 'people' },
   { id: 'documents', icon: 'doc', collection: 'documents' },
@@ -20,6 +21,7 @@ export default function MoreScreen({ go }) {
   const { t } = useT()
   const store = {
     inbox: useCollection('inbox').items.length,
+    notes: useCollection('notes').items.length,
     people: useCollection('people').items.length,
     documents: useCollection('documents').items.length,
     trips: useCollection('trips').items.length,
@@ -43,7 +45,7 @@ export default function MoreScreen({ go }) {
             </button>
           ))}
         </Card>
-        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v1.5</p>
+        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v1.6</p>
       </div>
     </>
   )

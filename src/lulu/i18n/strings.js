@@ -111,6 +111,7 @@ export const STRINGS = {
     // family nudge + points
     nudge: 'Nudge', nudgeAll: 'Nudge all pending', points: 'points', pts: 'pts',
     leaderboard: 'Family leaderboard', nudgedToast: 'Follow-up opened', earned: 'earned',
+    notes: 'Notes', convertToTask: 'Convert to task',
   },
   ar: {
     today: 'اليوم', tasks: 'المهام', garage: 'المرآب', expenses: 'المصروفات', more: 'المزيد',
@@ -207,5 +208,6 @@ export const STRINGS = {
     // family nudge + points
     nudge: 'تذكير', nudgeAll: 'تذكير الكل', points: 'نقاط', pts: 'نقطة',
     leaderboard: 'ترتيب العائلة', nudgedToast: 'تم فتح المتابعة', earned: 'حصل على',
+    notes: 'الملاحظات', convertToTask: 'تحويل إلى مهمة',
   },
 }

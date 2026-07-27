@@ -159,7 +159,7 @@ export default function TodayScreen({ go }) {
         {/* Quick notes */}
         {notes.items.length > 0 && (
           <>
-            <Section title={t('quickNotes')} count={notes.items.length} />
+            <Section title={t('quickNotes')} count={notes.items.length} action={t('view')} onAction={() => go('notes')} />
             <Card tight className="stack">
               {notes.items.slice(0, 3).map(n => (
                 <div key={n.id} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
