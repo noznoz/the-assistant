@@ -1,12 +1,12 @@
 import React, { useState, useMemo } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Section, Stat, Segmented, Bars, Chip, Field, Input, Select, Button, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Section, Stat, Segmented, Bars, Chip, Field, Input, Select, Button, Sheet, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { catLabel, findPayment, label } from '../../lib/domain.js'
 import { money, fmtDate, isoDate } from '../../lib/format.js'
 import { share } from '../../lib/share.js'
-import { downloadBlob } from '../../lib/files.js'
+import { exportXlsx, printHtml } from '../../lib/exporters.js'
 
 export default function ExpenseReportScreen({ go }) {
   const { t, lang } = useT()
@@ -22,6 +22,7 @@ export default function ExpenseReportScreen({ go }) {
   const [to, setTo] = useState('')
   const [projectId, setProjectId] = useState(projects.items[0]?.id || '')
   const [includeProjects, setIncludeProjects] = useState(true)
+  const [exportOpen, setExportOpen] = useState(false)
 
   const now = new Date()
   const inPeriod = (dateStr) => {
@@ -72,17 +73,49 @@ export default function ExpenseReportScreen({ go }) {
     return lines.join('\n')
   }
 
-  const exportCsv = () => {
-    const head = ['Date', 'Amount', 'Currency', 'Category', 'Merchant', 'Payment', 'Project', 'Type', 'Reimbursable', 'Note']
-    const rows = [head]
-    list.slice().sort((a, b) => (a.date || '').localeCompare(b.date || '')).forEach(e => rows.push([
-      e.date || '', e.amount || 0, e.currency || cur, catLabel(e.category, lang), e.merchant || '',
-      label(findPayment(e.method), lang) || '', projName(e.projectId || '__none'),
-      e.classification || '', e.reimbursable ? 'yes' : 'no', (e.note || '').replace(/\n/g, ' '),
-    ]))
-    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
-    downloadBlob(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }), `expense-report-${isoDate(now)}.csv`)
-    toast.show(t('downloadedToast'))
+  const sorted = () => list.slice().sort((a, b) => (a.date || '').localeCompare(b.date || ''))
+
+  const doExcel = async () => {
+    const aoa = [
+      ['The Assistant — ' + t('expenseReport')],
+      [t('byPeriod') + ' / ' + t('byProject'), scopeLabel],
+      [t('projectTotal'), total, cur],
+      [t('transactionsLabel'), list.length],
+      [],
+      ['Date', 'Amount', 'Currency', 'Category', 'Merchant', 'Payment', 'Project', 'Type', 'Reimbursable', 'Note'],
+      ...sorted().map(e => [
+        e.date || '', +e.amount || 0, e.currency || cur, catLabel(e.category, lang), e.merchant || '',
+        label(findPayment(e.method), lang) || '', projName(e.projectId || '__none'),
+        e.classification || '', e.reimbursable ? 'yes' : 'no', (e.note || '').replace(/\n/g, ' '),
+      ]),
+    ]
+    try {
+      await exportXlsx(`expense-report-${isoDate(now)}.xlsx`, t('expenseReport'), aoa, [13, 10, 8, 18, 18, 14, 16, 10, 12, 24])
+      toast.show(t('downloadedToast'))
+    } catch { toast.show('…') }
+    setExportOpen(false)
+  }
+
+  const doPdf = () => {
+    const esc = (s) => String(s == null ? '' : s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))
+    const catRows = byCat.slice(0, 12).map(([id, v]) => `<tr><td>${esc(catLabel(id, lang))}</td><td class="n">${esc(money(v, cur, lang))}</td></tr>`).join('')
+    const itemRows = sorted().map(e => `<tr>
+      <td>${esc(fmtDate(e.date, lang, settings.dateFormat))}</td>
+      <td>${esc(e.merchant || catLabel(e.category, lang))}</td>
+      <td>${esc(catLabel(e.category, lang))}</td>
+      <td>${esc(projName(e.projectId || '__none'))}</td>
+      <td class="n">${esc(money(e.amount, e.currency || cur, lang))}</td></tr>`).join('')
+    const body = `
+      <h1 class="brand">${esc(t('expenseReport'))}</h1>
+      <div class="sub">${esc(scopeLabel)}</div>
+      <div class="total">${esc(money(total, cur, lang))}</div>
+      <div class="muted">${list.length} ${esc(t('transactionsLabel'))} · ${esc(t('work'))} ${esc(money(work, cur, lang))} · ${esc(t('personal'))} ${esc(money(personal, cur, lang))}</div>
+      <h2>${esc(t('spendingByCategory'))}</h2>
+      <table><tbody>${catRows}</tbody></table>
+      <h2>${esc(t('recent'))}</h2>
+      <table><thead><tr><th>${esc(t('date'))}</th><th>${esc(t('merchant'))}</th><th>${esc(t('category'))}</th><th>${esc(t('project'))}</th><th class="n">${esc(t('amount'))}</th></tr></thead><tbody>${itemRows}</tbody></table>`
+    printHtml(t('expenseReport'), body)
+    setExportOpen(false)
   }
 
   return (
@@ -170,9 +203,19 @@ export default function ExpenseReportScreen({ go }) {
 
         <div className="row2" style={{ marginTop: 18 }}>
           <Button variant="brand" icon="whatsapp" onClick={() => share(buildShare())}>{t('share')}</Button>
-          <Button icon="download" onClick={exportCsv}>{t('exportCsv')}</Button>
+          <Button icon="download" onClick={() => setExportOpen(true)}>{t('exportLabel')}</Button>
         </div>
       </div>
+
+      {exportOpen && (
+        <Sheet title={t('exportLabel')} onClose={() => setExportOpen(false)}>
+          <p className="muted" style={{ marginBottom: 14 }}>{t('chooseFormat')}</p>
+          <div className="stack">
+            <Button block icon="chart" onClick={doExcel}>{t('exportExcel')}</Button>
+            <Button block icon="doc" onClick={doPdf}>{t('exportPdf')}</Button>
+          </div>
+        </Sheet>
+      )}
       {toast.node}
     </>
   )

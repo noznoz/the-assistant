@@ -125,6 +125,7 @@ export const STRINGS = {
     byPayment: 'By payment', byProjectTitle: 'By project', workVsPersonal: 'Work / Personal',
     exportCsv: 'Export CSV', avgPerDay: 'Avg / day', reimbursableLabel: 'Reimbursable',
     transactionsLabel: 'Transactions', generateReport: 'Report', selectProject: 'Select a project',
+    exportLabel: 'Export', exportExcel: 'Excel (.xlsx)', exportPdf: 'PDF', chooseFormat: 'Choose a format',
   },
   ar: {
     today: 'اليوم', tasks: 'المهام', garage: 'المرآب', expenses: 'المصروفات', more: 'المزيد',
@@ -235,5 +236,6 @@ export const STRINGS = {
     byPayment: 'حسب الدفع', byProjectTitle: 'حسب المشروع', workVsPersonal: 'عمل / شخصي',
     exportCsv: 'تصدير CSV', avgPerDay: 'المعدل / يوم', reimbursableLabel: 'قابل للاسترداد',
     transactionsLabel: 'العمليات', generateReport: 'تقرير', selectProject: 'اختر مشروعاً',
+    exportLabel: 'تصدير', exportExcel: 'إكسل (.xlsx)', exportPdf: 'PDF', chooseFormat: 'اختر الصيغة',
   },
 }
