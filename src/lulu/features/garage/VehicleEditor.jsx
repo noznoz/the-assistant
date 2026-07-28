@@ -1,8 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
+import Icon from '../../ui/Icon.jsx'
 import { Sheet, Field, Input, TextArea, Select, Button, Chip } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { VEHICLE_TYPES } from '../../lib/domain.js'
+import { imageToDataURL } from '../../lib/files.js'
 
 export default function VehicleEditor({ initial, onClose, onSaved, onDeleted }) {
   const { t } = useT()
@@ -10,11 +12,22 @@ export default function VehicleEditor({ initial, onClose, onSaved, onDeleted }) 
   const [f, setF] = useState({
     name: '', nickname: '', type: 'car', brand: '', model: '', year: '', color: '',
     plate: '', vin: '', mileage: '', fuel: '', purchaseDate: '', purchasePrice: '',
-    currentValue: '', insuranceCompany: '', policyExpiry: '', bio: '', ...initial,
+    currentValue: '', insuranceCompany: '', policyExpiry: '', bio: '', photo: '', ...initial,
   })
   const [err, setErr] = useState('')
+  const [busy, setBusy] = useState(false)
+  const cameraRef = useRef()
+  const fileRef = useRef()
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const isBoat = f.type === 'boat'
+
+  const onPhoto = async (fileList) => {
+    const file = fileList && fileList[0]
+    if (!file) return
+    setBusy(true)
+    try { const url = await imageToDataURL(file); if (url) setF(prev => ({ ...prev, photo: url })) }
+    finally { setBusy(false) }
+  }
 
   const submit = () => {
     if (!f.name.trim() && !f.model.trim()) { setErr(t('required')); return }
@@ -38,6 +51,33 @@ export default function VehicleEditor({ initial, onClose, onSaved, onDeleted }) 
         <Button variant="primary" block onClick={submit}>{t('save')}</Button>
         {initial?.id && <Button block variant="danger" icon="trash" onClick={doDelete}>{t('delete')}</Button>}
       </div>}>
+      {/* Photo */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{
+          position: 'relative', height: 170, borderRadius: 'var(--r-lg)', overflow: 'hidden',
+          border: '1px solid var(--line)', background: 'var(--surface-2)', display: 'grid', placeItems: 'center',
+        }}>
+          {f.photo
+            ? <img src={f.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            : <Icon name="camera" size={34} stroke={1.4} style={{ color: 'var(--ink-3)' }} />}
+          {busy && <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', background: 'rgba(0,0,0,0.3)' }}><span className="spinner" style={{ width: 22, height: 22 }} /></div>}
+          {f.photo && (
+            <button onClick={() => setF({ ...f, photo: '' })} aria-label={t('delete')} style={{
+              position: 'absolute', top: 8, insetInlineEnd: 8, width: 28, height: 28, borderRadius: '50%',
+              border: 0, background: 'rgba(0,0,0,0.6)', color: '#fff', display: 'grid', placeItems: 'center',
+            }}><Icon name="x" size={15} /></button>
+          )}
+        </div>
+        <div className="row2" style={{ marginTop: 8 }}>
+          <Button icon="camera" onClick={() => cameraRef.current?.click()}>{t('takePhoto')}</Button>
+          <Button icon="upload" onClick={() => fileRef.current?.click()}>{t('choosePhoto')}</Button>
+        </div>
+        <input ref={cameraRef} type="file" accept="image/*" capture="environment" hidden
+          onChange={(e) => { onPhoto(e.target.files); e.target.value = '' }} />
+        <input ref={fileRef} type="file" accept="image/*" hidden
+          onChange={(e) => { onPhoto(e.target.files); e.target.value = '' }} />
+      </div>
+
       <div style={{ marginBottom: 16 }}>
         <div className="chip-row">
           {VEHICLE_TYPES.map(v => (

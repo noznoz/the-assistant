@@ -3,7 +3,7 @@ import Icon from '../../ui/Icon.jsx'
 import { TopBar } from '../../ui/AppShell.jsx'
 import { Card } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection } from '../../store/StoreProvider.jsx'
+import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 
 const ITEMS = [
   { id: 'inbox', icon: 'inbox', collection: 'inbox' },
@@ -19,6 +19,10 @@ const ITEMS = [
 
 export default function MoreScreen({ go }) {
   const { t } = useT()
+  const { settings } = useSettings()
+  const p = settings.profile || {}
+  const initials = (p.fullName || settings.name || '')
+    .split(' ').filter(Boolean).slice(0, 2).map(s => s[0]).join('').toUpperCase() || 'NB'
   const store = {
     inbox: useCollection('inbox').items.length,
     notes: useCollection('notes').items.length,
@@ -30,6 +34,26 @@ export default function MoreScreen({ go }) {
     <>
       <TopBar title={t('more')} />
       <div className="screen">
+        {/* Profile header */}
+        <button onClick={() => go('profile')} style={{
+          width: '100%', display: 'flex', alignItems: 'center', gap: 14, marginTop: 14, padding: 16,
+          background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--r-lg)', color: 'var(--ink)',
+        }}>
+          <span style={{
+            width: 54, height: 54, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
+            background: 'var(--brand-tint)', color: 'var(--brand-600)', display: 'grid', placeItems: 'center',
+          }}>
+            {p.photo
+              ? <img src={p.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              : <span style={{ fontWeight: 780, fontSize: 20 }}>{initials}</span>}
+          </span>
+          <span style={{ flex: 1, textAlign: 'start', minWidth: 0 }}>
+            <span style={{ display: 'block', fontWeight: 750, fontSize: 16 }}>{p.fullName || settings.name || t('yourName')}</span>
+            <span className="muted" style={{ display: 'block', fontSize: 13 }}>{p.jobTitle || t('viewProfile')}</span>
+          </span>
+          <Icon name="chevron" size={18} style={{ color: 'var(--ink-3)' }} />
+        </button>
+
         <Card tight flat style={{ padding: 6, marginTop: 14 }}>
           {ITEMS.map((it, i) => (
             <button key={it.id} onClick={() => go(it.id)} style={{

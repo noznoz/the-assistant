@@ -53,6 +53,30 @@ export function downscaleImage(file, max = 2000, quality = 0.85) {
   })
 }
 
+// Downscale an image file to a self-contained JPEG data URL. Used for avatars
+// and vehicle photos that live directly on a record (localStorage) rather than
+// as a separate IndexedDB attachment — small enough to store, sharp enough to
+// fill a card or profile header. Returns '' for non-images or on failure.
+export function imageToDataURL(file, max = 1200, quality = 0.82) {
+  return new Promise((resolve) => {
+    if (!file || !file.type || !file.type.startsWith('image/')) { resolve(''); return }
+    const url = URL.createObjectURL(file)
+    const img = new Image()
+    img.onload = () => {
+      const scale = Math.min(1, max / Math.max(img.width, img.height))
+      const w = Math.max(1, Math.round(img.width * scale))
+      const h = Math.max(1, Math.round(img.height * scale))
+      const c = document.createElement('canvas')
+      c.width = w; c.height = h
+      c.getContext('2d').drawImage(img, 0, 0, w, h)
+      URL.revokeObjectURL(url)
+      try { resolve(c.toDataURL('image/jpeg', quality)) } catch { resolve('') }
+    }
+    img.onerror = () => { URL.revokeObjectURL(url); resolve('') }
+    img.src = url
+  })
+}
+
 // Persist a File to IndexedDB and return its metadata record.
 export async function saveAttachment(rawFile) {
   const file = await downscaleImage(rawFile)

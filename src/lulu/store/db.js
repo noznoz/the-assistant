@@ -90,6 +90,7 @@ export const DEFAULT_SETTINGS = {
   customCategories: [],  // user-added expense categories (labels)
   categoryBudgets: {},   // { [categoryId]: monthly amount }
   rates: {},             // { [currency]: SAR per unit } — overrides DEFAULT_RATES
+  profile: {},           // owner's personal info + Saudi National Address
 }
 
 export function readSettings() {
