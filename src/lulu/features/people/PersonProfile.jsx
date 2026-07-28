@@ -10,6 +10,7 @@ import { completeTask } from '../../lib/recurrence.js'
 import { pointsFor, awardPoints } from '../../lib/points.js'
 import PersonEditor from './PersonEditor.jsx'
 import TaskEditor from '../tasks/TaskEditor.jsx'
+import { RedeemSheet } from './RewardsScreen.jsx'
 
 export default function PersonProfile({ person, onBack, onDeleted }) {
   const { t, lang } = useT()
@@ -18,6 +19,7 @@ export default function PersonProfile({ person, onBack, onDeleted }) {
   const people = useCollection('people')
   const [editor, setEditor] = useState(false)      // edit person
   const [assigning, setAssigning] = useState(false) // task editor
+  const [redeem, setRedeem] = useState(false)
   const toast = useToast()
 
   const mine = tasks.items.filter(x =>
@@ -71,6 +73,7 @@ export default function PersonProfile({ person, onBack, onDeleted }) {
           <Button variant="primary" icon="plus" onClick={() => setAssigning(true)}>{t('assignTask')}</Button>
           <Button icon="whatsapp" disabled={open.length === 0} onClick={nudgeAll}>{t('nudgeAll')}</Button>
         </div>
+        {points > 0 && <Button block icon="gift" style={{ marginTop: 10 }} onClick={() => setRedeem(true)}>{t('redeemReward')}</Button>}
 
         {/* Their open tasks */}
         <Section title={t('theirTasks')} count={open.length} />
@@ -119,6 +122,8 @@ export default function PersonProfile({ person, onBack, onDeleted }) {
         initial={{ assigneeId: person.id, assignedTo: person.name, type: 'request', status: 'waiting_someone', classification: 'personal' }}
         onClose={() => setAssigning(false)}
         onSaved={() => toast.show(t('assignedToast'))} />}
+      {redeem && <RedeemSheet person={person} onClose={() => setRedeem(false)}
+        onRedeem={(r, cost) => { awardPoints(person, -cost, people); setRedeem(false); toast.show(`🎁 ${t('redeemedToast')}: ${r.name}`) }} />}
       {toast.node}
     </>
   )

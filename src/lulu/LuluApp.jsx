@@ -31,6 +31,9 @@ import SearchScreen from './features/search/SearchScreen.jsx'
 import NotesScreen from './features/notes/NotesScreen.jsx'
 import ProjectsScreen from './features/projects/ProjectsScreen.jsx'
 import ExpenseReportScreen from './features/expenses/ExpenseReportScreen.jsx'
+import BudgetsScreen from './features/expenses/BudgetsScreen.jsx'
+import SubscriptionsScreen from './features/expenses/SubscriptionsScreen.jsx'
+import RewardsScreen from './features/people/RewardsScreen.jsx'
 
 const MAIN_TABS = ['today', 'tasks', 'garage', 'expenses', 'more']
 
@@ -82,6 +85,9 @@ function Router() {
       case 'notes': return <NotesScreen go={go} />
       case 'projects': return <ProjectsScreen param={param} go={go} />
       case 'expensereport': return <ExpenseReportScreen go={go} />
+      case 'budgets': return <BudgetsScreen go={go} />
+      case 'subscriptions': return <SubscriptionsScreen go={go} />
+      case 'rewards': return <RewardsScreen go={go} />
       case 'search': return <SearchScreen go={go} />
       default: return <TodayScreen go={go} />
     }
@@ -89,8 +95,8 @@ function Router() {
 
   // Bottom nav highlights a main tab; sub-screens fall under "more".
   const activeTab = MAIN_TABS.includes(tab) ? tab
-    : (tab === 'projects' || tab === 'expensereport') ? 'expenses'
-    : ['inbox', 'people', 'documents', 'trips', 'reports', 'calendar', 'settings', 'notes'].includes(tab) ? 'more'
+    : ['projects', 'expensereport', 'budgets', 'subscriptions'].includes(tab) ? 'expenses'
+    : ['inbox', 'people', 'documents', 'trips', 'reports', 'calendar', 'settings', 'notes', 'rewards'].includes(tab) ? 'more'
     : tab
 
   const progress = Math.min(1, pull / 72)

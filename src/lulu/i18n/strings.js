@@ -126,6 +126,21 @@ export const STRINGS = {
     exportCsv: 'Export CSV', avgPerDay: 'Avg / day', reimbursableLabel: 'Reimbursable',
     transactionsLabel: 'Transactions', generateReport: 'Report', selectProject: 'Select a project',
     exportLabel: 'Export', exportExcel: 'Excel (.xlsx)', exportPdf: 'PDF', chooseFormat: 'Choose a format',
+    // budgets
+    budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
+    noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
+    budgetsHint: 'Set a monthly limit per category and get alerts.', remaining: 'left',
+    // subscriptions
+    subscriptions: 'Subscriptions', newSubscription: 'New subscription', subsHint: 'Recurring bills & subscriptions in one place.',
+    cycle: 'Cycle', weekly: 'Weekly', monthly: 'Monthly', yearly: 'Yearly', nextDue: 'Next due',
+    monthlyCommitment: 'Monthly commitment', markPaid: 'Mark paid', noSubs: 'No subscriptions yet', active: 'Active',
+    // trips
+    tripBudget: 'Budget', tripExpenses: 'Trip expenses', relatedTrip: 'Trip', tripReport: 'Trip report',
+    // rewards
+    rewards: 'Rewards', rewardsStore: 'Rewards store', newReward: 'New reward', rewardCost: 'Cost (points)',
+    redeem: 'Redeem', redeemReward: 'Redeem a reward', noRewards: 'No rewards yet', notEnoughPoints: 'Not enough points',
+    redeemedToast: 'Redeemed', rewardsHint: 'Let family redeem their chore points for rewards.',
+    birthdaySoon: 'Birthday',
   },
   ar: {
     today: 'اليوم', tasks: 'المهام', garage: 'المرآب', expenses: 'المصروفات', more: 'المزيد',
@@ -237,5 +252,20 @@ export const STRINGS = {
     exportCsv: 'تصدير CSV', avgPerDay: 'المعدل / يوم', reimbursableLabel: 'قابل للاسترداد',
     transactionsLabel: 'العمليات', generateReport: 'تقرير', selectProject: 'اختر مشروعاً',
     exportLabel: 'تصدير', exportExcel: 'إكسل (.xlsx)', exportPdf: 'PDF', chooseFormat: 'اختر الصيغة',
+    // budgets
+    budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
+    noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',
+    budgetsHint: 'حدد سقفاً شهرياً لكل فئة واحصل على تنبيهات.', remaining: 'متبقٍ',
+    // subscriptions
+    subscriptions: 'الاشتراكات', newSubscription: 'اشتراك جديد', subsHint: 'الفواتير والاشتراكات المتكررة في مكان واحد.',
+    cycle: 'الدورة', weekly: 'أسبوعي', monthly: 'شهري', yearly: 'سنوي', nextDue: 'الاستحقاق القادم',
+    monthlyCommitment: 'الالتزام الشهري', markPaid: 'تسجيل الدفع', noSubs: 'لا توجد اشتراكات بعد', active: 'نشط',
+    // trips
+    tripBudget: 'الميزانية', tripExpenses: 'مصاريف الرحلة', relatedTrip: 'الرحلة', tripReport: 'تقرير الرحلة',
+    // rewards
+    rewards: 'المكافآت', rewardsStore: 'متجر المكافآت', newReward: 'مكافأة جديدة', rewardCost: 'التكلفة (نقاط)',
+    redeem: 'استبدال', redeemReward: 'استبدال مكافأة', noRewards: 'لا توجد مكافآت بعد', notEnoughPoints: 'نقاط غير كافية',
+    redeemedToast: 'تم الاستبدال', rewardsHint: 'دع العائلة تستبدل نقاطها بمكافآت.',
+    birthdaySoon: 'عيد ميلاد',
   },
 }

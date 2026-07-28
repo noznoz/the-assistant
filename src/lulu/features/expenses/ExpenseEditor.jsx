@@ -11,10 +11,11 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
   const expenses = useCollection('expenses')
   const vehicles = useCollection('vehicles')
   const projects = useCollection('projects')
+  const trips = useCollection('trips')
   const [f, setF] = useState({
     amount: '', currency: settings.currency, category: 'other', merchant: '',
     method: 'credit', date: todayISO(), classification: 'personal',
-    reimbursable: false, relatedVehicle: '', projectId: '', note: '', liters: '', odometer: '', ...initial,
+    reimbursable: false, relatedVehicle: '', projectId: '', tripId: '', note: '', liters: '', odometer: '', ...initial,
   })
   const [err, setErr] = useState('')
   const [newCat, setNewCat] = useState(null)      // inline "add category" text or null
@@ -129,6 +130,15 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
           <Select value={f.relatedVehicle} onChange={set('relatedVehicle')}>
             <option value="">{t('none')}</option>
             {vehicles.items.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
+          </Select>
+        </Field>
+      )}
+
+      {trips.items.length > 0 && (
+        <Field label={t('relatedTrip')}>
+          <Select value={f.tripId} onChange={set('tripId')}>
+            <option value="">{t('none')}</option>
+            {trips.items.map(tr => <option key={tr.id} value={tr.id}>{tr.name}</option>)}
           </Select>
         </Field>
       )}

@@ -62,7 +62,25 @@ export function maybeSeed() {
   exp.forEach(e => db.insert('expenses', e))
 
   // A sample expense project with a custom category to showcase the feature.
-  db.writeSettings({ ...db.readSettings(), customCategories: ['Landscaping'] })
+  db.writeSettings({ ...db.readSettings(), customCategories: ['Landscaping'], categoryBudgets: { dining: 2000, fuel: 1500, groceries: 1200 } })
+
+  // Subscriptions / recurring bills
+  db.insert('subscriptions', { name: 'Netflix', amount: 56, currency: 'SAR', cycle: 'monthly', category: 'subscriptions', method: 'credit', nextDue: d(3), active: true })
+  db.insert('subscriptions', { name: 'iCloud+', amount: 11.99, currency: 'SAR', cycle: 'monthly', category: 'subscriptions', method: 'apple_pay', nextDue: d(12), active: true })
+  db.insert('subscriptions', { name: 'Car insurance', amount: 4200, currency: 'SAR', cycle: 'yearly', category: 'insurance', method: 'transfer', nextDue: d(38), active: true })
+
+  // Rewards store (redeem chore points)
+  db.insert('rewards', { name: 'Extra hour of screen time', cost: 10 })
+  db.insert('rewards', { name: 'Choose the weekend outing', cost: 25 })
+  db.insert('rewards', { name: 'New Lego set', cost: 50 })
+
+  // A trip with a budget and linked expenses
+  const trip = db.insert('trips', { name: 'AlUla Family Trip', destination: 'AlUla', start: d(20), end: d(24), budget: 15000, vehicleId: vAlmas.id });
+  [
+    { amount: 3200, category: 'hotels', merchant: 'Habitas AlUla', method: 'credit', date: d(20), tripId: trip.id, classification: 'personal' },
+    { amount: 850, category: 'dining', merchant: 'Local restaurant', method: 'credit', date: d(21), tripId: trip.id, classification: 'personal' },
+    { amount: 1200, category: 'entertainment', merchant: 'Desert tour', method: 'credit', date: d(22), tripId: trip.id, classification: 'personal' },
+  ].forEach(e => db.insert('expenses', e))
   const proj = db.insert('projects', { name: 'House Renovation', budget: 60000, note: 'Villa upgrade' });
   [
     { amount: 12500, category: 'household', merchant: 'IKEA', method: 'credit', date: d(-5), projectId: proj.id, classification: 'personal' },
@@ -71,9 +89,9 @@ export function maybeSeed() {
   ].forEach(e => db.insert('expenses', e))
 
   const people = [
-    { name: 'Layla', relationship: 'family', jobTitle: 'Spouse', mobile: '+966500000010', whatsapp: '+966500000010' },
-    { name: 'Omar', relationship: 'family', jobTitle: 'Son', mobile: '+966500000011', whatsapp: '+966500000011' },
-    { name: 'Noura', relationship: 'family', jobTitle: 'Daughter', mobile: '+966500000012', whatsapp: '+966500000012' },
+    { name: 'Layla', relationship: 'family', jobTitle: 'Spouse', mobile: '+966500000010', whatsapp: '+966500000010', birthday: d(40) },
+    { name: 'Omar', relationship: 'family', jobTitle: 'Son', mobile: '+966500000011', whatsapp: '+966500000011', birthday: d(9) },
+    { name: 'Noura', relationship: 'family', jobTitle: 'Daughter', mobile: '+966500000012', whatsapp: '+966500000012', birthday: d(120) },
     { name: 'Khalid Al-Otaibi', jobTitle: 'CFO', company: 'Group Finance', relationship: 'colleague', mobile: '+966500000001' },
     { name: 'Ahmed Al-Sayed', jobTitle: 'Partner', company: 'Al-Sayed Legal', relationship: 'supplier', mobile: '+966500000002' },
     { name: 'Sara Al-Nasser', jobTitle: 'Executive Assistant', company: 'Office', relationship: 'report', mobile: '+966500000003' },

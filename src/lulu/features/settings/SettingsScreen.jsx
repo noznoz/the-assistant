@@ -169,7 +169,7 @@ export default function SettingsScreen({ go }) {
         </Card>
 
         <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>
-          {t('about')} · v1.9 · <span>Offline-first</span>
+          {t('about')} · v2.0 · <span>Offline-first</span>
         </p>
       </div>
 

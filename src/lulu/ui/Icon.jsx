@@ -47,6 +47,8 @@ const P = {
   duplicate: 'M8 8V5a1 1 0 011-1h10a1 1 0 011 1v10a1 1 0 01-1 1h-3M4 9h10a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V10a1 1 0 011-1z',
   gauge: 'M12 13l4-4M5 19a9 9 0 1114 0H5z',
   refresh: 'M4 11a8 8 0 0114-4.9L20 8M20 13a8 8 0 01-14 4.9L4 16M20 4v4h-4M4 20v-4h4',
+  gift: 'M20 12v8a1 1 0 01-1 1H5a1 1 0 01-1-1v-8M3 8h18v4H3zM12 21V8M12 8H7.5a2.5 2.5 0 010-5C11 3 12 8 12 8zm0 0h4.5a2.5 2.5 0 000-5C13 3 12 8 12 8z',
+  cake: 'M4 21h16M5 21v-6a2 2 0 012-2h10a2 2 0 012 2v6M4 15c1.5 0 1.5 1.5 3 1.5S8.5 15 10 15s1.5 1.5 3 1.5 1.5-1.5 3-1.5M12 4v4M12 4a1 1 0 100-2 1 1 0 000 2z',
 }
 
 export default function Icon({ name, size = 24, stroke = 2, style, className }) {

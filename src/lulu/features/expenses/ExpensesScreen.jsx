@@ -5,7 +5,7 @@ import { Card, Section, Stat, Segmented, Bars, Fab, Empty, Button, Sheet, useToa
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { findPayment, catLabel, label } from '../../lib/domain.js'
-import { money, fmtDate, isToday } from '../../lib/format.js'
+import { money, fmtDate, isToday, isSameMonth } from '../../lib/format.js'
 import { share, formatExpenseSummary } from '../../lib/share.js'
 import ExpenseEditor from './ExpenseEditor.jsx'
 
@@ -39,6 +39,12 @@ export default function ExpensesScreen({ go }) {
   const budget = Number(settings.monthlyBudget) || 0
   const budgetPct = budget ? Math.min(1, total / budget) : 0
   const recent = [...expenses.items].sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 30)
+
+  // Over-budget category alerts (current month, regardless of the range filter).
+  const catBudgets = settings.categoryBudgets || {}
+  const monthByCat = {}
+  expenses.items.filter(e => isSameMonth(e.date)).forEach(e => { monthByCat[e.category] = (monthByCat[e.category] || 0) + (+e.amount || 0) })
+  const overBudgetCats = Object.keys(catBudgets).filter(id => (Number(catBudgets[id]) || 0) > 0 && (monthByCat[id] || 0) > catBudgets[id])
 
   return (
     <>
@@ -80,16 +86,29 @@ export default function ExpensesScreen({ go }) {
           <Stat label={t('largest')} value={money(Math.max(0, ...inRange.map(e => +e.amount || 0)), cur, lang)} />
         </div>
 
-        {/* Projects access */}
-        <Card className="tight" style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 10 }} onClick={() => go('projects')}>
-          <span className="lead t-brand" style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="report" size={18} /></span>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 700 }}>{t('projects')}</div>
-            <div className="muted" style={{ fontSize: 13 }}>{t('projectsHint')}</div>
-          </div>
-          {projects.items.length > 0 && <span className="chip">{projects.items.length}</span>}
-          <Icon name="chevron" size={18} style={{ color: 'var(--ink-3)' }} />
-        </Card>
+        {/* Quick access: projects, budgets, subscriptions */}
+        <div className="qa-grid" style={{ gridTemplateColumns: 'repeat(3,1fr)', marginTop: 12 }}>
+          <button className="qa" onClick={() => go('projects')}>
+            <span className="ic"><Icon name="report" size={22} /></span>{t('projects')}
+          </button>
+          <button className="qa" onClick={() => go('budgets')}>
+            <span className="ic"><Icon name="chart" size={22} /></span>{t('budgets')}
+          </button>
+          <button className="qa" onClick={() => go('subscriptions')}>
+            <span className="ic"><Icon name="refresh" size={22} /></span>{t('subscriptions')}
+          </button>
+        </div>
+
+        {overBudgetCats.length > 0 && (
+          <Card className="tight" style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 10, borderColor: 'var(--danger-tint)' }} onClick={() => go('budgets')}>
+            <span className="lead t-danger" style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="flag" size={18} /></span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700 }}>{overBudgetCats.length} {t('overBudgetAlert')}</div>
+              <div className="muted" style={{ fontSize: 13 }}>{overBudgetCats.map(c => catLabel(c, lang)).slice(0, 3).join(' · ')}</div>
+            </div>
+            <Icon name="chevron" size={18} style={{ color: 'var(--ink-3)' }} />
+          </Card>
+        )}
 
         {catBars.length > 0 && (
           <>

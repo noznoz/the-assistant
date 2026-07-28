@@ -13,6 +13,17 @@ export default function NotificationsScreen({ go }) {
   const vehicles = useCollection('vehicles')
   const services = useCollection('services')
   const docs = useCollection('documents')
+  const subs = useCollection('subscriptions')
+  const people = useCollection('people')
+
+  const daysToBirthday = (bStr) => {
+    if (!bStr) return null
+    const b = new Date(bStr); if (isNaN(b)) return null
+    const today = new Date(new Date().toISOString().slice(0, 10))
+    const next = new Date(today.getFullYear(), b.getMonth(), b.getDate())
+    if (next < today) next.setFullYear(next.getFullYear() + 1)
+    return Math.round((next - today) / 86400000)
+  }
 
   const feed = useMemo(() => {
     const out = []
@@ -27,8 +38,10 @@ export default function NotificationsScreen({ go }) {
     // Upcoming vehicle service (by next-service date).
     services.items.forEach(s => { const dd = daysUntil(s.nextDate); if (dd != null && dd <= 30) { const v = vehicles.items.find(x => x.id === s.vehicleId); out.push({ id: 'svc' + s.id, tint: dd <= 7 ? 't-danger' : 't-warn', icon: 'wrench', title: `${v ? (v.nickname || v.name) : ''} — ${t('serviceDue')}`, meta: `${s.work} · ${fmtDate(s.nextDate, lang, settings.dateFormat)}`, go: v ? `garage/${v.id}` : 'garage', sort: dd }) } })
     docs.items.forEach(d => { const dd = daysUntil(d.expiry); if (dd != null && dd <= 30) out.push({ id: 'doc' + d.id, tint: dd <= 7 ? 't-danger' : 't-warn', icon: 'doc', title: d.title, meta: `${t('policyExpiry')}: ${relativeDay(d.expiry, lang)}`, go: 'documents', sort: dd }) })
+    subs.items.filter(s => s.active !== false).forEach(s => { const dd = daysUntil(s.nextDue); if (dd != null && dd <= 5) out.push({ id: 'sub' + s.id, tint: dd <= 1 ? 't-danger' : 't-warn', icon: 'wallet', title: s.name, meta: `${t('nextDue')}: ${relativeDay(s.nextDue, lang)}`, go: 'subscriptions', sort: dd }) })
+    people.items.forEach(pn => { const dd = daysToBirthday(pn.birthday); if (dd != null && dd <= 14) out.push({ id: 'bd' + pn.id, tint: 't-brand', icon: 'cake', title: `${pn.name} — ${t('birthdaySoon')}`, meta: dd === 0 ? relativeDay(new Date().toISOString(), lang) : relativeDay(new Date(Date.now() + dd * 86400000).toISOString(), lang), go: 'people', sort: dd + 0.1 }) })
     return out.sort((a, b) => a.sort - b.sort)
-  }, [tasks.items, vehicles.items, services.items, docs.items, lang])
+  }, [tasks.items, vehicles.items, services.items, docs.items, subs.items, people.items, lang])
 
   return (
     <>
