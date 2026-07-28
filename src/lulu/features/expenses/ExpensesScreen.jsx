@@ -43,7 +43,10 @@ export default function ExpensesScreen({ go }) {
   return (
     <>
       <TopBar title={t('expenses')} right={
-        <button className="iconbtn" onClick={() => share(formatExpenseSummary(inRange, lang, settings))} aria-label={t('share')}><Icon name="share" size={18} /></button>
+        <>
+          <button className="iconbtn" onClick={() => go('expensereport')} aria-label={t('expenseReport')}><Icon name="chart" size={18} /></button>
+          <button className="iconbtn" onClick={() => share(formatExpenseSummary(inRange, lang, settings))} aria-label={t('share')}><Icon name="share" size={18} /></button>
+        </>
       } />
       <div className="screen">
         <div style={{ margin: '14px 0' }}>

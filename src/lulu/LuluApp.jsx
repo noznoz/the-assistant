@@ -30,6 +30,7 @@ import SettingsScreen from './features/settings/SettingsScreen.jsx'
 import SearchScreen from './features/search/SearchScreen.jsx'
 import NotesScreen from './features/notes/NotesScreen.jsx'
 import ProjectsScreen from './features/projects/ProjectsScreen.jsx'
+import ExpenseReportScreen from './features/expenses/ExpenseReportScreen.jsx'
 
 const MAIN_TABS = ['today', 'tasks', 'garage', 'expenses', 'more']
 
@@ -80,6 +81,7 @@ function Router() {
       case 'settings': return <SettingsScreen go={go} />
       case 'notes': return <NotesScreen go={go} />
       case 'projects': return <ProjectsScreen param={param} go={go} />
+      case 'expensereport': return <ExpenseReportScreen go={go} />
       case 'search': return <SearchScreen go={go} />
       default: return <TodayScreen go={go} />
     }
@@ -87,7 +89,7 @@ function Router() {
 
   // Bottom nav highlights a main tab; sub-screens fall under "more".
   const activeTab = MAIN_TABS.includes(tab) ? tab
-    : tab === 'projects' ? 'expenses'
+    : (tab === 'projects' || tab === 'expensereport') ? 'expenses'
     : ['inbox', 'people', 'documents', 'trips', 'reports', 'calendar', 'settings', 'notes'].includes(tab) ? 'more'
     : tab
 
