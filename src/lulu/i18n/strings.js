@@ -112,6 +112,12 @@ export const STRINGS = {
     nudge: 'Nudge', nudgeAll: 'Nudge all pending', points: 'points', pts: 'pts',
     leaderboard: 'Family leaderboard', nudgedToast: 'Follow-up opened', earned: 'earned',
     notes: 'Notes', convertToTask: 'Convert to task',
+    // expense projects + custom categories
+    projects: 'Projects', newProject: 'New project', addProject: '＋ New project…',
+    addCategory: '＋ New category…', projectName: 'Project name', noProjects: 'No projects yet',
+    projectsHint: 'Group expenses under a named project — a trip, a renovation…',
+    addExpenseTo: 'Add expense', projectTotal: 'Total', overBudget: 'Over budget',
+    customCategoryName: 'Category name',
   },
   ar: {
     today: 'اليوم', tasks: 'المهام', garage: 'المرآب', expenses: 'المصروفات', more: 'المزيد',
@@ -209,5 +215,11 @@ export const STRINGS = {
     nudge: 'تذكير', nudgeAll: 'تذكير الكل', points: 'نقاط', pts: 'نقطة',
     leaderboard: 'ترتيب العائلة', nudgedToast: 'تم فتح المتابعة', earned: 'حصل على',
     notes: 'الملاحظات', convertToTask: 'تحويل إلى مهمة',
+    // expense projects + custom categories
+    projects: 'المشاريع', newProject: 'مشروع جديد', addProject: '＋ مشروع جديد…',
+    addCategory: '＋ فئة جديدة…', projectName: 'اسم المشروع', noProjects: 'لا توجد مشاريع بعد',
+    projectsHint: 'اجمع المصروفات تحت مشروع باسم — رحلة، ترميم…',
+    addExpenseTo: 'إضافة مصروف', projectTotal: 'الإجمالي', overBudget: 'تجاوز الميزانية',
+    customCategoryName: 'اسم الفئة',
   },
 }

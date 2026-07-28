@@ -119,3 +119,19 @@ export function label(item, lang) {
   if (!item) return ''
   return lang === 'ar' ? item.ar : item.en
 }
+
+// Resolve an expense category label. Custom categories are stored on the
+// expense as `custom:<Label>`; built-in ones as their id.
+export function catLabel(id, lang = 'en') {
+  if (!id) return ''
+  if (typeof id === 'string' && id.startsWith('custom:')) return id.slice(7)
+  const c = findCategory(id)
+  return c ? label(c, lang) : id
+}
+
+// Options for the category picker: built-ins + the user's custom categories.
+export function categoryOptions(lang = 'en', custom = []) {
+  const base = EXPENSE_CATEGORIES.map(c => ({ value: c.id, label: label(c, lang) }))
+  const cust = (custom || []).map(l => ({ value: 'custom:' + l, label: l }))
+  return [...base, ...cust]
+}

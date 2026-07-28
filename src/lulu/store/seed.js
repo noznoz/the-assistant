@@ -61,6 +61,15 @@ export function maybeSeed() {
   ]
   exp.forEach(e => db.insert('expenses', e))
 
+  // A sample expense project with a custom category to showcase the feature.
+  db.writeSettings({ ...db.readSettings(), customCategories: ['Landscaping'] })
+  const proj = db.insert('projects', { name: 'House Renovation', budget: 60000, note: 'Villa upgrade' });
+  [
+    { amount: 12500, category: 'household', merchant: 'IKEA', method: 'credit', date: d(-5), projectId: proj.id, classification: 'personal' },
+    { amount: 8400, category: 'custom:Landscaping', merchant: 'Green Oasis', method: 'transfer', date: d(-10), projectId: proj.id, classification: 'personal' },
+    { amount: 3200, category: 'shopping', merchant: 'Home Centre', method: 'credit', date: d(-2), projectId: proj.id, classification: 'personal' },
+  ].forEach(e => db.insert('expenses', e))
+
   const people = [
     { name: 'Layla', relationship: 'family', jobTitle: 'Spouse', mobile: '+966500000010', whatsapp: '+966500000010' },
     { name: 'Omar', relationship: 'family', jobTitle: 'Son', mobile: '+966500000011', whatsapp: '+966500000011' },

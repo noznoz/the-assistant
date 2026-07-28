@@ -11,7 +11,7 @@ const NS = 'lulu:v1'
 
 export const COLLECTIONS = [
   'tasks', 'inbox', 'vehicles', 'services', 'accessories',
-  'expenses', 'people', 'documents', 'trips', 'notes', 'notifications',
+  'expenses', 'projects', 'people', 'documents', 'trips', 'notes', 'notifications',
 ]
 
 function keyFor(name) { return `${NS}:${name}` }
@@ -86,6 +86,7 @@ export const DEFAULT_SETTINGS = {
   notifications: false,  // on-device notifications + badge
   aiProvider: 'none',    // none | claude | openai
   monthlyBudget: 0,
+  customCategories: [],  // user-added expense categories (labels)
 }
 
 export function readSettings() {

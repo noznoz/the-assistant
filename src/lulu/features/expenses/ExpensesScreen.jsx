@@ -4,16 +4,17 @@ import { TopBar } from '../../ui/AppShell.jsx'
 import { Card, Section, Stat, Segmented, Bars, Fab, Empty, Button, Sheet, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
-import { findCategory, findPayment, label } from '../../lib/domain.js'
+import { findPayment, catLabel, label } from '../../lib/domain.js'
 import { money, fmtDate, isToday } from '../../lib/format.js'
 import { share, formatExpenseSummary } from '../../lib/share.js'
 import ExpenseEditor from './ExpenseEditor.jsx'
 
-export default function ExpensesScreen() {
+export default function ExpensesScreen({ go }) {
   const { t, lang } = useT()
   const { settings } = useSettings()
   const cur = settings.currency
   const expenses = useCollection('expenses')
+  const projects = useCollection('projects')
   const [range, setRange] = useState('month')
   const [editor, setEditor] = useState(null)
   const toast = useToast()
@@ -33,7 +34,7 @@ export default function ExpensesScreen() {
   const byCat = {}
   inRange.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + (+e.amount || 0) })
   const catBars = Object.entries(byCat).sort((a, b) => b[1] - a[1]).slice(0, 8)
-    .map(([id, v]) => ({ label: label(findCategory(id), lang) || id, value: v }))
+    .map(([id, v]) => ({ label: catLabel(id, lang), value: v }))
 
   const budget = Number(settings.monthlyBudget) || 0
   const budgetPct = budget ? Math.min(1, total / budget) : 0
@@ -76,6 +77,17 @@ export default function ExpensesScreen() {
           <Stat label={t('largest')} value={money(Math.max(0, ...inRange.map(e => +e.amount || 0)), cur, lang)} />
         </div>
 
+        {/* Projects access */}
+        <Card className="tight" style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 10 }} onClick={() => go('projects')}>
+          <span className="lead t-brand" style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="report" size={18} /></span>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 700 }}>{t('projects')}</div>
+            <div className="muted" style={{ fontSize: 13 }}>{t('projectsHint')}</div>
+          </div>
+          {projects.items.length > 0 && <span className="chip">{projects.items.length}</span>}
+          <Icon name="chevron" size={18} style={{ color: 'var(--ink-3)' }} />
+        </Card>
+
         {catBars.length > 0 && (
           <>
             <Section title={t('spendingByCategory')} />
@@ -88,14 +100,17 @@ export default function ExpensesScreen() {
           <Empty icon="wallet" title={t('nothingHere')}
             action={<Button variant="primary" icon="plus" onClick={() => setEditor({})}>{t('newExpense')}</Button>} />
         ) : recent.map(e => {
-          const cat = findCategory(e.category)
           const pm = findPayment(e.method)
+          const proj = e.projectId && projects.items.find(p => p.id === e.projectId)
           return (
             <div className="li" key={e.id} onClick={() => setEditor(e)}>
               <div className="lead t-brand"><Icon name="receipt" size={18} /></div>
               <div className="body">
-                <div className="title">{e.merchant || label(cat, lang)}</div>
-                <div className="meta">{label(cat, lang)} · {fmtDate(e.date, lang, settings.dateFormat)}{pm ? ` · ${label(pm, lang)}` : ''}</div>
+                <div className="title">{e.merchant || catLabel(e.category, lang)}</div>
+                <div className="meta">
+                  {catLabel(e.category, lang)} · {fmtDate(e.date, lang, settings.dateFormat)}{pm ? ` · ${label(pm, lang)}` : ''}
+                  {proj && <span className="chip t-brand" style={{ padding: '1px 7px' }}>{proj.name}</span>}
+                </div>
               </div>
               <b className="tnum">{money(e.amount, e.currency || cur, lang)}</b>
             </div>

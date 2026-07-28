@@ -2,7 +2,7 @@
 // deep-link fallback. Plus professional formatters for each shareable entity.
 import { STRINGS } from '../i18n/strings.js'
 import { money, fmtDate, fmtLongDate, relativeDay } from './format.js'
-import { findStatus, findPriority, findCategory, findVehicleType, label } from './domain.js'
+import { findStatus, findPriority, findVehicleType, catLabel, label } from './domain.js'
 
 export async function share(text, title = 'The Assistant') {
   if (navigator.share) {
@@ -141,7 +141,7 @@ export function formatExpenseSummary(expenses, lang = 'en', settings = {}) {
   const top = Object.entries(byCat).sort((a, b) => b[1] - a[1]).slice(0, 6)
   const lines = [`💳 *${t(lang, 'expenses')}*`, `${lang === 'ar' ? 'الإجمالي' : 'Total'}: *${money(total, cur, lang)}*`, '']
   top.forEach(([cat, amt]) => {
-    lines.push(`• ${label(findCategory(cat), lang) || cat}: ${money(amt, cur, lang)}`)
+    lines.push(`• ${catLabel(cat, lang)}: ${money(amt, cur, lang)}`)
   })
   lines.push('', '— The Assistant')
   return lines.join('\n')

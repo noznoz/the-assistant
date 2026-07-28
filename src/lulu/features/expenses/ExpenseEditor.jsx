@@ -2,21 +2,50 @@ import React, { useState } from 'react'
 import { Sheet, Field, Input, TextArea, Select, Button, Chip } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
-import { EXPENSE_CATEGORIES, PAYMENT_METHODS, label } from '../../lib/domain.js'
+import { PAYMENT_METHODS, categoryOptions, label } from '../../lib/domain.js'
 import { todayISO } from '../../lib/format.js'
 
 export default function ExpenseEditor({ initial, onClose, onSaved }) {
   const { t, lang } = useT()
-  const { settings } = useSettings()
+  const { settings, updateSettings } = useSettings()
   const expenses = useCollection('expenses')
   const vehicles = useCollection('vehicles')
+  const projects = useCollection('projects')
   const [f, setF] = useState({
     amount: '', currency: settings.currency, category: 'other', merchant: '',
     method: 'credit', date: todayISO(), classification: 'personal',
-    reimbursable: false, relatedVehicle: '', note: '', liters: '', odometer: '', ...initial,
+    reimbursable: false, relatedVehicle: '', projectId: '', note: '', liters: '', odometer: '', ...initial,
   })
   const [err, setErr] = useState('')
+  const [newCat, setNewCat] = useState(null)      // inline "add category" text or null
+  const [newProj, setNewProj] = useState(null)    // inline "add project" text or null
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
+
+  const onCategory = (e) => {
+    if (e.target.value === '__addcat') { setNewCat(''); return }
+    setF({ ...f, category: e.target.value })
+  }
+  const addCategory = () => {
+    const name = (newCat || '').trim()
+    if (!name) { setNewCat(null); return }
+    if (!(settings.customCategories || []).includes(name)) {
+      updateSettings({ customCategories: [...(settings.customCategories || []), name] })
+    }
+    setF({ ...f, category: 'custom:' + name })
+    setNewCat(null)
+  }
+
+  const onProject = (e) => {
+    if (e.target.value === '__addproj') { setNewProj(''); return }
+    setF({ ...f, projectId: e.target.value })
+  }
+  const addProject = () => {
+    const name = (newProj || '').trim()
+    if (!name) { setNewProj(null); return }
+    const rec = projects.add({ name })
+    setF({ ...f, projectId: rec.id })
+    setNewProj(null)
+  }
 
   const submit = () => {
     const amt = parseFloat(f.amount)
@@ -28,6 +57,8 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
     onClose()
   }
 
+  const catOpts = categoryOptions(lang, settings.customCategories)
+
   return (
     <Sheet title={t('newExpense')} onClose={onClose}
       footer={<Button variant="primary" block onClick={submit}>{t('save')}</Button>}>
@@ -36,14 +67,37 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
           <Input type="number" inputMode="decimal" value={f.amount} onChange={set('amount')} placeholder="0" autoFocus />
         </Field>
         <Field label={t('currency')}>
-          <Select value={f.currency} onChange={set('currency')} options={['SAR','USD','EUR','AED'].map(c => ({ value: c, label: c }))} />
+          <Select value={f.currency} onChange={set('currency')} options={['SAR', 'USD', 'EUR', 'AED', 'GBP'].map(c => ({ value: c, label: c }))} />
         </Field>
       </div>
 
       <Field label={t('category')}>
-        <Select value={f.category} onChange={set('category')}
-          options={EXPENSE_CATEGORIES.map(c => ({ value: c.id, label: label(c, lang) }))} />
+        <Select value={f.category} onChange={onCategory}>
+          {catOpts.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          <option value="__addcat">{t('addCategory')}</option>
+        </Select>
       </Field>
+      {newCat != null && (
+        <div className="row2" style={{ marginTop: -6, marginBottom: 12 }}>
+          <Input value={newCat} onChange={e => setNewCat(e.target.value)} placeholder={t('customCategoryName')} autoFocus />
+          <Button onClick={addCategory}>{t('add')}</Button>
+        </div>
+      )}
+
+      {/* Project */}
+      <Field label={t('project')}>
+        <Select value={f.projectId} onChange={onProject}>
+          <option value="">{t('none')}</option>
+          {projects.items.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+          <option value="__addproj">{t('addProject')}</option>
+        </Select>
+      </Field>
+      {newProj != null && (
+        <div className="row2" style={{ marginTop: -6, marginBottom: 12 }}>
+          <Input value={newProj} onChange={e => setNewProj(e.target.value)} placeholder={t('projectName')} autoFocus />
+          <Button onClick={addProject}>{t('add')}</Button>
+        </div>
+      )}
 
       <div className="row2">
         <Field label={t('merchant')}><Input value={f.merchant} onChange={set('merchant')} /></Field>
