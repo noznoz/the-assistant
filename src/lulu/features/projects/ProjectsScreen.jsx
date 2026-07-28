@@ -4,7 +4,7 @@ import { DetailHeader, Card, Section, Stat, Bars, Button, Sheet, Field, Input, T
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { catLabel } from '../../lib/domain.js'
-import { money, fmtDate } from '../../lib/format.js'
+import { money, fmtDate, expenseSar } from '../../lib/format.js'
 import { share, formatExpenseSummary } from '../../lib/share.js'
 import ExpenseEditor from '../expenses/ExpenseEditor.jsx'
 
@@ -17,7 +17,7 @@ export default function ProjectsScreen({ param, go }) {
   const [editor, setEditor] = useState(null)      // project editor
   const toast = useToast()
 
-  const totalFor = (id) => expenses.items.filter(e => e.projectId === id).reduce((s, e) => s + (+e.amount || 0), 0)
+  const totalFor = (id) => expenses.items.filter(e => e.projectId === id).reduce((s, e) => s + expenseSar(e, settings.rates), 0)
 
   if (param) {
     const p = projects.items.find(x => x.id === param)
@@ -77,12 +77,12 @@ function ProjectDetail({ project, go, onBack }) {
 
   const mine = expenses.items.filter(e => e.projectId === project.id)
     .sort((a, b) => (b.date || '').localeCompare(a.date || ''))
-  const total = mine.reduce((s, e) => s + (+e.amount || 0), 0)
+  const total = mine.reduce((s, e) => s + expenseSar(e, settings.rates), 0)
   const budget = Number(project.budget) || 0
   const pct = budget ? Math.min(1, total / budget) : 0
 
   const byCat = {}
-  mine.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + (+e.amount || 0) })
+  mine.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + expenseSar(e, settings.rates) })
   const bars = Object.entries(byCat).sort((a, b) => b[1] - a[1]).slice(0, 8)
     .map(([id, v]) => ({ label: catLabel(id, lang), value: v }))
 

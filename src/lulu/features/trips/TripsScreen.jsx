@@ -4,7 +4,7 @@ import { DetailHeader, Card, Section, Bars, Sheet, Field, Input, Select, Button,
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { catLabel } from '../../lib/domain.js'
-import { fmtDate, money, isoDate } from '../../lib/format.js'
+import { fmtDate, money, isoDate, expenseSar } from '../../lib/format.js'
 import { share, formatExpenseSummary } from '../../lib/share.js'
 import { exportXlsx, printHtml } from '../../lib/exporters.js'
 import ExpenseEditor from '../expenses/ExpenseEditor.jsx'
@@ -23,7 +23,7 @@ export default function TripsScreen({ go }) {
   const current = viewing && trips.items.find(x => x.id === viewing.id)
   if (current) return <TripDetail trip={current} onBack={() => setViewing(null)} />
 
-  const spentFor = (id) => expenses.items.filter(e => e.tripId === id).reduce((s, e) => s + (+e.amount || 0), 0)
+  const spentFor = (id) => expenses.items.filter(e => e.tripId === id).reduce((s, e) => s + expenseSar(e, settings.rates), 0)
 
   return (
     <>
@@ -82,10 +82,10 @@ function TripDetail({ trip, onBack }) {
   const toast = useToast()
 
   const mine = expenses.items.filter(e => e.tripId === trip.id).sort((a, b) => (b.date || '').localeCompare(a.date || ''))
-  const total = mine.reduce((s, e) => s + (+e.amount || 0), 0)
+  const total = mine.reduce((s, e) => s + expenseSar(e, settings.rates), 0)
   const budget = Number(trip.budget) || 0
   const pct = budget ? Math.min(1, total / budget) : 0
-  const byCat = {}; mine.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + (+e.amount || 0) })
+  const byCat = {}; mine.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + expenseSar(e, settings.rates) })
   const bars = Object.entries(byCat).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([id, v]) => ({ label: catLabel(id, lang), value: v }))
   const veh = vehicles.items.find(v => v.id === trip.vehicleId)
 

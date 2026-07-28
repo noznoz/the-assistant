@@ -49,7 +49,8 @@ export function maybeSeed() {
   tasks.forEach(t => db.insert('tasks', t))
 
   const exp = [
-    { amount: 450, category: 'moto_acc', merchant: 'Touratech', method: 'credit', date: todayISO(), classification: 'personal', relatedVehicle: vRaven.id, note: 'Crash bars + tank bag' },
+    { amount: 450, category: 'moto_acc', merchant: 'Touratech', item: 'Crash bars + tank bag', method: 'credit', date: todayISO(), classification: 'personal', relatedVehicle: vRaven.id },
+    { amount: 120, currency: 'USD', category: 'dining', merchant: 'Nobu', item: 'Dinner abroad', method: 'credit', date: todayISO(), classification: 'personal' },
     { amount: 280, category: 'fuel', merchant: 'Aramco', method: 'apple_pay', date: todayISO(), relatedVehicle: vAlmas.id, liters: 62, odometer: 24800 },
     { amount: 265, category: 'fuel', merchant: 'Aramco', method: 'apple_pay', date: d(-14), relatedVehicle: vAlmas.id, liters: 58, odometer: 24240 },
     { amount: 275, category: 'fuel', merchant: 'Sasco', method: 'apple_pay', date: d(-27), relatedVehicle: vAlmas.id, liters: 60, odometer: 23700 },

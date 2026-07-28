@@ -4,7 +4,7 @@ import { DetailHeader, Segmented, Card, Section, Stat, Button, Sheet, Field, Inp
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { findVehicleType } from '../../lib/domain.js'
-import { money, fmtDate, daysUntil } from '../../lib/format.js'
+import { money, fmtDate, daysUntil, expenseSar } from '../../lib/format.js'
 import { share, formatVehicle } from '../../lib/share.js'
 import VehicleEditor from './VehicleEditor.jsx'
 
@@ -25,7 +25,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
   const isBoat = vehicle.type === 'boat'
   const myServices = services.items.filter(s => s.vehicleId === vehicle.id).sort((a, b) => (b.date || '').localeCompare(a.date || ''))
   const myExpenses = expenses.items.filter(e => e.relatedVehicle === vehicle.id)
-  const totalCost = myExpenses.reduce((s, e) => s + (+e.amount || 0), 0)
+  const totalCost = myExpenses.reduce((s, e) => s + expenseSar(e, settings.rates), 0)
   const dd = daysUntil(vehicle.policyExpiry)
 
   const parseKm = (s) => { const n = parseFloat(String(s || '').replace(/[^0-9.]/g, '')); return isNaN(n) ? null : n }
@@ -42,12 +42,12 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
 
   // Fuel economy from consecutive fill-ups that recorded an odometer.
   const fuelExp = myExpenses.filter(e => e.category === 'fuel').sort((a, b) => (a.date || '').localeCompare(b.date || ''))
-  const fuelTotal = fuelExp.reduce((s, e) => s + (+e.amount || 0), 0)
+  const fuelTotal = fuelExp.reduce((s, e) => s + expenseSar(e, settings.rates), 0)
   const withOdo = fuelExp.filter(e => parseKm(e.odometer) != null)
   let distance = 0, litersForDist = 0, costForDist = 0
   for (let i = 1; i < withOdo.length; i++) {
     const dkm = parseKm(withOdo[i].odometer) - parseKm(withOdo[i - 1].odometer)
-    if (dkm > 0) { distance += dkm; litersForDist += parseFloat(withOdo[i].liters) || 0; costForDist += (+withOdo[i].amount || 0) }
+    if (dkm > 0) { distance += dkm; litersForDist += parseFloat(withOdo[i].liters) || 0; costForDist += expenseSar(withOdo[i], settings.rates) }
   }
   const consumption = distance > 0 && litersForDist > 0 ? (litersForDist / distance * 100) : null
   const costPerKm = distance > 0 && costForDist > 0 ? (costForDist / distance) : null

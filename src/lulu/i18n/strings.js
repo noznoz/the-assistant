@@ -126,6 +126,8 @@ export const STRINGS = {
     exportCsv: 'Export CSV', avgPerDay: 'Avg / day', reimbursableLabel: 'Reimbursable',
     transactionsLabel: 'Transactions', generateReport: 'Report', selectProject: 'Select a project',
     exportLabel: 'Export', exportExcel: 'Excel (.xlsx)', exportPdf: 'PDF', chooseFormat: 'Choose a format',
+    item: 'Item', itemPlaceholder: 'What did you buy?', inSar: 'in SAR',
+    exchangeRates: 'Exchange rates', ratesHint: 'SAR per 1 unit — edit to match your bank.',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -252,6 +254,8 @@ export const STRINGS = {
     exportCsv: 'تصدير CSV', avgPerDay: 'المعدل / يوم', reimbursableLabel: 'قابل للاسترداد',
     transactionsLabel: 'العمليات', generateReport: 'تقرير', selectProject: 'اختر مشروعاً',
     exportLabel: 'تصدير', exportExcel: 'إكسل (.xlsx)', exportPdf: 'PDF', chooseFormat: 'اختر الصيغة',
+    item: 'الصنف', itemPlaceholder: 'ماذا اشتريت؟', inSar: 'بالريال',
+    exchangeRates: 'أسعار الصرف', ratesHint: 'ريال لكل وحدة — عدّلها لتطابق بنكك.',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',

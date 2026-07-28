@@ -89,6 +89,7 @@ export const DEFAULT_SETTINGS = {
   monthlyBudget: 0,
   customCategories: [],  // user-added expense categories (labels)
   categoryBudgets: {},   // { [categoryId]: monthly amount }
+  rates: {},             // { [currency]: SAR per unit } — overrides DEFAULT_RATES
 }
 
 export function readSettings() {

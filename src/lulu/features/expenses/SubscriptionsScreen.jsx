@@ -4,7 +4,7 @@ import { DetailHeader, Card, Stat, Sheet, Field, Input, Select, Button, Empty, F
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { categoryOptions, PAYMENT_METHODS, catLabel, label } from '../../lib/domain.js'
-import { money, fmtDate, daysUntil, todayISO } from '../../lib/format.js'
+import { money, fmtDate, daysUntil, todayISO, toSar } from '../../lib/format.js'
 
 const CYCLES = [{ id: 'weekly', key: 'weekly' }, { id: 'monthly', key: 'monthly' }, { id: 'yearly', key: 'yearly' }]
 
@@ -32,7 +32,7 @@ export default function SubscriptionsScreen({ go }) {
   const toast = useToast()
 
   const active = subs.items.filter(s => s.active !== false)
-  const monthly = active.reduce((sum, s) => sum + monthlyEquivalent(s.amount, s.cycle), 0)
+  const monthly = active.reduce((sum, s) => sum + monthlyEquivalent(toSar(s.amount, s.currency || 'SAR', settings.rates), s.cycle), 0)
   const sorted = [...subs.items].sort((a, b) => (a.nextDue || '9999').localeCompare(b.nextDue || '9999'))
 
   const markPaid = (s) => {

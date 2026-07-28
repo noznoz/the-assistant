@@ -3,7 +3,7 @@ import { Sheet, Field, Input, TextArea, Select, Button, Chip } from '../../ui/pr
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { PAYMENT_METHODS, categoryOptions, label } from '../../lib/domain.js'
-import { todayISO } from '../../lib/format.js'
+import { todayISO, toSar, money } from '../../lib/format.js'
 
 export default function ExpenseEditor({ initial, onClose, onSaved }) {
   const { t, lang } = useT()
@@ -15,7 +15,7 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
   const [f, setF] = useState({
     amount: '', currency: settings.currency, category: 'other', merchant: '',
     method: 'credit', date: todayISO(), classification: 'personal',
-    reimbursable: false, relatedVehicle: '', projectId: '', tripId: '', note: '', liters: '', odometer: '', ...initial,
+    reimbursable: false, relatedVehicle: '', projectId: '', tripId: '', item: '', note: '', liters: '', odometer: '', ...initial,
   })
   const [err, setErr] = useState('')
   const [newCat, setNewCat] = useState(null)      // inline "add category" text or null
@@ -68,9 +68,14 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
           <Input type="number" inputMode="decimal" value={f.amount} onChange={set('amount')} placeholder="0" autoFocus />
         </Field>
         <Field label={t('currency')}>
-          <Select value={f.currency} onChange={set('currency')} options={['SAR', 'USD', 'EUR', 'AED', 'GBP'].map(c => ({ value: c, label: c }))} />
+          <Select value={f.currency} onChange={set('currency')} options={['SAR', 'USD', 'EUR', 'AED', 'GBP', 'KWD', 'BHD', 'QAR', 'OMR'].map(c => ({ value: c, label: c }))} />
         </Field>
       </div>
+      {f.currency && f.currency !== 'SAR' && parseFloat(f.amount) > 0 && (
+        <p className="hint" style={{ marginTop: -8, marginBottom: 12, fontWeight: 600, color: 'var(--brand-600)' }}>
+          ≈ {money(toSar(f.amount, f.currency, settings.rates), 'SAR', lang)} {t('inSar')}
+        </p>
+      )}
 
       <Field label={t('category')}>
         <Select value={f.category} onChange={onCategory}>
@@ -99,6 +104,8 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
           <Button onClick={addProject}>{t('add')}</Button>
         </div>
       )}
+
+      <Field label={t('item')}><Input value={f.item} onChange={set('item')} placeholder={t('itemPlaceholder')} /></Field>
 
       <div className="row2">
         <Field label={t('merchant')}><Input value={f.merchant} onChange={set('merchant')} /></Field>

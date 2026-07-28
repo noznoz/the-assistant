@@ -5,7 +5,7 @@ import { Card, Section, Stat, Segmented, Bars, Fab, Empty, Button, Sheet, useToa
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { findPayment, catLabel, label } from '../../lib/domain.js'
-import { money, fmtDate, isToday, isSameMonth } from '../../lib/format.js'
+import { money, fmtDate, isToday, isSameMonth, expenseSar } from '../../lib/format.js'
 import { share, formatExpenseSummary } from '../../lib/share.js'
 import ExpenseEditor from './ExpenseEditor.jsx'
 
@@ -30,9 +30,10 @@ export default function ExpensesScreen({ go }) {
     })
   }, [expenses.items, range])
 
-  const total = inRange.reduce((s, e) => s + (+e.amount || 0), 0)
+  const rates = settings.rates
+  const total = inRange.reduce((s, e) => s + expenseSar(e, rates), 0)
   const byCat = {}
-  inRange.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + (+e.amount || 0) })
+  inRange.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + expenseSar(e, rates) })
   const catBars = Object.entries(byCat).sort((a, b) => b[1] - a[1]).slice(0, 8)
     .map(([id, v]) => ({ label: catLabel(id, lang), value: v }))
 
@@ -43,7 +44,7 @@ export default function ExpensesScreen({ go }) {
   // Over-budget category alerts (current month, regardless of the range filter).
   const catBudgets = settings.categoryBudgets || {}
   const monthByCat = {}
-  expenses.items.filter(e => isSameMonth(e.date)).forEach(e => { monthByCat[e.category] = (monthByCat[e.category] || 0) + (+e.amount || 0) })
+  expenses.items.filter(e => isSameMonth(e.date)).forEach(e => { monthByCat[e.category] = (monthByCat[e.category] || 0) + expenseSar(e, rates) })
   const overBudgetCats = Object.keys(catBudgets).filter(id => (Number(catBudgets[id]) || 0) > 0 && (monthByCat[id] || 0) > catBudgets[id])
 
   return (
@@ -83,7 +84,7 @@ export default function ExpensesScreen({ go }) {
 
         <div className="stat-grid" style={{ marginTop: 14 }}>
           <Stat label={lang === 'ar' ? 'عدد العمليات' : 'Transactions'} value={inRange.length} />
-          <Stat label={t('largest')} value={money(Math.max(0, ...inRange.map(e => +e.amount || 0)), cur, lang)} />
+          <Stat label={t('largest')} value={money(Math.max(0, ...inRange.map(e => expenseSar(e, rates))), cur, lang)} />
         </div>
 
         {/* Quick access: projects, budgets, subscriptions */}
@@ -128,13 +129,16 @@ export default function ExpensesScreen({ go }) {
             <div className="li" key={e.id} onClick={() => setEditor(e)}>
               <div className="lead t-brand"><Icon name="receipt" size={18} /></div>
               <div className="body">
-                <div className="title">{e.merchant || catLabel(e.category, lang)}</div>
+                <div className="title">{e.item || e.merchant || catLabel(e.category, lang)}</div>
                 <div className="meta">
-                  {catLabel(e.category, lang)} · {fmtDate(e.date, lang, settings.dateFormat)}{pm ? ` · ${label(pm, lang)}` : ''}
+                  {[e.item && e.merchant, catLabel(e.category, lang), fmtDate(e.date, lang, settings.dateFormat)].filter(Boolean).join(' · ')}
                   {proj && <span className="chip t-brand" style={{ padding: '1px 7px' }}>{proj.name}</span>}
                 </div>
               </div>
-              <b className="tnum">{money(e.amount, e.currency || cur, lang)}</b>
+              <div style={{ textAlign: 'end' }}>
+                <b className="tnum">{money(e.amount, e.currency || cur, lang)}</b>
+                {(e.currency && e.currency !== 'SAR') && <div className="muted tnum" style={{ fontSize: 11 }}>≈ {money(expenseSar(e, rates), 'SAR', lang)}</div>}
+              </div>
             </div>
           )
         })}

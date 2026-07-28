@@ -3,7 +3,7 @@ import Icon from '../../ui/Icon.jsx'
 import { Card, Section, Ring, Stat, Chip, Button, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
-import { greetingKey, fmtLongDate, isToday, isOverdue, daysUntil, money } from '../../lib/format.js'
+import { greetingKey, fmtLongDate, isToday, isOverdue, daysUntil, money, expenseSar } from '../../lib/format.js'
 import { hijriDate } from '../../lib/prayer.js'
 import { buildBrief } from '../../lib/brief.js'
 import PrayerCard from './PrayerCard.jsx'
@@ -51,9 +51,9 @@ export default function TodayScreen({ go }) {
   }, [dueToday, completedToday])
 
   const cur = settings.currency
-  const spentToday = expenses.items.filter(e => isToday(e.date)).reduce((s, e) => s + (+e.amount || 0), 0)
+  const spentToday = expenses.items.filter(e => isToday(e.date)).reduce((s, e) => s + expenseSar(e, settings.rates), 0)
   const spentMonth = expenses.items.filter(e => new Date(e.date).getMonth() === new Date().getMonth() && new Date(e.date).getFullYear() === new Date().getFullYear())
-    .reduce((s, e) => s + (+e.amount || 0), 0)
+    .reduce((s, e) => s + expenseSar(e, settings.rates), 0)
 
   const renewals = vehicles.items
     .map(v => ({ v, dd: daysUntil(v.policyExpiry) }))

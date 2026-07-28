@@ -1,7 +1,7 @@
 // Sharing via the native OS share sheet (incl. WhatsApp) with a WhatsApp
 // deep-link fallback. Plus professional formatters for each shareable entity.
 import { STRINGS } from '../i18n/strings.js'
-import { money, fmtDate, fmtLongDate, relativeDay } from './format.js'
+import { money, fmtDate, fmtLongDate, relativeDay, expenseSar } from './format.js'
 import { findStatus, findPriority, findVehicleType, catLabel, label } from './domain.js'
 
 export async function share(text, title = 'The Assistant') {
@@ -126,7 +126,7 @@ export function formatAgenda(tasks, expenses, lang = 'en', settings = {}) {
   } else {
     lines.push(t(lang, 'noThingsToday'), '')
   }
-  const spent = expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0)
+  const spent = expenses.reduce((s, e) => s + expenseSar(e, settings.rates), 0)
   if (expenses.length) lines.push(`💳 ${t(lang, 'todaysSpending')}: ${money(spent, cur, lang)}`, '')
   lines.push('— The Assistant')
   return lines.join('\n')
@@ -135,9 +135,9 @@ export function formatAgenda(tasks, expenses, lang = 'en', settings = {}) {
 // ---- Expense summary ----
 export function formatExpenseSummary(expenses, lang = 'en', settings = {}) {
   const cur = settings.currency || 'SAR'
-  const total = expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0)
+  const total = expenses.reduce((s, e) => s + expenseSar(e, settings.rates), 0)
   const byCat = {}
-  expenses.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + (Number(e.amount) || 0) })
+  expenses.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + expenseSar(e, settings.rates) })
   const top = Object.entries(byCat).sort((a, b) => b[1] - a[1]).slice(0, 6)
   const lines = [`💳 *${t(lang, 'expenses')}*`, `${lang === 'ar' ? 'الإجمالي' : 'Total'}: *${money(total, cur, lang)}*`, '']
   top.forEach(([cat, amt]) => {

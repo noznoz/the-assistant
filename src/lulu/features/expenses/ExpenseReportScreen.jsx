@@ -4,7 +4,7 @@ import { DetailHeader, Card, Section, Stat, Segmented, Bars, Chip, Field, Input,
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { catLabel, findPayment, label } from '../../lib/domain.js'
-import { money, fmtDate, isoDate } from '../../lib/format.js'
+import { money, fmtDate, isoDate, expenseSar } from '../../lib/format.js'
 import { share } from '../../lib/share.js'
 import { exportXlsx, printHtml } from '../../lib/exporters.js'
 
@@ -45,19 +45,20 @@ export default function ExpenseReportScreen({ go }) {
     return l
   }, [expenses.items, mode, period, from, to, projectId, includeProjects])
 
-  const total = list.reduce((s, e) => s + (+e.amount || 0), 0)
-  const largest = Math.max(0, ...list.map(e => +e.amount || 0))
+  const rates = settings.rates
+  const total = list.reduce((s, e) => s + expenseSar(e, rates), 0)
+  const largest = Math.max(0, ...list.map(e => expenseSar(e, rates)))
   const group = (keyFn) => {
     const m = {}
-    list.forEach(e => { const k = keyFn(e); if (k != null) m[k] = (m[k] || 0) + (+e.amount || 0) })
+    list.forEach(e => { const k = keyFn(e); if (k != null) m[k] = (m[k] || 0) + expenseSar(e, rates) })
     return Object.entries(m).sort((a, b) => b[1] - a[1])
   }
   const byCat = group(e => e.category)
   const byPay = group(e => e.method)
   const byProj = group(e => e.projectId || '__none')
-  const work = list.filter(e => e.classification === 'work').reduce((s, e) => s + (+e.amount || 0), 0)
+  const work = list.filter(e => e.classification === 'work').reduce((s, e) => s + expenseSar(e, rates), 0)
   const personal = total - work
-  const reimb = list.filter(e => e.reimbursable && !e.reimbursed).reduce((s, e) => s + (+e.amount || 0), 0)
+  const reimb = list.filter(e => e.reimbursable && !e.reimbursed).reduce((s, e) => s + expenseSar(e, rates), 0)
 
   const projName = (id) => id === '__none' ? (lang === 'ar' ? 'بدون مشروع' : 'No project') : (projects.items.find(p => p.id === id)?.name || '—')
   const scopeLabel = mode === 'project'
@@ -82,15 +83,16 @@ export default function ExpenseReportScreen({ go }) {
       [t('projectTotal'), total, cur],
       [t('transactionsLabel'), list.length],
       [],
-      ['Date', 'Amount', 'Currency', 'Category', 'Merchant', 'Payment', 'Project', 'Type', 'Reimbursable', 'Note'],
+      ['Date', 'Item', 'Amount', 'Currency', 'Amount (SAR)', 'Category', 'Merchant', 'Payment', 'Project', 'Type', 'Reimbursable', 'Note'],
       ...sorted().map(e => [
-        e.date || '', +e.amount || 0, e.currency || cur, catLabel(e.category, lang), e.merchant || '',
+        e.date || '', e.item || '', +e.amount || 0, e.currency || cur, Math.round(expenseSar(e, rates) * 100) / 100,
+        catLabel(e.category, lang), e.merchant || '',
         label(findPayment(e.method), lang) || '', projName(e.projectId || '__none'),
         e.classification || '', e.reimbursable ? 'yes' : 'no', (e.note || '').replace(/\n/g, ' '),
       ]),
     ]
     try {
-      await exportXlsx(`expense-report-${isoDate(now)}.xlsx`, t('expenseReport'), aoa, [13, 10, 8, 18, 18, 14, 16, 10, 12, 24])
+      await exportXlsx(`expense-report-${isoDate(now)}.xlsx`, t('expenseReport'), aoa, [13, 18, 10, 8, 12, 18, 18, 14, 16, 10, 12, 24])
       toast.show(t('downloadedToast'))
     } catch { toast.show('…') }
     setExportOpen(false)
@@ -101,10 +103,10 @@ export default function ExpenseReportScreen({ go }) {
     const catRows = byCat.slice(0, 12).map(([id, v]) => `<tr><td>${esc(catLabel(id, lang))}</td><td class="n">${esc(money(v, cur, lang))}</td></tr>`).join('')
     const itemRows = sorted().map(e => `<tr>
       <td>${esc(fmtDate(e.date, lang, settings.dateFormat))}</td>
-      <td>${esc(e.merchant || catLabel(e.category, lang))}</td>
+      <td>${esc(e.item || e.merchant || catLabel(e.category, lang))}</td>
       <td>${esc(catLabel(e.category, lang))}</td>
       <td>${esc(projName(e.projectId || '__none'))}</td>
-      <td class="n">${esc(money(e.amount, e.currency || cur, lang))}</td></tr>`).join('')
+      <td class="n">${esc(money(expenseSar(e, rates), 'SAR', lang))}</td></tr>`).join('')
     const body = `
       <h1 class="brand">${esc(t('expenseReport'))}</h1>
       <div class="sub">${esc(scopeLabel)}</div>

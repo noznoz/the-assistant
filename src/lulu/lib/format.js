@@ -2,6 +2,29 @@
 // All date math is naive-local; timezone is a display preference for now and
 // the architecture leaves room for full Asia/Riyadh conversion later.
 
+// Exchange rates expressed as "SAR per 1 unit of currency" (base = SAR).
+// SAR is pegged to USD at 3.75; the rest are sensible, user-editable defaults.
+export const DEFAULT_RATES = {
+  SAR: 1, USD: 3.75, EUR: 4.05, GBP: 4.75, AED: 1.02,
+  KWD: 12.2, BHD: 9.95, QAR: 1.03, OMR: 9.74,
+}
+
+export function rateFor(currency, rates) {
+  const r = (rates || {})[currency]
+  return Number(r != null ? r : (DEFAULT_RATES[currency] != null ? DEFAULT_RATES[currency] : 1)) || 1
+}
+
+// Convert an amount in `currency` to SAR.
+export function toSar(amount, currency = 'SAR', rates) {
+  return (Number(amount) || 0) * rateFor(currency, rates)
+}
+
+// SAR value of an expense (or any {amount,currency}) using the given rates.
+export function expenseSar(e, rates) {
+  if (!e) return 0
+  return toSar(e.amount, e.currency || 'SAR', rates)
+}
+
 export function money(amount, currency = 'SAR', lang = 'en') {
   const n = Number(amount) || 0
   try {

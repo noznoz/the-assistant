@@ -3,7 +3,7 @@ import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Segmented, Stat, Section, Button } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
-import { money, isToday, isOverdue, daysUntil } from '../../lib/format.js'
+import { money, isToday, isOverdue, daysUntil, expenseSar } from '../../lib/format.js'
 import { share } from '../../lib/share.js'
 
 export default function ReportsScreen({ go }) {
@@ -25,7 +25,7 @@ export default function ReportsScreen({ go }) {
     const overdue = open.filter(x => isOverdue(x.dueDate))
     const delegated = open.filter(x => x.status === 'waiting_someone')
     const exp = expenses.items.filter(e => period === 'daily' ? isToday(e.date) : within(e.date, days))
-    const spend = exp.reduce((s, e) => s + (+e.amount || 0), 0)
+    const spend = exp.reduce((s, e) => s + expenseSar(e, settings.rates), 0)
     const renewals = vehicles.items.map(v => ({ v, dd: daysUntil(v.policyExpiry) })).filter(x => x.dd != null && x.dd <= 30)
     return { completed, open, overdue, delegated, spend, renewals }
   }, [tasks.items, expenses.items, vehicles.items, period])

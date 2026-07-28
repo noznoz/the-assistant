@@ -1,7 +1,7 @@
 // Deterministic "AI-style" morning brief generator (offline, no network).
 // When a real AI provider is configured later, swap this for an API call that
 // returns the same shape. Keeps the UI identical either way.
-import { isToday, isOverdue, daysUntil, money, greetingKey } from './format.js'
+import { isToday, isOverdue, daysUntil, money, greetingKey, expenseSar } from './format.js'
 
 export function buildBrief({ tasks, expenses, vehicles, settings, lang }) {
   const open = tasks.filter(t => t.status !== 'completed' && t.status !== 'cancelled')
@@ -9,7 +9,7 @@ export function buildBrief({ tasks, expenses, vehicles, settings, lang }) {
   const overdue = open.filter(t => isOverdue(t.dueDate))
   const waitingMe = open.filter(t => t.status === 'waiting_me')
   const critical = open.filter(t => t.priority === 'critical')
-  const spentToday = expenses.filter(e => isToday(e.date)).reduce((s, e) => s + (+e.amount || 0), 0)
+  const spentToday = expenses.filter(e => isToday(e.date)).reduce((s, e) => s + expenseSar(e, settings.rates), 0)
 
   const renewals = []
   vehicles.forEach(v => {

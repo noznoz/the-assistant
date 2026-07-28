@@ -4,7 +4,7 @@ import { DetailHeader, Card, Section, Field, Input, Select, Button, Empty, useTo
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { catLabel, categoryOptions } from '../../lib/domain.js'
-import { money, isSameMonth } from '../../lib/format.js'
+import { money, isSameMonth, expenseSar } from '../../lib/format.js'
 
 export default function BudgetsScreen({ go }) {
   const { t, lang } = useT()
@@ -17,7 +17,7 @@ export default function BudgetsScreen({ go }) {
   const budgets = settings.categoryBudgets || {}
   const spendByCat = {}
   expenses.items.filter(e => isSameMonth(e.date)).forEach(e => {
-    spendByCat[e.category] = (spendByCat[e.category] || 0) + (+e.amount || 0)
+    spendByCat[e.category] = (spendByCat[e.category] || 0) + expenseSar(e, settings.rates)
   })
   const ids = Array.from(new Set([...Object.keys(budgets), ...Object.keys(spendByCat)]))
     .filter(id => (Number(budgets[id]) || 0) > 0 || (spendByCat[id] || 0) > 0)

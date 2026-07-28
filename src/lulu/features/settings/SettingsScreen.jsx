@@ -6,6 +6,7 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useSettings, useStore } from '../../store/StoreProvider.jsx'
 import { LANGS } from '../../i18n/strings.js'
 import { CURRENCIES } from '../../lib/domain.js'
+import { DEFAULT_RATES } from '../../lib/format.js'
 import * as db from '../../store/db.js'
 import { hashPin, biometricSupported, enrollBiometric } from '../../lib/lock.js'
 import { requestNotificationPermission, notificationPermission, setBadge } from '../../lib/notify.js'
@@ -114,6 +115,22 @@ export default function SettingsScreen({ go }) {
           </Field>
         </Card>
 
+        <Section title={t('exchangeRates')} />
+        <Card className="stack">
+          <p className="hint" style={{ margin: '0 2px' }}>{t('ratesHint')}</p>
+          {CURRENCIES.filter(c => c !== 'SAR').map(c => (
+            <div key={c} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ width: 48, fontWeight: 650 }}>1 {c}</span>
+              <div style={{ flex: 1 }}>
+                <Input type="number" inputMode="decimal" style={{ textAlign: 'end' }}
+                  value={(settings.rates && settings.rates[c] != null ? settings.rates[c] : DEFAULT_RATES[c]) || ''}
+                  onChange={e => updateSettings({ rates: { ...(settings.rates || {}), [c]: parseFloat(e.target.value) || 0 } })} />
+              </div>
+              <span className="muted" style={{ fontSize: 12, width: 32 }}>SAR</span>
+            </div>
+          ))}
+        </Card>
+
         {/* Notifications */}
         <Section title={t('notifications')} />
         <Card className="stack">
@@ -169,7 +186,7 @@ export default function SettingsScreen({ go }) {
         </Card>
 
         <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>
-          {t('about')} · v2.0 · <span>Offline-first</span>
+          {t('about')} · v2.1 · <span>Offline-first</span>
         </p>
       </div>
 
