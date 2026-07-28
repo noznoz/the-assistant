@@ -197,7 +197,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
         )}
       </div>
 
-      {edit && <VehicleEditor initial={vehicle} onClose={() => setEdit(false)} onSaved={() => toast.show(t('savedToast'))} />}
+      {edit && <VehicleEditor initial={vehicle} onClose={() => setEdit(false)} onSaved={() => toast.show(t('savedToast'))} onDeleted={() => (onBack ? onBack() : go('garage'))} />}
       {svcEditor && <ServiceEditor vehicleId={vehicle.id} onClose={() => setSvcEditor(false)} onSaved={() => toast.show(t('savedToast'))} />}
       {emergency && (
         <Sheet title={t('emergencyInfo')} onClose={() => setEmergency(false)}

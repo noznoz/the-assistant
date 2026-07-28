@@ -58,11 +58,20 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
     onClose()
   }
 
+  const doDelete = () => {
+    if (!window.confirm(t('deleteExpenseQ'))) return
+    expenses.remove(initial.id)
+    onClose()
+  }
+
   const catOpts = categoryOptions(lang, settings.customCategories)
 
   return (
-    <Sheet title={t('newExpense')} onClose={onClose}
-      footer={<Button variant="primary" block onClick={submit}>{t('save')}</Button>}>
+    <Sheet title={initial?.id ? t('editExpense') : t('newExpense')} onClose={onClose}
+      footer={<div className="stack">
+        <Button variant="primary" block onClick={submit}>{t('save')}</Button>
+        {initial?.id && <Button block variant="danger" icon="trash" onClick={doDelete}>{t('delete')}</Button>}
+      </div>}>
       <div className="row2">
         <Field label={t('amount')} required error={err}>
           <Input type="number" inputMode="decimal" value={f.amount} onChange={set('amount')} placeholder="0" autoFocus />

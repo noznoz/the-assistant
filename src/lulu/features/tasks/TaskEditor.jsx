@@ -44,10 +44,19 @@ export default function TaskEditor({ initial, onClose, onSaved }) {
     onClose()
   }
 
+  const doDelete = () => {
+    if (!window.confirm(t('deleteTaskQ'))) return
+    tasks.remove(initial.id)
+    onClose()
+  }
+
   return (
     <>
       <Sheet title={initial?.id ? t('editTask') : t('newTask')} onClose={onClose}
-        footer={<Button variant="primary" block onClick={submit}>{t('save')}</Button>}>
+        footer={<div className="stack">
+          <Button variant="primary" block onClick={submit}>{t('save')}</Button>
+          {initial?.id && <Button block variant="danger" icon="trash" onClick={doDelete}>{t('delete')}</Button>}
+        </div>}>
         <Field label={t('title')} required error={err}>
           <Input value={f.title} onChange={set('title')} placeholder={t('title')} autoFocus />
         </Field>

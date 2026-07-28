@@ -4,7 +4,7 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { VEHICLE_TYPES } from '../../lib/domain.js'
 
-export default function VehicleEditor({ initial, onClose, onSaved }) {
+export default function VehicleEditor({ initial, onClose, onSaved, onDeleted }) {
   const { t } = useT()
   const vehicles = useCollection('vehicles')
   const [f, setF] = useState({
@@ -25,9 +25,19 @@ export default function VehicleEditor({ initial, onClose, onSaved }) {
     onClose()
   }
 
+  const doDelete = () => {
+    if (!window.confirm(t('deleteVehicleQ'))) return
+    vehicles.remove(initial.id)
+    onClose()
+    onDeleted && onDeleted()
+  }
+
   return (
     <Sheet title={initial?.id ? t('edit') : t('addGarageItem')} onClose={onClose}
-      footer={<Button variant="primary" block onClick={submit}>{t('save')}</Button>}>
+      footer={<div className="stack">
+        <Button variant="primary" block onClick={submit}>{t('save')}</Button>
+        {initial?.id && <Button block variant="danger" icon="trash" onClick={doDelete}>{t('delete')}</Button>}
+      </div>}>
       <div style={{ marginBottom: 16 }}>
         <div className="chip-row">
           {VEHICLE_TYPES.map(v => (
