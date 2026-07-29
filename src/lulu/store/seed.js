@@ -49,13 +49,13 @@ export function maybeSeed() {
   tasks.forEach(t => db.insert('tasks', t))
 
   const exp = [
-    { amount: 450, category: 'moto_acc', merchant: 'Touratech', item: 'Crash bars + tank bag', method: 'credit', date: todayISO(), classification: 'personal', relatedVehicle: vRaven.id },
+    { amount: 450, category: 'moto_acc', merchant: 'Touratech', item: 'Crash bars + tank bag', method: 'credit', date: todayISO(), classification: 'personal', kind: 'special', relatedVehicle: vRaven.id },
     { amount: 120, currency: 'USD', category: 'dining', merchant: 'Nobu', item: 'Dinner abroad', method: 'credit', date: todayISO(), classification: 'personal' },
     { amount: 280, category: 'fuel', merchant: 'Aramco', method: 'apple_pay', date: todayISO(), relatedVehicle: vAlmas.id, liters: 62, odometer: 24800 },
     { amount: 265, category: 'fuel', merchant: 'Aramco', method: 'apple_pay', date: d(-14), relatedVehicle: vAlmas.id, liters: 58, odometer: 24240 },
     { amount: 275, category: 'fuel', merchant: 'Sasco', method: 'apple_pay', date: d(-27), relatedVehicle: vAlmas.id, liters: 60, odometer: 23700 },
-    { amount: 1450, category: 'vehicle_maint', merchant: 'BMW Motorrad', method: 'credit', date: d(-15), relatedVehicle: vRaven.id },
-    { amount: 3200, category: 'vehicle_maint', merchant: 'Land Rover Riyadh', method: 'company', date: d(-40), relatedVehicle: vAlmas.id },
+    { amount: 1450, category: 'vehicle_maint', merchant: 'BMW Motorrad', method: 'credit', date: d(-15), kind: 'special', relatedVehicle: vRaven.id },
+    { amount: 3200, category: 'vehicle_maint', merchant: 'Land Rover Riyadh', method: 'company', date: d(-40), kind: 'special', relatedVehicle: vAlmas.id },
     { amount: 620, category: 'dining', merchant: 'Myazu', method: 'credit', date: d(-2), classification: 'personal' },
     { amount: 190, category: 'groceries', merchant: 'Danube', method: 'apple_pay', date: d(-3) },
     { amount: 2400, category: 'marina', merchant: 'Jeddah Yacht Club', method: 'transfer', date: d(-6), relatedVehicle: vBoat.id },
@@ -64,6 +64,17 @@ export function maybeSeed() {
 
   // A sample expense project with a custom category to showcase the feature.
   db.writeSettings({ ...db.readSettings(), customCategories: ['Landscaping'], categoryBudgets: { dining: 2000, fuel: 1500, groceries: 1200 } })
+
+  // Income — a recurring salary plus a one-off bonus.
+  db.insert('income', { source: 'salary', amount: 85000, currency: 'SAR', date: todayISO(), recurring: true, note: 'Monthly salary' })
+  db.insert('income', { source: 'rental', amount: 9000, currency: 'SAR', date: d(-4), recurring: true, note: 'Villa rent' })
+  db.insert('income', { source: 'bonus', amount: 15000, currency: 'SAR', date: d(-6), recurring: false, note: 'Q2 performance bonus' })
+
+  // Investments / holdings, with a dividend logged as income.
+  const invAramco = db.insert('investments', { name: 'Aramco shares', type: 'stocks', invested: 200000, currentValue: 236000, currency: 'SAR', note: '2,000 shares' })
+  db.insert('investments', { name: 'Rental flat — Jeddah', type: 'realestate', invested: 1200000, currentValue: 1350000, currency: 'SAR' })
+  db.insert('investments', { name: 'Global index fund', type: 'fund', invested: 50000, currentValue: 58500, currency: 'USD' })
+  db.insert('income', { source: 'dividend', investmentId: invAramco.id, amount: 4200, currency: 'SAR', date: d(-8), recurring: false, note: 'Aramco shares' })
 
   // Subscriptions / recurring bills
   db.insert('subscriptions', { name: 'Netflix', amount: 56, currency: 'SAR', cycle: 'monthly', category: 'subscriptions', method: 'credit', nextDue: d(3), active: true })

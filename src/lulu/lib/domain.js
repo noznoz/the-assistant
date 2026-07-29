@@ -104,6 +104,36 @@ export const DOC_CATEGORIES = [
 
 export const CURRENCIES = ['SAR', 'USD', 'EUR', 'GBP', 'AED', 'KWD', 'BHD', 'QAR', 'OMR']
 
+// Expense kinds — regular monthly living costs vs one-off/special outlays.
+export const EXPENSE_KINDS = [
+  { id: 'monthly', en: 'Monthly', ar: 'شهري' },
+  { id: 'special', en: 'Special', ar: 'خاص' },
+]
+
+// Income sources.
+export const INCOME_SOURCES = [
+  { id: 'salary', en: 'Salary', ar: 'راتب', icon: 'wallet' },
+  { id: 'bonus', en: 'Bonus', ar: 'مكافأة', icon: 'gift' },
+  { id: 'dividend', en: 'Dividend', ar: 'أرباح أسهم', icon: 'chart' },
+  { id: 'rental', en: 'Rental', ar: 'إيجار', icon: 'doc' },
+  { id: 'business', en: 'Business', ar: 'أعمال', icon: 'report' },
+  { id: 'other', en: 'Other', ar: 'أخرى', icon: 'plus' },
+]
+
+// Investment / holding types.
+export const INVESTMENT_TYPES = [
+  { id: 'stocks', en: 'Stocks', ar: 'أسهم', icon: 'chart' },
+  { id: 'fund', en: 'Fund', ar: 'صندوق', icon: 'report' },
+  { id: 'realestate', en: 'Real estate', ar: 'عقار', icon: 'doc' },
+  { id: 'crypto', en: 'Crypto', ar: 'عملات رقمية', icon: 'wallet' },
+  { id: 'savings', en: 'Savings', ar: 'ادخار', icon: 'wallet' },
+  { id: 'business', en: 'Business', ar: 'أعمال', icon: 'report' },
+  { id: 'other', en: 'Other', ar: 'أخرى', icon: 'plus' },
+]
+
+export const findIncomeSource = (id) => INCOME_SOURCES.find(x => x.id === id)
+export const findInvestmentType = (id) => INVESTMENT_TYPES.find(x => x.id === id)
+
 // Icons offered when creating a contact group (must exist in ui/Icon.jsx).
 export const GROUP_ICONS = [
   'people', 'cake', 'gift', 'sparkle', 'car', 'trip', 'wallet',

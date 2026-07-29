@@ -6,6 +6,7 @@ import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { catLabel } from '../../lib/domain.js'
 import { money, fmtDate, expenseSar } from '../../lib/format.js'
 import { share, formatExpenseSummary } from '../../lib/share.js'
+import { exportXlsx, printHtml } from '../../lib/exporters.js'
 import ExpenseEditor from '../expenses/ExpenseEditor.jsx'
 
 export default function ProjectsScreen({ param, go }) {
@@ -65,6 +66,10 @@ export default function ProjectsScreen({ param, go }) {
   )
 }
 
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+}
+
 function ProjectDetail({ project, go, onBack }) {
   const { t, lang } = useT()
   const { settings } = useSettings()
@@ -81,10 +86,47 @@ function ProjectDetail({ project, go, onBack }) {
   const budget = Number(project.budget) || 0
   const pct = budget ? Math.min(1, total / budget) : 0
 
+  const rates = settings.rates
   const byCat = {}
-  mine.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + expenseSar(e, settings.rates) })
-  const bars = Object.entries(byCat).sort((a, b) => b[1] - a[1]).slice(0, 8)
-    .map(([id, v]) => ({ label: catLabel(id, lang), value: v }))
+  mine.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + expenseSar(e, rates) })
+  const catRows = Object.entries(byCat).sort((a, b) => b[1] - a[1])
+  const bars = catRows.slice(0, 8).map(([id, v]) => ({ label: catLabel(id, lang), value: v }))
+  const remaining = budget - total
+  const r2 = (n) => Math.round(n * 100) / 100
+
+  const exportExcel = () => {
+    const aoa = [
+      [project.name],
+      [t('budget'), budget || ''],
+      [t('projectTotal'), r2(total)],
+      [t('remaining'), budget ? r2(remaining) : ''],
+      [],
+      [t('spendingByCategory'), t('amount') + ' (SAR)'],
+      ...catRows.map(([id, v]) => [catLabel(id, lang), r2(v)]),
+      [],
+      [t('date'), t('item'), t('merchant'), t('category'), t('amount'), t('currency'), 'SAR'],
+      ...mine.map(e => [e.date, e.item || '', e.merchant || '', catLabel(e.category, lang), e.amount, e.currency || 'SAR', r2(expenseSar(e, rates))]),
+    ]
+    exportExcelSafe(project, aoa)
+  }
+  const exportExcelSafe = async (proj, aoa) => {
+    try { await exportXlsx(`${proj.name}.xlsx`, proj.name, aoa, [14, 20, 16, 16, 12, 8, 12]); toast.show(t('savedToast')) }
+    catch { toast.show(t('comingSoon')) }
+  }
+  const exportPdf = () => {
+    const rowsHtml = mine.map(e => `<tr><td>${fmtDate(e.date, lang, settings.dateFormat)}</td><td>${escapeHtml(e.item || e.merchant || catLabel(e.category, lang))}</td><td>${escapeHtml(catLabel(e.category, lang))}</td><td class="n">${money(expenseSar(e, rates), cur, lang)}</td></tr>`).join('')
+    const catHtml = catRows.map(([id, v]) => `<tr><td>${escapeHtml(catLabel(id, lang))}</td><td class="n">${money(v, cur, lang)}</td></tr>`).join('')
+    const body = `
+      <h1>${escapeHtml(project.name)}</h1>
+      <div class="sub">${t('projectDashboard')} · ${new Date().toLocaleDateString()}</div>
+      <div class="total brand">${money(total, cur, lang)}</div>
+      <div class="muted">${budget ? `${t('budget')}: ${money(budget, cur, lang)} · ${t('remaining')}: ${money(remaining, cur, lang)}` : ''}</div>
+      <h2>${t('spendingByCategory')}</h2>
+      <table><thead><tr><th>${t('category')}</th><th class="n">${t('amount')}</th></tr></thead><tbody>${catHtml}</tbody></table>
+      <h2>${t('recent')} (${mine.length})</h2>
+      <table><thead><tr><th>${t('date')}</th><th>${t('item')}</th><th>${t('category')}</th><th class="n">${t('amount')}</th></tr></thead><tbody>${rowsHtml}</tbody></table>`
+    printHtml(project.name, body)
+  }
 
   return (
     <>
@@ -110,6 +152,12 @@ function ProjectDetail({ project, go, onBack }) {
         <div className="row2" style={{ marginTop: 12 }}>
           <Button variant="primary" icon="plus" onClick={() => setAddExp(true)}>{t('addExpenseTo')}</Button>
           <Button icon="whatsapp" onClick={() => share(`🗂️ *${project.name}*\n\n` + formatExpenseSummary(mine, lang, settings))}>{t('share')}</Button>
+        </div>
+
+        <Section title={t('projectDashboard')} />
+        <div className="row2">
+          <Button icon="download" onClick={exportExcel}>{t('exportExcel')}</Button>
+          <Button icon="doc" onClick={exportPdf}>{t('exportPdf')}</Button>
         </div>
 
         {bars.length > 0 && (

@@ -6,7 +6,7 @@ const TABS = [
   { id: 'today', icon: 'today' },
   { id: 'tasks', icon: 'check' },
   { id: 'garage', icon: 'car' },
-  { id: 'expenses', icon: 'wallet' },
+  { id: 'expenses', icon: 'wallet', labelKey: 'myFinance' },
   { id: 'more', icon: 'grid' },
 ]
 
@@ -17,7 +17,7 @@ export function BottomNav({ tab, go }) {
       {TABS.map(x => (
         <button key={x.id} className={`navbtn ${tab === x.id ? 'active' : ''}`} onClick={() => go(x.id)}>
           <Icon name={x.icon} size={24} stroke={tab === x.id ? 2.4 : 2} />
-          {t(x.id)}
+          {t(x.labelKey || x.id)}
         </button>
       ))}
     </nav>

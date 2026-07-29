@@ -14,7 +14,7 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
   const trips = useCollection('trips')
   const [f, setF] = useState({
     amount: '', currency: settings.currency, category: 'other', merchant: '',
-    method: 'credit', date: todayISO(), classification: 'personal',
+    method: 'credit', date: todayISO(), classification: 'personal', kind: 'monthly',
     reimbursable: false, relatedVehicle: '', projectId: '', tripId: '', item: '', note: '', liters: '', odometer: '', ...initial,
   })
   const [err, setErr] = useState('')
@@ -132,6 +132,14 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
         <Select value={f.method} onChange={set('method')}
           options={PAYMENT_METHODS.map(m => ({ value: m.id, label: label(m, lang) }))} />
       </Field>
+
+      <div style={{ marginBottom: 12 }}>
+        <label style={{ display: 'block', fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '0 2px 7px' }}>{t('expenseKind')}</label>
+        <div className="chip-row">
+          <Chip selectable on={(f.kind || 'monthly') !== 'special'} onClick={() => setF({ ...f, kind: 'monthly' })}>{t('expMonthly')}</Chip>
+          <Chip selectable on={f.kind === 'special'} onClick={() => setF({ ...f, kind: 'special' })}>{t('expSpecial')}</Chip>
+        </div>
+      </div>
 
       <div style={{ marginBottom: 16 }}>
         <div className="chip-row">

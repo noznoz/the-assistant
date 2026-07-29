@@ -5,7 +5,7 @@ import { Card, Section, Stat, Segmented, Bars, Fab, Empty, Button, Sheet, useToa
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { findPayment, catLabel, label } from '../../lib/domain.js'
-import { money, fmtDate, isToday, isSameMonth, expenseSar } from '../../lib/format.js'
+import { money, fmtDate, isToday, isSameMonth, expenseSar, toSar } from '../../lib/format.js'
 import { share, formatExpenseSummary } from '../../lib/share.js'
 import ExpenseEditor from './ExpenseEditor.jsx'
 import SwipeRow from '../../ui/SwipeRow.jsx'
@@ -16,6 +16,8 @@ export default function ExpensesScreen({ go }) {
   const cur = settings.currency
   const expenses = useCollection('expenses')
   const projects = useCollection('projects')
+  const income = useCollection('income')
+  const investments = useCollection('investments')
   const [range, setRange] = useState('month')
   const [editor, setEditor] = useState(null)
   const toast = useToast()
@@ -33,6 +35,16 @@ export default function ExpensesScreen({ go }) {
 
   const rates = settings.rates
   const total = inRange.reduce((s, e) => s + expenseSar(e, rates), 0)
+
+  // Finance overview — this month, in SAR: income, expenses (monthly vs special), net.
+  const monthExp = expenses.items.filter(e => isSameMonth(e.date))
+  const monthlyExp = monthExp.filter(e => (e.kind || 'monthly') !== 'special').reduce((s, e) => s + expenseSar(e, rates), 0)
+  const specialExp = monthExp.filter(e => e.kind === 'special').reduce((s, e) => s + expenseSar(e, rates), 0)
+  const monthExpTotal = monthlyExp + specialExp
+  const monthIncome = income.items.filter(i => isSameMonth(i.date)).reduce((s, i) => s + toSar(i.amount, i.currency || 'SAR', rates), 0)
+  const net = monthIncome - monthExpTotal
+  const portfolio = investments.items.reduce((s, v) => s + toSar(v.currentValue || v.invested, v.currency || 'SAR', rates), 0)
+
   const byCat = {}
   inRange.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + expenseSar(e, rates) })
   const catBars = Object.entries(byCat).sort((a, b) => b[1] - a[1]).slice(0, 8)
@@ -50,13 +62,35 @@ export default function ExpensesScreen({ go }) {
 
   return (
     <>
-      <TopBar title={t('expenses')} right={
+      <TopBar title={t('myFinance')} right={
         <>
           <button className="iconbtn" onClick={() => go('expensereport')} aria-label={t('expenseReport')}><Icon name="chart" size={18} /></button>
           <button className="iconbtn" onClick={() => share(formatExpenseSummary(inRange, lang, settings))} aria-label={t('share')}><Icon name="share" size={18} /></button>
         </>
       } />
       <div className="screen">
+        {/* Finance overview — this month */}
+        <Card style={{ marginTop: 14 }}>
+          <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em', textAlign: 'center' }}>{t('netThisMonth')}</div>
+          <div style={{ fontSize: 32, fontWeight: 780, marginTop: 4, textAlign: 'center' }} className={`tnum ${net >= 0 ? 't-ok' : 't-danger'}`}>
+            {net >= 0 ? '' : '−'}{money(Math.abs(net), cur, lang)}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 14 }}>
+            <button className="qa" style={{ alignItems: 'flex-start', textAlign: 'start' }} onClick={() => go('income')}>
+              <span className="muted" style={{ fontSize: 11, fontWeight: 650, textTransform: 'uppercase' }}>{t('income')}</span>
+              <b className="tnum t-ok" style={{ fontSize: 18 }}>{money(monthIncome, cur, lang)}</b>
+            </button>
+            <div className="qa" style={{ alignItems: 'flex-start', textAlign: 'start', cursor: 'default' }}>
+              <span className="muted" style={{ fontSize: 11, fontWeight: 650, textTransform: 'uppercase' }}>{t('expenses')}</span>
+              <b className="tnum" style={{ fontSize: 18 }}>{money(monthExpTotal, cur, lang)}</b>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+            <span className="chip" style={{ flex: 1, justifyContent: 'space-between' }}>{t('expMonthly')} <b className="tnum">{money(monthlyExp, cur, lang)}</b></span>
+            <span className="chip" style={{ flex: 1, justifyContent: 'space-between' }}>{t('expSpecial')} <b className="tnum">{money(specialExp, cur, lang)}</b></span>
+          </div>
+        </Card>
+
         <div style={{ margin: '14px 0' }}>
           <Segmented value={range} onChange={setRange} options={[
             { value: 'today', label: t('today') },
@@ -88,16 +122,25 @@ export default function ExpensesScreen({ go }) {
           <Stat label={t('largest')} value={money(Math.max(0, ...inRange.map(e => expenseSar(e, rates))), cur, lang)} />
         </div>
 
-        {/* Quick access: projects, budgets, subscriptions */}
+        {/* Quick access */}
         <div className="qa-grid" style={{ gridTemplateColumns: 'repeat(3,1fr)', marginTop: 12 }}>
+          <button className="qa" onClick={() => go('income')}>
+            <span className="ic t-ok"><Icon name="wallet" size={22} /></span>{t('income')}
+          </button>
+          <button className="qa" onClick={() => go('investments')}>
+            <span className="ic"><Icon name="chart" size={22} /></span>{t('investments')}
+          </button>
+          <button className="qa" onClick={() => go('subscriptions')}>
+            <span className="ic"><Icon name="refresh" size={22} /></span>{t('subscriptions')}
+          </button>
           <button className="qa" onClick={() => go('projects')}>
             <span className="ic"><Icon name="report" size={22} /></span>{t('projects')}
           </button>
           <button className="qa" onClick={() => go('budgets')}>
             <span className="ic"><Icon name="chart" size={22} /></span>{t('budgets')}
           </button>
-          <button className="qa" onClick={() => go('subscriptions')}>
-            <span className="ic"><Icon name="refresh" size={22} /></span>{t('subscriptions')}
+          <button className="qa" onClick={() => go('expensereport')}>
+            <span className="ic"><Icon name="doc" size={22} /></span>{t('reports')}
           </button>
         </div>
 
