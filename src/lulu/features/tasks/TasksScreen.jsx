@@ -10,6 +10,7 @@ import { share, formatTask, formatFollowUp, copyText, whatsappToPerson, formatAs
 import { completeTask } from '../../lib/recurrence.js'
 import { pointsFor, awardPoints } from '../../lib/points.js'
 import TaskEditor from './TaskEditor.jsx'
+import SwipeRow from '../../ui/SwipeRow.jsx'
 
 const VIEWS = [
   { id: 'all', key: 'allTasks' },
@@ -81,8 +82,11 @@ export default function TasksScreen({ param, go }) {
         ) : (
           <div style={{ marginTop: 10 }}>
             {filtered.map(task => (
-              <TaskRow key={task.id} task={task} lang={lang} dateFormat={settings.dateFormat}
-                onToggle={() => toggleComplete(task)} onOpen={() => setSheet({ task })} />
+              <SwipeRow key={task.id} onEdit={() => setEditor(task)}
+                onDelete={() => { tasks.remove(task.id); toast.show(t('deletedToast')) }}>
+                <TaskRow task={task} lang={lang} dateFormat={settings.dateFormat}
+                  onToggle={() => toggleComplete(task)} onOpen={() => setSheet({ task })} />
+              </SwipeRow>
             ))}
           </div>
         )}

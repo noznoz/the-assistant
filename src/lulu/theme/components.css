@@ -146,6 +146,22 @@
 .li .lead { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0; }
 .li.done .title { text-decoration: line-through; color: var(--ink-3); }
 
+/* Swipe-to-reveal (Edit / Delete) */
+.swipe-wrap { position: relative; margin-bottom: 10px; border-radius: var(--r-md); overflow: hidden; }
+.swipe-wrap > .swipe-content > .li { margin-bottom: 0; }
+.swipe-actions {
+  position: absolute; top: 0; bottom: 0; right: 0;
+  display: flex; z-index: 0;
+}
+.swipe-actions button {
+  border: 0; height: 100%; width: 76px; color: #fff; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  font-size: 12px; font-weight: 650;
+}
+.swipe-actions .edit { background: var(--brand-600); }
+.swipe-actions .del { background: var(--danger); }
+.swipe-content { position: relative; z-index: 1; touch-action: pan-y; background: var(--bg); }
+
 /* checkbox */
 .check {
   width: 26px; height: 26px; border-radius: 50%;

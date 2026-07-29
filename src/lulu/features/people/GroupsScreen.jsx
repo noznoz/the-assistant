@@ -4,6 +4,7 @@ import { DetailHeader, Card, Sheet, Field, Input, Button, Empty, Fab, useToast }
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { GROUP_ICONS, SUGGESTED_GROUPS } from '../../lib/domain.js'
+import SwipeRow from '../../ui/SwipeRow.jsx'
 
 // Manage contact groups (Family, Friends, Work, …). Each group has a name and
 // an icon; people reference groups by id in their `groupIds` array.
@@ -15,6 +16,14 @@ export default function GroupsScreen({ go }) {
   const toast = useToast()
 
   const countFor = (id) => people.items.filter(p => (p.groupIds || []).includes(id)).length
+
+  const deleteGroup = (id) => {
+    if (!window.confirm(t('deleteGroupQ'))) return
+    people.items.forEach(p => {
+      if ((p.groupIds || []).includes(id)) people.patch(p.id, { groupIds: p.groupIds.filter(x => x !== id) })
+    })
+    groups.remove(id); toast.show(t('deletedToast'))
+  }
 
   const addSuggested = () => {
     SUGGESTED_GROUPS.forEach(g => {
@@ -37,7 +46,8 @@ export default function GroupsScreen({ go }) {
         ) : (
           <div style={{ marginTop: 14 }}>
             {groups.items.map(g => (
-              <div className="li" key={g.id} onClick={() => setEditor(g)}>
+              <SwipeRow key={g.id} onEdit={() => setEditor(g)} onDelete={() => deleteGroup(g.id)}>
+              <div className="li" onClick={() => setEditor(g)}>
                 <div className="lead t-brand"><Icon name={g.icon || 'people'} size={18} /></div>
                 <div className="body">
                   <div className="title">{g.name}</div>
@@ -45,6 +55,7 @@ export default function GroupsScreen({ go }) {
                 </div>
                 <Icon name="chevron" size={16} style={{ color: 'var(--ink-3)' }} />
               </div>
+              </SwipeRow>
             ))}
           </div>
         )}

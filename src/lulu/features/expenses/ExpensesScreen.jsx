@@ -8,6 +8,7 @@ import { findPayment, catLabel, label } from '../../lib/domain.js'
 import { money, fmtDate, isToday, isSameMonth, expenseSar } from '../../lib/format.js'
 import { share, formatExpenseSummary } from '../../lib/share.js'
 import ExpenseEditor from './ExpenseEditor.jsx'
+import SwipeRow from '../../ui/SwipeRow.jsx'
 
 export default function ExpensesScreen({ go }) {
   const { t, lang } = useT()
@@ -126,7 +127,8 @@ export default function ExpensesScreen({ go }) {
           const pm = findPayment(e.method)
           const proj = e.projectId && projects.items.find(p => p.id === e.projectId)
           return (
-            <div className="li" key={e.id} onClick={() => setEditor(e)}>
+            <SwipeRow key={e.id} onEdit={() => setEditor(e)} onDelete={() => { expenses.remove(e.id); toast.show(t('deletedToast')) }}>
+            <div className="li" onClick={() => setEditor(e)}>
               <div className="lead t-brand"><Icon name="receipt" size={18} /></div>
               <div className="body">
                 <div className="title">{e.item || e.merchant || catLabel(e.category, lang)}</div>
@@ -140,6 +142,7 @@ export default function ExpensesScreen({ go }) {
                 {(e.currency && e.currency !== 'SAR') && <div className="muted tnum" style={{ fontSize: 11 }}>≈ {money(expenseSar(e, rates), 'SAR', lang)}</div>}
               </div>
             </div>
+            </SwipeRow>
           )
         })}
       </div>

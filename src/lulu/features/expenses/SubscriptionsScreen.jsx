@@ -5,6 +5,7 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { categoryOptions, PAYMENT_METHODS, catLabel, label } from '../../lib/domain.js'
 import { money, fmtDate, daysUntil, todayISO, toSar } from '../../lib/format.js'
+import SwipeRow from '../../ui/SwipeRow.jsx'
 
 const CYCLES = [{ id: 'weekly', key: 'weekly' }, { id: 'monthly', key: 'monthly' }, { id: 'yearly', key: 'yearly' }]
 
@@ -60,7 +61,8 @@ export default function SubscriptionsScreen({ go }) {
             {sorted.map(s => {
               const dd = daysUntil(s.nextDue)
               return (
-                <div className="li" key={s.id}>
+                <SwipeRow key={s.id} onEdit={() => setEditor(s)} onDelete={() => { subs.remove(s.id); toast.show(t('deletedToast')) }}>
+                <div className="li">
                   <div className="lead t-brand"><Icon name="wallet" size={18} /></div>
                   <div className="body" onClick={() => setEditor(s)}>
                     <div className="title">{s.name}</div>
@@ -71,6 +73,7 @@ export default function SubscriptionsScreen({ go }) {
                   </div>
                   <button className="btn sm" onClick={() => markPaid(s)}>{t('markPaid')}</button>
                 </div>
+                </SwipeRow>
               )
             })}
           </div>

@@ -7,6 +7,7 @@ import { RELATIONSHIPS, label } from '../../lib/domain.js'
 import { whatsappToPerson, personDigits } from '../../lib/share.js'
 import PersonEditor from './PersonEditor.jsx'
 import PersonProfile from './PersonProfile.jsx'
+import SwipeRow from '../../ui/SwipeRow.jsx'
 
 export default function PeopleScreen({ go }) {
   const { t, lang } = useT()
@@ -81,7 +82,8 @@ export default function PeopleScreen({ go }) {
               const rel = RELATIONSHIPS.find(r => r.id === p.relationship)
               const initials = (p.name || '?').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
               return (
-                <div className="li" key={p.id} onClick={() => setViewing(p)}>
+                <SwipeRow key={p.id} onEdit={() => setEditor(p)} onDelete={() => { people.remove(p.id); toast.show(t('deletedToast')) }}>
+                <div className="li" onClick={() => setViewing(p)}>
                   <div className="lead" style={{ padding: 0, overflow: 'hidden', background: 'var(--brand-tint)', color: 'var(--brand-600)', fontWeight: 750 }}>
                     {p.photo ? <img src={p.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
                   </div>
@@ -104,6 +106,7 @@ export default function PeopleScreen({ go }) {
                     </button>
                   )}
                 </div>
+                </SwipeRow>
               )
             })}
           </>
