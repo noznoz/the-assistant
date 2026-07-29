@@ -97,7 +97,12 @@ export function maybeSeed() {
     { name: 'Ahmed Al-Sayed', jobTitle: 'Partner', company: 'Al-Sayed Legal', relationship: 'supplier', mobile: '+966500000002' },
     { name: 'Sara Al-Nasser', jobTitle: 'Executive Assistant', company: 'Office', relationship: 'report', mobile: '+966500000003' },
   ]
-  const savedPeople = people.map(p => db.insert('people', p))
+  // Contact groups
+  const gFamily = db.insert('groups', { name: 'Family', icon: 'people' })
+  const gFriends = db.insert('groups', { name: 'Friends', icon: 'sparkle' })
+  const gWork = db.insert('groups', { name: 'Work', icon: 'flag' })
+  const groupFor = (rel) => rel === 'family' ? [gFamily.id] : ['colleague', 'report', 'manager'].includes(rel) ? [gWork.id] : []
+  const savedPeople = people.map(p => db.insert('people', { ...p, groupIds: groupFor(p.relationship) }))
   // A couple of family-assigned tasks to demonstrate delegation.
   const layla = savedPeople[0], omar = savedPeople[1]
   db.insert('tasks', { title: 'Pick up the AlUla trip documents', type: 'request', classification: 'personal', priority: 'high', status: 'waiting_someone', dueDate: todayISO(), assigneeId: layla.id, assignedTo: layla.name })

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { Sheet, Field, Input, Select, Button } from '../../ui/primitives.jsx'
+import { Sheet, Field, Input, Select, Button, Chip } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { RELATIONSHIPS, label } from '../../lib/domain.js'
@@ -11,9 +11,14 @@ import { makeThumb } from '../../lib/files.js'
 export default function PersonEditor({ initial = {}, onClose, onSaved }) {
   const { t, lang } = useT()
   const people = useCollection('people')
+  const groups = useCollection('groups')
   const [f, setF] = useState({
     name: '', photo: '', jobTitle: '', company: '', mobile: '', whatsapp: '',
-    email: '', relationship: 'family', birthday: '', notes: '', ...initial,
+    email: '', relationship: 'family', birthday: '', notes: '', groupIds: [], ...initial,
+  })
+  const toggleGroup = (id) => setF(prev => {
+    const cur = prev.groupIds || []
+    return { ...prev, groupIds: cur.includes(id) ? cur.filter(x => x !== id) : [...cur, id] }
   })
   const [err, setErr] = useState('')
   const photoRef = useRef()
@@ -61,6 +66,17 @@ export default function PersonEditor({ initial = {}, onClose, onSaved }) {
       <Field label={t('relationship')}>
         <Select value={f.relationship} onChange={set('relationship')} options={RELATIONSHIPS.map(r => ({ value: r.id, label: label(r, lang) }))} />
       </Field>
+      {groups.items.length > 0 && (
+        <Field label={t('groups')}>
+          <div className="chip-row">
+            {groups.items.map(g => (
+              <Chip key={g.id} selectable on={(f.groupIds || []).includes(g.id)} onClick={() => toggleGroup(g.id)}>
+                <Icon name={g.icon || 'people'} size={13} /> {g.name}
+              </Chip>
+            ))}
+          </div>
+        </Field>
+      )}
       <div className="row2">
         <Field label={t('mobile')}><Input value={f.mobile} onChange={set('mobile')} placeholder="+9665…" inputMode="tel" /></Field>
         <Field label={t('whatsapp')}><Input value={f.whatsapp} onChange={set('whatsapp')} placeholder="+9665…" inputMode="tel" /></Field>

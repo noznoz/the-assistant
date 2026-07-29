@@ -104,6 +104,19 @@ export const DOC_CATEGORIES = [
 
 export const CURRENCIES = ['SAR', 'USD', 'EUR', 'GBP', 'AED', 'KWD', 'BHD', 'QAR', 'OMR']
 
+// Icons offered when creating a contact group (must exist in ui/Icon.jsx).
+export const GROUP_ICONS = [
+  'people', 'cake', 'gift', 'sparkle', 'car', 'trip', 'wallet',
+  'flag', 'phone', 'mail', 'shield', 'note', 'wrench', 'doc',
+]
+
+// One-tap starter groups shown when no groups exist yet.
+export const SUGGESTED_GROUPS = [
+  { key: 'family', icon: 'people', en: 'Family', ar: 'العائلة' },
+  { key: 'friends', icon: 'sparkle', en: 'Friends', ar: 'الأصدقاء' },
+  { key: 'work', icon: 'flag', en: 'Work', ar: 'العمل' },
+]
+
 // Helpers to look up a label object by id.
 const byId = (list) => (id) => list.find(x => x.id === id)
 export const findCategory = byId(EXPENSE_CATEGORIES)

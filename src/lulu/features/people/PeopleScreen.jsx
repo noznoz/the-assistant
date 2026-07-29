@@ -8,11 +8,10 @@ import { whatsappToPerson, personDigits } from '../../lib/share.js'
 import PersonEditor from './PersonEditor.jsx'
 import PersonProfile from './PersonProfile.jsx'
 
-const WORK_RELS = ['colleague', 'report', 'manager']
-
 export default function PeopleScreen({ go }) {
   const { t, lang } = useT()
   const people = useCollection('people')
+  const groups = useCollection('groups')
   const tasks = useCollection('tasks')
   const [editor, setEditor] = useState(null)
   const [viewing, setViewing] = useState(null)
@@ -30,21 +29,17 @@ export default function PeopleScreen({ go }) {
 
   const list = people.items.filter(p => {
     if (filter === 'all') return true
-    if (filter === 'family') return p.relationship === 'family'
-    if (filter === 'work') return WORK_RELS.includes(p.relationship)
-    return true
+    return (p.groupIds || []).includes(filter)
   })
 
-  const filters = [
-    { id: 'all', label: t('all') },
-    { id: 'family', label: t('family') },
-    { id: 'work', label: t('work') },
-  ]
+  const filters = [{ id: 'all', label: t('all'), icon: '' }]
+    .concat(groups.items.map(g => ({ id: g.id, label: g.name, icon: g.icon || 'people' })))
 
   return (
     <>
       <DetailHeader title={t('people')} onBack={() => go('more')} right={
         <>
+          <button className="iconbtn" onClick={() => go('groups')} aria-label={t('groups')}><Icon name="people" size={18} /></button>
           <button className="iconbtn" onClick={() => go('message')} aria-label={t('sendMessage')} style={{ color: 'var(--ok)' }}><Icon name="whatsapp" size={18} /></button>
           <button className="iconbtn" onClick={() => go('rewards')} aria-label={t('rewardsStore')}><Icon name="gift" size={18} /></button>
         </>
@@ -57,10 +52,13 @@ export default function PeopleScreen({ go }) {
           <>
             <div className="chip-row" style={{ margin: '14px 0 4px' }}>
               {filters.map(fl => (
-                <Chip key={fl.id} selectable on={filter === fl.id} onClick={() => setFilter(fl.id)}>{fl.label}</Chip>
+                <Chip key={fl.id} selectable on={filter === fl.id} onClick={() => setFilter(fl.id)}>
+                  {fl.icon ? <Icon name={fl.icon} size={13} /> : null} {fl.label}
+                </Chip>
               ))}
+              <Chip onClick={() => go('groups')}><Icon name="plus" size={13} /> {t('groups')}</Chip>
             </div>
-            {filter === 'family' && (() => {
+            {filter === 'all' && (() => {
               const board = people.items.filter(p => p.relationship === 'family' && (Number(p.points) || 0) > 0)
                 .sort((a, b) => (Number(b.points) || 0) - (Number(a.points) || 0)).slice(0, 3)
               if (!board.length) return null
@@ -91,6 +89,10 @@ export default function PeopleScreen({ go }) {
                     <div className="title">{p.name}</div>
                     <div className="meta">
                       {[rel ? label(rel, lang) : '', p.jobTitle].filter(Boolean).join(' · ')}
+                      {(p.groupIds || []).map(gid => {
+                        const g = groups.items.find(x => x.id === gid)
+                        return g ? <span key={gid} className="chip t-brand" style={{ padding: '1px 7px' }}><Icon name={g.icon || 'people'} size={11} /> {g.name}</span> : null
+                      })}
                       {open.length > 0 && <span className="chip t-warn" style={{ padding: '1px 7px' }}>{open.length} {t('openLabel')}</span>}
                       {(Number(p.points) || 0) > 0 && <span className="chip t-brand" style={{ padding: '1px 7px' }}>{p.points} {t('pts')}</span>}
                     </div>

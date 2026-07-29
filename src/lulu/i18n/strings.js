@@ -149,6 +149,12 @@ export const STRINGS = {
     searchContacts: 'Search contacts', sendVia: 'Send on WhatsApp', sendViaWhatsApp: 'Send on WhatsApp',
     clear: 'Clear', noNumberForContact: 'That contact has no number',
     quickHi: 'Hello 👋', quickFollowUp: 'Just following up.', quickThanks: 'Thank you 🙏',
+    // groups
+    groups: 'Groups', group: 'Group', newGroup: 'New group', editGroup: 'Edit group',
+    deleteGroupQ: 'Delete this group? People stay, they just leave the group.',
+    groupName: 'Group name', groupNamePlaceholder: 'Family, Friends, Work…',
+    noGroups: 'No groups yet', groupsHint: 'Organize people into groups like Family, Friends or Work.',
+    addSuggestedGroups: 'Add Family, Friends & Work', member: 'member', members: 'members', icon: 'Icon',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -298,6 +304,12 @@ export const STRINGS = {
     searchContacts: 'بحث في جهات الاتصال', sendVia: 'إرسال عبر واتساب', sendViaWhatsApp: 'إرسال عبر واتساب',
     clear: 'مسح', noNumberForContact: 'لا يوجد رقم لجهة الاتصال',
     quickHi: 'مرحباً 👋', quickFollowUp: 'متابعة بسيطة.', quickThanks: 'شكراً 🙏',
+    // groups
+    groups: 'المجموعات', group: 'مجموعة', newGroup: 'مجموعة جديدة', editGroup: 'تعديل المجموعة',
+    deleteGroupQ: 'حذف هذه المجموعة؟ ستبقى جهات الاتصال، وتخرج من المجموعة فقط.',
+    groupName: 'اسم المجموعة', groupNamePlaceholder: 'العائلة، الأصدقاء، العمل…',
+    noGroups: 'لا توجد مجموعات بعد', groupsHint: 'نظّم الأشخاص في مجموعات مثل العائلة والأصدقاء والعمل.',
+    addSuggestedGroups: 'إضافة العائلة والأصدقاء والعمل', member: 'عضو', members: 'أعضاء', icon: 'أيقونة',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',

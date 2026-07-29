@@ -12,7 +12,7 @@ const NS = 'lulu:v1'
 export const COLLECTIONS = [
   'tasks', 'inbox', 'vehicles', 'services', 'accessories',
   'expenses', 'projects', 'subscriptions', 'rewards',
-  'people', 'documents', 'trips', 'notes', 'notifications',
+  'people', 'groups', 'documents', 'trips', 'notes', 'notifications',
 ]
 
 function keyFor(name) { return `${NS}:${name}` }
