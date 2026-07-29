@@ -148,7 +148,8 @@
 
 /* Swipe-to-reveal (Edit / Delete) */
 .swipe-wrap { position: relative; margin-bottom: 10px; border-radius: var(--r-md); overflow: hidden; }
-.swipe-wrap > .swipe-content > .li { margin-bottom: 0; }
+.swipe-wrap > .swipe-content > .li,
+.swipe-wrap > .swipe-content > .card { margin-bottom: 0; }
 .swipe-actions {
   position: absolute; top: 0; bottom: 0; right: 0;
   display: flex; z-index: 0;

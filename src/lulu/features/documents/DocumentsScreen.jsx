@@ -9,6 +9,7 @@ import {
   saveAttachment, removeAttachment, getAttachmentFile, shareAttachments,
   downloadBlob, isImage, isPdf, humanSize,
 } from '../../lib/files.js'
+import SwipeRow from '../../ui/SwipeRow.jsx'
 
 export default function DocumentsScreen({ go }) {
   const { t, lang } = useT()
@@ -51,7 +52,9 @@ export default function DocumentsScreen({ go }) {
               const thumb = (d.attachments || []).find(a => a.thumb)?.thumb
               const count = (d.attachments || []).length
               return (
-                <div className="li" key={d.id} onClick={() => setViewing(d)}>
+                <SwipeRow key={d.id} onEdit={() => setEditor(d)}
+                  onDelete={async () => { for (const a of d.attachments || []) await removeAttachment(a); docs.remove(d.id); toast.show(t('deletedToast')) }}>
+                <div className="li" onClick={() => setViewing(d)}>
                   <div className="lead" style={{ padding: 0, overflow: 'hidden', background: 'var(--surface-2)' }}>
                     {thumb
                       ? <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -67,6 +70,7 @@ export default function DocumentsScreen({ go }) {
                   </div>
                   {dd != null && dd <= 30 && <Chip tint={dd <= 7 ? 't-danger' : 't-warn'}>{dd}d</Chip>}
                 </div>
+                </SwipeRow>
               )
             })}
           </div>

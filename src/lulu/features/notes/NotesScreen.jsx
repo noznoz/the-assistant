@@ -5,6 +5,7 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { fmtDate } from '../../lib/format.js'
 import NoteEditor from '../inbox/NoteEditor.jsx'
+import SwipeRow from '../../ui/SwipeRow.jsx'
 
 export default function NotesScreen({ go }) {
   const { t, lang } = useT()
@@ -31,13 +32,15 @@ export default function NotesScreen({ go }) {
         ) : (
           <div style={{ marginTop: 14 }}>
             {list.map(n => (
-              <div className="li" key={n.id} onClick={() => setEditor(n)} style={{ alignItems: 'flex-start' }}>
+              <SwipeRow key={n.id} onEdit={() => setEditor(n)} onDelete={() => { notes.remove(n.id); toast.show(t('deletedToast')) }}>
+              <div className="li" onClick={() => setEditor(n)} style={{ alignItems: 'flex-start' }}>
                 <div className="lead t-brand" style={{ marginTop: 2 }}><Icon name="note" size={18} /></div>
                 <div className="body">
                   <div className="title" style={{ fontWeight: 500, whiteSpace: 'pre-wrap' }}>{n.text}</div>
                   {n.createdAt && <div className="meta">{fmtDate(n.createdAt, lang)}</div>}
                 </div>
               </div>
+              </SwipeRow>
             ))}
           </div>
         )}

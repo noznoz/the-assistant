@@ -5,6 +5,7 @@ import { Card, Button, Empty, Chip, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { suggestTriage } from '../../lib/triage.js'
+import SwipeRow from '../../ui/SwipeRow.jsx'
 
 // Executive inbox — capture anything fast, triage into a task/note later.
 export default function InboxScreen({ go }) {
@@ -54,7 +55,8 @@ export default function InboxScreen({ go }) {
           ) : inbox.items.map(item => {
             const s = suggestTriage(item.text)
             return (
-              <div className="li" key={item.id}>
+              <SwipeRow key={item.id} onDelete={() => { inbox.remove(item.id); toast.show(t('deletedToast')) }}>
+              <div className="li">
                 <div className="lead t-info"><Icon name="inbox" size={18} /></div>
                 <div className="body">
                   <div className="title" style={{ fontWeight: 500 }}>{item.text}</div>
@@ -64,6 +66,7 @@ export default function InboxScreen({ go }) {
                 </div>
                 <button className="btn sm" onClick={() => triage(item)}>{t('triage')}</button>
               </div>
+              </SwipeRow>
             )
           })}
         </div>

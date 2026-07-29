@@ -8,6 +8,7 @@ import { fmtDate, money, isoDate, expenseSar } from '../../lib/format.js'
 import { share, formatExpenseSummary } from '../../lib/share.js'
 import { exportXlsx, printHtml } from '../../lib/exporters.js'
 import ExpenseEditor from '../expenses/ExpenseEditor.jsx'
+import SwipeRow from '../../ui/SwipeRow.jsx'
 
 export default function TripsScreen({ go }) {
   const { t, lang } = useT()
@@ -39,7 +40,8 @@ export default function TripsScreen({ go }) {
               const budget = Number(tr.budget) || 0
               const pct = budget ? Math.min(1, spent / budget) : 0
               return (
-                <Card key={tr.id} className="tight" style={{ marginBottom: 12 }} onClick={() => setViewing(tr)}>
+                <SwipeRow key={tr.id} onEdit={() => setEditor(tr)} onDelete={() => { trips.remove(tr.id); toast.show(t('deletedToast')) }}>
+                <Card className="tight" onClick={() => setViewing(tr)}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span className="lead t-brand" style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="trip" size={18} /></span>
                     <div style={{ flex: 1 }}>
@@ -57,6 +59,7 @@ export default function TripsScreen({ go }) {
                     </div>
                   )}
                 </Card>
+                </SwipeRow>
               )
             })}
           </div>
@@ -131,11 +134,13 @@ function TripDetail({ trip, onBack }) {
         <Section title={t('tripExpenses')} count={mine.length} />
         {mine.length === 0 ? <Empty icon="wallet" title={t('nothingHere')} text={t('addExpenseTo')} /> :
           mine.map(e => (
-            <div className="li" key={e.id} onClick={() => setAddExp(e)}>
+            <SwipeRow key={e.id} onEdit={() => setAddExp(e)} onDelete={() => { expenses.remove(e.id); toast.show(t('deletedToast')) }}>
+            <div className="li" onClick={() => setAddExp(e)}>
               <div className="lead t-brand"><Icon name="receipt" size={18} /></div>
               <div className="body"><div className="title">{e.merchant || catLabel(e.category, lang)}</div><div className="meta">{catLabel(e.category, lang)} · {fmtDate(e.date, lang, settings.dateFormat)}</div></div>
               <b className="tnum">{money(e.amount, e.currency || cur, lang)}</b>
             </div>
+            </SwipeRow>
           ))}
 
         <Button block variant="brand" icon="whatsapp" style={{ marginTop: 16 }} onClick={() => share(`🧭 *${trip.name}*\n\n` + formatExpenseSummary(mine, lang, settings))}>{t('share')}</Button>

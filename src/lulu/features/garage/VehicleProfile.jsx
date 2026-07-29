@@ -7,6 +7,8 @@ import { findVehicleType } from '../../lib/domain.js'
 import { money, fmtDate, daysUntil, expenseSar } from '../../lib/format.js'
 import { share, formatVehicle } from '../../lib/share.js'
 import VehicleEditor from './VehicleEditor.jsx'
+import ExpenseEditor from '../expenses/ExpenseEditor.jsx'
+import SwipeRow from '../../ui/SwipeRow.jsx'
 
 export default function VehicleProfile({ vehicle, go, onBack }) {
   const { t, lang } = useT()
@@ -17,7 +19,8 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
   const vehicles = useCollection('vehicles')
   const [tab, setTab] = useState('overview')
   const [edit, setEdit] = useState(false)
-  const [svcEditor, setSvcEditor] = useState(false)
+  const [svcEditor, setSvcEditor] = useState(false)   // true = new, service object = edit
+  const [expEditor, setExpEditor] = useState(null)    // expense record to edit
   const [emergency, setEmergency] = useState(false)
   const toast = useToast()
 
@@ -163,7 +166,8 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
               <Empty icon="wrench" title={t('nothingHere')}
                 action={<Button variant="primary" icon="plus" onClick={() => setSvcEditor(true)}>{t('addService')}</Button>} />
             ) : myServices.map(s => (
-              <div className="li" key={s.id}>
+              <SwipeRow key={s.id} onEdit={() => setSvcEditor(s)} onDelete={() => { services.remove(s.id); toast.show(t('deletedToast')) }}>
+              <div className="li" onClick={() => setSvcEditor(s)}>
                 <div className="lead t-brand"><Icon name="wrench" size={18} /></div>
                 <div className="body">
                   <div className="title">{s.work}</div>
@@ -172,6 +176,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
                 </div>
                 {s.cost ? <b className="tnum">{money(s.cost, cur, lang)}</b> : null}
               </div>
+              </SwipeRow>
             ))}
           </>
         )}
@@ -184,7 +189,8 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
             </Card>
             {myExpenses.length === 0 ? <Empty icon="wallet" title={t('nothingHere')} /> :
               myExpenses.map(e => (
-                <div className="li" key={e.id}>
+                <SwipeRow key={e.id} onEdit={() => setExpEditor(e)} onDelete={() => { expenses.remove(e.id); toast.show(t('deletedToast')) }}>
+                <div className="li" onClick={() => setExpEditor(e)}>
                   <div className="lead t-ok"><Icon name="wallet" size={18} /></div>
                   <div className="body">
                     <div className="title">{e.merchant || t('vehExpenses')}</div>
@@ -192,13 +198,15 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
                   </div>
                   <b className="tnum">{money(e.amount, cur, lang)}</b>
                 </div>
+                </SwipeRow>
               ))}
           </>
         )}
       </div>
 
       {edit && <VehicleEditor initial={vehicle} onClose={() => setEdit(false)} onSaved={() => toast.show(t('savedToast'))} onDeleted={() => (onBack ? onBack() : go('garage'))} />}
-      {svcEditor && <ServiceEditor vehicleId={vehicle.id} onClose={() => setSvcEditor(false)} onSaved={() => toast.show(t('savedToast'))} />}
+      {svcEditor && <ServiceEditor vehicleId={vehicle.id} initial={svcEditor.id ? svcEditor : null} onClose={() => setSvcEditor(false)} onSaved={() => toast.show(t('savedToast'))} />}
+      {expEditor && <ExpenseEditor initial={expEditor} onClose={() => setExpEditor(null)} onSaved={() => toast.show(t('savedToast'))} />}
       {emergency && (
         <Sheet title={t('emergencyInfo')} onClose={() => setEmergency(false)}
           footer={<Button block variant="brand" icon="whatsapp" onClick={() => share(formatVehicle(vehicle, lang, settings))}>{t('share')}</Button>}>
@@ -237,14 +245,23 @@ function Row({ k, v }) {
   )
 }
 
-function ServiceEditor({ vehicleId, onClose, onSaved }) {
+function ServiceEditor({ vehicleId, initial, onClose, onSaved }) {
   const { t } = useT()
   const services = useCollection('services')
-  const [f, setF] = useState({ vehicleId, date: new Date().toISOString().slice(0, 10), odo: '', workshop: '', work: '', cost: '', nextDate: '' })
+  const [f, setF] = useState({ vehicleId, date: new Date().toISOString().slice(0, 10), odo: '', workshop: '', work: '', cost: '', nextDate: '', ...(initial || {}) })
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
-  const submit = () => { if (!f.work.trim()) return; services.add({ ...f, cost: parseFloat(f.cost) || 0 }); onSaved && onSaved(); onClose() }
+  const submit = () => {
+    if (!f.work.trim()) return
+    const rec = { ...f, cost: parseFloat(f.cost) || 0 }
+    initial?.id ? services.save({ ...rec, id: initial.id }) : services.add(rec)
+    onSaved && onSaved(); onClose()
+  }
   return (
-    <Sheet title={t('addService')} onClose={onClose} footer={<Button variant="primary" block onClick={submit}>{t('save')}</Button>}>
+    <Sheet title={initial?.id ? t('edit') : t('addService')} onClose={onClose}
+      footer={<div className="stack">
+        <Button variant="primary" block onClick={submit}>{t('save')}</Button>
+        {initial?.id && <Button block variant="danger" icon="trash" onClick={() => { services.remove(initial.id); onClose() }}>{t('delete')}</Button>}
+      </div>}>
       <Field label={t('maintenance')} required><Input value={f.work} onChange={set('work')} placeholder="e.g. Oil & filter" autoFocus /></Field>
       <div className="row2">
         <Field label={t('date')}><Input type="date" value={f.date} onChange={set('date')} /></Field>

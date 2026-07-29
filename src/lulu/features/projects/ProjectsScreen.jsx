@@ -8,6 +8,7 @@ import { money, fmtDate, expenseSar } from '../../lib/format.js'
 import { share, formatExpenseSummary } from '../../lib/share.js'
 import { exportXlsx, printHtml } from '../../lib/exporters.js'
 import ExpenseEditor from '../expenses/ExpenseEditor.jsx'
+import SwipeRow from '../../ui/SwipeRow.jsx'
 
 export default function ProjectsScreen({ param, go }) {
   const { t, lang } = useT()
@@ -39,7 +40,8 @@ export default function ProjectsScreen({ param, go }) {
               const budget = Number(p.budget) || 0
               const pct = budget ? Math.min(1, total / budget) : 0
               return (
-                <Card key={p.id} className="tight" style={{ marginBottom: 12 }} onClick={() => go(`projects/${p.id}`)}>
+                <SwipeRow key={p.id} onEdit={() => setEditor(p)} onDelete={() => { projects.remove(p.id); toast.show(t('deletedToast')) }}>
+                <Card className="tight" onClick={() => go(`projects/${p.id}`)}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span className="lead t-brand" style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="report" size={18} /></span>
                     <div style={{ flex: 1 }}>
@@ -54,6 +56,7 @@ export default function ProjectsScreen({ param, go }) {
                     </div>
                   )}
                 </Card>
+                </SwipeRow>
               )
             })}
           </div>
@@ -171,7 +174,8 @@ function ProjectDetail({ project, go, onBack }) {
         {mine.length === 0 ? (
           <Empty icon="wallet" title={t('nothingHere')} text={t('addExpenseTo')} />
         ) : mine.map(e => (
-          <div className="li" key={e.id} onClick={() => setAddExp(e)}>
+          <SwipeRow key={e.id} onEdit={() => setAddExp(e)} onDelete={() => { expenses.remove(e.id); toast.show(t('deletedToast')) }}>
+          <div className="li" onClick={() => setAddExp(e)}>
             <div className="lead t-brand"><Icon name="receipt" size={18} /></div>
             <div className="body">
               <div className="title">{e.merchant || catLabel(e.category, lang)}</div>
@@ -179,6 +183,7 @@ function ProjectDetail({ project, go, onBack }) {
             </div>
             <b className="tnum">{money(e.amount, e.currency || cur, lang)}</b>
           </div>
+          </SwipeRow>
         ))}
       </div>
 

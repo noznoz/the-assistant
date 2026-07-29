@@ -3,6 +3,7 @@ import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Sheet, Field, Input, Button, Empty, Fab, Chip, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
+import SwipeRow from '../../ui/SwipeRow.jsx'
 
 export default function RewardsScreen({ go }) {
   const { t } = useT()
@@ -20,7 +21,8 @@ export default function RewardsScreen({ go }) {
         ) : (
           <div style={{ marginTop: 14 }}>
             {rewards.items.map(r => (
-              <div className="li" key={r.id} onClick={() => setEditor(r)}>
+              <SwipeRow key={r.id} onEdit={() => setEditor(r)} onDelete={() => { rewards.remove(r.id); toast.show(t('deletedToast')) }}>
+              <div className="li" onClick={() => setEditor(r)}>
                 <div className="lead t-brand"><Icon name="gift" size={18} /></div>
                 <div className="body">
                   <div className="title">{r.name}</div>
@@ -28,6 +30,7 @@ export default function RewardsScreen({ go }) {
                 </div>
                 <Chip tint="t-brand"><Icon name="sparkle" size={12} /> {Number(r.cost) || 0} {t('pts')}</Chip>
               </div>
+              </SwipeRow>
             ))}
           </div>
         )}
