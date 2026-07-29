@@ -142,6 +142,13 @@ export const STRINGS = {
     workInfo: 'Work', employeeId: 'Employee ID',
     emergencyContact: 'Emergency contact', profileStoredLocally: 'Stored on this device only.',
     choosePhoto: 'Choose photo',
+    // messaging
+    sendMessage: 'Send message', to: 'To', writeMessagePlaceholder: 'Write your message…',
+    writeMessageFirst: 'Write a message first', chooseFromContacts: 'Choose from phone contacts',
+    orTypeNumber: 'Or type a number', fromMyContacts: 'From my contacts', noContactsYet: 'No contacts with a number yet',
+    searchContacts: 'Search contacts', sendVia: 'Send on WhatsApp', sendViaWhatsApp: 'Send on WhatsApp',
+    clear: 'Clear', noNumberForContact: 'That contact has no number',
+    quickHi: 'Hello 👋', quickFollowUp: 'Just following up.', quickThanks: 'Thank you 🙏',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -284,6 +291,13 @@ export const STRINGS = {
     workInfo: 'العمل', employeeId: 'الرقم الوظيفي',
     emergencyContact: 'جهة اتصال للطوارئ', profileStoredLocally: 'محفوظ على هذا الجهاز فقط.',
     choosePhoto: 'اختر صورة',
+    // messaging
+    sendMessage: 'إرسال رسالة', to: 'إلى', writeMessagePlaceholder: 'اكتب رسالتك…',
+    writeMessageFirst: 'اكتب رسالة أولاً', chooseFromContacts: 'اختر من جهات اتصال الهاتف',
+    orTypeNumber: 'أو اكتب رقماً', fromMyContacts: 'من جهات اتصالي', noContactsYet: 'لا توجد جهات اتصال بأرقام بعد',
+    searchContacts: 'بحث في جهات الاتصال', sendVia: 'إرسال عبر واتساب', sendViaWhatsApp: 'إرسال عبر واتساب',
+    clear: 'مسح', noNumberForContact: 'لا يوجد رقم لجهة الاتصال',
+    quickHi: 'مرحباً 👋', quickFollowUp: 'متابعة بسيطة.', quickThanks: 'شكراً 🙏',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',

@@ -44,7 +44,10 @@ export default function PeopleScreen({ go }) {
   return (
     <>
       <DetailHeader title={t('people')} onBack={() => go('more')} right={
-        <button className="iconbtn" onClick={() => go('rewards')} aria-label={t('rewardsStore')}><Icon name="gift" size={18} /></button>
+        <>
+          <button className="iconbtn" onClick={() => go('message')} aria-label={t('sendMessage')} style={{ color: 'var(--ok)' }}><Icon name="whatsapp" size={18} /></button>
+          <button className="iconbtn" onClick={() => go('rewards')} aria-label={t('rewardsStore')}><Icon name="gift" size={18} /></button>
+        </>
       } />
       <div className="screen">
         {people.items.length === 0 ? (

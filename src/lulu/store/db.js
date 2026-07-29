@@ -91,6 +91,7 @@ export const DEFAULT_SETTINGS = {
   categoryBudgets: {},   // { [categoryId]: monthly amount }
   rates: {},             // { [currency]: SAR per unit } — overrides DEFAULT_RATES
   profile: {},           // owner's personal info + Saudi National Address
+  notificationsSeen: [], // ids of notification-feed items already viewed
 }
 
 export function readSettings() {

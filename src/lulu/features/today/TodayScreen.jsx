@@ -6,6 +6,7 @@ import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { greetingKey, fmtLongDate, isToday, isOverdue, daysUntil, money, expenseSar } from '../../lib/format.js'
 import { hijriDate } from '../../lib/prayer.js'
 import { buildBrief } from '../../lib/brief.js'
+import { buildNotificationFeed, unreadCount } from '../../lib/notifications.js'
 import PrayerCard from './PrayerCard.jsx'
 import { share, formatAgenda } from '../../lib/share.js'
 import { findPriority } from '../../lib/domain.js'
@@ -19,10 +20,10 @@ const QUICK = [
   { id: 'request', key: 'addRequest', icon: 'inbox' },
   { id: 'expense', key: 'addExpense', icon: 'wallet' },
   { id: 'note', key: 'addNote', icon: 'note' },
+  { id: 'message', key: 'sendMessage', icon: 'whatsapp' },
   { id: 'appointment', key: 'addAppointment', icon: 'calendar' },
   { id: 'vehicle', key: 'addVehicle', icon: 'car' },
   { id: 'receipt', key: 'scanReceipt', icon: 'receipt' },
-  { id: 'voice', key: 'voice', icon: 'mic' },
 ]
 
 export default function TodayScreen({ go }) {
@@ -32,8 +33,18 @@ export default function TodayScreen({ go }) {
   const expenses = useCollection('expenses')
   const vehicles = useCollection('vehicles')
   const notes = useCollection('notes')
+  const services = useCollection('services')
+  const documents = useCollection('documents')
+  const subscriptions = useCollection('subscriptions')
+  const people = useCollection('people')
   const [editor, setEditor] = useState(null)
   const toast = useToast()
+
+  const notifFeed = useMemo(() => buildNotificationFeed({
+    tasks: tasks.items, vehicles: vehicles.items, services: services.items,
+    docs: documents.items, subs: subscriptions.items, people: people.items, t, lang, settings,
+  }), [tasks.items, vehicles.items, services.items, documents.items, subscriptions.items, people.items, lang])
+  const unread = unreadCount(notifFeed, settings.notificationsSeen)
 
   const open = tasks.items.filter(x => x.status !== 'completed' && x.status !== 'cancelled')
   const dueToday = open.filter(x => isToday(x.dueDate))
@@ -75,7 +86,16 @@ export default function TodayScreen({ go }) {
         <div style={{ flex: 1 }}>
           <div className="sub">{fmtLongDate(new Date(), lang)}{hijriDate(new Date(), lang) ? ` · ${hijriDate(new Date(), lang)}` : ''}</div>
         </div>
-        <button className="iconbtn" onClick={() => go('notifications')} aria-label={t('notifications')}><Icon name="bell" size={18} /></button>
+        <button className="iconbtn" onClick={() => go('notifications')} aria-label={t('notifications')} style={{ position: 'relative' }}>
+          <Icon name="bell" size={18} />
+          {unread > 0 && (
+            <span style={{
+              position: 'absolute', top: 2, insetInlineEnd: 2, minWidth: 17, height: 17, padding: '0 4px',
+              borderRadius: 9, background: 'var(--danger)', color: '#fff', fontSize: 10.5, fontWeight: 750,
+              display: 'grid', placeItems: 'center', border: '2px solid var(--bg)', lineHeight: 1,
+            }}>{unread > 99 ? '99+' : unread}</span>
+          )}
+        </button>
         <button className="iconbtn" onClick={() => go('search')} aria-label={t('search')}><Icon name="search" size={18} /></button>
       </div>
 
@@ -116,6 +136,7 @@ export default function TodayScreen({ go }) {
         <div className="qa-grid">
           {QUICK.map(q => (
             <button key={q.id} className="qa" onClick={() => {
+              if (q.id === 'message') { go('message'); return }
               if (q.id === 'receipt' || q.id === 'voice') { toast.show(t('comingSoon')); return }
               setEditor(q.id)
             }}>
