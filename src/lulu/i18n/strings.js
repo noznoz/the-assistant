@@ -217,6 +217,23 @@ export const STRINGS = {
     descriptionPlaceholder: 'Add a description or notes…',
     noVehicleDocs: 'No documents yet', vehicleDocsHint: 'Keep registration, insurance and warranty papers here.',
     ownership: 'Ownership',
+    // properties
+    properties: 'Properties', noProperties: 'No properties yet',
+    propertiesHint: 'Track homes, land and rentals — value, rent, documents.',
+    addProperty: 'Add property', editProperty: 'Edit property', propertyName: 'Name',
+    rentPerMonth: 'Rent / month', rentedTo: 'Rented to', address: 'Address',
+    propertyDocsHint: 'Title deed, contracts, utility bills…',
+    // valuables & warranty
+    valuables: 'Valuables', noValuables: 'No valuables yet',
+    valuablesHint: 'Track valuables and warranties — with receipts.',
+    addValuable: 'Add item', editValuable: 'Edit item', valuableName: 'Name',
+    serialNumber: 'Serial number', value: 'Value', warranty: 'Warranty',
+    warrantyExpiry: 'Warranty expiry', warrantyExpired: 'Warranty expired', underWarranty: 'Under warranty',
+    totalValue: 'Total value',
+    // week ahead
+    weekAhead: 'Week ahead', week: 'Week ahead', allClear: 'All clear',
+    weekEmptyHint: 'Nothing due in the next 7 days.', tasksThisWeek: 'Tasks this week',
+    moneyThisWeek: 'Money this week', shareWeekAhead: 'Share the week ahead',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -434,6 +451,23 @@ export const STRINGS = {
     descriptionPlaceholder: 'أضف وصفاً أو ملاحظات…',
     noVehicleDocs: 'لا توجد مستندات بعد', vehicleDocsHint: 'احتفظ باستمارة المركبة والتأمين والضمان هنا.',
     ownership: 'الملكية',
+    // properties
+    properties: 'العقارات', noProperties: 'لا توجد عقارات بعد',
+    propertiesHint: 'تابع المنازل والأراضي والإيجارات — القيمة والإيجار والمستندات.',
+    addProperty: 'إضافة عقار', editProperty: 'تعديل العقار', propertyName: 'الاسم',
+    rentPerMonth: 'الإيجار / شهر', rentedTo: 'مؤجّر إلى', address: 'العنوان',
+    propertyDocsHint: 'صك الملكية، العقود، فواتير الخدمات…',
+    // valuables & warranty
+    valuables: 'المقتنيات', noValuables: 'لا توجد مقتنيات بعد',
+    valuablesHint: 'تابع المقتنيات والضمانات — مع الإيصالات.',
+    addValuable: 'إضافة عنصر', editValuable: 'تعديل العنصر', valuableName: 'الاسم',
+    serialNumber: 'الرقم التسلسلي', value: 'القيمة', warranty: 'الضمان',
+    warrantyExpiry: 'انتهاء الضمان', warrantyExpired: 'انتهى الضمان', underWarranty: 'ضمن الضمان',
+    totalValue: 'القيمة الإجمالية',
+    // week ahead
+    weekAhead: 'الأسبوع القادم', week: 'الأسبوع القادم', allClear: 'كل شيء تمام',
+    weekEmptyHint: 'لا شيء مستحق خلال 7 أيام.', tasksThisWeek: 'مهام هذا الأسبوع',
+    moneyThisWeek: 'مالية هذا الأسبوع', shareWeekAhead: 'مشاركة الأسبوع القادم',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',

@@ -6,10 +6,13 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 
 const ITEMS = [
+  { id: 'week', icon: 'calendar', route: 'week' },
   { id: 'inbox', icon: 'inbox', collection: 'inbox' },
   { id: 'notes', icon: 'note', collection: 'notes' },
   { id: 'calendar', icon: 'calendar' },
   { id: 'people', icon: 'people', collection: 'people' },
+  { id: 'properties', icon: 'doc', collection: 'properties' },
+  { id: 'valuables', icon: 'gift', collection: 'valuables' },
   { id: 'documents', icon: 'doc', collection: 'documents' },
   { id: 'trips', icon: 'trip', collection: 'trips' },
   { id: 'reports', icon: 'report' },
@@ -27,6 +30,8 @@ export default function MoreScreen({ go }) {
     inbox: useCollection('inbox').items.length,
     notes: useCollection('notes').items.length,
     people: useCollection('people').items.length,
+    properties: useCollection('properties').items.length,
+    valuables: useCollection('valuables').items.length,
     documents: useCollection('documents').items.length,
     trips: useCollection('trips').items.length,
   }
@@ -69,7 +74,7 @@ export default function MoreScreen({ go }) {
             </button>
           ))}
         </Card>
-        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v2.6</p>
+        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v2.7</p>
       </div>
     </>
   )

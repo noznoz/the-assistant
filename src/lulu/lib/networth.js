@@ -31,17 +31,19 @@ export function investmentValue(v, rates) {
   return toSar(v.currentValue || v.invested, v.currency || 'SAR', rates)
 }
 
-// Assets = account remaining balances + investment portfolio value.
-export function totalAssets({ accounts = [], investments = [], income = [], expenses = [], rates }) {
+// Assets = account balances + investments + property values + valuables.
+export function totalAssets({ accounts = [], investments = [], properties = [], valuables = [], income = [], expenses = [], rates }) {
   const accountsTotal = accounts.reduce((s, a) => s + accountStats(a, income, expenses, rates).remaining, 0)
   const investTotal = investments.reduce((s, v) => s + investmentValue(v, rates), 0)
-  return { accountsTotal, investTotal, total: accountsTotal + investTotal }
+  const propertyTotal = properties.reduce((s, p) => s + toSar(p.currentValue || p.purchasePrice, p.currency || 'SAR', rates), 0)
+  const valuablesTotal = valuables.reduce((s, v) => s + toSar(v.value, v.currency || 'SAR', rates), 0)
+  return { accountsTotal, investTotal, propertyTotal, valuablesTotal, total: accountsTotal + investTotal + propertyTotal + valuablesTotal }
 }
 
-export function netWorth({ accounts = [], investments = [], income = [], expenses = [], liabilities = [], rates }) {
-  const assets = totalAssets({ accounts, investments, income, expenses, rates })
+export function netWorth({ accounts = [], investments = [], properties = [], valuables = [], income = [], expenses = [], liabilities = [], rates }) {
+  const assets = totalAssets({ accounts, investments, properties, valuables, income, expenses, rates })
   const debt = totalLiabilities(expenses, rates, liabilities)
-  return { assets: assets.total, accountsTotal: assets.accountsTotal, investTotal: assets.investTotal, liabilities: debt, value: assets.total - debt }
+  return { assets: assets.total, accountsTotal: assets.accountsTotal, investTotal: assets.investTotal, propertyTotal: assets.propertyTotal, valuablesTotal: assets.valuablesTotal, liabilities: debt, value: assets.total - debt }
 }
 
 export function monthKey(d = new Date()) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` }

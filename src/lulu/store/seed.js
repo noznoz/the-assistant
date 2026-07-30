@@ -89,9 +89,17 @@ export function maybeSeed() {
 
   // Investments / holdings, with a dividend logged as income.
   const invAramco = db.insert('investments', { name: 'Aramco shares', type: 'stocks', invested: 200000, currentValue: 236000, currency: 'SAR', note: '2,000 shares' })
-  db.insert('investments', { name: 'Rental flat — Jeddah', type: 'realestate', invested: 1200000, currentValue: 1350000, currency: 'SAR' })
   db.insert('investments', { name: 'Global index fund', type: 'fund', invested: 50000, currentValue: 58500, currency: 'USD' })
   db.insert('income', { source: 'dividend', investmentId: invAramco.id, amount: 4200, currency: 'SAR', date: d(-8), recurring: false, note: 'Aramco shares' })
+
+  // Properties / real estate
+  db.insert('properties', { name: 'Family villa', type: 'villa', address: 'Al Malqa, Riyadh', purchasePrice: 1800000, currentValue: 1950000, currency: 'SAR', ownership: 'finance', monthlyRent: 0, note: 'Primary residence' })
+  db.insert('properties', { name: 'Rental flat — Jeddah', type: 'apartment', address: 'Al Shati, Jeddah', purchasePrice: 1200000, currentValue: 1350000, currency: 'SAR', ownership: 'owned', monthlyRent: 4500, rentedTo: 'Mr. Faisal' })
+
+  // Valuables & warranties
+  db.insert('valuables', { name: 'Rolex Submariner', category: 'watch', brand: 'Rolex', value: 48000, currency: 'SAR', purchaseDate: d(-400), warrantyExpiry: d(1400), receipts: [] })
+  db.insert('valuables', { name: 'MacBook Pro 16"', category: 'electronics', brand: 'Apple', model: 'M4 Pro', serial: 'C02XXXX', value: 12000, currency: 'SAR', purchaseDate: d(-1), warrantyExpiry: d(364), receipts: [] })
+  db.insert('valuables', { name: 'Samsung fridge', category: 'appliance', brand: 'Samsung', value: 6500, currency: 'SAR', purchaseDate: d(-320), warrantyExpiry: d(20), receipts: [] })
 
   // Subscriptions / recurring bills
   db.insert('subscriptions', { name: 'Netflix', amount: 56, currency: 'SAR', cycle: 'monthly', category: 'subscriptions', method: 'credit', nextDue: d(3), active: true })

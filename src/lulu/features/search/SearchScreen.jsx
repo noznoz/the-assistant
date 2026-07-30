@@ -17,13 +17,21 @@ export default function SearchScreen({ go }) {
     const push = (kind, icon, target, item, text) => {
       if (text.toLowerCase().includes(s)) out.push({ kind, icon, target, id: item.id, label: text })
     }
-    data.tasks?.forEach(x => push(t('tasks'), 'check', 'tasks', x, x.title))
-    data.vehicles?.forEach(x => push(t('garage'), 'car', `garage/${x.id}`, x, `${x.name} ${x.nickname || ''}`))
-    data.expenses?.forEach(x => push(t('expenses'), 'wallet', 'expenses', x, `${x.merchant || ''} ${x.amount}`))
-    data.people?.forEach(x => push(t('people'), 'people', 'people', x, x.name))
+    data.tasks?.forEach(x => push(t('tasks'), 'check', 'tasks', x, `${x.title} ${x.assignedTo || ''} ${x.project || ''}`))
+    data.vehicles?.forEach(x => push(t('garage'), 'car', `garage/${x.id}`, x, `${x.name} ${x.nickname || ''} ${x.plate || ''}`))
+    data.properties?.forEach(x => push(t('properties'), 'doc', `properties/${x.id}`, x, `${x.name} ${x.address || ''}`))
+    data.expenses?.forEach(x => push(t('expenses'), 'wallet', 'expenses', x, `${x.merchant || ''} ${x.item || ''} ${x.amount}`))
+    data.income?.forEach(x => push(t('income'), 'wallet', 'income', x, `${x.note || ''} ${x.source || ''} ${x.amount}`))
+    data.liabilities?.forEach(x => push(t('liabilities'), 'wallet', 'liabilities', x, `${x.name} ${x.lender || ''}`))
+    data.investments?.forEach(x => push(t('investments'), 'chart', 'investments', x, x.name))
+    data.subscriptions?.forEach(x => push(t('subscriptions'), 'refresh', 'subscriptions', x, x.name))
+    data.projects?.forEach(x => push(t('projects'), 'report', `projects/${x.id}`, x, x.name))
+    data.trips?.forEach(x => push(t('trips'), 'trip', 'trips', x, `${x.name} ${x.destination || ''}`))
+    data.valuables?.forEach(x => push(t('valuables'), 'gift', 'valuables', x, `${x.name} ${x.brand || ''} ${x.model || ''} ${x.serial || ''}`))
+    data.people?.forEach(x => push(t('people'), 'people', 'people', x, `${x.name} ${x.company || ''} ${x.jobTitle || ''}`))
     data.documents?.forEach(x => push(t('documents'), 'doc', 'documents', x, x.title))
-    data.notes?.forEach(x => push(t('quickNotes'), 'note', 'today', x, x.text || ''))
-    return out.slice(0, 40)
+    data.notes?.forEach(x => push(t('quickNotes'), 'note', 'notes', x, x.text || ''))
+    return out.slice(0, 50)
   }, [q, data])
 
   return (

@@ -37,13 +37,14 @@ export default function TodayScreen({ go }) {
   const documents = useCollection('documents')
   const subscriptions = useCollection('subscriptions')
   const people = useCollection('people')
+  const valuables = useCollection('valuables')
   const [editor, setEditor] = useState(null)
   const toast = useToast()
 
   const notifFeed = useMemo(() => buildNotificationFeed({
     tasks: tasks.items, vehicles: vehicles.items, services: services.items,
-    docs: documents.items, subs: subscriptions.items, people: people.items, expenses: expenses.items, t, lang, settings,
-  }), [tasks.items, vehicles.items, services.items, documents.items, subscriptions.items, people.items, expenses.items, lang])
+    docs: documents.items, subs: subscriptions.items, people: people.items, expenses: expenses.items, valuables: valuables.items, t, lang, settings,
+  }), [tasks.items, vehicles.items, services.items, documents.items, subscriptions.items, people.items, expenses.items, valuables.items, lang])
   const unread = unreadCount(notifFeed, settings.notificationsSeen)
 
   const open = tasks.items.filter(x => x.status !== 'completed' && x.status !== 'cancelled')
@@ -86,6 +87,7 @@ export default function TodayScreen({ go }) {
         <div style={{ flex: 1 }}>
           <div className="sub">{fmtLongDate(new Date(), lang)}{hijriDate(new Date(), lang) ? ` · ${hijriDate(new Date(), lang)}` : ''}</div>
         </div>
+        <button className="iconbtn" onClick={() => go('week')} aria-label={t('weekAhead')}><Icon name="calendar" size={18} /></button>
         <button className="iconbtn" onClick={() => go('notifications')} aria-label={t('notifications')} style={{ position: 'relative' }}>
           <Icon name="bell" size={18} />
           {unread > 0 && (

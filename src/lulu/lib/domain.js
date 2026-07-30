@@ -165,6 +165,28 @@ export const LIABILITY_TYPES = [
 ]
 export const findLiabilityType = (id) => LIABILITY_TYPES.find(x => x.id === id)
 
+// Property / real-estate types.
+export const PROPERTY_TYPES = [
+  { id: 'villa', en: 'Villa', ar: 'فيلا', icon: 'doc' },
+  { id: 'apartment', en: 'Apartment', ar: 'شقة', icon: 'doc' },
+  { id: 'land', en: 'Land', ar: 'أرض', icon: 'trip' },
+  { id: 'office', en: 'Office', ar: 'مكتب', icon: 'report' },
+  { id: 'shop', en: 'Shop', ar: 'محل', icon: 'wallet' },
+  { id: 'other', en: 'Other', ar: 'أخرى', icon: 'doc' },
+]
+export const findPropertyType = (id) => PROPERTY_TYPES.find(x => x.id === id)
+
+// Valuables / warranty categories.
+export const VALUABLE_CATEGORIES = [
+  { id: 'electronics', en: 'Electronics', ar: 'إلكترونيات', icon: 'doc' },
+  { id: 'watch', en: 'Watch', ar: 'ساعة', icon: 'clock' },
+  { id: 'jewelry', en: 'Jewelry', ar: 'مجوهرات', icon: 'sparkle' },
+  { id: 'appliance', en: 'Appliance', ar: 'أجهزة منزلية', icon: 'wrench' },
+  { id: 'art', en: 'Art', ar: 'فن', icon: 'camera' },
+  { id: 'other', en: 'Other', ar: 'أخرى', icon: 'gift' },
+]
+export const findValuableCategory = (id) => VALUABLE_CATEGORIES.find(x => x.id === id)
+
 export const findIncomeSource = (id) => INCOME_SOURCES.find(x => x.id === id)
 export const findInvestmentType = (id) => INVESTMENT_TYPES.find(x => x.id === id)
 export const findAccountType = (id) => ACCOUNT_TYPES.find(x => x.id === id)

@@ -19,7 +19,7 @@ function monthsElapsed(dateStr) {
   return (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth())
 }
 
-export function buildNotificationFeed({ tasks = [], vehicles = [], services = [], docs = [], subs = [], people = [], expenses = [], t, lang = 'en', settings = {} }) {
+export function buildNotificationFeed({ tasks = [], vehicles = [], services = [], docs = [], subs = [], people = [], expenses = [], valuables = [], t, lang = 'en', settings = {} }) {
   const out = []
   const open = tasks.filter(x => x.status !== 'completed' && x.status !== 'cancelled')
   open.filter(x => isOverdue(x.dueDate)).forEach(x => out.push({ id: 't' + x.id, tint: 't-danger', icon: 'clock', title: x.title, meta: t('overdue'), go: 'tasks/overdue', sort: -1 }))
@@ -42,6 +42,7 @@ export function buildNotificationFeed({ tasks = [], vehicles = [], services = []
     if (dd != null && dd >= 0 && dd <= 7) out.push({ id: 'inst' + e.id, tint: dd <= 2 ? 't-warn' : 't-info', icon: 'refresh', title: `${e.item || e.merchant || t('installment')} · ${paid + 1}/${months}`, meta: `${t('installment')}: ${relativeDay(next.toISOString(), lang)}`, go: 'moneycal', sort: dd + 0.05 })
   })
   people.forEach(pn => { const dd = daysToBirthday(pn.birthday); if (dd != null && dd <= 14) out.push({ id: 'bd' + pn.id, tint: 't-brand', icon: 'cake', title: `${pn.name} — ${t('birthdaySoon')}`, meta: dd === 0 ? relativeDay(new Date().toISOString(), lang) : relativeDay(new Date(Date.now() + dd * 86400000).toISOString(), lang), go: 'people', sort: dd + 0.1 }) })
+  valuables.forEach(v => { const dd = daysUntil(v.warrantyExpiry); if (dd != null && dd >= 0 && dd <= 30) out.push({ id: 'war' + v.id, tint: dd <= 7 ? 't-warn' : 't-info', icon: 'gift', title: `${v.name} — ${t('warranty')}`, meta: `${t('warranty')}: ${relativeDay(v.warrantyExpiry, lang)}`, go: 'valuables', sort: dd + 0.2 }) })
   return out.sort((a, b) => a.sort - b.sort)
 }
 

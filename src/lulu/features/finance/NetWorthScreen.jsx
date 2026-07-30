@@ -17,12 +17,14 @@ export default function NetWorthScreen({ go }) {
   const income = useCollection('income')
   const expenses = useCollection('expenses')
   const liabilitiesCol = useCollection('liabilities')
+  const propertiesCol = useCollection('properties')
+  const valuablesCol = useCollection('valuables')
   const snapshots = useCollection('networth')
 
   const nw = useMemo(() => netWorth({
-    accounts: accounts.items, investments: investments.items,
+    accounts: accounts.items, investments: investments.items, properties: propertiesCol.items, valuables: valuablesCol.items,
     income: income.items, expenses: expenses.items, liabilities: liabilitiesCol.items, rates,
-  }), [accounts.items, investments.items, income.items, expenses.items, liabilitiesCol.items, rates])
+  }), [accounts.items, investments.items, propertiesCol.items, valuablesCol.items, income.items, expenses.items, liabilitiesCol.items, rates])
 
   // Record (or update) this month's snapshot so a trend builds up over time.
   // A ref guards against StrictMode's double effect creating a duplicate.
@@ -47,6 +49,8 @@ export default function NetWorthScreen({ go }) {
   const composition = [
     { label: t('accounts'), value: Math.max(0, nw.accountsTotal) },
     { label: t('investments'), value: Math.max(0, nw.investTotal) },
+    { label: t('properties'), value: Math.max(0, nw.propertyTotal) },
+    { label: t('valuables'), value: Math.max(0, nw.valuablesTotal) },
   ].filter(x => x.value > 0)
 
   const shareStatement = () => {
