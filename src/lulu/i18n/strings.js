@@ -188,6 +188,22 @@ export const STRINGS = {
     accessoriesHint: 'Track fitted accessories and what they cost.', accessoryName: 'Accessory',
     fitted: 'Fitted', cost: 'Cost', adjustPhoto: 'Adjust photo', reset: 'Reset',
     horizontal: 'Horizontal', vertical: 'Vertical',
+    // net worth
+    netWorth: 'Net Worth', vsLastMonth: 'vs last month', assets: 'Assets', liabilities: 'Liabilities',
+    installmentsOutstanding: 'Installments outstanding', assetBreakdown: 'Asset breakdown',
+    netWorthTrend: 'Net worth trend', netWorthTrendHint: 'A point is recorded each month you open this.',
+    // zakat
+    zakat: 'Zakat', zakatDue: 'Zakat due', meetsNisab: 'Above nisab', belowNisab: 'Below nisab', nisab: 'Nisab',
+    zakatableWealth: 'Zakatable wealth', cashInAccounts: 'Cash in accounts', goldValue: 'Gold',
+    otherCash: 'Other cash', debtsInstallments: 'Debts / installments', zakatableTotal: 'Zakatable total',
+    adjustInputs: 'Adjust', goldGrams: 'Gold (grams)', goldPricePerGram: 'Gold price / gram',
+    otherCashGold: 'Other cash / gold value', includeRealEstate: 'Include real estate',
+    zakatHint: 'Zakat is 2.5% of wealth held for a full lunar year, if above nisab (85g gold).',
+    shareStatement: 'Share statement', zakatDisclaimer: 'Estimate only — confirm with a scholar for your situation.',
+    // trends
+    trends: 'Trends', avgMonthlySpend: 'Avg monthly spend', savingsRate: 'Savings rate',
+    lastNMonths: 'Last {n} months', incomeVsExpenses: 'Income vs expenses', topCategories: 'Top categories', month: 'Month',
+    receipt: 'Receipt',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -376,6 +392,22 @@ export const STRINGS = {
     accessoriesHint: 'تابع الإكسسوارات المركبة وتكلفتها.', accessoryName: 'الإكسسوار',
     fitted: 'مركّب', cost: 'التكلفة', adjustPhoto: 'ضبط الصورة', reset: 'إعادة تعيين',
     horizontal: 'أفقي', vertical: 'رأسي',
+    // net worth
+    netWorth: 'صافي الثروة', vsLastMonth: 'مقارنة بالشهر السابق', assets: 'الأصول', liabilities: 'الخصوم',
+    installmentsOutstanding: 'الأقساط المتبقية', assetBreakdown: 'توزيع الأصول',
+    netWorthTrend: 'اتجاه صافي الثروة', netWorthTrendHint: 'تُسجَّل نقطة كل شهر تفتح فيه هذه الشاشة.',
+    // zakat
+    zakat: 'الزكاة', zakatDue: 'الزكاة المستحقة', meetsNisab: 'فوق النصاب', belowNisab: 'دون النصاب', nisab: 'النصاب',
+    zakatableWealth: 'الوعاء الزكوي', cashInAccounts: 'النقد في الحسابات', goldValue: 'الذهب',
+    otherCash: 'نقد آخر', debtsInstallments: 'الديون / الأقساط', zakatableTotal: 'إجمالي الوعاء',
+    adjustInputs: 'تعديل', goldGrams: 'الذهب (جرام)', goldPricePerGram: 'سعر جرام الذهب',
+    otherCashGold: 'نقد / ذهب آخر', includeRealEstate: 'تضمين العقارات',
+    zakatHint: 'الزكاة 2.5% من المال المملوك لحول كامل إذا بلغ النصاب (85 جرام ذهب).',
+    shareStatement: 'مشاركة الكشف', zakatDisclaimer: 'تقدير فقط — راجع مختصاً لحالتك.',
+    // trends
+    trends: 'الاتجاهات', avgMonthlySpend: 'متوسط الإنفاق الشهري', savingsRate: 'معدل الادخار',
+    lastNMonths: 'آخر {n} أشهر', incomeVsExpenses: 'الدخل مقابل المصروفات', topCategories: 'أعلى الفئات', month: 'الشهر',
+    receipt: 'الإيصال',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',

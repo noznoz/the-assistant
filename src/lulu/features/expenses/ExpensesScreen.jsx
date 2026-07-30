@@ -146,6 +146,15 @@ export default function ExpensesScreen({ go }) {
           <button className="qa" onClick={() => go('subscriptions')}>
             <span className="ic"><Icon name="refresh" size={22} /></span>{t('subscriptions')}
           </button>
+          <button className="qa" onClick={() => go('networth')}>
+            <span className="ic"><Icon name="shield" size={22} /></span>{t('netWorth')}
+          </button>
+          <button className="qa" onClick={() => go('trends')}>
+            <span className="ic"><Icon name="chart" size={22} /></span>{t('trends')}
+          </button>
+          <button className="qa" onClick={() => go('zakat')}>
+            <span className="ic"><Icon name="sparkle" size={22} /></span>{t('zakat')}
+          </button>
           <button className="qa" onClick={() => go('projects')}>
             <span className="ic"><Icon name="report" size={22} /></span>{t('projects')}
           </button>
@@ -197,6 +206,7 @@ export default function ExpensesScreen({ go }) {
                   {e.method === 'installment' && Number(e.installmentMonths) > 0 && (
                     <span className="chip t-info" style={{ padding: '1px 7px' }}><Icon name="refresh" size={11} /> {t('installment')} {money(expenseSar(e, rates) / Number(e.installmentMonths), cur, lang)}×{Number(e.installmentMonths)}</span>
                   )}
+                  {(e.receipts || []).length > 0 && <span className="chip" style={{ padding: '1px 7px' }}><Icon name="receipt" size={11} /></span>}
                   {e.account && <span className="chip" style={{ padding: '1px 7px' }}>{e.account}</span>}
                   {proj && <span className="chip t-brand" style={{ padding: '1px 7px' }}>{proj.name}</span>}
                 </div>

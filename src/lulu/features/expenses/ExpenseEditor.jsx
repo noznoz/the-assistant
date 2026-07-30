@@ -1,10 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
+import Icon from '../../ui/Icon.jsx'
 import { Sheet, Field, Input, TextArea, Select, Button, Chip } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { PAYMENT_METHODS, categoryOptions, label } from '../../lib/domain.js'
 import { todayISO, toSar, money } from '../../lib/format.js'
 import { defaultAccountName } from '../../lib/accounts.js'
+import { saveAttachment, removeAttachment } from '../../lib/files.js'
 
 export default function ExpenseEditor({ initial, onClose, onSaved }) {
   const { t, lang } = useT()
@@ -19,12 +21,29 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
     method: 'credit', date: todayISO(), classification: 'personal', kind: 'monthly',
     account: defaultAccountName(accountsCol.items),
     reimbursable: false, relatedVehicle: '', projectId: '', tripId: '', item: '', note: '', liters: '', odometer: '',
-    installmentMonths: '', ...initial,
+    installmentMonths: '', receipts: [], ...initial,
   })
   const [err, setErr] = useState('')
   const [newCat, setNewCat] = useState(null)      // inline "add category" text or null
   const [newProj, setNewProj] = useState(null)    // inline "add project" text or null
   const [newAcct, setNewAcct] = useState(null)    // inline "add account" text or null
+  const [busy, setBusy] = useState(false)
+  const camRef = useRef()
+  const recRef = useRef()
+
+  const addReceipts = async (fileList) => {
+    if (!fileList || !fileList.length) return
+    setBusy(true)
+    try {
+      const added = []
+      for (const file of Array.from(fileList)) added.push(await saveAttachment(file))
+      setF(prev => ({ ...prev, receipts: [...(prev.receipts || []), ...added] }))
+    } finally { setBusy(false) }
+  }
+  const removeReceipt = async (att) => {
+    await removeAttachment(att)
+    setF(prev => ({ ...prev, receipts: (prev.receipts || []).filter(a => a.id !== att.id) }))
+  }
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
 
   const onCategory = (e) => {
@@ -193,6 +212,28 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
           <Chip selectable on={f.reimbursable} onClick={() => setF({ ...f, reimbursable: !f.reimbursable })}>{t('reimbursable')}</Chip>
         </div>
       </div>
+
+      {/* Receipt */}
+      <Field label={t('receipt')}>
+        <div className="row2">
+          <Button icon="camera" onClick={() => camRef.current?.click()}>{t('takePhoto')}</Button>
+          <Button icon="upload" onClick={() => recRef.current?.click()}>{t('chooseFile')}</Button>
+        </div>
+        <input ref={camRef} type="file" accept="image/*" capture="environment" hidden onChange={e => { addReceipts(e.target.files); e.target.value = '' }} />
+        <input ref={recRef} type="file" accept="image/*,application/pdf" multiple hidden onChange={e => { addReceipts(e.target.files); e.target.value = '' }} />
+        {busy && <p className="muted" style={{ fontSize: 12, margin: '4px 2px' }}><span className="spinner" style={{ width: 14, height: 14, display: 'inline-block', verticalAlign: 'middle' }} /> …</p>}
+        {(f.receipts || []).length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginTop: 8 }}>
+            {f.receipts.map(a => (
+              <div key={a.id} style={{ position: 'relative', aspectRatio: '1', borderRadius: 10, overflow: 'hidden', border: '1px solid var(--line)', background: 'var(--surface-2)' }}>
+                {a.thumb ? <img src={a.thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : <div style={{ display: 'grid', placeItems: 'center', height: '100%', color: 'var(--ink-3)' }}><Icon name="doc" size={20} /></div>}
+                <button onClick={() => removeReceipt(a)} aria-label={t('delete')} style={{ position: 'absolute', top: 2, insetInlineEnd: 2, width: 20, height: 20, borderRadius: '50%', border: 0, background: 'rgba(0,0,0,0.6)', color: '#fff', display: 'grid', placeItems: 'center' }}><Icon name="x" size={12} /></button>
+              </div>
+            ))}
+          </div>
+        )}
+      </Field>
 
       {vehicles.items.length > 0 && (
         <Field label={t('relatedVehicle')}>
