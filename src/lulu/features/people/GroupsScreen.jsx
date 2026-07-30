@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Sheet, Field, Input, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Sheet, Field, Input, TextArea, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { GROUP_ICONS, SUGGESTED_GROUPS } from '../../lib/domain.js'
@@ -71,7 +71,7 @@ function GroupEditor({ initial, onClose, onSaved }) {
   const { t } = useT()
   const groups = useCollection('groups')
   const people = useCollection('people')
-  const [f, setF] = useState({ name: '', icon: 'people', ...initial })
+  const [f, setF] = useState({ name: '', icon: 'people', note: '', ...initial })
   const [err, setErr] = useState('')
 
   const submit = () => {
@@ -116,6 +116,7 @@ function GroupEditor({ initial, onClose, onSaved }) {
           })}
         </div>
       </Field>
+      <Field label={t('description')}><TextArea value={f.note} onChange={e => setF({ ...f, note: e.target.value })} placeholder={t('descriptionPlaceholder')} /></Field>
     </Sheet>
   )
 }

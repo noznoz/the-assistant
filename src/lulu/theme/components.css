@@ -146,6 +146,17 @@
 .li .lead { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0; }
 .li.done .title { text-decoration: line-through; color: var(--ink-3); }
 
+/* Icon tab bar (e.g. vehicle profile) */
+.icontabs { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.icontabs::-webkit-scrollbar { display: none; }
+.icontab {
+  flex: 1 0 auto; min-width: 60px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 9px 6px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--surface);
+  color: var(--ink-3); font-size: 11px; font-weight: 600; cursor: pointer; transition: all .15s var(--ease);
+}
+.icontab .cap { white-space: nowrap; }
+.icontab.on { background: var(--brand-tint); border-color: var(--brand-400); color: var(--brand-600); }
+
 /* Swipe-to-reveal (Edit / Delete) */
 .swipe-wrap { position: relative; margin-bottom: 10px; border-radius: var(--r-md); overflow: hidden; }
 .swipe-wrap > .swipe-content > .li,

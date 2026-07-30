@@ -214,6 +214,7 @@ export const STRINGS = {
     dueOut: 'Due out', expectedIn: 'Expected in', next3Months: 'Next 3 months',
     renewal: 'Renewal', bill: 'Bill',
     monthlyStatement: 'Monthly statement', topMerchants: 'Top merchants',
+    descriptionPlaceholder: 'Add a description or notes…',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -428,6 +429,7 @@ export const STRINGS = {
     dueOut: 'مستحق للدفع', expectedIn: 'متوقع دخوله', next3Months: 'الأشهر الثلاثة القادمة',
     renewal: 'تجديد', bill: 'فاتورة',
     monthlyStatement: 'الكشف الشهري', topMerchants: 'أعلى المتاجر',
+    descriptionPlaceholder: 'أضف وصفاً أو ملاحظات…',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',

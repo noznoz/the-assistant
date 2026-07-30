@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Stat, Sheet, Field, Input, Select, Chip, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Stat, Sheet, Field, Input, TextArea, Select, Chip, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { ACCOUNT_TYPES, findAccountType, label } from '../../lib/domain.js'
@@ -75,7 +75,7 @@ export default function AccountsScreen({ go }) {
 
 function AccountEditor({ initial, accounts, onClose, onSaved }) {
   const { t, lang } = useT()
-  const [f, setF] = useState({ name: '', type: 'current', openingBalance: '', includeInNet: true, isDefault: false, ...initial })
+  const [f, setF] = useState({ name: '', type: 'current', openingBalance: '', includeInNet: true, isDefault: false, note: '', ...initial })
   const [err, setErr] = useState('')
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
 
@@ -107,6 +107,7 @@ function AccountEditor({ initial, accounts, onClose, onSaved }) {
           <Chip selectable on={!!f.isDefault} onClick={() => setF({ ...f, isDefault: !f.isDefault })}>{t('defaultForExpenses')}</Chip>
         </div>
       </div>
+      <Field label={t('description')}><TextArea value={f.note} onChange={set('note')} placeholder={t('descriptionPlaceholder')} /></Field>
       <p className="hint" style={{ margin: '0 2px' }}>{t('accountEditorHint')}</p>
     </Sheet>
   )

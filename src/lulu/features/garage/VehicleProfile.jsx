@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Segmented, Card, Section, Stat, Button, Sheet, Field, Input, Chip, Empty, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Section, Stat, Button, Sheet, Field, Input, TextArea, Chip, Empty, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { findVehicleType } from '../../lib/domain.js'
@@ -74,15 +74,20 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
           </div>
         </div>
 
-        <div style={{ margin: '14px 0' }}>
-          <Segmented value={tab} onChange={setTab} options={[
-            { value: 'overview', label: t('overview') },
-            { value: 'photos', label: t('photos') },
-            { value: 'accessories', label: t('accessories') },
-            { value: 'maintenance', label: t('maintenance') },
-            { value: 'fuel', label: t('fuelLog') },
-            { value: 'expenses', label: t('vehExpenses') },
-          ]} />
+        <div className="icontabs" style={{ margin: '14px 0' }}>
+          {[
+            { id: 'overview', icon: 'grid', label: t('overview') },
+            { id: 'photos', icon: 'camera', label: t('photos') },
+            { id: 'accessories', icon: 'gift', label: t('accessories') },
+            { id: 'maintenance', icon: 'wrench', label: t('maintenance') },
+            { id: 'fuel', icon: 'fuel', label: t('fuelLog') },
+            { id: 'expenses', icon: 'wallet', label: t('vehExpenses') },
+          ].map(x => (
+            <button key={x.id} className={`icontab ${tab === x.id ? 'on' : ''}`} onClick={() => setTab(x.id)} aria-label={x.label}>
+              <Icon name={x.icon} size={20} stroke={tab === x.id ? 2.3 : 1.9} />
+              <span className="cap">{x.label}</span>
+            </button>
+          ))}
         </div>
 
         {tab === 'overview' && (
@@ -180,6 +185,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
                 <div className="body">
                   <div className="title">{s.work}</div>
                   <div className="meta">{fmtDate(s.date, lang, settings.dateFormat)} · {s.workshop} {s.odo ? `· ${s.odo}` : ''}</div>
+                  {s.note && <div className="meta" style={{ marginTop: 2 }}>{s.note}</div>}
                   {s.nextDate && <div className="meta t-warn" style={{ padding: '1px 6px', borderRadius: 6, marginTop: 4 }}>{t('nextService')}: {fmtDate(s.nextDate, lang, settings.dateFormat)}</div>}
                 </div>
                 {s.cost ? <b className="tnum">{money(s.cost, cur, lang)}</b> : null}
@@ -256,7 +262,7 @@ function Row({ k, v }) {
 function ServiceEditor({ vehicleId, initial, onClose, onSaved }) {
   const { t } = useT()
   const services = useCollection('services')
-  const [f, setF] = useState({ vehicleId, date: new Date().toISOString().slice(0, 10), odo: '', workshop: '', work: '', cost: '', nextDate: '', ...(initial || {}) })
+  const [f, setF] = useState({ vehicleId, date: new Date().toISOString().slice(0, 10), odo: '', workshop: '', work: '', cost: '', nextDate: '', note: '', ...(initial || {}) })
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const submit = () => {
     if (!f.work.trim()) return
@@ -280,6 +286,7 @@ function ServiceEditor({ vehicleId, initial, onClose, onSaved }) {
         <Field label={t('totalCost')}><Input type="number" value={f.cost} onChange={set('cost')} /></Field>
         <Field label={t('nextService')}><Input type="date" value={f.nextDate} onChange={set('nextDate')} /></Field>
       </div>
+      <Field label={t('description')}><TextArea value={f.note} onChange={set('note')} placeholder={t('descriptionPlaceholder')} /></Field>
     </Sheet>
   )
 }

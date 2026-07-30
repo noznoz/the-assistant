@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Stat, Sheet, Field, Input, Select, Button, Empty, Fab, Chip, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Stat, Sheet, Field, Input, TextArea, Select, Button, Empty, Fab, Chip, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { categoryOptions, PAYMENT_METHODS, catLabel, label } from '../../lib/domain.js'
@@ -119,6 +119,7 @@ function SubscriptionEditor({ initial, onClose, onSaved }) {
           <Select value={f.method} onChange={set('method')} options={PAYMENT_METHODS.map(m => ({ value: m.id, label: label(m, lang) }))} />
         </Field>
       </div>
+      <Field label={t('description')}><TextArea value={f.note} onChange={set('note')} placeholder={t('descriptionPlaceholder')} /></Field>
     </Sheet>
   )
 }
