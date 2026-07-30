@@ -15,11 +15,12 @@ export default function NotificationsScreen({ go }) {
   const docs = useCollection('documents')
   const subs = useCollection('subscriptions')
   const people = useCollection('people')
+  const expensesCol = useCollection('expenses')
 
   const feed = useMemo(() => buildNotificationFeed({
     tasks: tasks.items, vehicles: vehicles.items, services: services.items,
-    docs: docs.items, subs: subs.items, people: people.items, t, lang, settings,
-  }), [tasks.items, vehicles.items, services.items, docs.items, subs.items, people.items, lang])
+    docs: docs.items, subs: subs.items, people: people.items, expenses: expensesCol.items, t, lang, settings,
+  }), [tasks.items, vehicles.items, services.items, docs.items, subs.items, people.items, expensesCol.items, lang])
 
   const seen = new Set(settings.notificationsSeen || [])
 

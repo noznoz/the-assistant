@@ -213,6 +213,7 @@ export const STRINGS = {
     moneyCalendar: 'Money calendar', moneyCalHint: 'Upcoming bills, installments, renewals and income appear here.',
     dueOut: 'Due out', expectedIn: 'Expected in', next3Months: 'Next 3 months',
     renewal: 'Renewal', bill: 'Bill',
+    monthlyStatement: 'Monthly statement', topMerchants: 'Top merchants',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -426,6 +427,7 @@ export const STRINGS = {
     moneyCalendar: 'التقويم المالي', moneyCalHint: 'تظهر هنا الفواتير والأقساط والتجديدات والدخل القادمة.',
     dueOut: 'مستحق للدفع', expectedIn: 'متوقع دخوله', next3Months: 'الأشهر الثلاثة القادمة',
     renewal: 'تجديد', bill: 'فاتورة',
+    monthlyStatement: 'الكشف الشهري', topMerchants: 'أعلى المتاجر',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',

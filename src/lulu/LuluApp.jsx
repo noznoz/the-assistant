@@ -45,6 +45,7 @@ import ZakatScreen from './features/finance/ZakatScreen.jsx'
 import TrendsScreen from './features/finance/TrendsScreen.jsx'
 import LiabilitiesScreen from './features/finance/LiabilitiesScreen.jsx'
 import MoneyCalendarScreen from './features/finance/MoneyCalendarScreen.jsx'
+import StatementScreen from './features/finance/StatementScreen.jsx'
 
 const MAIN_TABS = ['today', 'tasks', 'garage', 'expenses', 'more']
 
@@ -110,6 +111,7 @@ function Router() {
       case 'trends': return <TrendsScreen go={go} />
       case 'liabilities': return <LiabilitiesScreen go={go} />
       case 'moneycal': return <MoneyCalendarScreen go={go} />
+      case 'statement': return <StatementScreen go={go} />
       case 'search': return <SearchScreen go={go} />
       default: return <TodayScreen go={go} />
     }
@@ -117,7 +119,7 @@ function Router() {
 
   // Bottom nav highlights a main tab; sub-screens fall under "more".
   const activeTab = MAIN_TABS.includes(tab) ? tab
-    : ['projects', 'expensereport', 'budgets', 'subscriptions', 'income', 'investments', 'accounts', 'networth', 'zakat', 'trends', 'liabilities', 'moneycal'].includes(tab) ? 'expenses'
+    : ['projects', 'expensereport', 'budgets', 'subscriptions', 'income', 'investments', 'accounts', 'networth', 'zakat', 'trends', 'liabilities', 'moneycal', 'statement'].includes(tab) ? 'expenses'
     : ['inbox', 'people', 'documents', 'trips', 'reports', 'calendar', 'settings', 'notes', 'rewards', 'profile', 'message', 'groups'].includes(tab) ? 'more'
     : tab
 

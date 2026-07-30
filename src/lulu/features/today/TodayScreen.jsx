@@ -42,8 +42,8 @@ export default function TodayScreen({ go }) {
 
   const notifFeed = useMemo(() => buildNotificationFeed({
     tasks: tasks.items, vehicles: vehicles.items, services: services.items,
-    docs: documents.items, subs: subscriptions.items, people: people.items, t, lang, settings,
-  }), [tasks.items, vehicles.items, services.items, documents.items, subscriptions.items, people.items, lang])
+    docs: documents.items, subs: subscriptions.items, people: people.items, expenses: expenses.items, t, lang, settings,
+  }), [tasks.items, vehicles.items, services.items, documents.items, subscriptions.items, people.items, expenses.items, lang])
   const unread = unreadCount(notifFeed, settings.notificationsSeen)
 
   const open = tasks.items.filter(x => x.status !== 'completed' && x.status !== 'cancelled')

@@ -13,7 +13,13 @@ function daysToBirthday(bStr) {
   return Math.round((next - today) / 86400000)
 }
 
-export function buildNotificationFeed({ tasks = [], vehicles = [], services = [], docs = [], subs = [], people = [], t, lang = 'en', settings = {} }) {
+function monthsElapsed(dateStr) {
+  const d = new Date(dateStr); if (isNaN(d)) return 0
+  const now = new Date()
+  return (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth())
+}
+
+export function buildNotificationFeed({ tasks = [], vehicles = [], services = [], docs = [], subs = [], people = [], expenses = [], t, lang = 'en', settings = {} }) {
   const out = []
   const open = tasks.filter(x => x.status !== 'completed' && x.status !== 'cancelled')
   open.filter(x => isOverdue(x.dueDate)).forEach(x => out.push({ id: 't' + x.id, tint: 't-danger', icon: 'clock', title: x.title, meta: t('overdue'), go: 'tasks/overdue', sort: -1 }))
@@ -25,6 +31,16 @@ export function buildNotificationFeed({ tasks = [], vehicles = [], services = []
   services.forEach(s => { const dd = daysUntil(s.nextDate); if (dd != null && dd <= 30) { const v = vehicles.find(x => x.id === s.vehicleId); out.push({ id: 'svc' + s.id, tint: dd <= 7 ? 't-danger' : 't-warn', icon: 'wrench', title: `${v ? (v.nickname || v.name) : ''} — ${t('serviceDue')}`, meta: `${s.work} · ${fmtDate(s.nextDate, lang, settings.dateFormat)}`, go: v ? `garage/${v.id}` : 'garage', sort: dd }) } })
   docs.forEach(d => { const dd = daysUntil(d.expiry); if (dd != null && dd <= 30) out.push({ id: 'doc' + d.id, tint: dd <= 7 ? 't-danger' : 't-warn', icon: 'doc', title: d.title, meta: `${t('policyExpiry')}: ${relativeDay(d.expiry, lang)}`, go: 'documents', sort: dd }) })
   subs.filter(s => s.active !== false).forEach(s => { const dd = daysUntil(s.nextDue); if (dd != null && dd <= 5) out.push({ id: 'sub' + s.id, tint: dd <= 1 ? 't-danger' : 't-warn', icon: 'wallet', title: s.name, meta: `${t('nextDue')}: ${relativeDay(s.nextDue, lang)}`, go: 'subscriptions', sort: dd }) })
+  // Upcoming installment payments (next monthly instalment within a week).
+  expenses.filter(e => e.method === 'installment' && Number(e.installmentMonths) > 0).forEach(e => {
+    const months = Number(e.installmentMonths)
+    const paid = Math.max(0, monthsElapsed(e.date))
+    if (paid >= months) return
+    const d0 = new Date(e.date); if (isNaN(d0)) return
+    const next = new Date(d0.getFullYear(), d0.getMonth() + paid + 1, d0.getDate())
+    const dd = daysUntil(next.toISOString().slice(0, 10))
+    if (dd != null && dd >= 0 && dd <= 7) out.push({ id: 'inst' + e.id, tint: dd <= 2 ? 't-warn' : 't-info', icon: 'refresh', title: `${e.item || e.merchant || t('installment')} · ${paid + 1}/${months}`, meta: `${t('installment')}: ${relativeDay(next.toISOString(), lang)}`, go: 'moneycal', sort: dd + 0.05 })
+  })
   people.forEach(pn => { const dd = daysToBirthday(pn.birthday); if (dd != null && dd <= 14) out.push({ id: 'bd' + pn.id, tint: 't-brand', icon: 'cake', title: `${pn.name} — ${t('birthdaySoon')}`, meta: dd === 0 ? relativeDay(new Date().toISOString(), lang) : relativeDay(new Date(Date.now() + dd * 86400000).toISOString(), lang), go: 'people', sort: dd + 0.1 }) })
   return out.sort((a, b) => a.sort - b.sort)
 }
