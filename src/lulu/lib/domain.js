@@ -38,6 +38,17 @@ export const VEHICLE_TYPES = [
   { id: 'other', key: 'vt_other', icon: 'car' },
 ]
 
+// Ownership status of a vehicle.
+export const OWNERSHIP_STATUSES = [
+  { id: 'owned', en: 'Owned', ar: 'مملوكة', tint: 't-ok' },
+  { id: 'finance', en: 'On finance', ar: 'تمويل', tint: 't-warn' },
+  { id: 'lease', en: 'Leased', ar: 'مستأجرة', tint: 't-info' },
+  { id: 'company', en: 'Company', ar: 'شركة', tint: 't-brand' },
+  { id: 'sold', en: 'Sold', ar: 'مباعة', tint: 't-danger' },
+  { id: 'other', en: 'Other', ar: 'أخرى', tint: '' },
+]
+export const findOwnership = (id) => OWNERSHIP_STATUSES.find(x => x.id === id)
+
 // Expense categories — id + English/Arabic label + tint hue for charts.
 export const EXPENSE_CATEGORIES = [
   { id: 'household', en: 'Household', ar: 'المنزل' },

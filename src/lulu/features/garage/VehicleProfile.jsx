@@ -3,7 +3,7 @@ import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Section, Stat, Button, Sheet, Field, Input, TextArea, Chip, Empty, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
-import { findVehicleType } from '../../lib/domain.js'
+import { findVehicleType, findOwnership, label } from '../../lib/domain.js'
 import { money, fmtDate, daysUntil, expenseSar } from '../../lib/format.js'
 import { share, formatVehicle } from '../../lib/share.js'
 import VehicleEditor from './VehicleEditor.jsx'
@@ -67,7 +67,10 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
         <div className="veh-card" style={{ marginTop: 14 }}>
           <div className="img">
             {vehicle.photo ? <img src={vehicle.photo} alt={vehicle.name} style={{ objectPosition: vehicle.photoPos || '50% 50%' }} /> : <Icon name={vt?.icon || 'car'} size={72} stroke={1.4} />}
-            <div className="badge"><Chip tint="t-brand">{vt ? t(vt.key) : ''}</Chip></div>
+            <div className="badge" style={{ display: 'flex', gap: 6 }}>
+              <Chip tint="t-brand">{vt ? t(vt.key) : ''}</Chip>
+              {(() => { const ow = findOwnership(vehicle.ownership); return ow ? <Chip tint={ow.tint}>{label(ow, lang)}</Chip> : null })()}
+            </div>
           </div>
           <div className="info">
             <h3>{vehicle.name}</h3>
@@ -110,6 +113,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
             )}
             {vehicle.bio && <Card style={{ marginBottom: 14 }}><p style={{ fontStyle: 'italic', color: 'var(--ink-2)' }}>“{vehicle.bio}”</p></Card>}
             <Card className="stack">
+              <Row k={t('ownership')} v={(() => { const ow = findOwnership(vehicle.ownership); return ow ? label(ow, lang) : '' })()} />
               <Row k={t('brand')} v={vehicle.brand} />
               <Row k={t('model')} v={vehicle.model} />
               <Row k={t('modelYear')} v={vehicle.year} />

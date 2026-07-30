@@ -14,7 +14,7 @@ export function maybeSeed() {
     name: 'Range Rover Autobiography', nickname: 'Almas', type: 'car',
     brand: 'Land Rover', model: 'Range Rover', year: 2023, color: 'Santorini Black',
     plate: 'RUH 4820', vin: 'SALGA2AKXPA1XXXXX', mileage: '24,800 km', fuel: 'Petrol',
-    purchaseDate: '2023-02-10', purchasePrice: 620000, currentValue: 540000,
+    purchaseDate: '2023-02-10', purchasePrice: 620000, currentValue: 540000, ownership: 'finance',
     insuranceCompany: 'Tawuniya', policyExpiry: d(38),
     bio: 'The daily executive command centre. Quiet, commanding, effortless on the long Riyadh–Jeddah runs.',
   })
@@ -22,14 +22,14 @@ export function maybeSeed() {
     name: 'BMW R 1250 GS', nickname: 'Iron Raven', type: 'motorcycle',
     brand: 'BMW', model: 'R 1250 GS Adventure', year: 2022, color: 'Ice Grey',
     plate: 'RUH 9017', mileage: '14,200 km', fuel: 'Petrol',
-    purchaseDate: '2022-09-01', purchasePrice: 92000, currentValue: 78000,
+    purchaseDate: '2022-09-01', purchasePrice: 92000, currentValue: 78000, ownership: 'owned',
     insuranceCompany: 'Malath', policyExpiry: d(12),
     bio: 'Weekend freedom machine. Built for the Taif escarpment and the empty roads before dawn.',
   })
   const vBoat = db.insert('vehicles', {
     name: 'Axopar 37 Sun Top', nickname: 'Blue Hour', type: 'boat',
     brand: 'Axopar', model: '37 Sun Top', year: 2021, color: 'Deep Blue',
-    mileage: '320 hrs', fuel: 'Diesel', purchaseDate: '2021-06-20',
+    mileage: '320 hrs', fuel: 'Diesel', purchaseDate: '2021-06-20', ownership: 'owned',
     purchasePrice: 1250000, currentValue: 1100000,
     insuranceCompany: 'Bupa Marine', policyExpiry: d(85),
     bio: 'Sunset cruises off the Corniche and long weekends on the Red Sea.',

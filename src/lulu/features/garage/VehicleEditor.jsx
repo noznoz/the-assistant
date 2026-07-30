@@ -3,16 +3,16 @@ import Icon from '../../ui/Icon.jsx'
 import { Sheet, Field, Input, TextArea, Select, Button, Chip } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
-import { VEHICLE_TYPES } from '../../lib/domain.js'
+import { VEHICLE_TYPES, OWNERSHIP_STATUSES, label } from '../../lib/domain.js'
 import { imageToDataURL } from '../../lib/files.js'
 
 export default function VehicleEditor({ initial, onClose, onSaved, onDeleted }) {
-  const { t } = useT()
+  const { t, lang } = useT()
   const vehicles = useCollection('vehicles')
   const [f, setF] = useState({
     name: '', nickname: '', type: 'car', brand: '', model: '', year: '', color: '',
     plate: '', vin: '', mileage: '', fuel: '', purchaseDate: '', purchasePrice: '',
-    currentValue: '', insuranceCompany: '', policyExpiry: '', bio: '', photo: '', photoPos: '50% 50%', ...initial,
+    currentValue: '', insuranceCompany: '', policyExpiry: '', bio: '', photo: '', photoPos: '50% 50%', ownership: 'owned', ...initial,
   })
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
@@ -97,10 +97,19 @@ export default function VehicleEditor({ initial, onClose, onSaved, onDeleted }) 
         )}
       </div>
 
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 12 }}>
         <div className="chip-row">
           {VEHICLE_TYPES.map(v => (
             <Chip key={v.id} selectable on={f.type === v.id} onClick={() => setF({ ...f, type: v.id })}>{t(v.key)}</Chip>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ display: 'block', fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '0 2px 7px' }}>{t('ownership')}</label>
+        <div className="chip-row">
+          {OWNERSHIP_STATUSES.map(o => (
+            <Chip key={o.id} selectable on={f.ownership === o.id} onClick={() => setF({ ...f, ownership: o.id })}>{label(o, lang)}</Chip>
           ))}
         </div>
       </div>

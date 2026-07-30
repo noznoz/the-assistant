@@ -216,6 +216,7 @@ export const STRINGS = {
     monthlyStatement: 'Monthly statement', topMerchants: 'Top merchants',
     descriptionPlaceholder: 'Add a description or notes…',
     noVehicleDocs: 'No documents yet', vehicleDocsHint: 'Keep registration, insurance and warranty papers here.',
+    ownership: 'Ownership',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -432,6 +433,7 @@ export const STRINGS = {
     monthlyStatement: 'الكشف الشهري', topMerchants: 'أعلى المتاجر',
     descriptionPlaceholder: 'أضف وصفاً أو ملاحظات…',
     noVehicleDocs: 'لا توجد مستندات بعد', vehicleDocsHint: 'احتفظ باستمارة المركبة والتأمين والضمان هنا.',
+    ownership: 'الملكية',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',

@@ -4,7 +4,7 @@ import { TopBar } from '../../ui/AppShell.jsx'
 import { Fab, Chip, Empty, Button, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
-import { findVehicleType, VEHICLE_TYPES } from '../../lib/domain.js'
+import { findVehicleType, VEHICLE_TYPES, findOwnership, label } from '../../lib/domain.js'
 import { money, daysUntil } from '../../lib/format.js'
 import VehicleEditor from './VehicleEditor.jsx'
 import VehicleProfile from './VehicleProfile.jsx'
@@ -58,7 +58,10 @@ function VehicleCard({ v, lang, cur, onClick }) {
     <div className="veh-card" onClick={onClick}>
       <div className="img">
         {v.photo ? <img src={v.photo} alt={v.name} style={{ objectPosition: v.photoPos || '50% 50%' }} /> : <Icon name={vt?.icon || 'car'} size={64} stroke={1.4} />}
-        <div className="badge"><Chip tint="t-brand">{vt ? t(vt.key) : ''}</Chip></div>
+        <div className="badge" style={{ display: 'flex', gap: 6 }}>
+          <Chip tint="t-brand">{vt ? t(vt.key) : ''}</Chip>
+          {(() => { const ow = findOwnership(v.ownership); return ow && ow.id !== 'owned' ? <Chip tint={ow.tint}>{label(ow, lang)}</Chip> : null })()}
+        </div>
         {dd != null && dd <= 30 && (
           <div style={{ position: 'absolute', top: 12, insetInlineEnd: 12 }}>
             <Chip tint={dd <= 14 ? 't-danger' : 't-warn'}><Icon name="shield" size={12} /> {dd}d</Chip>
