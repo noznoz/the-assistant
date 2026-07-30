@@ -7,6 +7,8 @@ import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 
 const ITEMS = [
   { id: 'week', icon: 'calendar', route: 'week' },
+  { id: 'renewals', icon: 'shield' },
+  { id: 'monthlyreport', icon: 'report' },
   { id: 'inbox', icon: 'inbox', collection: 'inbox' },
   { id: 'notes', icon: 'note', collection: 'notes' },
   { id: 'calendar', icon: 'calendar' },
@@ -76,7 +78,7 @@ export default function MoreScreen({ go }) {
             </button>
           ))}
         </Card>
-        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v2.8</p>
+        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v2.9</p>
       </div>
     </>
   )
