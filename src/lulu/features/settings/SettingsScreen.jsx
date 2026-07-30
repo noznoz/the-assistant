@@ -19,11 +19,18 @@ export default function SettingsScreen({ go }) {
   const fileRef = useRef()
   const [setup, setSetup] = useState(false)   // passcode setup overlay
 
-  const doExport = () => {
-    const blob = new Blob([JSON.stringify(db.exportAll(), null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
+  const doExport = async () => {
+    const json = JSON.stringify(db.exportAll(), null, 2)
+    const filename = `the-assistant-backup-${new Date().toISOString().slice(0, 10)}.json`
+    const file = new File([json], filename, { type: 'application/json' })
+    // On phones, offer the native share sheet (Files, WhatsApp, iCloud…) first.
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: t('backup') }); toast.show(t('savedToast')); return }
+      catch { /* user cancelled → fall through to download */ }
+    }
+    const url = URL.createObjectURL(file)
     const a = document.createElement('a')
-    a.href = url; a.download = `the-assistant-backup-${new Date().toISOString().slice(0, 10)}.json`
+    a.href = url; a.download = filename
     a.click(); URL.revokeObjectURL(url)
     toast.show(t('savedToast'))
   }
@@ -185,6 +192,7 @@ export default function SettingsScreen({ go }) {
 
         <Section title={t('backup')} />
         <Card className="stack">
+          <p className="hint" style={{ margin: '0 2px' }}>{t('backupHint')}</p>
           <Button block icon="download" onClick={doExport}>{t('exportData')}</Button>
           <Button block icon="upload" onClick={() => fileRef.current?.click()}>{t('importData')}</Button>
           <input ref={fileRef} type="file" accept="application/json" hidden onChange={doImport} />
@@ -192,7 +200,7 @@ export default function SettingsScreen({ go }) {
         </Card>
 
         <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>
-          {t('about')} · v2.7 · <span>Offline-first</span>
+          {t('about')} · v2.9 · <span>Offline-first</span>
         </p>
       </div>
 

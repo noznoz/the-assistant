@@ -15,7 +15,7 @@ export function maybeSeed() {
     brand: 'Land Rover', model: 'Range Rover', year: 2023, color: 'Santorini Black',
     plate: 'RUH 4820', vin: 'SALGA2AKXPA1XXXXX', mileage: '24,800 km', fuel: 'Petrol',
     purchaseDate: '2023-02-10', purchasePrice: 620000, currentValue: 540000, ownership: 'finance',
-    insuranceCompany: 'Tawuniya', policyExpiry: d(38),
+    insuranceCompany: 'Tawuniya', policyExpiry: d(38), registrationExpiry: d(24),
     bio: 'The daily executive command centre. Quiet, commanding, effortless on the long Riyadh–Jeddah runs.',
   })
   const vRaven = db.insert('vehicles', {
@@ -23,7 +23,7 @@ export function maybeSeed() {
     brand: 'BMW', model: 'R 1250 GS Adventure', year: 2022, color: 'Ice Grey',
     plate: 'RUH 9017', mileage: '14,200 km', fuel: 'Petrol',
     purchaseDate: '2022-09-01', purchasePrice: 92000, currentValue: 78000, ownership: 'owned',
-    insuranceCompany: 'Malath', policyExpiry: d(12),
+    insuranceCompany: 'Malath', policyExpiry: d(12), registrationExpiry: d(-6),
     bio: 'Weekend freedom machine. Built for the Taif escarpment and the empty roads before dawn.',
   })
   const vBoat = db.insert('vehicles', {
@@ -94,7 +94,7 @@ export function maybeSeed() {
 
   // Properties / real estate
   db.insert('properties', { name: 'Family villa', type: 'villa', address: 'Al Malqa, Riyadh', purchasePrice: 1800000, currentValue: 1950000, currency: 'SAR', ownership: 'finance', monthlyRent: 0, note: 'Primary residence' })
-  db.insert('properties', { name: 'Rental flat — Jeddah', type: 'apartment', address: 'Al Shati, Jeddah', purchasePrice: 1200000, currentValue: 1350000, currency: 'SAR', ownership: 'owned', monthlyRent: 4500, rentedTo: 'Mr. Faisal' })
+  db.insert('properties', { name: 'Rental flat — Jeddah', type: 'apartment', address: 'Al Shati, Jeddah', purchasePrice: 1200000, currentValue: 1350000, currency: 'SAR', ownership: 'owned', monthlyRent: 4500, rentedTo: 'Mr. Faisal', contractEnd: d(64) })
 
   // Valuables & warranties
   db.insert('valuables', { name: 'Rolex Submariner', category: 'watch', brand: 'Rolex', value: 48000, currency: 'SAR', purchaseDate: d(-400), warrantyExpiry: d(1400), receipts: [] })
@@ -126,9 +126,9 @@ export function maybeSeed() {
   ].forEach(e => db.insert('expenses', e))
 
   const people = [
-    { name: 'Layla', relationship: 'family', jobTitle: 'Spouse', mobile: '+966500000010', whatsapp: '+966500000010', birthday: d(40), bloodType: 'A+', healthInsurer: 'Bupa Arabia', healthPolicy: 'BUP-8842' },
-    { name: 'Omar', relationship: 'family', jobTitle: 'Son', mobile: '+966500000011', whatsapp: '+966500000011', birthday: d(9), bloodType: 'O+', allergies: 'Peanuts', doctor: 'Dr. Sami (Pediatrics)' },
-    { name: 'Noura', relationship: 'family', jobTitle: 'Daughter', mobile: '+966500000012', whatsapp: '+966500000012', birthday: d(120), bloodType: 'A-' },
+    { name: 'Layla', relationship: 'family', jobTitle: 'Spouse', mobile: '+966500000010', whatsapp: '+966500000010', birthday: d(40), bloodType: 'A+', healthInsurer: 'Bupa Arabia', healthPolicy: 'BUP-8842', passportNumber: 'K1234567', passportExpiry: d(75), nationalId: '1088xxxxxx', iqamaExpiry: '' },
+    { name: 'Omar', relationship: 'family', jobTitle: 'Son', mobile: '+966500000011', whatsapp: '+966500000011', birthday: d(9), bloodType: 'O+', allergies: 'Peanuts', doctor: 'Dr. Sami (Pediatrics)', passportNumber: 'K2345678', passportExpiry: d(18) },
+    { name: 'Noura', relationship: 'family', jobTitle: 'Daughter', mobile: '+966500000012', whatsapp: '+966500000012', birthday: d(120), bloodType: 'A-', passportExpiry: d(-12) },
     { name: 'Khalid Al-Otaibi', jobTitle: 'CFO', company: 'Group Finance', relationship: 'colleague', mobile: '+966500000001' },
     { name: 'Ahmed Al-Sayed', jobTitle: 'Partner', company: 'Al-Sayed Legal', relationship: 'supplier', mobile: '+966500000002' },
     { name: 'Sara Al-Nasser', jobTitle: 'Executive Assistant', company: 'Office', relationship: 'report', mobile: '+966500000003' },

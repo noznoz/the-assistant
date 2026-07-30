@@ -12,7 +12,7 @@ export default function VehicleEditor({ initial, onClose, onSaved, onDeleted }) 
   const [f, setF] = useState({
     name: '', nickname: '', type: 'car', brand: '', model: '', year: '', color: '',
     plate: '', vin: '', mileage: '', fuel: '', purchaseDate: '', purchasePrice: '',
-    currentValue: '', insuranceCompany: '', policyExpiry: '', bio: '', photo: '', photoPos: '50% 50%', ownership: 'owned', ...initial,
+    currentValue: '', insuranceCompany: '', policyExpiry: '', registrationExpiry: '', bio: '', photo: '', photoPos: '50% 50%', ownership: 'owned', ...initial,
   })
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
@@ -138,7 +138,10 @@ export default function VehicleEditor({ initial, onClose, onSaved, onDeleted }) 
         <Field label={t('currentValue')}><Input type="number" value={f.currentValue} onChange={set('currentValue')} /></Field>
         <Field label={t('insurance')}><Input value={f.insuranceCompany} onChange={set('insuranceCompany')} /></Field>
       </div>
-      <Field label={t('policyExpiry')}><Input type="date" value={f.policyExpiry} onChange={set('policyExpiry')} /></Field>
+      <div className="row2">
+        <Field label={t('policyExpiry')}><Input type="date" value={f.policyExpiry} onChange={set('policyExpiry')} /></Field>
+        <Field label={t('istimara') + ' — ' + t('expiry')}><Input type="date" value={f.registrationExpiry} onChange={set('registrationExpiry')} /></Field>
+      </div>
       <Field label={t('biography')} hint={t('optional')}><TextArea value={f.bio} onChange={set('bio')} /></Field>
     </Sheet>
   )

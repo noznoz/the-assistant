@@ -119,6 +119,26 @@ export default function TodayScreen({ go }) {
           </div>
         </div>
 
+        {/* Assistant — what needs your attention, ahead of time */}
+        {notifFeed.length > 0 && (
+          <>
+            <Section title={t('needsAttention')} count={notifFeed.length}
+              action={notifFeed.length > 3 ? t('viewAll') : undefined} onAction={() => go('notifications')} />
+            <Card tight>
+              {notifFeed.slice(0, 4).map(n => (
+                <div className="li" key={n.id} onClick={() => go(n.go)}>
+                  <div className={`lead ${n.tint}`}><Icon name={n.icon} size={18} /></div>
+                  <div className="body">
+                    <div className="title">{n.title}</div>
+                    <div className="meta">{n.meta}</div>
+                  </div>
+                  <Icon name="chevron" size={15} style={{ color: 'var(--ink-3)' }} />
+                </div>
+              ))}
+            </Card>
+          </>
+        )}
+
         <PrayerCard />
 
         {/* Progress + stats */}

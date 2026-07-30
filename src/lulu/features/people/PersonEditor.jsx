@@ -15,7 +15,8 @@ export default function PersonEditor({ initial = {}, onClose, onSaved }) {
   const [f, setF] = useState({
     name: '', photo: '', jobTitle: '', company: '', mobile: '', whatsapp: '',
     email: '', relationship: 'family', birthday: '', notes: '', groupIds: [],
-    bloodType: '', allergies: '', conditions: '', medications: '', doctor: '', healthInsurer: '', healthPolicy: '', ...initial,
+    bloodType: '', allergies: '', conditions: '', medications: '', doctor: '', healthInsurer: '', healthPolicy: '',
+    iqamaNumber: '', iqamaExpiry: '', passportNumber: '', passportExpiry: '', licenseExpiry: '', nationalId: '', nationalIdExpiry: '', ...initial,
   })
   const toggleGroup = (id) => setF(prev => {
     const cur = prev.groupIds || []
@@ -107,7 +108,22 @@ export default function PersonEditor({ initial = {}, onClose, onSaved }) {
         <Field label={t('healthPolicy')}><Input value={f.healthPolicy} onChange={set('healthPolicy')} /></Field>
       </div>
 
-      <p className="muted" style={{ fontSize: 12 }}>
+      <div style={{ margin: '10px 2px 8px', fontSize: 13, fontWeight: 700, color: 'var(--ink-2)' }}>{t('identityDocs')}</div>
+      <p className="hint" style={{ margin: '0 2px 8px' }}>{t('identityDocsHint')}</p>
+      <div className="row2">
+        <Field label={t('iqama') + ' — ' + t('number')}><Input value={f.iqamaNumber} onChange={set('iqamaNumber')} inputMode="numeric" /></Field>
+        <Field label={t('iqama') + ' — ' + t('expiry')}><Input type="date" value={f.iqamaExpiry} onChange={set('iqamaExpiry')} /></Field>
+      </div>
+      <div className="row2">
+        <Field label={t('passport') + ' — ' + t('number')}><Input value={f.passportNumber} onChange={set('passportNumber')} /></Field>
+        <Field label={t('passport') + ' — ' + t('expiry')}><Input type="date" value={f.passportExpiry} onChange={set('passportExpiry')} /></Field>
+      </div>
+      <div className="row2">
+        <Field label={t('nationalId')}><Input value={f.nationalId} onChange={set('nationalId')} inputMode="numeric" /></Field>
+        <Field label={t('drivingLicense') + ' — ' + t('expiry')}><Input type="date" value={f.licenseExpiry} onChange={set('licenseExpiry')} /></Field>
+      </div>
+
+      <p className="muted" style={{ fontSize: 12, marginTop: 10 }}>
         <Icon name="whatsapp" size={12} /> {t('sendTaskHint')}
       </p>
     </Sheet>

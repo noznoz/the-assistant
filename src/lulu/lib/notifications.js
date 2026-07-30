@@ -19,6 +19,23 @@ function monthsElapsed(dateStr) {
   return (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth())
 }
 
+// Identity documents (Saudi context) surfaced when they expire within ~60 days.
+const PERSON_DOC_FIELDS = [
+  { field: 'iqamaExpiry', key: 'iqama' },
+  { field: 'passportExpiry', key: 'passport' },
+  { field: 'licenseExpiry', key: 'drivingLicense' },
+  { field: 'nationalIdExpiry', key: 'nationalId' },
+]
+
+function sumMonth(expenses, ref, rates) {
+  const rk = `${ref.getFullYear()}-${ref.getMonth()}`
+  return expenses.reduce((s, e) => {
+    const d = new Date(e.date)
+    if (isNaN(d) || `${d.getFullYear()}-${d.getMonth()}` !== rk) return s
+    return s + (Number(e.amount) || 0) * ((rates && rates[e.currency || 'SAR']) || 1)
+  }, 0)
+}
+
 export function buildNotificationFeed({ tasks = [], vehicles = [], services = [], docs = [], subs = [], people = [], expenses = [], valuables = [], t, lang = 'en', settings = {} }) {
   const out = []
   const open = tasks.filter(x => x.status !== 'completed' && x.status !== 'cancelled')
@@ -43,6 +60,16 @@ export function buildNotificationFeed({ tasks = [], vehicles = [], services = []
   })
   people.forEach(pn => { const dd = daysToBirthday(pn.birthday); if (dd != null && dd <= 14) out.push({ id: 'bd' + pn.id, tint: 't-brand', icon: 'cake', title: `${pn.name} — ${t('birthdaySoon')}`, meta: dd === 0 ? relativeDay(new Date().toISOString(), lang) : relativeDay(new Date(Date.now() + dd * 86400000).toISOString(), lang), go: 'people', sort: dd + 0.1 }) })
   valuables.forEach(v => { const dd = daysUntil(v.warrantyExpiry); if (dd != null && dd >= 0 && dd <= 30) out.push({ id: 'war' + v.id, tint: dd <= 7 ? 't-warn' : 't-info', icon: 'gift', title: `${v.name} — ${t('warranty')}`, meta: `${t('warranty')}: ${relativeDay(v.warrantyExpiry, lang)}`, go: 'valuables', sort: dd + 0.2 }) })
+  // Identity-document renewals (Iqama, passport, license, national ID) within 60 days.
+  people.forEach(pn => PERSON_DOC_FIELDS.forEach(df => { const dd = daysUntil(pn[df.field]); if (dd != null && dd <= 60) out.push({ id: df.field + pn.id, tint: dd < 0 ? 't-danger' : dd <= 21 ? 't-warn' : 't-info', icon: 'shield', title: `${pn.name} — ${t(df.key)}`, meta: dd < 0 ? t('expired') : `${t('renews')}: ${relativeDay(pn[df.field], lang)}`, go: 'renewals', sort: dd - 0.3 }) }))
+  // Spending insight: this month vs last month (only once meaningful spend exists).
+  const now = new Date()
+  const thisM = sumMonth(expenses, now, settings.rates)
+  const lastM = sumMonth(expenses, new Date(now.getFullYear(), now.getMonth() - 1, 1), settings.rates)
+  if (lastM > 500 && thisM > 0) {
+    const pct = Math.round((thisM - lastM) / lastM * 100)
+    if (Math.abs(pct) >= 15) out.push({ id: 'insight-spend-' + now.getMonth(), tint: pct > 0 ? 't-warn' : 't-ok', icon: 'chart', title: pct > 0 ? t('spendingUp') : t('spendingDown'), meta: `${pct > 0 ? '+' : ''}${pct}% ${t('vsLastMonth')}`, go: 'trends', sort: 50 })
+  }
   return out.sort((a, b) => a.sort - b.sort)
 }
 
