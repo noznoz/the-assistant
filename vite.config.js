@@ -14,11 +14,11 @@ export default defineConfig({
       filename: 'sw.js',
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Road Heaven',
-        short_name: 'Road Heaven',
-        description: 'Plan. Ride. Connect. Remember.',
-        theme_color: '#FF6B00',
-        background_color: '#0a0a0a',
+        name: 'The Assistant',
+        short_name: 'The Assistant',
+        description: 'Your premium personal operating system.',
+        theme_color: '#F4F1EC',
+        background_color: '#0E0F12',
         display: 'standalone',
         icons: [
           // Relative so they resolve correctly under any base path
