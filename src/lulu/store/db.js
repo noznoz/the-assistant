@@ -92,6 +92,7 @@ export const DEFAULT_SETTINGS = {
   rates: {},             // { [currency]: SAR per unit } — overrides DEFAULT_RATES
   profile: {},           // owner's personal info + Saudi National Address
   notificationsSeen: [], // ids of notification-feed items already viewed
+  accounts: ['Salary account', 'Other account'], // funding accounts an expense can be paid from
 }
 
 export function readSettings() {

@@ -49,16 +49,16 @@ export function maybeSeed() {
   tasks.forEach(t => db.insert('tasks', t))
 
   const exp = [
-    { amount: 450, category: 'moto_acc', merchant: 'Touratech', item: 'Crash bars + tank bag', method: 'credit', date: todayISO(), classification: 'personal', kind: 'special', relatedVehicle: vRaven.id },
-    { amount: 120, currency: 'USD', category: 'dining', merchant: 'Nobu', item: 'Dinner abroad', method: 'credit', date: todayISO(), classification: 'personal' },
-    { amount: 280, category: 'fuel', merchant: 'Aramco', method: 'apple_pay', date: todayISO(), relatedVehicle: vAlmas.id, liters: 62, odometer: 24800 },
+    { amount: 450, category: 'moto_acc', merchant: 'Touratech', item: 'Crash bars + tank bag', method: 'credit', date: todayISO(), classification: 'personal', kind: 'special', account: 'Other account', relatedVehicle: vRaven.id },
+    { amount: 120, currency: 'USD', category: 'dining', merchant: 'Nobu', item: 'Dinner abroad', method: 'credit', date: todayISO(), classification: 'personal', account: 'Salary account' },
+    { amount: 280, category: 'fuel', merchant: 'Aramco', method: 'apple_pay', date: todayISO(), account: 'Salary account', relatedVehicle: vAlmas.id, liters: 62, odometer: 24800 },
     { amount: 265, category: 'fuel', merchant: 'Aramco', method: 'apple_pay', date: d(-14), relatedVehicle: vAlmas.id, liters: 58, odometer: 24240 },
     { amount: 275, category: 'fuel', merchant: 'Sasco', method: 'apple_pay', date: d(-27), relatedVehicle: vAlmas.id, liters: 60, odometer: 23700 },
     { amount: 1450, category: 'vehicle_maint', merchant: 'BMW Motorrad', method: 'credit', date: d(-15), kind: 'special', relatedVehicle: vRaven.id },
     { amount: 3200, category: 'vehicle_maint', merchant: 'Land Rover Riyadh', method: 'company', date: d(-40), kind: 'special', relatedVehicle: vAlmas.id },
-    { amount: 620, category: 'dining', merchant: 'Myazu', method: 'credit', date: d(-2), classification: 'personal' },
-    { amount: 190, category: 'groceries', merchant: 'Danube', method: 'apple_pay', date: d(-3) },
-    { amount: 2400, category: 'marina', merchant: 'Jeddah Yacht Club', method: 'transfer', date: d(-6), relatedVehicle: vBoat.id },
+    { amount: 620, category: 'dining', merchant: 'Myazu', method: 'credit', date: d(-2), classification: 'personal', account: 'Salary account' },
+    { amount: 190, category: 'groceries', merchant: 'Danube', method: 'apple_pay', date: d(-3), account: 'Salary account' },
+    { amount: 2400, category: 'marina', merchant: 'Jeddah Yacht Club', method: 'transfer', date: d(-6), account: 'Other account', relatedVehicle: vBoat.id },
   ]
   exp.forEach(e => db.insert('expenses', e))
 

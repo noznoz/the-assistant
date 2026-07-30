@@ -15,11 +15,13 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
   const [f, setF] = useState({
     amount: '', currency: settings.currency, category: 'other', merchant: '',
     method: 'credit', date: todayISO(), classification: 'personal', kind: 'monthly',
+    account: (settings.accounts && settings.accounts[0]) || '',
     reimbursable: false, relatedVehicle: '', projectId: '', tripId: '', item: '', note: '', liters: '', odometer: '', ...initial,
   })
   const [err, setErr] = useState('')
   const [newCat, setNewCat] = useState(null)      // inline "add category" text or null
   const [newProj, setNewProj] = useState(null)    // inline "add project" text or null
+  const [newAcct, setNewAcct] = useState(null)    // inline "add account" text or null
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
 
   const onCategory = (e) => {
@@ -39,6 +41,19 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
   const onProject = (e) => {
     if (e.target.value === '__addproj') { setNewProj(''); return }
     setF({ ...f, projectId: e.target.value })
+  }
+
+  const accounts = settings.accounts || []
+  const onAccount = (e) => {
+    if (e.target.value === '__addacct') { setNewAcct(''); return }
+    setF({ ...f, account: e.target.value })
+  }
+  const addAccount = () => {
+    const name = (newAcct || '').trim()
+    if (!name) { setNewAcct(null); return }
+    if (!accounts.includes(name)) updateSettings({ accounts: [...accounts, name] })
+    setF({ ...f, account: name })
+    setNewAcct(null)
   }
   const addProject = () => {
     const name = (newProj || '').trim()
@@ -132,6 +147,20 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
         <Select value={f.method} onChange={set('method')}
           options={PAYMENT_METHODS.map(m => ({ value: m.id, label: label(m, lang) }))} />
       </Field>
+
+      <Field label={t('paidFrom')}>
+        <Select value={f.account} onChange={onAccount}>
+          <option value="">{t('none')}</option>
+          {accounts.map(a => <option key={a} value={a}>{a}</option>)}
+          <option value="__addacct">{t('addAccount')}</option>
+        </Select>
+      </Field>
+      {newAcct != null && (
+        <div className="row2" style={{ marginTop: -6, marginBottom: 12 }}>
+          <Input value={newAcct} onChange={e => setNewAcct(e.target.value)} placeholder={t('accountNamePlaceholder')} autoFocus />
+          <Button onClick={addAccount}>{t('add')}</Button>
+        </div>
+      )}
 
       <div style={{ marginBottom: 12 }}>
         <label style={{ display: 'block', fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '0 2px 7px' }}>{t('expenseKind')}</label>

@@ -169,6 +169,9 @@ export const STRINGS = {
     dividendHint: 'This is added to your income automatically.',
     expenseKind: 'Type of expense', expMonthly: 'Monthly', expSpecial: 'Special',
     projectDashboard: 'Project dashboard',
+    paidFrom: 'Paid from', addAccount: '+ Add account…', accountNamePlaceholder: 'Account name',
+    spendingByAccount: 'Spending by account', unassignedAccount: 'Unassigned',
+    accounts: 'Accounts', accountsHint: 'The accounts an expense can be paid from (e.g. Salary, Other).',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -338,6 +341,9 @@ export const STRINGS = {
     dividendHint: 'يُضاف تلقائياً إلى دخلك.',
     expenseKind: 'نوع المصروف', expMonthly: 'شهري', expSpecial: 'خاص',
     projectDashboard: 'لوحة المشروع',
+    paidFrom: 'مدفوع من', addAccount: '+ إضافة حساب…', accountNamePlaceholder: 'اسم الحساب',
+    spendingByAccount: 'الإنفاق حسب الحساب', unassignedAccount: 'غير محدد',
+    accounts: 'الحسابات', accountsHint: 'الحسابات التي يُدفع منها المصروف (مثل الراتب، أخرى).',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',

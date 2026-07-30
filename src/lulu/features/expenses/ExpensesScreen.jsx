@@ -50,6 +50,10 @@ export default function ExpensesScreen({ go }) {
   const catBars = Object.entries(byCat).sort((a, b) => b[1] - a[1]).slice(0, 8)
     .map(([id, v]) => ({ label: catLabel(id, lang), value: v }))
 
+  const byAccount = {}
+  inRange.forEach(e => { const a = e.account || t('unassignedAccount'); byAccount[a] = (byAccount[a] || 0) + expenseSar(e, rates) })
+  const acctBars = Object.entries(byAccount).sort((a, b) => b[1] - a[1]).map(([lbl, v]) => ({ label: lbl, value: v }))
+
   const budget = Number(settings.monthlyBudget) || 0
   const budgetPct = budget ? Math.min(1, total / budget) : 0
   const recent = [...expenses.items].sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 30)
@@ -162,6 +166,13 @@ export default function ExpensesScreen({ go }) {
           </>
         )}
 
+        {acctBars.length > 1 && (
+          <>
+            <Section title={t('spendingByAccount')} />
+            <Card><Bars data={acctBars} format={(v) => money(v, cur, lang)} /></Card>
+          </>
+        )}
+
         <Section title={t('recent')} count={expenses.items.length} />
         {recent.length === 0 ? (
           <Empty icon="wallet" title={t('nothingHere')}
@@ -177,6 +188,7 @@ export default function ExpensesScreen({ go }) {
                 <div className="title">{e.item || e.merchant || catLabel(e.category, lang)}</div>
                 <div className="meta">
                   {[e.item && e.merchant, catLabel(e.category, lang), fmtDate(e.date, lang, settings.dateFormat)].filter(Boolean).join(' · ')}
+                  {e.account && <span className="chip" style={{ padding: '1px 7px' }}>{e.account}</span>}
                   {proj && <span className="chip t-brand" style={{ padding: '1px 7px' }}>{proj.name}</span>}
                 </div>
               </div>
