@@ -71,9 +71,11 @@ export const PAYMENT_METHODS = [
   { id: 'debit', en: 'Debit card', ar: 'بطاقة مدى' },
   { id: 'credit', en: 'Credit card', ar: 'بطاقة ائتمان' },
   { id: 'transfer', en: 'Bank transfer', ar: 'تحويل بنكي' },
+  { id: 'amex', en: 'Amex', ar: 'أمريكان إكسبريس' },
   { id: 'apple_pay', en: 'Apple Pay', ar: 'Apple Pay' },
   { id: 'wallet', en: 'Digital wallet', ar: 'محفظة رقمية' },
   { id: 'company', en: 'Company card', ar: 'بطاقة الشركة' },
+  { id: 'installment', en: 'Installment', ar: 'تقسيط' },
   { id: 'other', en: 'Other', ar: 'أخرى' },
 ]
 

@@ -194,6 +194,9 @@ export default function ExpensesScreen({ go }) {
                 <div className="title">{e.item || e.merchant || catLabel(e.category, lang)}</div>
                 <div className="meta">
                   {[e.item && e.merchant, catLabel(e.category, lang), fmtDate(e.date, lang, settings.dateFormat)].filter(Boolean).join(' · ')}
+                  {e.method === 'installment' && Number(e.installmentMonths) > 0 && (
+                    <span className="chip t-info" style={{ padding: '1px 7px' }}><Icon name="refresh" size={11} /> {t('installment')} {money(expenseSar(e, rates) / Number(e.installmentMonths), cur, lang)}×{Number(e.installmentMonths)}</span>
+                  )}
                   {e.account && <span className="chip" style={{ padding: '1px 7px' }}>{e.account}</span>}
                   {proj && <span className="chip t-brand" style={{ padding: '1px 7px' }}>{proj.name}</span>}
                 </div>

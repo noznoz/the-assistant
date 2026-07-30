@@ -56,7 +56,8 @@ export function maybeSeed() {
     { amount: 275, category: 'fuel', merchant: 'Sasco', method: 'apple_pay', date: d(-27), relatedVehicle: vAlmas.id, liters: 60, odometer: 23700 },
     { amount: 1450, category: 'vehicle_maint', merchant: 'BMW Motorrad', method: 'credit', date: d(-15), kind: 'special', relatedVehicle: vRaven.id },
     { amount: 3200, category: 'vehicle_maint', merchant: 'Land Rover Riyadh', method: 'company', date: d(-40), kind: 'special', relatedVehicle: vAlmas.id },
-    { amount: 620, category: 'dining', merchant: 'Myazu', method: 'credit', date: d(-2), classification: 'personal', account: 'Salary account' },
+    { amount: 620, category: 'dining', merchant: 'Myazu', method: 'amex', date: d(-2), classification: 'personal', account: 'Salary account' },
+    { amount: 12000, category: 'shopping', merchant: 'Apple Store', item: 'MacBook Pro', method: 'installment', installmentMonths: 12, date: d(-1), classification: 'personal', kind: 'special', account: 'Salary account' },
     { amount: 190, category: 'groceries', merchant: 'Danube', method: 'apple_pay', date: d(-3), account: 'Salary account' },
     { amount: 2400, category: 'marina', merchant: 'Jeddah Yacht Club', method: 'transfer', date: d(-6), account: 'Other account', relatedVehicle: vBoat.id },
   ]

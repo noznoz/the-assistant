@@ -179,6 +179,7 @@ export const STRINGS = {
     includeInNet: 'Include in net income', defaultForExpenses: 'Default for expenses',
     accountEditorHint: 'Remaining = opening balance + income in − expenses out.',
     toAccount: 'To account', manageAccounts: 'Manage accounts',
+    installment: 'Installment', installmentMonths: 'Number of months', perMonth: 'mo',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -358,6 +359,7 @@ export const STRINGS = {
     includeInNet: 'تضمين في صافي الدخل', defaultForExpenses: 'افتراضي للمصروفات',
     accountEditorHint: 'المتبقي = الرصيد الافتتاحي + الدخل الداخل − المصروفات الخارجة.',
     toAccount: 'إلى حساب', manageAccounts: 'إدارة الحسابات',
+    installment: 'تقسيط', installmentMonths: 'عدد الأشهر', perMonth: 'شهر',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',

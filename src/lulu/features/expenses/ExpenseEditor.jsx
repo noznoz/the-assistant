@@ -18,7 +18,8 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
     amount: '', currency: settings.currency, category: 'other', merchant: '',
     method: 'credit', date: todayISO(), classification: 'personal', kind: 'monthly',
     account: defaultAccountName(accountsCol.items),
-    reimbursable: false, relatedVehicle: '', projectId: '', tripId: '', item: '', note: '', liters: '', odometer: '', ...initial,
+    reimbursable: false, relatedVehicle: '', projectId: '', tripId: '', item: '', note: '', liters: '', odometer: '',
+    installmentMonths: '', ...initial,
   })
   const [err, setErr] = useState('')
   const [newCat, setNewCat] = useState(null)      // inline "add category" text or null
@@ -149,6 +150,19 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
         <Select value={f.method} onChange={set('method')}
           options={PAYMENT_METHODS.map(m => ({ value: m.id, label: label(m, lang) }))} />
       </Field>
+
+      {f.method === 'installment' && (
+        <>
+          <Field label={t('installmentMonths')}>
+            <Input type="number" inputMode="numeric" value={f.installmentMonths} onChange={set('installmentMonths')} placeholder="12" />
+          </Field>
+          {parseFloat(f.amount) > 0 && parseInt(f.installmentMonths) > 0 && (
+            <p className="hint" style={{ marginTop: -8, marginBottom: 12, fontWeight: 600, color: 'var(--brand-600)' }}>
+              ≈ {money(parseFloat(f.amount) / parseInt(f.installmentMonths), f.currency, lang)} / {t('perMonth')} × {parseInt(f.installmentMonths)}
+            </p>
+          )}
+        </>
+      )}
 
       <Field label={t('paidFrom')}>
         <Select value={f.account} onChange={onAccount}>
