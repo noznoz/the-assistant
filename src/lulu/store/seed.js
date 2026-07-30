@@ -75,6 +75,10 @@ export function maybeSeed() {
   db.insert('accounts', { name: 'Other account', type: 'current', openingBalance: 0, includeInNet: true, isDefault: false })
   db.insert('accounts', { name: 'Savings', type: 'savings', openingBalance: 250000, includeInNet: false, isDefault: false })
 
+  // Liabilities / loans
+  db.insert('liabilities', { name: 'Villa mortgage', type: 'mortgage', lender: 'Al Rajhi Bank', principal: 1800000, balance: 1240000, monthlyPayment: 9800, rate: 4.2 })
+  db.insert('liabilities', { name: 'Range Rover finance', type: 'car_loan', lender: 'SNB', principal: 420000, balance: 168000, monthlyPayment: 7200, rate: 3.5 })
+
   // Income — a recurring salary plus a one-off bonus.
   db.insert('income', { source: 'salary', amount: 85000, currency: 'SAR', date: todayISO(), recurring: true, account: 'Salary account', note: 'Monthly salary' })
   db.insert('income', { source: 'rental', amount: 9000, currency: 'SAR', date: d(-4), recurring: true, account: 'Other account', note: 'Villa rent' })

@@ -20,8 +20,11 @@ export function installmentOutstanding(e, rates) {
   return Math.max(0, total - paid)
 }
 
-export function totalLiabilities(expenses = [], rates) {
-  return expenses.reduce((s, e) => s + installmentOutstanding(e, rates), 0)
+// Total owed: outstanding installment balances + tracked loan/liability balances.
+export function totalLiabilities(expenses = [], rates, liabilities = []) {
+  const inst = expenses.reduce((s, e) => s + installmentOutstanding(e, rates), 0)
+  const loans = liabilities.reduce((s, l) => s + (Number(l.balance) || 0), 0)
+  return inst + loans
 }
 
 export function investmentValue(v, rates) {
@@ -35,10 +38,10 @@ export function totalAssets({ accounts = [], investments = [], income = [], expe
   return { accountsTotal, investTotal, total: accountsTotal + investTotal }
 }
 
-export function netWorth({ accounts = [], investments = [], income = [], expenses = [], rates }) {
+export function netWorth({ accounts = [], investments = [], income = [], expenses = [], liabilities = [], rates }) {
   const assets = totalAssets({ accounts, investments, income, expenses, rates })
-  const liabilities = totalLiabilities(expenses, rates)
-  return { assets: assets.total, accountsTotal: assets.accountsTotal, investTotal: assets.investTotal, liabilities, value: assets.total - liabilities }
+  const debt = totalLiabilities(expenses, rates, liabilities)
+  return { assets: assets.total, accountsTotal: assets.accountsTotal, investTotal: assets.investTotal, liabilities: debt, value: assets.total - debt }
 }
 
 export function monthKey(d = new Date()) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` }

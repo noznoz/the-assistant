@@ -16,12 +16,13 @@ export default function NetWorthScreen({ go }) {
   const investments = useCollection('investments')
   const income = useCollection('income')
   const expenses = useCollection('expenses')
+  const liabilitiesCol = useCollection('liabilities')
   const snapshots = useCollection('networth')
 
   const nw = useMemo(() => netWorth({
     accounts: accounts.items, investments: investments.items,
-    income: income.items, expenses: expenses.items, rates,
-  }), [accounts.items, investments.items, income.items, expenses.items, rates])
+    income: income.items, expenses: expenses.items, liabilities: liabilitiesCol.items, rates,
+  }), [accounts.items, investments.items, income.items, expenses.items, liabilitiesCol.items, rates])
 
   // Record (or update) this month's snapshot so a trend builds up over time.
   // A ref guards against StrictMode's double effect creating a duplicate.
@@ -76,7 +77,7 @@ export default function NetWorthScreen({ go }) {
 
         <div className="stat-grid" style={{ marginTop: 12 }}>
           <Stat label={t('assets')} value={money(nw.assets, cur, lang)} onClick={() => go('accounts')} />
-          <Stat label={t('liabilities')} value={money(nw.liabilities, cur, lang)} sub={t('installmentsOutstanding')} />
+          <Stat label={t('liabilities')} value={money(nw.liabilities, cur, lang)} sub={t('installmentsAndLoans')} onClick={() => go('liabilities')} />
         </div>
 
         {composition.length > 0 && (

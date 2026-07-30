@@ -204,6 +204,15 @@ export const STRINGS = {
     trends: 'Trends', avgMonthlySpend: 'Avg monthly spend', savingsRate: 'Savings rate',
     lastNMonths: 'Last {n} months', incomeVsExpenses: 'Income vs expenses', topCategories: 'Top categories', month: 'Month',
     receipt: 'Receipt',
+    // liabilities & money calendar
+    totalOwed: 'Total owed', monthlyPayments: 'Monthly payments', loans: 'Loans',
+    noLiabilities: 'No loans yet', liabilitiesHint: 'Track loans and debts and their payoff progress.',
+    addLiability: 'Add loan', editLiability: 'Edit loan', paidOff: 'paid off',
+    liabilityName: 'Name', lender: 'Lender', originalAmount: 'Original amount', remainingBalance: 'Remaining balance',
+    monthlyPayment: 'Monthly payment', interestRate: 'Interest rate', installmentsAndLoans: 'Installments + loans',
+    moneyCalendar: 'Money calendar', moneyCalHint: 'Upcoming bills, installments, renewals and income appear here.',
+    dueOut: 'Due out', expectedIn: 'Expected in', next3Months: 'Next 3 months',
+    renewal: 'Renewal', bill: 'Bill',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -408,6 +417,15 @@ export const STRINGS = {
     trends: 'الاتجاهات', avgMonthlySpend: 'متوسط الإنفاق الشهري', savingsRate: 'معدل الادخار',
     lastNMonths: 'آخر {n} أشهر', incomeVsExpenses: 'الدخل مقابل المصروفات', topCategories: 'أعلى الفئات', month: 'الشهر',
     receipt: 'الإيصال',
+    // liabilities & money calendar
+    totalOwed: 'إجمالي المديونية', monthlyPayments: 'الأقساط الشهرية', loans: 'القروض',
+    noLiabilities: 'لا توجد قروض بعد', liabilitiesHint: 'تابع القروض والديون وتقدم سدادها.',
+    addLiability: 'إضافة قرض', editLiability: 'تعديل القرض', paidOff: 'مسدد',
+    liabilityName: 'الاسم', lender: 'الجهة المُقرضة', originalAmount: 'المبلغ الأصلي', remainingBalance: 'الرصيد المتبقي',
+    monthlyPayment: 'القسط الشهري', interestRate: 'نسبة الفائدة', installmentsAndLoans: 'الأقساط + القروض',
+    moneyCalendar: 'التقويم المالي', moneyCalHint: 'تظهر هنا الفواتير والأقساط والتجديدات والدخل القادمة.',
+    dueOut: 'مستحق للدفع', expectedIn: 'متوقع دخوله', next3Months: 'الأشهر الثلاثة القادمة',
+    renewal: 'تجديد', bill: 'فاتورة',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',

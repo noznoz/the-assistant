@@ -143,6 +143,17 @@ export const ACCOUNT_TYPES = [
   { id: 'other', en: 'Other', ar: 'أخرى', icon: 'wallet' },
 ]
 
+// Loan / liability types.
+export const LIABILITY_TYPES = [
+  { id: 'mortgage', en: 'Mortgage', ar: 'رهن عقاري', icon: 'doc' },
+  { id: 'car_loan', en: 'Car loan', ar: 'قرض سيارة', icon: 'car' },
+  { id: 'personal', en: 'Personal loan', ar: 'قرض شخصي', icon: 'wallet' },
+  { id: 'credit_card', en: 'Credit card', ar: 'بطاقة ائتمان', icon: 'wallet' },
+  { id: 'business', en: 'Business loan', ar: 'قرض تجاري', icon: 'report' },
+  { id: 'other', en: 'Other', ar: 'أخرى', icon: 'wallet' },
+]
+export const findLiabilityType = (id) => LIABILITY_TYPES.find(x => x.id === id)
+
 export const findIncomeSource = (id) => INCOME_SOURCES.find(x => x.id === id)
 export const findInvestmentType = (id) => INVESTMENT_TYPES.find(x => x.id === id)
 export const findAccountType = (id) => ACCOUNT_TYPES.find(x => x.id === id)

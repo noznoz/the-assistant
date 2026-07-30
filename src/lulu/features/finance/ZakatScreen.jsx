@@ -21,6 +21,7 @@ export default function ZakatScreen({ go }) {
   const income = useCollection('income')
   const expenses = useCollection('expenses')
   const investments = useCollection('investments')
+  const liabilitiesCol = useCollection('liabilities')
 
   const z = settings.zakat || {}
   const goldPrice = Number(z.goldPrice) || 300
@@ -35,12 +36,12 @@ export default function ZakatScreen({ go }) {
       .filter(v => includeRealEstate || v.type !== 'realestate')
       .reduce((s, v) => s + investmentValue(v, rates), 0)
     const gold = goldGrams * goldPrice
-    const liabilities = totalLiabilities(expenses.items, rates)
+    const liabilities = totalLiabilities(expenses.items, rates, liabilitiesCol.items)
     const base = Math.max(0, cash + invest + gold + extraCash - liabilities)
     const nisab = NISAB_GRAMS * goldPrice
     const due = base >= nisab ? base * ZAKAT_RATE : 0
     return { cash, invest, gold, liabilities, base, nisab, due, meetsNisab: base >= nisab }
-  }, [accounts.items, investments.items, income.items, expenses.items, rates, goldPrice, goldGrams, extraCash, includeRealEstate])
+  }, [accounts.items, investments.items, income.items, expenses.items, liabilitiesCol.items, rates, goldPrice, goldGrams, extraCash, includeRealEstate])
 
   const shareStatement = () => {
     const L = lang === 'ar'
