@@ -42,6 +42,9 @@ export function maybeSeed() {
   db.insert('accessories', { vehicleId: vAlmas.id, name: 'Dash cam (front + rear)', cost: 1200, date: d(-30), fitted: true })
   db.insert('accessories', { vehicleId: vRaven.id, name: 'Touratech panniers', cost: 6500, date: d(-45), fitted: true, note: 'Aluminium, 38L pair' })
 
+  db.insert('documents', { title: 'Vehicle registration (Istimara)', category: 'vehicle_reg', vehicleId: vAlmas.id, expiry: d(210), notes: 'Renew via Absher', attachments: [] })
+  db.insert('documents', { title: 'Insurance policy', category: 'insurance', vehicleId: vAlmas.id, expiry: d(38), attachments: [] })
+
   const tasks = [
     { title: 'Approve Q3 marketing budget', type: 'approval', classification: 'work', priority: 'critical', status: 'waiting_me', dueDate: todayISO(), project: 'Finance', requestedBy: 'Khalid Al-Otaibi' },
     { title: 'Call Ahmed about the Jeddah contract', type: 'follow_up', classification: 'work', priority: 'high', status: 'planned', dueDate: todayISO(), dueTime: '10:00', assignedTo: 'Ahmed Al-Sayed' },

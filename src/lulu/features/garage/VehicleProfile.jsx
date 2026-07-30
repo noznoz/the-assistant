@@ -11,6 +11,7 @@ import ExpenseEditor from '../expenses/ExpenseEditor.jsx'
 import SwipeRow from '../../ui/SwipeRow.jsx'
 import VehiclePhotos from './VehiclePhotos.jsx'
 import AccessoriesPanel from './AccessoriesPanel.jsx'
+import VehicleDocuments from './VehicleDocuments.jsx'
 
 export default function VehicleProfile({ vehicle, go, onBack }) {
   const { t, lang } = useT()
@@ -78,6 +79,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
           {[
             { id: 'overview', icon: 'grid', label: t('overview') },
             { id: 'photos', icon: 'camera', label: t('photos') },
+            { id: 'documents', icon: 'doc', label: t('documents') },
             { id: 'accessories', icon: 'gift', label: t('accessories') },
             { id: 'maintenance', icon: 'wrench', label: t('maintenance') },
             { id: 'fuel', icon: 'fuel', label: t('fuelLog') },
@@ -168,6 +170,8 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
         )}
 
         {tab === 'photos' && <VehiclePhotos vehicle={vehicle} />}
+
+        {tab === 'documents' && <VehicleDocuments vehicle={vehicle} />}
 
         {tab === 'accessories' && <AccessoriesPanel vehicle={vehicle} />}
 

@@ -215,6 +215,7 @@ export const STRINGS = {
     renewal: 'Renewal', bill: 'Bill',
     monthlyStatement: 'Monthly statement', topMerchants: 'Top merchants',
     descriptionPlaceholder: 'Add a description or notes…',
+    noVehicleDocs: 'No documents yet', vehicleDocsHint: 'Keep registration, insurance and warranty papers here.',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -430,6 +431,7 @@ export const STRINGS = {
     renewal: 'تجديد', bill: 'فاتورة',
     monthlyStatement: 'الكشف الشهري', topMerchants: 'أعلى المتاجر',
     descriptionPlaceholder: 'أضف وصفاً أو ملاحظات…',
+    noVehicleDocs: 'لا توجد مستندات بعد', vehicleDocsHint: 'احتفظ باستمارة المركبة والتأمين والضمان هنا.',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',

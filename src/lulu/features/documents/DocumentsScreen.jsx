@@ -91,7 +91,7 @@ export default function DocumentsScreen({ go }) {
 }
 
 // ---------------------------------------------------------------------------
-function DocEditor({ initial, onClose, onSaved, onToast }) {
+export function DocEditor({ initial, onClose, onSaved, onToast }) {
   const { t, lang } = useT()
   const docs = useCollection('documents')
   const [f, setF] = useState({ title: '', category: 'id', expiry: '', notes: '', attachments: [], ...initial })
@@ -174,7 +174,7 @@ function DocEditor({ initial, onClose, onSaved, onToast }) {
 }
 
 // ---------------------------------------------------------------------------
-function DocumentViewer({ doc, onBack, onEdit, onDelete, onToast }) {
+export function DocumentViewer({ doc, onBack, onEdit, onDelete, onToast }) {
   const { t, lang } = useT()
   const { settings } = useSettings()
   const cat = DOC_CATEGORIES.find(c => c.id === doc.category)
