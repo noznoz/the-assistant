@@ -88,7 +88,7 @@ export function maybeSeed() {
   db.insert('income', { source: 'bonus', amount: 15000, currency: 'SAR', date: d(-6), recurring: false, account: 'Salary account', note: 'Q2 performance bonus' })
 
   // Investments / holdings, with a dividend logged as income.
-  const invAramco = db.insert('investments', { name: 'Aramco shares', type: 'stocks', invested: 200000, currentValue: 236000, currency: 'SAR', note: '2,000 shares' })
+  const invAramco = db.insert('investments', { name: 'Aramco shares', type: 'stocks', currency: 'SAR', lots: [{ qty: 1500, price: 32 }, { qty: 500, price: 35 }], shares: 2000, avgPrice: 32.75, invested: 65500, currentPrice: 34.9, currentValue: 69800, note: 'Averaged across 2 buys' })
   db.insert('investments', { name: 'Global index fund', type: 'fund', invested: 50000, currentValue: 58500, currency: 'USD' })
   db.insert('income', { source: 'dividend', investmentId: invAramco.id, amount: 4200, currency: 'SAR', date: d(-8), recurring: false, note: 'Aramco shares' })
 

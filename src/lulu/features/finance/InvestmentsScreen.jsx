@@ -8,6 +8,14 @@ import { money, toSar, fmtDate, todayISO } from '../../lib/format.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
 
 const CUR = ['SAR', 'USD', 'EUR', 'AED', 'GBP', 'KWD', 'BHD', 'QAR', 'OMR']
+const UNIT_TYPES = ['stocks', 'fund', 'crypto']
+
+// Aggregate buy lots into total shares, total cost and the weighted-average price.
+export function lotStats(lots = []) {
+  const shares = lots.reduce((s, l) => s + (Number(l.qty) || 0), 0)
+  const cost = lots.reduce((s, l) => s + (Number(l.qty) || 0) * (Number(l.price) || 0), 0)
+  return { shares, cost, avg: shares > 0 ? cost / shares : 0 }
+}
 
 export default function InvestmentsScreen({ go }) {
   const { t, lang } = useT()
@@ -65,6 +73,7 @@ export default function InvestmentsScreen({ go }) {
                     <div className="title">{v.name}</div>
                     <div className="meta">
                       {type ? label(type, lang) : ''}
+                      {Number(v.shares) > 0 && <span>{Number(v.shares).toLocaleString()} × {money(v.avgPrice || 0, v.currency || cur, lang)}</span>}
                       {inv > 0 && <span className={g >= 0 ? 't-ok' : 't-danger'}>{g >= 0 ? '▲' : '▼'} {money(Math.abs(g), cur, lang)}</span>}
                       {div > 0 && <span className="chip t-ok" style={{ padding: '1px 7px' }}>{t('dividend')} {money(div, cur, lang)}</span>}
                     </div>
@@ -92,15 +101,32 @@ function InvestmentEditor({ initial, onClose, onSaved }) {
   const { t, lang } = useT()
   const { settings } = useSettings()
   const investments = useCollection('investments')
-  const [f, setF] = useState({ name: '', type: 'stocks', invested: '', currentValue: '', currency: settings.currency, note: '', ...initial })
+  const [f, setF] = useState({ name: '', type: 'stocks', invested: '', currentValue: '', currency: settings.currency, currentPrice: '', lots: [], note: '', ...initial })
   const [err, setErr] = useState('')
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
+
+  const usesLots = UNIT_TYPES.includes(f.type)
+  const lots = f.lots || []
+  const stats = lotStats(lots)
+  const cur = f.currency
+  const currentValueFromLots = stats.shares > 0 && parseFloat(f.currentPrice) > 0 ? stats.shares * parseFloat(f.currentPrice) : stats.cost
+
+  const addLot = () => setF({ ...f, lots: [...lots, { qty: '', price: '' }] })
+  const setLot = (i, k, val) => setF({ ...f, lots: lots.map((l, j) => j === i ? { ...l, [k]: val } : l) })
+  const removeLot = (i) => setF({ ...f, lots: lots.filter((_, j) => j !== i) })
+
   const submit = () => {
     if (!f.name.trim()) { setErr(t('required')); return }
-    const rec = { ...f, name: f.name.trim(), invested: parseFloat(f.invested) || 0, currentValue: parseFloat(f.currentValue) || 0 }
+    let rec = { ...f, name: f.name.trim() }
+    if (usesLots && lots.length > 0) {
+      rec = { ...rec, shares: stats.shares, avgPrice: Math.round(stats.avg * 100) / 100, invested: Math.round(stats.cost * 100) / 100, currentValue: Math.round(currentValueFromLots * 100) / 100, currentPrice: parseFloat(f.currentPrice) || 0 }
+    } else {
+      rec = { ...rec, invested: parseFloat(f.invested) || 0, currentValue: parseFloat(f.currentValue) || 0, shares: 0, avgPrice: 0 }
+    }
     initial.id ? investments.save({ ...rec, id: initial.id }) : investments.add(rec)
     onSaved && onSaved(); onClose()
   }
+
   return (
     <Sheet title={initial.id ? t('editInvestment') : t('addInvestment')} onClose={onClose}
       footer={<div className="stack">
@@ -116,10 +142,44 @@ function InvestmentEditor({ initial, onClose, onSaved }) {
           <Select value={f.currency} onChange={set('currency')} options={CUR.map(c => ({ value: c, label: c }))} />
         </Field>
       </div>
-      <div className="row2">
-        <Field label={t('amountInvested')}><Input type="number" inputMode="decimal" value={f.invested} onChange={set('invested')} placeholder="0" /></Field>
-        <Field label={t('currentValue')}><Input type="number" inputMode="decimal" value={f.currentValue} onChange={set('currentValue')} placeholder="0" /></Field>
-      </div>
+
+      {usesLots ? (
+        <>
+          <label style={{ display: 'block', fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '4px 2px 6px' }}>{t('buyLots')}</label>
+          {lots.map((l, i) => (
+            <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+              <Input type="number" inputMode="decimal" value={l.qty} onChange={e => setLot(i, 'qty', e.target.value)} placeholder={t('quantity')} style={{ flex: 1 }} />
+              <span className="muted">×</span>
+              <Input type="number" inputMode="decimal" value={l.price} onChange={e => setLot(i, 'price', e.target.value)} placeholder={t('pricePerShare')} style={{ flex: 1 }} />
+              <button className="iconbtn" aria-label={t('delete')} onClick={() => removeLot(i)}><Icon name="x" size={16} /></button>
+            </div>
+          ))}
+          <Button block icon="plus" onClick={addLot} style={{ marginBottom: 10 }}>{t('addLot')}</Button>
+
+          {stats.shares > 0 && (
+            <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+              <span className="chip" style={{ flex: 1, justifyContent: 'space-between' }}>{t('shares')} <b className="tnum">{stats.shares.toLocaleString()}</b></span>
+              <span className="chip" style={{ flex: 1, justifyContent: 'space-between' }}>{t('avgPrice')} <b className="tnum">{money(stats.avg, cur, lang)}</b></span>
+            </div>
+          )}
+
+          <div className="row2">
+            <Field label={t('amountInvested')} hint={t('fromLots')}><Input value={money(stats.cost, cur, lang)} readOnly disabled /></Field>
+            <Field label={t('currentPrice')}><Input type="number" inputMode="decimal" value={f.currentPrice} onChange={set('currentPrice')} placeholder="0" /></Field>
+          </div>
+          {stats.shares > 0 && (
+            <p className="hint" style={{ marginTop: -8, marginBottom: 12, fontWeight: 600, color: 'var(--brand-600)' }}>
+              {t('currentValue')}: {money(currentValueFromLots, cur, lang)}
+            </p>
+          )}
+        </>
+      ) : (
+        <div className="row2">
+          <Field label={t('amountInvested')}><Input type="number" inputMode="decimal" value={f.invested} onChange={set('invested')} placeholder="0" /></Field>
+          <Field label={t('currentValue')}><Input type="number" inputMode="decimal" value={f.currentValue} onChange={set('currentValue')} placeholder="0" /></Field>
+        </div>
+      )}
+
       <Field label={t('notesField')}><Input value={f.note} onChange={set('note')} /></Field>
     </Sheet>
   )
