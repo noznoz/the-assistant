@@ -4,6 +4,7 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { PAYMENT_METHODS, categoryOptions, label } from '../../lib/domain.js'
 import { todayISO, toSar, money } from '../../lib/format.js'
+import { defaultAccountName } from '../../lib/accounts.js'
 
 export default function ExpenseEditor({ initial, onClose, onSaved }) {
   const { t, lang } = useT()
@@ -12,10 +13,11 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
   const vehicles = useCollection('vehicles')
   const projects = useCollection('projects')
   const trips = useCollection('trips')
+  const accountsCol = useCollection('accounts')
   const [f, setF] = useState({
     amount: '', currency: settings.currency, category: 'other', merchant: '',
     method: 'credit', date: todayISO(), classification: 'personal', kind: 'monthly',
-    account: (settings.accounts && settings.accounts[0]) || '',
+    account: defaultAccountName(accountsCol.items),
     reimbursable: false, relatedVehicle: '', projectId: '', tripId: '', item: '', note: '', liters: '', odometer: '', ...initial,
   })
   const [err, setErr] = useState('')
@@ -43,7 +45,7 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
     setF({ ...f, projectId: e.target.value })
   }
 
-  const accounts = settings.accounts || []
+  const accounts = accountsCol.items.map(a => a.name)
   const onAccount = (e) => {
     if (e.target.value === '__addacct') { setNewAcct(''); return }
     setF({ ...f, account: e.target.value })
@@ -51,7 +53,7 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
   const addAccount = () => {
     const name = (newAcct || '').trim()
     if (!name) { setNewAcct(null); return }
-    if (!accounts.includes(name)) updateSettings({ accounts: [...accounts, name] })
+    if (!accounts.includes(name)) accountsCol.add({ name, type: 'current', openingBalance: 0, includeInNet: true, isDefault: false })
     setF({ ...f, account: name })
     setNewAcct(null)
   }

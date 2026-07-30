@@ -131,8 +131,19 @@ export const INVESTMENT_TYPES = [
   { id: 'other', en: 'Other', ar: 'أخرى', icon: 'plus' },
 ]
 
+// Account types for the funding accounts an expense/income is tagged to.
+export const ACCOUNT_TYPES = [
+  { id: 'salary', en: 'Salary', ar: 'راتب', icon: 'wallet' },
+  { id: 'current', en: 'Current', ar: 'جاري', icon: 'wallet' },
+  { id: 'savings', en: 'Savings', ar: 'ادخار', icon: 'shield' },
+  { id: 'credit', en: 'Credit card', ar: 'بطاقة ائتمان', icon: 'wallet' },
+  { id: 'cash', en: 'Cash', ar: 'نقد', icon: 'wallet' },
+  { id: 'other', en: 'Other', ar: 'أخرى', icon: 'wallet' },
+]
+
 export const findIncomeSource = (id) => INCOME_SOURCES.find(x => x.id === id)
 export const findInvestmentType = (id) => INVESTMENT_TYPES.find(x => x.id === id)
+export const findAccountType = (id) => ACCOUNT_TYPES.find(x => x.id === id)
 
 // Icons offered when creating a contact group (must exist in ui/Icon.jsx).
 export const GROUP_ICONS = [

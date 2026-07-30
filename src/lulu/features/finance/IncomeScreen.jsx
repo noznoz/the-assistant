@@ -5,6 +5,7 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { INCOME_SOURCES, findIncomeSource, label } from '../../lib/domain.js'
 import { money, toSar, fmtDate, isSameMonth, todayISO } from '../../lib/format.js'
+import { defaultAccountName } from '../../lib/accounts.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
 
 export default function IncomeScreen({ go }) {
@@ -75,7 +76,8 @@ export function IncomeEditor({ initial, onClose, onSaved }) {
   const { t, lang } = useT()
   const { settings } = useSettings()
   const income = useCollection('income')
-  const [f, setF] = useState({ source: 'salary', amount: '', currency: settings.currency, date: todayISO(), recurring: true, note: '', ...initial })
+  const accountsCol = useCollection('accounts')
+  const [f, setF] = useState({ source: 'salary', amount: '', currency: settings.currency, date: todayISO(), recurring: true, account: defaultAccountName(accountsCol.items), note: '', ...initial })
   const [err, setErr] = useState('')
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const submit = () => {
@@ -104,7 +106,15 @@ export function IncomeEditor({ initial, onClose, onSaved }) {
           ≈ {money(toSar(f.amount, f.currency, settings.rates), 'SAR', lang)} {t('inSar')}
         </p>
       )}
-      <Field label={t('date')}><Input type="date" value={f.date} onChange={set('date')} /></Field>
+      <div className="row2">
+        <Field label={t('date')}><Input type="date" value={f.date} onChange={set('date')} /></Field>
+        <Field label={t('toAccount')}>
+          <Select value={f.account} onChange={set('account')}>
+            <option value="">{t('none')}</option>
+            {accountsCol.items.map(a => <option key={a.id} value={a.name}>{a.name}</option>)}
+          </Select>
+        </Field>
+      </div>
       <div style={{ marginBottom: 16 }}>
         <div className="chip-row">
           <Chip selectable on={f.recurring} onClick={() => setF({ ...f, recurring: !f.recurring })}>{t('recurringMonthlyChip')}</Chip>

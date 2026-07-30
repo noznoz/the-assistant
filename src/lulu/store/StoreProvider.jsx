@@ -10,6 +10,7 @@ export function StoreProvider({ children }) {
     // Seed sample data on first ever launch (idempotent) BEFORE the first read,
     // so the initial render already reflects it.
     maybeSeed()
+    db.ensureAccounts()   // migrate legacy string accounts → account records
     const init = {}
     db.COLLECTIONS.forEach(c => { init[c] = db.readCollection(c) })
     return init

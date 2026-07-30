@@ -65,10 +65,15 @@ export function maybeSeed() {
   // A sample expense project with a custom category to showcase the feature.
   db.writeSettings({ ...db.readSettings(), customCategories: ['Landscaping'], categoryBudgets: { dining: 2000, fuel: 1500, groceries: 1200 } })
 
+  // Funding accounts (Salary is the default; Savings is excluded from net).
+  db.insert('accounts', { name: 'Salary account', type: 'salary', openingBalance: 0, includeInNet: true, isDefault: true })
+  db.insert('accounts', { name: 'Other account', type: 'current', openingBalance: 0, includeInNet: true, isDefault: false })
+  db.insert('accounts', { name: 'Savings', type: 'savings', openingBalance: 250000, includeInNet: false, isDefault: false })
+
   // Income — a recurring salary plus a one-off bonus.
-  db.insert('income', { source: 'salary', amount: 85000, currency: 'SAR', date: todayISO(), recurring: true, note: 'Monthly salary' })
-  db.insert('income', { source: 'rental', amount: 9000, currency: 'SAR', date: d(-4), recurring: true, note: 'Villa rent' })
-  db.insert('income', { source: 'bonus', amount: 15000, currency: 'SAR', date: d(-6), recurring: false, note: 'Q2 performance bonus' })
+  db.insert('income', { source: 'salary', amount: 85000, currency: 'SAR', date: todayISO(), recurring: true, account: 'Salary account', note: 'Monthly salary' })
+  db.insert('income', { source: 'rental', amount: 9000, currency: 'SAR', date: d(-4), recurring: true, account: 'Other account', note: 'Villa rent' })
+  db.insert('income', { source: 'bonus', amount: 15000, currency: 'SAR', date: d(-6), recurring: false, account: 'Salary account', note: 'Q2 performance bonus' })
 
   // Investments / holdings, with a dividend logged as income.
   const invAramco = db.insert('investments', { name: 'Aramco shares', type: 'stocks', invested: 200000, currentValue: 236000, currency: 'SAR', note: '2,000 shares' })

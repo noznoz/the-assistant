@@ -6,6 +6,7 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { findPayment, catLabel, label } from '../../lib/domain.js'
 import { money, fmtDate, isToday, isSameMonth, expenseSar, toSar } from '../../lib/format.js'
+import { isIncluded } from '../../lib/accounts.js'
 import { share, formatExpenseSummary } from '../../lib/share.js'
 import ExpenseEditor from './ExpenseEditor.jsx'
 import SwipeRow from '../../ui/SwipeRow.jsx'
@@ -18,6 +19,7 @@ export default function ExpensesScreen({ go }) {
   const projects = useCollection('projects')
   const income = useCollection('income')
   const investments = useCollection('investments')
+  const accounts = useCollection('accounts')
   const [range, setRange] = useState('month')
   const [editor, setEditor] = useState(null)
   const toast = useToast()
@@ -37,12 +39,16 @@ export default function ExpensesScreen({ go }) {
   const total = inRange.reduce((s, e) => s + expenseSar(e, rates), 0)
 
   // Finance overview — this month, in SAR: income, expenses (monthly vs special), net.
+  // Net only counts accounts flagged "include in net" (untagged items count too).
+  const acc = accounts.items
   const monthExp = expenses.items.filter(e => isSameMonth(e.date))
   const monthlyExp = monthExp.filter(e => (e.kind || 'monthly') !== 'special').reduce((s, e) => s + expenseSar(e, rates), 0)
   const specialExp = monthExp.filter(e => e.kind === 'special').reduce((s, e) => s + expenseSar(e, rates), 0)
   const monthExpTotal = monthlyExp + specialExp
   const monthIncome = income.items.filter(i => isSameMonth(i.date)).reduce((s, i) => s + toSar(i.amount, i.currency || 'SAR', rates), 0)
-  const net = monthIncome - monthExpTotal
+  const netIncome = income.items.filter(i => isSameMonth(i.date) && isIncluded(i.account, acc)).reduce((s, i) => s + toSar(i.amount, i.currency || 'SAR', rates), 0)
+  const netExp = monthExp.filter(e => isIncluded(e.account, acc)).reduce((s, e) => s + expenseSar(e, rates), 0)
+  const net = netIncome - netExp
   const portfolio = investments.items.reduce((s, v) => s + toSar(v.currentValue || v.invested, v.currency || 'SAR', rates), 0)
 
   const byCat = {}
@@ -131,6 +137,9 @@ export default function ExpensesScreen({ go }) {
           <button className="qa" onClick={() => go('income')}>
             <span className="ic t-ok"><Icon name="wallet" size={22} /></span>{t('income')}
           </button>
+          <button className="qa" onClick={() => go('accounts')}>
+            <span className="ic"><Icon name="wallet" size={22} /></span>{t('accounts')}
+          </button>
           <button className="qa" onClick={() => go('investments')}>
             <span className="ic"><Icon name="chart" size={22} /></span>{t('investments')}
           </button>
@@ -142,9 +151,6 @@ export default function ExpensesScreen({ go }) {
           </button>
           <button className="qa" onClick={() => go('budgets')}>
             <span className="ic"><Icon name="chart" size={22} /></span>{t('budgets')}
-          </button>
-          <button className="qa" onClick={() => go('expensereport')}>
-            <span className="ic"><Icon name="doc" size={22} /></span>{t('reports')}
           </button>
         </div>
 

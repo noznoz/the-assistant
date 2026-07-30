@@ -18,15 +18,6 @@ export default function SettingsScreen({ go }) {
   const toast = useToast()
   const fileRef = useRef()
   const [setup, setSetup] = useState(false)   // passcode setup overlay
-  const [newAccount, setNewAccount] = useState('')
-
-  const accounts = settings.accounts || []
-  const addAccount = () => {
-    const name = newAccount.trim()
-    if (!name || accounts.includes(name)) { setNewAccount(''); return }
-    updateSettings({ accounts: [...accounts, name] }); setNewAccount('')
-  }
-  const removeAccount = (name) => updateSettings({ accounts: accounts.filter(a => a !== name) })
 
   const doExport = () => {
     const blob = new Blob([JSON.stringify(db.exportAll(), null, 2)], { type: 'application/json' })
@@ -143,17 +134,7 @@ export default function SettingsScreen({ go }) {
         <Section title={t('accounts')} />
         <Card className="stack">
           <p className="hint" style={{ margin: '0 2px' }}>{t('accountsHint')}</p>
-          {accounts.map(a => (
-            <div key={a} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span className="lead t-brand" style={{ width: 34, height: 34, borderRadius: 10, display: 'grid', placeItems: 'center' }}><Icon name="wallet" size={16} /></span>
-              <span style={{ flex: 1, fontWeight: 600 }}>{a}</span>
-              <button className="iconbtn" aria-label={t('delete')} onClick={() => removeAccount(a)}><Icon name="x" size={16} /></button>
-            </div>
-          ))}
-          <div className="row2">
-            <Input value={newAccount} onChange={e => setNewAccount(e.target.value)} placeholder={t('accountNamePlaceholder')} />
-            <Button icon="plus" onClick={addAccount}>{t('add')}</Button>
-          </div>
+          <Button block icon="wallet" onClick={() => go('accounts')}>{t('manageAccounts')}</Button>
         </Card>
 
         {/* Notifications */}

@@ -11,7 +11,7 @@ const NS = 'lulu:v1'
 
 export const COLLECTIONS = [
   'tasks', 'inbox', 'vehicles', 'services', 'accessories',
-  'expenses', 'income', 'investments', 'projects', 'subscriptions', 'rewards',
+  'expenses', 'income', 'investments', 'accounts', 'projects', 'subscriptions', 'rewards',
   'people', 'groups', 'documents', 'trips', 'notes', 'notifications',
 ]
 
@@ -125,3 +125,16 @@ export function wipeAll() {
 
 export function markSeeded() { localStorage.setItem(keyFor('seeded'), '1') }
 export function isSeeded() { return localStorage.getItem(keyFor('seeded')) === '1' }
+
+// One-time migration: turn the old string list of accounts (settings.accounts)
+// into proper account records with balances. Runs whenever the accounts
+// collection is empty, so existing users get their accounts carried over.
+export function ensureAccounts() {
+  if (readCollection('accounts').length > 0) return
+  const names = (readSettings().accounts && readSettings().accounts.length)
+    ? readSettings().accounts : ['Salary account', 'Other account']
+  names.forEach((name, i) => insert('accounts', {
+    name, type: i === 0 ? 'salary' : 'current',
+    openingBalance: 0, includeInNet: true, isDefault: i === 0,
+  }))
+}
