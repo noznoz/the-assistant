@@ -12,7 +12,7 @@ const NS = 'lulu:v1'
 export const COLLECTIONS = [
   'tasks', 'inbox', 'vehicles', 'services', 'accessories',
   'expenses', 'income', 'investments', 'accounts', 'networth', 'liabilities',
-  'properties', 'valuables', 'projects', 'subscriptions', 'rewards',
+  'properties', 'valuables', 'memberships', 'projects', 'subscriptions', 'rewards',
   'people', 'groups', 'documents', 'trips', 'notes', 'notifications',
 ]
 

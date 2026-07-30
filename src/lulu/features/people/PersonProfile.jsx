@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Section, Button, Empty, Chip, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Section, Card, Button, Empty, Chip, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { RELATIONSHIPS, findPriority, label } from '../../lib/domain.js'
 import { relativeDay, fmtTime } from '../../lib/format.js'
-import { whatsappToPerson, formatAssignment, formatNudge, formatNudgeList, personDigits } from '../../lib/share.js'
+import { whatsappToPerson, formatAssignment, formatNudge, formatNudgeList, personDigits, share } from '../../lib/share.js'
+import EntityDocuments from '../shared/EntityDocuments.jsx'
 import { completeTask } from '../../lib/recurrence.js'
 import { pointsFor, awardPoints } from '../../lib/points.js'
 import PersonEditor from './PersonEditor.jsx'
@@ -31,6 +32,27 @@ export default function PersonProfile({ person, onBack, onDeleted }) {
   const rel = RELATIONSHIPS.find(r => r.id === person.relationship)
   const initials = (person.name || '?').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
   const digits = personDigits(person)
+
+  const healthRows = [
+    [t('bloodType'), person.bloodType],
+    [t('allergies'), person.allergies],
+    [t('conditions'), person.conditions],
+    [t('medications'), person.medications],
+    [t('doctor'), person.doctor],
+    [t('healthInsurer'), [person.healthInsurer, person.healthPolicy].filter(Boolean).join(' · ')],
+  ].filter(([, v]) => v)
+  const shareMedicalCard = () => {
+    const L = lang === 'ar'
+    share([
+      `🚑 ${L ? 'بطاقة طبية' : 'Medical card'} — ${person.name}`,
+      person.bloodType && `${L ? 'فصيلة الدم' : 'Blood type'}: ${person.bloodType}`,
+      person.allergies && `${L ? 'حساسية' : 'Allergies'}: ${person.allergies}`,
+      person.conditions && `${L ? 'حالات' : 'Conditions'}: ${person.conditions}`,
+      person.medications && `${L ? 'أدوية' : 'Medications'}: ${person.medications}`,
+      person.doctor && `${L ? 'الطبيب' : 'Doctor'}: ${person.doctor}`,
+      person.mobile && `${L ? 'هاتف' : 'Phone'}: ${person.mobile}`,
+    ].filter(Boolean).join('\n'))
+  }
 
   const sendTask = (task) => whatsappToPerson(person, formatAssignment(task, person, lang, settings))
   const nudge = (task) => { whatsappToPerson(person, formatNudge(task, person, lang, settings)); toast.show(t('nudgedToast')) }
@@ -74,6 +96,25 @@ export default function PersonProfile({ person, onBack, onDeleted }) {
           <Button icon="whatsapp" disabled={open.length === 0} onClick={nudgeAll}>{t('nudgeAll')}</Button>
         </div>
         {points > 0 && <Button block icon="gift" style={{ marginTop: 10 }} onClick={() => setRedeem(true)}>{t('redeemReward')}</Button>}
+
+        {/* Health & medical */}
+        {healthRows.length > 0 && (
+          <>
+            <Section title={t('healthMedical')} />
+            <Card className="stack">
+              {healthRows.map(([k, v]) => (
+                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 14 }}>
+                  <span className="muted">{k}</span><span style={{ fontWeight: 600, textAlign: 'end' }}>{v}</span>
+                </div>
+              ))}
+              <Button block icon="share" onClick={shareMedicalCard}>{t('shareMedicalCard')}</Button>
+            </Card>
+          </>
+        )}
+
+        {/* Medical documents */}
+        <Section title={t('medicalDocuments')} />
+        <EntityDocuments filterKey="personId" id={person.id} hint={t('medicalDocsHint')} />
 
         {/* Their open tasks */}
         <Section title={t('theirTasks')} count={open.length} />

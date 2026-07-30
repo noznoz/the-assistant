@@ -126,9 +126,9 @@ export function maybeSeed() {
   ].forEach(e => db.insert('expenses', e))
 
   const people = [
-    { name: 'Layla', relationship: 'family', jobTitle: 'Spouse', mobile: '+966500000010', whatsapp: '+966500000010', birthday: d(40) },
-    { name: 'Omar', relationship: 'family', jobTitle: 'Son', mobile: '+966500000011', whatsapp: '+966500000011', birthday: d(9) },
-    { name: 'Noura', relationship: 'family', jobTitle: 'Daughter', mobile: '+966500000012', whatsapp: '+966500000012', birthday: d(120) },
+    { name: 'Layla', relationship: 'family', jobTitle: 'Spouse', mobile: '+966500000010', whatsapp: '+966500000010', birthday: d(40), bloodType: 'A+', healthInsurer: 'Bupa Arabia', healthPolicy: 'BUP-8842' },
+    { name: 'Omar', relationship: 'family', jobTitle: 'Son', mobile: '+966500000011', whatsapp: '+966500000011', birthday: d(9), bloodType: 'O+', allergies: 'Peanuts', doctor: 'Dr. Sami (Pediatrics)' },
+    { name: 'Noura', relationship: 'family', jobTitle: 'Daughter', mobile: '+966500000012', whatsapp: '+966500000012', birthday: d(120), bloodType: 'A-' },
     { name: 'Khalid Al-Otaibi', jobTitle: 'CFO', company: 'Group Finance', relationship: 'colleague', mobile: '+966500000001' },
     { name: 'Ahmed Al-Sayed', jobTitle: 'Partner', company: 'Al-Sayed Legal', relationship: 'supplier', mobile: '+966500000002' },
     { name: 'Sara Al-Nasser', jobTitle: 'Executive Assistant', company: 'Office', relationship: 'report', mobile: '+966500000003' },
@@ -143,6 +143,10 @@ export function maybeSeed() {
   const layla = savedPeople[0], omar = savedPeople[1]
   db.insert('tasks', { title: 'Pick up the AlUla trip documents', type: 'request', classification: 'personal', priority: 'high', status: 'waiting_someone', dueDate: todayISO(), assigneeId: layla.id, assignedTo: layla.name })
   db.insert('tasks', { title: 'Finish school project & email teacher', type: 'request', classification: 'personal', priority: 'medium', status: 'waiting_someone', dueDate: d(2), assigneeId: omar.id, assignedTo: omar.name })
+
+  db.insert('memberships', { name: 'Saudia AlFursan', category: 'airline', number: 'SV 1234567', tier: 'Gold' })
+  db.insert('memberships', { name: 'Hilton Honors', category: 'hotel', number: '600123456', tier: 'Diamond' })
+  db.insert('memberships', { name: 'Fitness Time', category: 'gym', number: 'FT-99213', expiry: d(160) })
 
   db.insert('notes', { text: 'Reminder: renew boat registration before the summer season.' })
 

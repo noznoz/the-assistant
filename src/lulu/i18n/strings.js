@@ -234,6 +234,15 @@ export const STRINGS = {
     weekAhead: 'Week ahead', week: 'Week ahead', allClear: 'All clear',
     weekEmptyHint: 'Nothing due in the next 7 days.', tasksThisWeek: 'Tasks this week',
     moneyThisWeek: 'Money this week', shareWeekAhead: 'Share the week ahead',
+    // health & memberships
+    healthMedical: 'Health & medical', allergies: 'Allergies', allergiesPlaceholder: 'e.g. penicillin, nuts',
+    conditions: 'Conditions', medications: 'Medications', doctor: 'Doctor',
+    healthInsurer: 'Health insurer', healthPolicy: 'Policy no.', shareMedicalCard: 'Share medical card',
+    medicalDocuments: 'Medical documents', medicalDocsHint: 'Reports, prescriptions, insurance cards…',
+    memberships: 'Memberships', noMemberships: 'No cards yet',
+    membershipsHint: 'Loyalty and membership cards — numbers, tiers, expiry.',
+    addMembership: 'Add card', editMembership: 'Edit card', membershipName: 'Name',
+    membershipNumber: 'Number', tier: 'Tier', expiry: 'Expiry', copy: 'Copy',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -468,6 +477,15 @@ export const STRINGS = {
     weekAhead: 'الأسبوع القادم', week: 'الأسبوع القادم', allClear: 'كل شيء تمام',
     weekEmptyHint: 'لا شيء مستحق خلال 7 أيام.', tasksThisWeek: 'مهام هذا الأسبوع',
     moneyThisWeek: 'مالية هذا الأسبوع', shareWeekAhead: 'مشاركة الأسبوع القادم',
+    // health & memberships
+    healthMedical: 'الصحة والطب', allergies: 'الحساسية', allergiesPlaceholder: 'مثل البنسلين، المكسرات',
+    conditions: 'حالات مرضية', medications: 'الأدوية', doctor: 'الطبيب',
+    healthInsurer: 'شركة التأمين الصحي', healthPolicy: 'رقم الوثيقة', shareMedicalCard: 'مشاركة البطاقة الطبية',
+    medicalDocuments: 'المستندات الطبية', medicalDocsHint: 'تقارير، وصفات، بطاقات تأمين…',
+    memberships: 'العضويات', noMemberships: 'لا توجد بطاقات بعد',
+    membershipsHint: 'بطاقات الولاء والعضوية — الأرقام والفئات والانتهاء.',
+    addMembership: 'إضافة بطاقة', editMembership: 'تعديل البطاقة', membershipName: 'الاسم',
+    membershipNumber: 'الرقم', tier: 'الفئة', expiry: 'الانتهاء', copy: 'نسخ',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',

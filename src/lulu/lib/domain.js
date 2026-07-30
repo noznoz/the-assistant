@@ -187,6 +187,18 @@ export const VALUABLE_CATEGORIES = [
 ]
 export const findValuableCategory = (id) => VALUABLE_CATEGORIES.find(x => x.id === id)
 
+// Membership / loyalty card categories.
+export const MEMBERSHIP_CATEGORIES = [
+  { id: 'airline', en: 'Airline', ar: 'طيران', icon: 'trip' },
+  { id: 'hotel', en: 'Hotel', ar: 'فندق', icon: 'doc' },
+  { id: 'store', en: 'Store', ar: 'متجر', icon: 'wallet' },
+  { id: 'gym', en: 'Gym / Club', ar: 'نادي', icon: 'sparkle' },
+  { id: 'bank', en: 'Bank', ar: 'بنك', icon: 'wallet' },
+  { id: 'gov', en: 'Government', ar: 'حكومي', icon: 'shield' },
+  { id: 'other', en: 'Other', ar: 'أخرى', icon: 'gift' },
+]
+export const findMembershipCategory = (id) => MEMBERSHIP_CATEGORIES.find(x => x.id === id)
+
 export const findIncomeSource = (id) => INCOME_SOURCES.find(x => x.id === id)
 export const findInvestmentType = (id) => INVESTMENT_TYPES.find(x => x.id === id)
 export const findAccountType = (id) => ACCOUNT_TYPES.find(x => x.id === id)

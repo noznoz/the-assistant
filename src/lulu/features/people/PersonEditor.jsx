@@ -14,7 +14,8 @@ export default function PersonEditor({ initial = {}, onClose, onSaved }) {
   const groups = useCollection('groups')
   const [f, setF] = useState({
     name: '', photo: '', jobTitle: '', company: '', mobile: '', whatsapp: '',
-    email: '', relationship: 'family', birthday: '', notes: '', groupIds: [], ...initial,
+    email: '', relationship: 'family', birthday: '', notes: '', groupIds: [],
+    bloodType: '', allergies: '', conditions: '', medications: '', doctor: '', healthInsurer: '', healthPolicy: '', ...initial,
   })
   const toggleGroup = (id) => setF(prev => {
     const cur = prev.groupIds || []
@@ -90,6 +91,22 @@ export default function PersonEditor({ initial = {}, onClose, onSaved }) {
         <Field label={t('company')}><Input value={f.company} onChange={set('company')} /></Field>
       </div>
       <Field label={t('notesField')}><Input value={f.notes} onChange={set('notes')} /></Field>
+
+      <div style={{ margin: '4px 2px 8px', fontSize: 13, fontWeight: 700, color: 'var(--ink-2)' }}>{t('healthMedical')}</div>
+      <div className="row2">
+        <Field label={t('bloodType')}>
+          <Select value={f.bloodType} onChange={set('bloodType')} options={[''].concat(['A+','A-','B+','B-','AB+','AB-','O+','O-']).map(v => ({ value: v, label: v || '—' }))} />
+        </Field>
+        <Field label={t('doctor')}><Input value={f.doctor} onChange={set('doctor')} /></Field>
+      </div>
+      <Field label={t('allergies')}><Input value={f.allergies} onChange={set('allergies')} placeholder={t('allergiesPlaceholder')} /></Field>
+      <Field label={t('conditions')}><Input value={f.conditions} onChange={set('conditions')} /></Field>
+      <Field label={t('medications')}><Input value={f.medications} onChange={set('medications')} /></Field>
+      <div className="row2">
+        <Field label={t('healthInsurer')}><Input value={f.healthInsurer} onChange={set('healthInsurer')} /></Field>
+        <Field label={t('healthPolicy')}><Input value={f.healthPolicy} onChange={set('healthPolicy')} /></Field>
+      </div>
+
       <p className="muted" style={{ fontSize: 12 }}>
         <Icon name="whatsapp" size={12} /> {t('sendTaskHint')}
       </p>

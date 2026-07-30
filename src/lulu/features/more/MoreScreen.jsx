@@ -13,6 +13,7 @@ const ITEMS = [
   { id: 'people', icon: 'people', collection: 'people' },
   { id: 'properties', icon: 'doc', collection: 'properties' },
   { id: 'valuables', icon: 'gift', collection: 'valuables' },
+  { id: 'memberships', icon: 'gift', collection: 'memberships' },
   { id: 'documents', icon: 'doc', collection: 'documents' },
   { id: 'trips', icon: 'trip', collection: 'trips' },
   { id: 'reports', icon: 'report' },
@@ -32,6 +33,7 @@ export default function MoreScreen({ go }) {
     people: useCollection('people').items.length,
     properties: useCollection('properties').items.length,
     valuables: useCollection('valuables').items.length,
+    memberships: useCollection('memberships').items.length,
     documents: useCollection('documents').items.length,
     trips: useCollection('trips').items.length,
   }
