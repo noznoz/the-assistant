@@ -9,6 +9,8 @@ import { share, formatVehicle } from '../../lib/share.js'
 import VehicleEditor from './VehicleEditor.jsx'
 import ExpenseEditor from '../expenses/ExpenseEditor.jsx'
 import SwipeRow from '../../ui/SwipeRow.jsx'
+import VehiclePhotos from './VehiclePhotos.jsx'
+import AccessoriesPanel from './AccessoriesPanel.jsx'
 
 export default function VehicleProfile({ vehicle, go, onBack }) {
   const { t, lang } = useT()
@@ -63,7 +65,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
       <div className="screen">
         <div className="veh-card" style={{ marginTop: 14 }}>
           <div className="img">
-            {vehicle.photo ? <img src={vehicle.photo} alt={vehicle.name} /> : <Icon name={vt?.icon || 'car'} size={72} stroke={1.4} />}
+            {vehicle.photo ? <img src={vehicle.photo} alt={vehicle.name} style={{ objectPosition: vehicle.photoPos || '50% 50%' }} /> : <Icon name={vt?.icon || 'car'} size={72} stroke={1.4} />}
             <div className="badge"><Chip tint="t-brand">{vt ? t(vt.key) : ''}</Chip></div>
           </div>
           <div className="info">
@@ -75,6 +77,8 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
         <div style={{ margin: '14px 0' }}>
           <Segmented value={tab} onChange={setTab} options={[
             { value: 'overview', label: t('overview') },
+            { value: 'photos', label: t('photos') },
+            { value: 'accessories', label: t('accessories') },
             { value: 'maintenance', label: t('maintenance') },
             { value: 'fuel', label: t('fuelLog') },
             { value: 'expenses', label: t('vehExpenses') },
@@ -157,6 +161,10 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
             <p className="hint center" style={{ marginTop: 12 }}>{t('liters')} + {t('odometer')} → {t('economy')}</p>
           </>
         )}
+
+        {tab === 'photos' && <VehiclePhotos vehicle={vehicle} />}
+
+        {tab === 'accessories' && <AccessoriesPanel vehicle={vehicle} />}
 
         {tab === 'maintenance' && (
           <>

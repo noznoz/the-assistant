@@ -57,7 +57,7 @@ function VehicleCard({ v, lang, cur, onClick }) {
   return (
     <div className="veh-card" onClick={onClick}>
       <div className="img">
-        {v.photo ? <img src={v.photo} alt={v.name} /> : <Icon name={vt?.icon || 'car'} size={64} stroke={1.4} />}
+        {v.photo ? <img src={v.photo} alt={v.name} style={{ objectPosition: v.photoPos || '50% 50%' }} /> : <Icon name={vt?.icon || 'car'} size={64} stroke={1.4} />}
         <div className="badge"><Chip tint="t-brand">{vt ? t(vt.key) : ''}</Chip></div>
         {dd != null && dd <= 30 && (
           <div style={{ position: 'absolute', top: 12, insetInlineEnd: 12 }}>

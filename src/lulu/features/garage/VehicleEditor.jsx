@@ -12,7 +12,7 @@ export default function VehicleEditor({ initial, onClose, onSaved, onDeleted }) 
   const [f, setF] = useState({
     name: '', nickname: '', type: 'car', brand: '', model: '', year: '', color: '',
     plate: '', vin: '', mileage: '', fuel: '', purchaseDate: '', purchasePrice: '',
-    currentValue: '', insuranceCompany: '', policyExpiry: '', bio: '', photo: '', ...initial,
+    currentValue: '', insuranceCompany: '', policyExpiry: '', bio: '', photo: '', photoPos: '50% 50%', ...initial,
   })
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
@@ -20,6 +20,12 @@ export default function VehicleEditor({ initial, onClose, onSaved, onDeleted }) 
   const fileRef = useRef()
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const isBoat = f.type === 'boat'
+
+  // Cover-photo position (object-position), for readjusting the crop.
+  const pos = (f.photoPos || '50% 50%').split(' ')
+  const posX = parseInt(pos[0]) || 50
+  const posY = parseInt(pos[1]) || 50
+  const setPos = (x, y) => setF(prev => ({ ...prev, photoPos: `${x}% ${y}%` }))
 
   const onPhoto = async (fileList) => {
     const file = fileList && fileList[0]
@@ -58,7 +64,7 @@ export default function VehicleEditor({ initial, onClose, onSaved, onDeleted }) 
           border: '1px solid var(--line)', background: 'var(--surface-2)', display: 'grid', placeItems: 'center',
         }}>
           {f.photo
-            ? <img src={f.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ? <img src={f.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: `${posX}% ${posY}%` }} />
             : <Icon name="camera" size={34} stroke={1.4} style={{ color: 'var(--ink-3)' }} />}
           {busy && <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', background: 'rgba(0,0,0,0.3)' }}><span className="spinner" style={{ width: 22, height: 22 }} /></div>}
           {f.photo && (
@@ -76,6 +82,19 @@ export default function VehicleEditor({ initial, onClose, onSaved, onDeleted }) 
           onChange={(e) => { onPhoto(e.target.files); e.target.value = '' }} />
         <input ref={fileRef} type="file" accept="image/*" hidden
           onChange={(e) => { onPhoto(e.target.files); e.target.value = '' }} />
+
+        {f.photo && (
+          <div style={{ marginTop: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
+              <span className="hint">{t('adjustPhoto')}</span>
+              <button className="link-btn" type="button" onClick={() => setPos(50, 50)}>{t('reset')}</button>
+            </div>
+            <label style={{ fontSize: 12, color: 'var(--ink-3)' }}>{t('horizontal')}</label>
+            <input type="range" min="0" max="100" value={posX} onChange={e => setPos(parseInt(e.target.value), posY)} style={{ width: '100%' }} />
+            <label style={{ fontSize: 12, color: 'var(--ink-3)' }}>{t('vertical')}</label>
+            <input type="range" min="0" max="100" value={posY} onChange={e => setPos(posX, parseInt(e.target.value))} style={{ width: '100%' }} />
+          </div>
+        )}
       </div>
 
       <div style={{ marginBottom: 16 }}>

@@ -180,6 +180,14 @@ export const STRINGS = {
     accountEditorHint: 'Remaining = opening balance + income in − expenses out.',
     toAccount: 'To account', manageAccounts: 'Manage accounts',
     installment: 'Installment', installmentMonths: 'Number of months', perMonth: 'mo',
+    // garage: photos & accessories
+    photos: 'Photos', addPhotos: 'Add photos', noPhotos: 'No photos yet',
+    photosHint: 'Build a photo album for this vehicle.', setAsCover: 'Set as cover',
+    accessories: 'Accessories', accessoriesValue: 'Accessories value', items: 'items',
+    addAccessory: 'Add accessory', editAccessory: 'Edit accessory', noAccessories: 'No accessories yet',
+    accessoriesHint: 'Track fitted accessories and what they cost.', accessoryName: 'Accessory',
+    fitted: 'Fitted', cost: 'Cost', adjustPhoto: 'Adjust photo', reset: 'Reset',
+    horizontal: 'Horizontal', vertical: 'Vertical',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -360,6 +368,14 @@ export const STRINGS = {
     accountEditorHint: 'المتبقي = الرصيد الافتتاحي + الدخل الداخل − المصروفات الخارجة.',
     toAccount: 'إلى حساب', manageAccounts: 'إدارة الحسابات',
     installment: 'تقسيط', installmentMonths: 'عدد الأشهر', perMonth: 'شهر',
+    // garage: photos & accessories
+    photos: 'الصور', addPhotos: 'إضافة صور', noPhotos: 'لا توجد صور بعد',
+    photosHint: 'أنشئ ألبوم صور لهذه المركبة.', setAsCover: 'تعيين كغلاف',
+    accessories: 'الإكسسوارات', accessoriesValue: 'قيمة الإكسسوارات', items: 'عناصر',
+    addAccessory: 'إضافة إكسسوار', editAccessory: 'تعديل الإكسسوار', noAccessories: 'لا توجد إكسسوارات بعد',
+    accessoriesHint: 'تابع الإكسسوارات المركبة وتكلفتها.', accessoryName: 'الإكسسوار',
+    fitted: 'مركّب', cost: 'التكلفة', adjustPhoto: 'ضبط الصورة', reset: 'إعادة تعيين',
+    horizontal: 'أفقي', vertical: 'رأسي',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',
