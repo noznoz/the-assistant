@@ -242,6 +242,15 @@ export const PROPERTY_LOG_KINDS = [
 ]
 export const findPropertyLogKind = (id) => PROPERTY_LOG_KINDS.find(x => x.id === id)
 
+// Charity / giving types + common causes.
+export const GIVING_TYPES = [
+  { id: 'zakat', en: 'Zakat', ar: 'زكاة', icon: 'sparkle' },
+  { id: 'sadaqah', en: 'Sadaqah', ar: 'صدقة', icon: 'gift' },
+  { id: 'zakat_fitr', en: 'Zakat al-Fitr', ar: 'زكاة الفطر', icon: 'sparkle' },
+]
+export const findGivingType = (id) => GIVING_TYPES.find(x => x.id === id)
+export const GIVING_CAUSES = ['Mosque', 'Orphans', 'Family in need', 'Water well', 'Medical aid', 'Education', 'Ramadan iftar', 'Refugees', 'General']
+
 // Appointment / health-calendar types.
 export const APPOINTMENT_TYPES = [
   { id: 'doctor', en: 'Doctor', ar: 'طبيب', icon: 'shield' },
