@@ -5,6 +5,7 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { categoryOptions, PAYMENT_METHODS, catLabel, label } from '../../lib/domain.js'
 import { money, fmtDate, daysUntil, todayISO, toSar } from '../../lib/format.js'
+import { detectRecurring } from '../../lib/smart.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
 
 const CYCLES = [{ id: 'weekly', key: 'weekly' }, { id: 'monthly', key: 'monthly' }, { id: 'yearly', key: 'yearly' }]
@@ -35,6 +36,12 @@ export default function SubscriptionsScreen({ go }) {
   const active = subs.items.filter(s => s.active !== false)
   const monthly = active.reduce((sum, s) => sum + monthlyEquivalent(toSar(s.amount, s.currency || 'SAR', settings.rates), s.cycle), 0)
   const sorted = [...subs.items].sort((a, b) => (a.nextDue || '9999').localeCompare(b.nextDue || '9999'))
+  const detected = detectRecurring(expenses.items, subs.items)
+
+  const addDetected = (d) => {
+    subs.add({ name: d.merchant, amount: d.amount, currency: cur, cycle: 'monthly', category: d.category || 'subscriptions', method: 'credit', nextDue: todayISO(), active: true })
+    toast.show(t('savedToast'))
+  }
 
   const markPaid = (s) => {
     // log an expense and advance the next-due date
@@ -52,6 +59,28 @@ export default function SubscriptionsScreen({ go }) {
           <div style={{ fontSize: 34, fontWeight: 780, marginTop: 4 }} className="tnum">{money(monthly, cur, lang)}</div>
           <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>{active.length} {t('active')}</div>
         </Card>
+
+        {detected.length > 0 && (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '16px 2px 8px' }}>
+              <Icon name="sparkle" size={15} style={{ color: 'var(--brand-600)' }} />
+              <span style={{ fontWeight: 700, fontSize: 13.5 }}>{t('detectedRecurring')}</span>
+            </div>
+            <Card tight>
+              {detected.slice(0, 5).map((d, i) => (
+                <div className="li" key={d.merchant + i}>
+                  <div className="lead t-warn"><Icon name="refresh" size={17} /></div>
+                  <div className="body">
+                    <div className="title">{d.merchant}</div>
+                    <div className="meta">≈ {money(d.amount, cur, lang)} · {d.months} {t('months')} · {catLabel(d.category, lang)}</div>
+                  </div>
+                  <button className="btn sm" onClick={() => addDetected(d)}><Icon name="plus" size={13} /> {t('add')}</button>
+                </div>
+              ))}
+            </Card>
+            <p className="hint" style={{ margin: '6px 2px 0' }}>{t('detectedHint')}</p>
+          </>
+        )}
 
         {subs.items.length === 0 ? (
           <Empty icon="wallet" title={t('noSubs')} text={t('subsHint')}

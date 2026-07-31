@@ -96,6 +96,7 @@ export const DEFAULT_SETTINGS = {
   notificationsSeen: [], // ids of notification-feed items already viewed
   accounts: ['Salary account', 'Other account'], // funding accounts an expense can be paid from
   dashboard: null,       // Today-screen card order/visibility (null = default)
+  targetAllocation: {},  // desired investment mix by type { [typeId]: percent }
 }
 
 export function readSettings() {

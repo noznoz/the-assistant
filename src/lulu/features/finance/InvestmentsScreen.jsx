@@ -38,7 +38,9 @@ export default function InvestmentsScreen({ go }) {
 
   return (
     <>
-      <DetailHeader title={t('investments')} onBack={() => go('expenses')} />
+      <DetailHeader title={t('investments')} onBack={() => go('expenses')} right={
+        investments.items.length > 0 ? <button className="iconbtn" onClick={() => go('allocation')} aria-label={t('allocation')}><Icon name="chart" size={18} /></button> : null
+      } />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
           <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('portfolioValue')}</div>
