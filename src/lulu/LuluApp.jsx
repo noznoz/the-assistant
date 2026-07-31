@@ -56,6 +56,7 @@ import ForecastScreen from './features/finance/ForecastScreen.jsx'
 import EmergencyScreen from './features/emergency/EmergencyScreen.jsx'
 import WishlistScreen from './features/wishlist/WishlistScreen.jsx'
 import GoalsScreen from './features/finance/GoalsScreen.jsx'
+import DashboardScreen from './features/today/DashboardScreen.jsx'
 
 const MAIN_TABS = ['today', 'tasks', 'garage', 'expenses', 'more']
 
@@ -132,6 +133,7 @@ function Router() {
       case 'emergency': return <EmergencyScreen go={go} />
       case 'wishlist': return <WishlistScreen go={go} />
       case 'goals': return <GoalsScreen go={go} />
+      case 'dashboard': return <DashboardScreen go={go} />
       case 'search': return <SearchScreen go={go} />
       default: return <TodayScreen go={go} />
     }
@@ -141,6 +143,7 @@ function Router() {
   const activeTab = MAIN_TABS.includes(tab) ? tab
     : ['projects', 'expensereport', 'budgets', 'subscriptions', 'income', 'investments', 'accounts', 'networth', 'zakat', 'trends', 'liabilities', 'moneycal', 'statement', 'properties', 'forecast', 'goals'].includes(tab) ? 'expenses'
     : ['inbox', 'people', 'documents', 'trips', 'reports', 'calendar', 'settings', 'notes', 'rewards', 'profile', 'message', 'groups', 'valuables', 'week', 'memberships', 'renewals', 'monthlyreport', 'emergency', 'wishlist'].includes(tab) ? 'more'
+    : tab === 'dashboard' ? 'today'
     : tab
 
   const progress = Math.min(1, pull / 72)

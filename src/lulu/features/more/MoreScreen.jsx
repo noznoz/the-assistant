@@ -81,7 +81,7 @@ export default function MoreScreen({ go }) {
             </button>
           ))}
         </Card>
-        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v3.2</p>
+        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v3.3</p>
       </div>
     </>
   )

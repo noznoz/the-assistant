@@ -6,6 +6,7 @@ import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { money } from '../../lib/format.js'
 import { netWorth, monthKey } from '../../lib/networth.js'
 import { share } from '../../lib/share.js'
+import NetWorthChart from './NetWorthChart.jsx'
 
 export default function NetWorthScreen({ go }) {
   const { t, lang } = useT()
@@ -41,8 +42,20 @@ export default function NetWorthScreen({ go }) {
   // De-dupe by month (keep the latest per month) so the trend is one point/month.
   const byMonth = {}
   snapshots.items.forEach(s => { byMonth[s.month] = s })
-  const history = Object.values(byMonth).sort((a, b) => (a.month || '').localeCompare(b.month || '')).slice(-6)
-  const trend = history.map(s => ({ label: s.month.slice(2), value: Math.max(0, s.value) }))
+  const allHistory = Object.values(byMonth).sort((a, b) => (a.month || '').localeCompare(b.month || ''))
+  const history = allHistory.slice(-12)
+  const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+  const chartPoints = history.map(s => {
+    const [y, m] = (s.month || '').split('-')
+    return { label: MON[(parseInt(m) || 1) - 1] || s.month, value: Math.max(0, s.value) }
+  })
+  // Milestone markers: each time net worth crosses a new whole million.
+  const milestones = []
+  for (let i = 1; i < history.length; i++) {
+    const prevM = Math.floor(Math.max(0, history[i - 1].value) / 1e6)
+    const curM = Math.floor(Math.max(0, history[i].value) / 1e6)
+    if (curM > prevM && curM > 0) milestones.push({ index: i, label: `${curM}M` })
+  }
   const prev = history.length > 1 ? history[history.length - 2].value : null
   const change = prev != null ? nw.value - prev : null
 
@@ -91,11 +104,13 @@ export default function NetWorthScreen({ go }) {
           </>
         )}
 
-        {trend.length > 1 && (
+        {chartPoints.length > 1 && (
           <>
-            <Section title={t('netWorthTrend')} />
-            <Card><Bars data={trend} format={(v) => money(v, cur, lang)} /></Card>
-            <p className="hint center" style={{ marginTop: 8 }}>{t('netWorthTrendHint')}</p>
+            <Section title={t('netWorthHistory')} />
+            <Card><NetWorthChart points={chartPoints} milestones={milestones} format={(v) => money(v, cur, lang)} /></Card>
+            <p className="hint center" style={{ marginTop: 8 }}>
+              {milestones.length > 0 ? t('netWorthMilestoneHint') : t('netWorthTrendHint')}
+            </p>
           </>
         )}
 

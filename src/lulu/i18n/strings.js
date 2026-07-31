@@ -279,6 +279,14 @@ export const STRINGS = {
     addGoal: 'Add goal', editGoal: 'Edit goal', goalName: 'Goal', goalNamePlaceholder: 'Hajj fund, new watch, Maldives…',
     goalTarget: 'Target amount', alreadySaved: 'Already saved', savedSoFar: 'Saved so far', goalTotal: 'Target total',
     addFunds: 'Add funds', toGo: 'to go', goalReached: '🎉 Goal reached', fromWishlist: 'From wishlist',
+    // net-worth history + vehicle running costs + dashboard
+    netWorthHistory: 'Net-worth history', netWorthMilestoneHint: 'Milestones mark each new million crossed.',
+    runningCosts: 'Running costs', totalRunningCost: 'Total running cost', costBreakdown: 'Cost breakdown',
+    predictedService: 'Predicted next service', runningCostsHint: 'Fuel, servicing, accessories and expenses combined.', monthsOwned: 'months owned',
+    customizeHome: 'Customize home', customizeHint: 'Toggle cards on or off and reorder them with the arrows.',
+    moveUp: 'Move up', moveDown: 'Move down', resetDefault: 'Reset to default',
+    dashBrief: 'Morning brief', dashAssistant: 'Needs attention', dashPrayer: 'Prayer times', dashStats: 'Progress & spending',
+    dashQuick: 'Quick actions', dashRenewals: 'Renewals', dashNotes: 'Quick notes',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -558,6 +566,14 @@ export const STRINGS = {
     addGoal: 'إضافة هدف', editGoal: 'تعديل الهدف', goalName: 'الهدف', goalNamePlaceholder: 'صندوق الحج، ساعة جديدة، المالديف…',
     goalTarget: 'المبلغ المستهدف', alreadySaved: 'المُدّخر حالياً', savedSoFar: 'المُدّخر', goalTotal: 'إجمالي الهدف',
     addFunds: 'إضافة مبلغ', toGo: 'متبقٍ', goalReached: '🎉 تحقّق الهدف', fromWishlist: 'من قائمة الرغبات',
+    // net-worth history + vehicle running costs + dashboard
+    netWorthHistory: 'سجل صافي الثروة', netWorthMilestoneHint: 'العلامات تشير إلى كل مليون جديد يتم تجاوزه.',
+    runningCosts: 'تكاليف التشغيل', totalRunningCost: 'إجمالي تكاليف التشغيل', costBreakdown: 'تفصيل التكاليف',
+    predictedService: 'الصيانة القادمة المتوقّعة', runningCostsHint: 'الوقود والصيانة والملحقات والمصاريف مجتمعة.', monthsOwned: 'شهر ملكية',
+    customizeHome: 'تخصيص الرئيسية', customizeHint: 'فعّل البطاقات أو أخفِها وأعد ترتيبها بالأسهم.',
+    moveUp: 'تحريك لأعلى', moveDown: 'تحريك لأسفل', resetDefault: 'إعادة للافتراضي',
+    dashBrief: 'ملخص الصباح', dashAssistant: 'يحتاج انتباه', dashPrayer: 'أوقات الصلاة', dashStats: 'التقدّم والإنفاق',
+    dashQuick: 'إجراءات سريعة', dashRenewals: 'التجديدات', dashNotes: 'ملاحظات سريعة',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',

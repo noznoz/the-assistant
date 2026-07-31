@@ -7,6 +7,7 @@ import { greetingKey, fmtLongDate, isToday, isOverdue, daysUntil, money, expense
 import { hijriDate } from '../../lib/prayer.js'
 import { buildBrief } from '../../lib/brief.js'
 import { buildNotificationFeed, unreadCount } from '../../lib/notifications.js'
+import { normalizeDashboard } from '../../lib/dashboard.js'
 import PrayerCard from './PrayerCard.jsx'
 import { share, formatAgenda } from '../../lib/share.js'
 import { findPriority } from '../../lib/domain.js'
@@ -81,6 +82,116 @@ export default function TodayScreen({ go }) {
 
   const closeEditor = (msg) => { setEditor(null); if (msg) toast.show(msg) }
 
+  const dash = normalizeDashboard(settings.dashboard)
+  const quickActionsOn = dash.some(s => s.key === 'quickActions' && s.on)
+
+  const sectionNodes = {
+    brief: (
+      <div className="brief">
+        <div className="spark"><Icon name="sparkle" size={130} /></div>
+        <h3><Icon name="sparkle" size={18} /> {t('morningBrief')}</h3>
+        <p>{brief}</p>
+        <div style={{ marginTop: 14 }}>
+          <button className="btn sm" style={{ background: 'rgba(255,255,255,0.18)', color: '#fff', border: 0 }} onClick={shareAgenda}>
+            <Icon name="whatsapp" size={16} /> {t('shareAgenda')}
+          </button>
+        </div>
+      </div>
+    ),
+    assistant: notifFeed.length > 0 ? (
+      <>
+        <Section title={t('needsAttention')} count={notifFeed.length}
+          action={notifFeed.length > 3 ? t('viewAll') : undefined} onAction={() => go('notifications')} />
+        <Card tight>
+          {notifFeed.slice(0, 4).map(n => (
+            <div className="li" key={n.id} onClick={() => go(n.go)}>
+              <div className={`lead ${n.tint}`}><Icon name={n.icon} size={18} /></div>
+              <div className="body">
+                <div className="title">{n.title}</div>
+                <div className="meta">{n.meta}</div>
+              </div>
+              <Icon name="chevron" size={15} style={{ color: 'var(--ink-3)' }} />
+            </div>
+          ))}
+        </Card>
+      </>
+    ) : null,
+    prayer: <PrayerCard />,
+    stats: (
+      <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 12, marginTop: 14, alignItems: 'stretch' }}>
+        <Card tight style={{ display: 'grid', placeItems: 'center', gap: 8 }}>
+          <Ring value={progress.pct}>{Math.round(progress.pct * 100)}%</Ring>
+          <div className="muted" style={{ fontSize: 12, fontWeight: 600 }}>{t('dailyProgress')}</div>
+        </Card>
+        <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: 12 }}>
+          <Stat label={t('todaysSpending')} value={money(spentToday, cur, lang)} onClick={() => go('expenses')} />
+          <Stat label={t('monthlyTotal')} value={money(spentMonth, cur, lang)} onClick={() => go('expenses')} />
+        </div>
+      </div>
+    ),
+    quickActions: (
+      <>
+        <Section title={t('quickActions')} />
+        <div className="qa-grid">
+          {QUICK.map(q => (
+            <button key={q.id} className="qa" onClick={() => {
+              if (q.id === 'message') { go('message'); return }
+              if (q.id === 'voice') { toast.show(t('comingSoon')); return }
+              setEditor(q.id)
+            }}>
+              <span className="ic"><Icon name={q.icon} size={22} /></span>
+              {t(q.key)}
+            </button>
+          ))}
+        </div>
+      </>
+    ),
+    renewals: renewals.length > 0 ? (
+      <>
+        <Section title={t('renewals')} count={renewals.length} />
+        {renewals.slice(0, 3).map(({ v, dd }) => (
+          <div className="li" key={v.id} onClick={() => go(`garage/${v.id}`)}>
+            <div className="lead t-warn"><Icon name="shield" size={20} /></div>
+            <div className="body">
+              <div className="title">{v.nickname || v.name}</div>
+              <div className="meta">{t('insurance')} · {v.insuranceCompany}</div>
+            </div>
+            <Chip tint={dd <= 14 ? 't-danger' : 't-warn'}>{dd}d</Chip>
+          </div>
+        ))}
+      </>
+    ) : null,
+    notes: notes.items.length > 0 ? (
+      <>
+        <Section title={t('quickNotes')} count={notes.items.length} action={t('view')} onAction={() => go('notes')} />
+        <Card tight className="stack">
+          {notes.items.slice(0, 3).map(n => (
+            <div key={n.id} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+              <Icon name="note" size={16} style={{ marginTop: 2, color: 'var(--ink-3)' }} />
+              <span style={{ fontSize: 14 }}>{n.text}</span>
+            </div>
+          ))}
+        </Card>
+      </>
+    ) : null,
+  }
+
+  const attentionBlock = (
+    <>
+      {overdue.length > 0 && <AttentionCard tint="t-danger" icon="clock" title={t('overdue')} items={overdue} go={go} lang={lang} />}
+      {waitingMe.length > 0 && <AttentionCard tint="t-warn" icon="flag" title={t('waitingForMe')} items={waitingMe} go={go} lang={lang} />}
+      {dueToday.length > 0 && <AttentionCard tint="t-info" icon="today" title={t('todaysTasks')} items={dueToday} go={go} lang={lang} />}
+      {highPri.length > 0 && dueToday.length === 0 && overdue.length === 0 &&
+        <AttentionCard tint="t-brand" icon="flag" title={t('highPriority')} items={highPri} go={go} lang={lang} />}
+      {delegated.length > 0 && (
+        <>
+          <Section title={t('delegated')} count={delegated.length} action={t('view')} onAction={() => go('tasks/delegated')} />
+          <Card tight>{delegated.slice(0, 3).map(x => <MiniRow key={x.id} task={x} lang={lang} />)}</Card>
+        </>
+      )}
+    </>
+  )
+
   return (
     <>
       <div className="topbar">
@@ -107,118 +218,19 @@ export default function TodayScreen({ go }) {
           <h1>{settings.name || 'The Assistant'}</h1>
         </div>
 
-        {/* Morning brief */}
-        <div className="brief">
-          <div className="spark"><Icon name="sparkle" size={130} /></div>
-          <h3><Icon name="sparkle" size={18} /> {t('morningBrief')}</h3>
-          <p>{brief}</p>
-          <div style={{ marginTop: 14 }}>
-            <button className="btn sm" style={{ background: 'rgba(255,255,255,0.18)', color: '#fff', border: 0 }} onClick={shareAgenda}>
-              <Icon name="whatsapp" size={16} /> {t('shareAgenda')}
-            </button>
-          </div>
-        </div>
-
-        {/* Assistant — what needs your attention, ahead of time */}
-        {notifFeed.length > 0 && (
-          <>
-            <Section title={t('needsAttention')} count={notifFeed.length}
-              action={notifFeed.length > 3 ? t('viewAll') : undefined} onAction={() => go('notifications')} />
-            <Card tight>
-              {notifFeed.slice(0, 4).map(n => (
-                <div className="li" key={n.id} onClick={() => go(n.go)}>
-                  <div className={`lead ${n.tint}`}><Icon name={n.icon} size={18} /></div>
-                  <div className="body">
-                    <div className="title">{n.title}</div>
-                    <div className="meta">{n.meta}</div>
-                  </div>
-                  <Icon name="chevron" size={15} style={{ color: 'var(--ink-3)' }} />
-                </div>
-              ))}
-            </Card>
-          </>
-        )}
-
-        <PrayerCard />
-
-        {/* Progress + stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 12, marginTop: 14, alignItems: 'stretch' }}>
-          <Card tight style={{ display: 'grid', placeItems: 'center', gap: 8 }}>
-            <Ring value={progress.pct}>{Math.round(progress.pct * 100)}%</Ring>
-            <div className="muted" style={{ fontSize: 12, fontWeight: 600 }}>{t('dailyProgress')}</div>
-          </Card>
-          <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: 12 }}>
-            <Stat label={t('todaysSpending')} value={money(spentToday, cur, lang)} onClick={() => go('expenses')} />
-            <Stat label={t('monthlyTotal')} value={money(spentMonth, cur, lang)} onClick={() => go('expenses')} />
-          </div>
-        </div>
-
-        {/* Quick actions */}
-        <Section title={t('quickActions')} />
-        <div className="qa-grid">
-          {QUICK.map(q => (
-            <button key={q.id} className="qa" onClick={() => {
-              if (q.id === 'message') { go('message'); return }
-              if (q.id === 'voice') { toast.show(t('comingSoon')); return }
-              setEditor(q.id)
-            }}>
-              <span className="ic"><Icon name={q.icon} size={22} /></span>
-              {t(q.key)}
-            </button>
-          ))}
-        </div>
-
-        {/* Attention lists */}
-        {overdue.length > 0 && <AttentionCard tint="t-danger" icon="clock" title={t('overdue')} items={overdue} go={go} lang={lang} />}
-        {waitingMe.length > 0 && <AttentionCard tint="t-warn" icon="flag" title={t('waitingForMe')} items={waitingMe} go={go} lang={lang} />}
-        {dueToday.length > 0 && <AttentionCard tint="t-info" icon="today" title={t('todaysTasks')} items={dueToday} go={go} lang={lang} />}
-        {highPri.length > 0 && dueToday.length === 0 && overdue.length === 0 &&
-          <AttentionCard tint="t-brand" icon="flag" title={t('highPriority')} items={highPri} go={go} lang={lang} />}
-
-        {delegated.length > 0 && (
-          <>
-            <Section title={t('delegated')} count={delegated.length} action={t('view')} onAction={() => go('tasks/delegated')} />
-            <Card tight>{delegated.slice(0, 3).map(x => <MiniRow key={x.id} task={x} lang={lang} />)}</Card>
-          </>
-        )}
-
-        {/* Renewals / maintenance */}
-        {renewals.length > 0 && (
-          <>
-            <Section title={t('renewals')} count={renewals.length} />
-            {renewals.slice(0, 3).map(({ v, dd }) => (
-              <div className="li" key={v.id} onClick={() => go(`garage/${v.id}`)}>
-                <div className="lead t-warn"><Icon name="shield" size={20} /></div>
-                <div className="body">
-                  <div className="title">{v.nickname || v.name}</div>
-                  <div className="meta">{t('insurance')} · {v.insuranceCompany}</div>
-                </div>
-                <Chip tint={dd <= 14 ? 't-danger' : 't-warn'}>{dd}d</Chip>
-              </div>
-            ))}
-          </>
-        )}
-
-        {/* Quick notes */}
-        {notes.items.length > 0 && (
-          <>
-            <Section title={t('quickNotes')} count={notes.items.length} action={t('view')} onAction={() => go('notes')} />
-            <Card tight className="stack">
-              {notes.items.slice(0, 3).map(n => (
-                <div key={n.id} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                  <Icon name="note" size={16} style={{ marginTop: 2, color: 'var(--ink-3)' }} />
-                  <span style={{ fontSize: 14 }}>{n.text}</span>
-                </div>
-              ))}
-            </Card>
-          </>
-        )}
+        {dash.map(({ key, on }) => on && sectionNodes[key] ? <React.Fragment key={key}>{sectionNodes[key]}{key === 'quickActions' ? attentionBlock : null}</React.Fragment> : null)}
+        {!quickActionsOn && attentionBlock}
 
         {open.length === 0 && overdue.length === 0 && (
           <Card style={{ marginTop: 20, textAlign: 'center' }}>
             <p className="muted">{t('noThingsToday')}</p>
           </Card>
         )}
+
+        <button className="link-btn" onClick={() => go('dashboard')}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, margin: '20px auto 4px', color: 'var(--ink-3)', fontSize: 12.5 }}>
+          <Icon name="cog" size={14} /> {t('customizeHome')}
+        </button>
       </div>
 
       {editor === 'task' && <TaskEditor onClose={closeEditor} onSaved={() => toast.show(t('savedToast'))} />}
