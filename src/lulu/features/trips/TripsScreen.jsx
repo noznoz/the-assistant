@@ -8,6 +8,9 @@ import { fmtDate, money, isoDate, expenseSar } from '../../lib/format.js'
 import { share, formatExpenseSummary } from '../../lib/share.js'
 import { exportXlsx, printHtml } from '../../lib/exporters.js'
 import ExpenseEditor from '../expenses/ExpenseEditor.jsx'
+import TripItinerary from './TripItinerary.jsx'
+import TripPacking from './TripPacking.jsx'
+import EntityDocuments from '../shared/EntityDocuments.jsx'
 import SwipeRow from '../../ui/SwipeRow.jsx'
 
 export default function TripsScreen({ go }) {
@@ -82,6 +85,7 @@ function TripDetail({ trip, onBack }) {
   const [addExp, setAddExp] = useState(false)
   const [edit, setEdit] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
+  const [tab, setTab] = useState('overview')
   const toast = useToast()
 
   const mine = expenses.items.filter(e => e.tripId === trip.id).sort((a, b) => (b.date || '').localeCompare(a.date || ''))
@@ -113,37 +117,58 @@ function TripDetail({ trip, onBack }) {
         <button className="iconbtn" onClick={() => setEdit(true)} aria-label={t('edit')}><Icon name="cog" size={18} /></button>
       } />
       <div className="screen">
-        <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase' }}>{[trip.destination, veh?.name].filter(Boolean).join(' · ') || t('tripExpenses')}</div>
-          <div style={{ fontSize: 34, fontWeight: 780, marginTop: 4 }} className="tnum">{money(total, cur, lang)}</div>
-          {budget > 0 && (
-            <div style={{ marginTop: 12 }}>
-              <div className="bar-track" style={{ height: 12 }}><div className="bar-fill" style={{ width: `${pct * 100}%`, background: pct >= 1 ? 'var(--danger)' : pct > 0.85 ? 'var(--warn)' : 'var(--ok)' }} /></div>
-              <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>{money(total, cur, lang)} / {money(budget, cur, lang)}{pct >= 1 ? ` · ${t('overBudget')}` : ''}</div>
-            </div>
-          )}
-        </Card>
-
-        <div className="row2" style={{ marginTop: 12 }}>
-          <Button variant="primary" icon="plus" onClick={() => setAddExp(true)}>{t('addExpenseTo')}</Button>
-          <Button icon="download" onClick={() => setExportOpen(true)}>{t('exportLabel')}</Button>
+        <div className="icontabs" style={{ margin: '14px 0' }}>
+          {[
+            { id: 'overview', icon: 'wallet', label: t('budget') },
+            { id: 'itinerary', icon: 'calendar', label: t('itinerary') },
+            { id: 'packing', icon: 'check', label: t('packing') },
+            { id: 'documents', icon: 'doc', label: t('documents') },
+          ].map(x => (
+            <button key={x.id} className={`icontab ${tab === x.id ? 'on' : ''}`} onClick={() => setTab(x.id)} aria-label={x.label}>
+              <Icon name={x.icon} size={20} stroke={tab === x.id ? 2.3 : 1.9} /><span className="cap">{x.label}</span>
+            </button>
+          ))}
         </div>
 
-        {bars.length > 0 && (<><Section title={t('spendingByCategory')} /><Card><Bars data={bars} format={(v) => money(v, cur, lang)} /></Card></>)}
+        {tab === 'overview' && (
+          <>
+            <Card style={{ textAlign: 'center' }}>
+              <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase' }}>{[trip.destination, veh?.name].filter(Boolean).join(' · ') || t('tripExpenses')}</div>
+              <div style={{ fontSize: 34, fontWeight: 780, marginTop: 4 }} className="tnum">{money(total, cur, lang)}</div>
+              {budget > 0 && (
+                <div style={{ marginTop: 12 }}>
+                  <div className="bar-track" style={{ height: 12 }}><div className="bar-fill" style={{ width: `${pct * 100}%`, background: pct >= 1 ? 'var(--danger)' : pct > 0.85 ? 'var(--warn)' : 'var(--ok)' }} /></div>
+                  <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>{money(total, cur, lang)} / {money(budget, cur, lang)}{pct >= 1 ? ` · ${t('overBudget')}` : ` · ${money(budget - total, cur, lang)} ${t('leftLabel')}`}</div>
+                </div>
+              )}
+            </Card>
 
-        <Section title={t('tripExpenses')} count={mine.length} />
-        {mine.length === 0 ? <Empty icon="wallet" title={t('nothingHere')} text={t('addExpenseTo')} /> :
-          mine.map(e => (
-            <SwipeRow key={e.id} onEdit={() => setAddExp(e)} onDelete={() => { expenses.remove(e.id); toast.show(t('deletedToast')) }}>
-            <div className="li" onClick={() => setAddExp(e)}>
-              <div className="lead t-brand"><Icon name="receipt" size={18} /></div>
-              <div className="body"><div className="title">{e.merchant || catLabel(e.category, lang)}</div><div className="meta">{catLabel(e.category, lang)} · {fmtDate(e.date, lang, settings.dateFormat)}</div></div>
-              <b className="tnum">{money(e.amount, e.currency || cur, lang)}</b>
+            <div className="row2" style={{ marginTop: 12 }}>
+              <Button variant="primary" icon="plus" onClick={() => setAddExp(true)}>{t('addExpenseTo')}</Button>
+              <Button icon="download" onClick={() => setExportOpen(true)}>{t('exportLabel')}</Button>
             </div>
-            </SwipeRow>
-          ))}
 
-        <Button block variant="brand" icon="whatsapp" style={{ marginTop: 16 }} onClick={() => share(`🧭 *${trip.name}*\n\n` + formatExpenseSummary(mine, lang, settings))}>{t('share')}</Button>
+            {bars.length > 0 && (<><Section title={t('spendingByCategory')} /><Card><Bars data={bars} format={(v) => money(v, cur, lang)} /></Card></>)}
+
+            <Section title={t('tripExpenses')} count={mine.length} />
+            {mine.length === 0 ? <Empty icon="wallet" title={t('nothingHere')} text={t('addExpenseTo')} /> :
+              mine.map(e => (
+                <SwipeRow key={e.id} onEdit={() => setAddExp(e)} onDelete={() => { expenses.remove(e.id); toast.show(t('deletedToast')) }}>
+                <div className="li" onClick={() => setAddExp(e)}>
+                  <div className="lead t-brand"><Icon name="receipt" size={18} /></div>
+                  <div className="body"><div className="title">{e.merchant || catLabel(e.category, lang)}</div><div className="meta">{catLabel(e.category, lang)} · {fmtDate(e.date, lang, settings.dateFormat)}</div></div>
+                  <b className="tnum">{money(e.amount, e.currency || cur, lang)}</b>
+                </div>
+                </SwipeRow>
+              ))}
+
+            <Button block variant="brand" icon="whatsapp" style={{ marginTop: 16 }} onClick={() => share(`🧭 *${trip.name}*\n\n` + formatExpenseSummary(mine, lang, settings))}>{t('share')}</Button>
+          </>
+        )}
+
+        {tab === 'itinerary' && <TripItinerary trip={trip} />}
+        {tab === 'packing' && <TripPacking trip={trip} />}
+        {tab === 'documents' && <EntityDocuments filterKey="tripId" id={trip.id} hint={t('tripDocsHint')} />}
       </div>
 
       {addExp && <ExpenseEditor initial={addExp.id ? addExp : { tripId: trip.id }} onClose={() => setAddExp(false)} onSaved={() => toast.show(t('savedToast'))} />}
