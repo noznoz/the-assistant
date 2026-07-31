@@ -101,6 +101,13 @@ export function maybeSeed() {
   db.insert('valuables', { name: 'MacBook Pro 16"', category: 'electronics', brand: 'Apple', model: 'M4 Pro', serial: 'C02XXXX', value: 12000, currency: 'SAR', purchaseDate: d(-1), warrantyExpiry: d(364), receipts: [] })
   db.insert('valuables', { name: 'Samsung fridge', category: 'appliance', brand: 'Samsung', value: 6500, currency: 'SAR', purchaseDate: d(-320), warrantyExpiry: d(20), receipts: [] })
 
+  // Wishlist — things to buy / aspire to
+  db.insert('wishlist', { name: 'Patek Philippe Nautilus', category: 'watch', priority: 'someday', price: 480000, currency: 'SAR', forWho: 'Myself', note: 'The grail. One day.', purchased: false })
+  db.insert('wishlist', { name: 'Sony WH-1000XM6', category: 'tech', priority: 'want', price: 1699, currency: 'SAR', url: 'https://www.sony.com', forWho: 'Myself', purchased: false })
+  db.insert('wishlist', { name: 'PlayStation 5 Pro', category: 'tech', priority: 'must', price: 3200, currency: 'SAR', forWho: 'Omar', targetDate: d(9), note: 'Birthday gift', purchased: false })
+  db.insert('wishlist', { name: 'Dyson Airwrap', category: 'home', priority: 'want', price: 2400, currency: 'SAR', forWho: 'Layla', purchased: false })
+  db.insert('wishlist', { name: 'Maldives family trip', category: 'travel', priority: 'someday', price: 60000, currency: 'SAR', forWho: 'Family', note: 'Eid break next year', purchased: false })
+
   // Subscriptions / recurring bills
   db.insert('subscriptions', { name: 'Netflix', amount: 56, currency: 'SAR', cycle: 'monthly', category: 'subscriptions', method: 'credit', nextDue: d(3), active: true })
   db.insert('subscriptions', { name: 'iCloud+', amount: 11.99, currency: 'SAR', cycle: 'monthly', category: 'subscriptions', method: 'apple_pay', nextDue: d(12), active: true })
