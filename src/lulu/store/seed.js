@@ -124,11 +124,12 @@ export function maybeSeed() {
   const salesDept = db.insert('departments', { name: 'Sales', note: 'Commercial team' })
   const mOmar = db.insert('members', { name: 'Omar Nasser', title: 'Sales Lead', departmentId: salesDept.id, mobile: '+966500000033', whatsapp: '+966500000033' })
   db.update('departments', salesDept.id, { headId: mOmar.id })
-  db.insert('tasks', { title: 'Prepare Q3 operations report', description: 'Consolidate regional KPIs and cost variances.', classification: 'work', departmentId: opsDept.id, memberId: mFaisal.id, assignedTo: mFaisal.name, status: 'waiting_someone', priority: 'high', dueDate: d(5) })
+  db.insert('tasks', { title: 'Prepare Q3 operations report', description: 'Consolidate regional KPIs and cost variances.', classification: 'work', departmentId: opsDept.id, memberId: mFaisal.id, assignedTo: mFaisal.name, status: 'waiting_someone', priority: 'high', dueDate: d(5), subtasks: [{ id: 'sb1', text: 'Collect KPI data', done: true }, { id: 'sb2', text: 'Draft summary', done: false }, { id: 'sb3', text: 'Review with finance', done: false }] })
   db.insert('tasks', { title: 'Vendor contract renewals', classification: 'work', departmentId: opsDept.id, memberId: mSara.id, assignedTo: mSara.name, status: 'waiting_someone', priority: 'medium', dueDate: d(12) })
   db.insert('tasks', { title: 'Follow up Q3 pipeline', classification: 'work', departmentId: salesDept.id, memberId: mOmar.id, assignedTo: mOmar.name, status: 'waiting_someone', priority: 'high', dueDate: d(4) })
   db.insert('tasks', { title: 'Discuss 2026 budget with CEO', description: 'Bring capex priorities.', classification: 'work', boss: 'up', priority: 'high', dueDate: d(3) })
   db.insert('tasks', { title: 'Board deck requested by CEO', classification: 'work', boss: 'down', priority: 'critical', dueDate: d(2) })
+  db.insert('meetings', { title: 'Weekly ops sync', date: d(-1), attendees: 'Faisal, Sara', context: 'team', departmentId: opsDept.id, notes: 'Reviewed Q3 pipeline and vendor risks. Agreed to fast-track two renewals.', actions: [{ id: 'ma1', text: 'Send vendor list to Sara' }, { id: 'ma2', text: 'Book finance review' }] })
 
   // A recurring utility charge across 3 months (fuels the "detected recurring"
   // suggestion) plus repeat merchants so category auto-suggest has history.

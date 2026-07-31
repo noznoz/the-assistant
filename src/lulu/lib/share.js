@@ -70,6 +70,31 @@ export async function copyText(text) {
   try { await navigator.clipboard.writeText(text); return true } catch { return false }
 }
 
+// Open the device email composer with a subject + body (works offline).
+export function emailShare(subject, body, to = '') {
+  window.location.href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+}
+
+// Full detail of a work/department task for sharing (WhatsApp or email).
+export function formatTaskDetail(task, lang = 'en', settings = {}, extra = {}) {
+  const L = lang === 'ar'
+  const pr = findPriority(task.priority)
+  const st = findStatus(task.status)
+  const lines = [`📋 *${task.title}*`]
+  if (task.description) lines.push('', task.description)
+  const meta = []
+  if (extra.department) meta.push(`${L ? 'القسم' : 'Department'}: ${extra.department}`)
+  if (task.assignedTo) meta.push(`${L ? 'مُسند إلى' : 'Assigned to'}: ${task.assignedTo}`)
+  if (pr) meta.push(`${L ? 'الأولوية' : 'Priority'}: ${STRINGS[lang]?.[pr.key] ?? STRINGS.en[pr.key]}`)
+  if (st) meta.push(`${L ? 'الحالة' : 'Status'}: ${STRINGS[lang]?.[st.key] ?? STRINGS.en[st.key]}`)
+  if (task.dueDate) meta.push(`${L ? 'الموعد النهائي' : 'Deadline'}: ${fmtDate(task.dueDate, lang, settings.dateFormat)}`)
+  if (meta.length) lines.push('', ...meta.map(m => `• ${m}`))
+  const subs = task.subtasks || []
+  if (subs.length) { lines.push('', L ? 'المهام الفرعية:' : 'Checklist:'); subs.forEach(s => lines.push(`${s.done ? '☑' : '☐'} ${s.text}`)) }
+  lines.push('', '— The Assistant')
+  return lines.join('\n')
+}
+
 const t = (lang, k) => STRINGS[lang]?.[k] ?? STRINGS.en[k] ?? k
 
 // ---- Task ----
