@@ -132,57 +132,35 @@ export default function ExpensesScreen({ go }) {
           <Stat label={t('largest')} value={money(Math.max(0, ...inRange.map(e => expenseSar(e, rates))), cur, lang)} />
         </div>
 
-        {/* Quick access */}
-        <div className="qa-grid" style={{ gridTemplateColumns: 'repeat(3,1fr)', marginTop: 12 }}>
-          <button className="qa" onClick={() => go('income')}>
-            <span className="ic t-ok"><Icon name="wallet" size={22} /></span>{t('income')}
-          </button>
-          <button className="qa" onClick={() => go('accounts')}>
-            <span className="ic"><Icon name="wallet" size={22} /></span>{t('accounts')}
-          </button>
-          <button className="qa" onClick={() => go('investments')}>
-            <span className="ic"><Icon name="chart" size={22} /></span>{t('investments')}
-          </button>
-          <button className="qa" onClick={() => go('properties')}>
-            <span className="ic"><Icon name="doc" size={22} /></span>{t('properties')}
-          </button>
-          <button className="qa" onClick={() => go('subscriptions')}>
-            <span className="ic"><Icon name="refresh" size={22} /></span>{t('subscriptions')}
-          </button>
-          <button className="qa" onClick={() => go('networth')}>
-            <span className="ic"><Icon name="shield" size={22} /></span>{t('netWorth')}
-          </button>
-          <button className="qa" onClick={() => go('liabilities')}>
-            <span className="ic"><Icon name="wallet" size={22} /></span>{t('liabilities')}
-          </button>
-          <button className="qa" onClick={() => go('debtpayoff')}>
-            <span className="ic"><Icon name="chart" size={22} /></span>{t('debtPayoff')}
-          </button>
-          <button className="qa" onClick={() => go('moneycal')}>
-            <span className="ic"><Icon name="calendar" size={22} /></span>{t('moneyCalendar')}
-          </button>
-          <button className="qa" onClick={() => go('forecast')}>
-            <span className="ic"><Icon name="chart" size={22} /></span>{t('cashflowForecast')}
-          </button>
-          <button className="qa" onClick={() => go('goals')}>
-            <span className="ic"><Icon name="sparkle" size={22} /></span>{t('savingsGoals')}
-          </button>
-          <button className="qa" onClick={() => go('trends')}>
-            <span className="ic"><Icon name="chart" size={22} /></span>{t('trends')}
-          </button>
-          <button className="qa" onClick={() => go('statement')}>
-            <span className="ic"><Icon name="doc" size={22} /></span>{t('monthlyStatement')}
-          </button>
-          <button className="qa" onClick={() => go('zakat')}>
-            <span className="ic"><Icon name="sparkle" size={22} /></span>{t('zakat')}
-          </button>
-          <button className="qa" onClick={() => go('projects')}>
-            <span className="ic"><Icon name="report" size={22} /></span>{t('projects')}
-          </button>
-          <button className="qa" onClick={() => go('budgets')}>
-            <span className="ic"><Icon name="chart" size={22} /></span>{t('budgets')}
-          </button>
-        </div>
+        {/* Quick access — grouped */}
+        {[
+          { key: 'finOverview', items: [
+            { id: 'income', icon: 'wallet', tint: 't-ok' }, { id: 'accounts', icon: 'wallet' },
+            { id: 'networth', icon: 'shield', label: 'netWorth' }, { id: 'trends', icon: 'chart' }, { id: 'statement', icon: 'doc', label: 'monthlyStatement' },
+          ] },
+          { key: 'finPlan', items: [
+            { id: 'budgets', icon: 'chart' }, { id: 'goals', icon: 'sparkle', label: 'savingsGoals' }, { id: 'forecast', icon: 'chart', label: 'cashflowForecast' },
+            { id: 'moneycal', icon: 'calendar', label: 'moneyCalendar' }, { id: 'zakat', icon: 'sparkle' },
+          ] },
+          { key: 'finGrow', items: [
+            { id: 'investments', icon: 'chart' }, { id: 'properties', icon: 'doc' },
+            { id: 'liabilities', icon: 'wallet' }, { id: 'debtpayoff', icon: 'chart', label: 'debtPayoff' },
+          ] },
+          { key: 'finTrack', items: [
+            { id: 'subscriptions', icon: 'refresh' }, { id: 'projects', icon: 'report' },
+          ] },
+        ].map(grp => (
+          <React.Fragment key={grp.key}>
+            <Section title={t(grp.key)} />
+            <div className="qa-grid" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
+              {grp.items.map(it => (
+                <button key={it.id} className="qa" onClick={() => go(it.id)}>
+                  <span className={`ic ${it.tint || ''}`}><Icon name={it.icon} size={22} /></span>{t(it.label || it.id)}
+                </button>
+              ))}
+            </div>
+          </React.Fragment>
+        ))}
 
         {overBudgetCats.length > 0 && (
           <Card className="tight" style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 10, borderColor: 'var(--danger-tint)' }} onClick={() => go('budgets')}>
