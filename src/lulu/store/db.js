@@ -13,7 +13,7 @@ export const COLLECTIONS = [
   'tasks', 'inbox', 'vehicles', 'services', 'accessories',
   'expenses', 'income', 'investments', 'accounts', 'networth', 'liabilities',
   'properties', 'valuables', 'memberships', 'projects', 'subscriptions', 'rewards',
-  'people', 'groups', 'documents', 'trips', 'notes', 'notifications', 'wishlist', 'goals',
+  'people', 'groups', 'documents', 'trips', 'notes', 'notifications', 'wishlist', 'goals', 'appointments',
 ]
 
 function keyFor(name) { return `${NS}:${name}` }

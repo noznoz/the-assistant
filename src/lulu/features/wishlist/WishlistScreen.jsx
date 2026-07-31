@@ -111,7 +111,7 @@ export default function WishlistScreen({ go }) {
   )
 }
 
-function WishEditor({ initial, onClose, onSaved }) {
+export function WishEditor({ initial, onClose, onSaved }) {
   const { t, lang } = useT()
   const { settings } = useSettings()
   const wishlist = useCollection('wishlist')

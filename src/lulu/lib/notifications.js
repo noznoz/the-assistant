@@ -36,8 +36,10 @@ function sumMonth(expenses, ref, rates) {
   }, 0)
 }
 
-export function buildNotificationFeed({ tasks = [], vehicles = [], services = [], docs = [], subs = [], people = [], expenses = [], valuables = [], t, lang = 'en', settings = {} }) {
+export function buildNotificationFeed({ tasks = [], vehicles = [], services = [], docs = [], subs = [], people = [], expenses = [], valuables = [], appointments = [], t, lang = 'en', settings = {} }) {
   const out = []
+  // Upcoming appointments within the next 7 days.
+  appointments.forEach(a => { const dd = daysUntil(a.date); if (dd != null && dd >= 0 && dd <= 7) { const who = (people.find(p => p.id === a.personId) || {}).name; out.push({ id: 'appt' + a.id, tint: dd <= 1 ? 't-warn' : 't-info', icon: 'calendar', title: a.title + (who ? ` · ${who}` : ''), meta: `${relativeDay(a.date, lang)}${a.time ? ' · ' + a.time : ''}`, go: 'appointments', sort: dd - 0.15 }) } })
   const open = tasks.filter(x => x.status !== 'completed' && x.status !== 'cancelled')
   open.filter(x => isOverdue(x.dueDate)).forEach(x => out.push({ id: 't' + x.id, tint: 't-danger', icon: 'clock', title: x.title, meta: t('overdue'), go: 'tasks/overdue', sort: -1 }))
   open.filter(x => isToday(x.dueDate)).forEach(x => out.push({ id: 'd' + x.id, tint: 't-info', icon: 'today', title: x.title, meta: t('todaysTasks'), go: 'tasks/today', sort: 0 }))

@@ -39,13 +39,14 @@ export default function TodayScreen({ go }) {
   const subscriptions = useCollection('subscriptions')
   const people = useCollection('people')
   const valuables = useCollection('valuables')
+  const appointments = useCollection('appointments')
   const [editor, setEditor] = useState(null)
   const toast = useToast()
 
   const notifFeed = useMemo(() => buildNotificationFeed({
     tasks: tasks.items, vehicles: vehicles.items, services: services.items,
-    docs: documents.items, subs: subscriptions.items, people: people.items, expenses: expenses.items, valuables: valuables.items, t, lang, settings,
-  }), [tasks.items, vehicles.items, services.items, documents.items, subscriptions.items, people.items, expenses.items, valuables.items, lang])
+    docs: documents.items, subs: subscriptions.items, people: people.items, expenses: expenses.items, valuables: valuables.items, appointments: appointments.items, t, lang, settings,
+  }), [tasks.items, vehicles.items, services.items, documents.items, subscriptions.items, people.items, expenses.items, valuables.items, appointments.items, lang])
   const unread = unreadCount(notifFeed, settings.notificationsSeen)
 
   const open = tasks.items.filter(x => x.status !== 'completed' && x.status !== 'cancelled')
