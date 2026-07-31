@@ -115,6 +115,21 @@ export function maybeSeed() {
   db.insert('wishlist', { name: 'Dyson Airwrap', category: 'home', priority: 'want', price: 2400, currency: 'SAR', forWho: 'Layla', purchased: false })
   db.insert('wishlist', { name: 'Maldives family trip', category: 'travel', priority: 'someday', price: 60000, currency: 'SAR', forWho: 'Family', note: 'Eid break next year', purchased: false })
 
+  // Work — department structure, members, tasks and boss (two-way) tasks.
+  db.writeSettings({ ...db.readSettings(), profile: { ...(db.readSettings().profile || {}), managerName: 'Abdullah Al-Rashid', managerTitle: 'Group CEO', managerWhatsapp: '+966500000040' } })
+  const opsDept = db.insert('departments', { name: 'Operations', note: 'Regional operations team' })
+  const mFaisal = db.insert('members', { name: 'Faisal Al-Harbi', title: 'Operations Manager', departmentId: opsDept.id, mobile: '+966500000031', whatsapp: '+966500000031' })
+  const mSara = db.insert('members', { name: 'Sara Khan', title: 'Coordinator', departmentId: opsDept.id, mobile: '+966500000032', whatsapp: '+966500000032' })
+  db.update('departments', opsDept.id, { headId: mFaisal.id })
+  const salesDept = db.insert('departments', { name: 'Sales', note: 'Commercial team' })
+  const mOmar = db.insert('members', { name: 'Omar Nasser', title: 'Sales Lead', departmentId: salesDept.id, mobile: '+966500000033', whatsapp: '+966500000033' })
+  db.update('departments', salesDept.id, { headId: mOmar.id })
+  db.insert('tasks', { title: 'Prepare Q3 operations report', description: 'Consolidate regional KPIs and cost variances.', classification: 'work', departmentId: opsDept.id, memberId: mFaisal.id, assignedTo: mFaisal.name, status: 'waiting_someone', priority: 'high', dueDate: d(5) })
+  db.insert('tasks', { title: 'Vendor contract renewals', classification: 'work', departmentId: opsDept.id, memberId: mSara.id, assignedTo: mSara.name, status: 'waiting_someone', priority: 'medium', dueDate: d(12) })
+  db.insert('tasks', { title: 'Follow up Q3 pipeline', classification: 'work', departmentId: salesDept.id, memberId: mOmar.id, assignedTo: mOmar.name, status: 'waiting_someone', priority: 'high', dueDate: d(4) })
+  db.insert('tasks', { title: 'Discuss 2026 budget with CEO', description: 'Bring capex priorities.', classification: 'work', boss: 'up', priority: 'high', dueDate: d(3) })
+  db.insert('tasks', { title: 'Board deck requested by CEO', classification: 'work', boss: 'down', priority: 'critical', dueDate: d(2) })
+
   // A recurring utility charge across 3 months (fuels the "detected recurring"
   // suggestion) plus repeat merchants so category auto-suggest has history.
   ;[

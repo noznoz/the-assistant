@@ -14,7 +14,7 @@ export const COLLECTIONS = [
   'expenses', 'income', 'investments', 'accounts', 'networth', 'liabilities',
   'properties', 'valuables', 'memberships', 'projects', 'subscriptions', 'rewards',
   'people', 'groups', 'documents', 'trips', 'notes', 'notifications', 'wishlist', 'goals', 'appointments',
-  'staff', 'propertylog', 'itinerary',
+  'staff', 'propertylog', 'itinerary', 'departments', 'members',
 ]
 
 function keyFor(name) { return `${NS}:${name}` }
