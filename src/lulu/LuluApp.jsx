@@ -59,6 +59,9 @@ import GoalsScreen from './features/finance/GoalsScreen.jsx'
 import DashboardScreen from './features/today/DashboardScreen.jsx'
 import AppointmentsScreen from './features/appointments/AppointmentsScreen.jsx'
 import OccasionsScreen from './features/occasions/OccasionsScreen.jsx'
+import StaffScreen from './features/staff/StaffScreen.jsx'
+import DebtPayoffScreen from './features/finance/DebtPayoffScreen.jsx'
+import HijriScreen from './features/hijri/HijriScreen.jsx'
 
 const MAIN_TABS = ['today', 'tasks', 'garage', 'expenses', 'more']
 
@@ -138,6 +141,9 @@ function Router() {
       case 'dashboard': return <DashboardScreen go={go} />
       case 'appointments': return <AppointmentsScreen go={go} />
       case 'occasions': return <OccasionsScreen go={go} />
+      case 'staff': return <StaffScreen go={go} />
+      case 'debtpayoff': return <DebtPayoffScreen go={go} />
+      case 'hijri': return <HijriScreen go={go} />
       case 'search': return <SearchScreen go={go} />
       default: return <TodayScreen go={go} />
     }
@@ -145,8 +151,8 @@ function Router() {
 
   // Bottom nav highlights a main tab; sub-screens fall under "more".
   const activeTab = MAIN_TABS.includes(tab) ? tab
-    : ['projects', 'expensereport', 'budgets', 'subscriptions', 'income', 'investments', 'accounts', 'networth', 'zakat', 'trends', 'liabilities', 'moneycal', 'statement', 'properties', 'forecast', 'goals'].includes(tab) ? 'expenses'
-    : ['inbox', 'people', 'documents', 'trips', 'reports', 'calendar', 'settings', 'notes', 'rewards', 'profile', 'message', 'groups', 'valuables', 'week', 'memberships', 'renewals', 'monthlyreport', 'emergency', 'wishlist', 'appointments', 'occasions'].includes(tab) ? 'more'
+    : ['projects', 'expensereport', 'budgets', 'subscriptions', 'income', 'investments', 'accounts', 'networth', 'zakat', 'trends', 'liabilities', 'moneycal', 'statement', 'properties', 'forecast', 'goals', 'debtpayoff'].includes(tab) ? 'expenses'
+    : ['inbox', 'people', 'documents', 'trips', 'reports', 'calendar', 'settings', 'notes', 'rewards', 'profile', 'message', 'groups', 'valuables', 'week', 'memberships', 'renewals', 'monthlyreport', 'emergency', 'wishlist', 'appointments', 'occasions', 'staff', 'hijri'].includes(tab) ? 'more'
     : tab === 'dashboard' ? 'today'
     : tab
 

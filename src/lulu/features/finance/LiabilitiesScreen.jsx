@@ -20,7 +20,10 @@ export default function LiabilitiesScreen({ go }) {
 
   return (
     <>
-      <DetailHeader title={t('liabilities')} onBack={() => go('expenses')} />
+      <DetailHeader title={t('liabilities')} onBack={() => go('expenses')} right={
+        liabilities.items.some(l => (Number(l.balance) || 0) > 0)
+          ? <button className="iconbtn" onClick={() => go('debtpayoff')} aria-label={t('debtPayoff')}><Icon name="chart" size={18} /></button> : null
+      } />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
           <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('totalOwed')}</div>

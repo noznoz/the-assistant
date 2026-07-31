@@ -18,11 +18,12 @@ export default function RenewalsScreen({ go }) {
   const memberships = useCollection('memberships')
   const valuables = useCollection('valuables')
   const properties = useCollection('properties')
+  const staff = useCollection('staff')
 
   const items = useMemo(() => buildRenewals({
     people: people.items, vehicles: vehicles.items, documents: documents.items,
-    memberships: memberships.items, valuables: valuables.items, properties: properties.items, t, lang,
-  }), [people.items, vehicles.items, documents.items, memberships.items, valuables.items, properties.items, lang])
+    memberships: memberships.items, valuables: valuables.items, properties: properties.items, staff: staff.items, t, lang,
+  }), [people.items, vehicles.items, documents.items, memberships.items, valuables.items, properties.items, staff.items, lang])
 
   const expired = items.filter(x => x.days < 0)
   const soon = items.filter(x => x.days >= 0 && x.days <= 30)

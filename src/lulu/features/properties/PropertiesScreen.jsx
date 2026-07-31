@@ -9,6 +9,7 @@ import { money, toSar, fmtDate } from '../../lib/format.js'
 import { imageToDataURL } from '../../lib/files.js'
 import { share } from '../../lib/share.js'
 import EntityDocuments from '../shared/EntityDocuments.jsx'
+import PropertyLedger from './PropertyLedger.jsx'
 import SwipeRow from '../../ui/SwipeRow.jsx'
 
 export default function PropertiesScreen({ param, go }) {
@@ -119,7 +120,7 @@ function PropertyDetail({ property, go, onBack }) {
         </div>
 
         <div className="icontabs" style={{ margin: '14px 0' }}>
-          {[{ id: 'overview', icon: 'grid', label: t('overview') }, { id: 'documents', icon: 'doc', label: t('documents') }].map(x => (
+          {[{ id: 'overview', icon: 'grid', label: t('overview') }, { id: 'costs', icon: 'wallet', label: t('costsIncome') }, { id: 'documents', icon: 'doc', label: t('documents') }].map(x => (
             <button key={x.id} className={`icontab ${tab === x.id ? 'on' : ''}`} onClick={() => setTab(x.id)} aria-label={x.label}>
               <Icon name={x.icon} size={20} stroke={tab === x.id ? 2.3 : 1.9} /><span className="cap">{x.label}</span>
             </button>
@@ -145,6 +146,8 @@ function PropertyDetail({ property, go, onBack }) {
             <Button block variant="brand" icon="whatsapp" style={{ marginTop: 14 }} onClick={shareCard}>{t('share')}</Button>
           </>
         )}
+
+        {tab === 'costs' && <PropertyLedger property={property} />}
 
         {tab === 'documents' && <EntityDocuments filterKey="propertyId" id={property.id} hint={t('propertyDocsHint')} />}
       </div>
