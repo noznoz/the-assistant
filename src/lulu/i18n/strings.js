@@ -354,6 +354,8 @@ export const STRINGS = {
     grpPlan: 'Plan & alerts', grpPeople: 'People & network', grpHome: 'Home & assets', grpFaith: 'Faith', grpReports: 'Reports & settings',
     favorites: 'Favorites', searchSections: 'Search sections…', pin: 'Pin',
     finOverview: 'Overview', finPlan: 'Plan & save', finGrow: 'Wealth & debt', finTrack: 'Track',
+    navigation: 'Navigation', bottomTabs: 'Bottom tabs', bottomTabsHint: 'Choose which sections sit in the bottom bar. Today and More are always shown.',
+    inYourBar: 'In your bottom bar', alwaysShown: 'Always shown', availableSections: 'Available sections', maxTabs: 'Up to 4 middle tabs.',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -708,6 +710,8 @@ export const STRINGS = {
     grpPlan: 'التخطيط والتنبيهات', grpPeople: 'الأشخاص والشبكة', grpHome: 'المنزل والأصول', grpFaith: 'الروحانيات', grpReports: 'التقارير والإعدادات',
     favorites: 'المفضلة', searchSections: 'ابحث في الأقسام…', pin: 'تثبيت',
     finOverview: 'نظرة عامة', finPlan: 'التخطيط والادخار', finGrow: 'الثروة والديون', finTrack: 'المتابعة',
+    navigation: 'التنقّل', bottomTabs: 'أشرطة الأسفل', bottomTabsHint: 'اختر الأقسام التي تظهر في الشريط السفلي. الرئيسية والمزيد تظهران دائماً.',
+    inYourBar: 'في شريطك السفلي', alwaysShown: 'تظهر دائماً', availableSections: 'الأقسام المتاحة', maxTabs: 'حتى ٤ أشرطة وسطى.',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',

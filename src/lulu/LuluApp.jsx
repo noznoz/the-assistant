@@ -5,7 +5,7 @@ import { StoreProvider, useStore, useSettings } from './store/StoreProvider.jsx'
 import { ThemeProvider } from './theme/ThemeProvider.jsx'
 import { I18nProvider, useT } from './i18n/I18nProvider.jsx'
 import { useRouter } from './lib/router.js'
-import { BottomNav } from './ui/AppShell.jsx'
+import { BottomNav, navMiddle } from './ui/AppShell.jsx'
 import ErrorBoundary from './ui/ErrorBoundary.jsx'
 import Icon from './ui/Icon.jsx'
 import { usePullToRefresh } from './ui/usePullToRefresh.js'
@@ -69,6 +69,7 @@ import MeetingsScreen from './features/work/MeetingsScreen.jsx'
 import SpiritualScreen from './features/spiritual/SpiritualScreen.jsx'
 import GivingScreen from './features/giving/GivingScreen.jsx'
 import KeepInTouchScreen from './features/people/KeepInTouchScreen.jsx'
+import NavTabsScreen from './features/settings/NavTabsScreen.jsx'
 
 const MAIN_TABS = ['today', 'tasks', 'garage', 'expenses', 'more']
 
@@ -158,18 +159,24 @@ function Router() {
       case 'spiritual': return <SpiritualScreen go={go} />
       case 'giving': return <GivingScreen go={go} />
       case 'keepintouch': return <KeepInTouchScreen go={go} />
+      case 'navtabs': return <NavTabsScreen go={go} />
       case 'search': return <SearchScreen go={go} />
       default: return <TodayScreen go={go} />
     }
   })()
 
-  // Bottom nav highlights a main tab; sub-screens fall under "more".
-  const activeTab = MAIN_TABS.includes(tab) ? tab
-    : ['projects', 'expensereport', 'budgets', 'subscriptions', 'income', 'investments', 'accounts', 'networth', 'zakat', 'trends', 'liabilities', 'moneycal', 'statement', 'properties', 'forecast', 'goals', 'debtpayoff', 'allocation'].includes(tab) ? 'expenses'
-    : ['inbox', 'people', 'documents', 'trips', 'reports', 'calendar', 'settings', 'notes', 'rewards', 'profile', 'message', 'groups', 'valuables', 'week', 'memberships', 'renewals', 'monthlyreport', 'emergency', 'wishlist', 'appointments', 'occasions', 'staff', 'hijri', 'spiritual', 'giving', 'keepintouch'].includes(tab) ? 'more'
-    : tab === 'dashboard' ? 'today'
-    : ['work', 'workboard', 'meetings'].includes(tab) ? 'tasks'
-    : tab
+  // Bottom nav highlights whichever tab the current route belongs to. The middle
+  // tabs are user-chosen, so a route's "parent" only lights up if it's in the bar;
+  // otherwise everything falls back to More.
+  const parentOf = (tb) => {
+    if (['projects', 'expensereport', 'budgets', 'subscriptions', 'income', 'investments', 'accounts', 'networth', 'zakat', 'trends', 'liabilities', 'moneycal', 'statement', 'properties', 'forecast', 'goals', 'debtpayoff', 'allocation'].includes(tb)) return 'expenses'
+    if (['work', 'workboard', 'meetings'].includes(tb)) return 'tasks'
+    if (tb === 'dashboard') return 'today'
+    return 'more'
+  }
+  const navSet = new Set(['today', ...navMiddle(settings), 'more'])
+  const activeTab = navSet.has(tab) ? tab
+    : (navSet.has(parentOf(tab)) ? parentOf(tab) : 'more')
 
   const progress = Math.min(1, pull / 72)
   return (

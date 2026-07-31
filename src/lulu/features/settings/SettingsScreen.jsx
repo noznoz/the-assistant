@@ -138,6 +138,12 @@ export default function SettingsScreen({ go }) {
           ))}
         </Card>
 
+        <Section title={t('navigation')} />
+        <Card className="stack">
+          <p className="hint" style={{ margin: '0 2px' }}>{t('bottomTabsHint')}</p>
+          <Button block icon="grid" onClick={() => go('navtabs')}>{t('bottomTabs')}</Button>
+        </Card>
+
         <Section title={t('accounts')} />
         <Card className="stack">
           <p className="hint" style={{ margin: '0 2px' }}>{t('accountsHint')}</p>
