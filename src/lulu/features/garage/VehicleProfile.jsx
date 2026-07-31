@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Section, Stat, Button, Sheet, Field, Input, TextArea, Chip, Empty, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Section, Stat, Bars, Button, Sheet, Field, Input, TextArea, Chip, Empty, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { findVehicleType, findOwnership, label } from '../../lib/domain.js'
@@ -19,6 +19,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
   const cur = settings.currency
   const services = useCollection('services')
   const expenses = useCollection('expenses')
+  const accessoriesCol = useCollection('accessories')
   const vehicles = useCollection('vehicles')
   const [tab, setTab] = useState('overview')
   const [edit, setEdit] = useState(false)
@@ -58,6 +59,23 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
   const consumption = distance > 0 && litersForDist > 0 ? (litersForDist / distance * 100) : null
   const costPerKm = distance > 0 && costForDist > 0 ? (costForDist / distance) : null
 
+  // Running costs — everything spent on this vehicle: expenses (incl. fuel),
+  // logged services and fitted accessories.
+  const serviceTotal = myServices.reduce((s, x) => s + (Number(x.cost) || 0), 0)
+  const myAccessories = accessoriesCol.items.filter(a => a.vehicleId === vehicle.id)
+  const accessoriesTotal = myAccessories.reduce((s, a) => s + (Number(a.cost) || 0), 0)
+  const runningTotal = totalCost + serviceTotal + accessoriesTotal
+  const costBreakdown = [
+    { label: t('fuel'), value: Math.round(fuelTotal) },
+    { label: t('vehExpenses'), value: Math.round(totalCost - fuelTotal) },
+    { label: t('maintenance'), value: Math.round(serviceTotal) },
+    { label: t('accessories'), value: Math.round(accessoriesTotal) },
+  ].filter(x => x.value > 0)
+  const monthsOwned = vehicle.purchaseDate
+    ? Math.max(1, Math.round((Date.now() - new Date(vehicle.purchaseDate)) / 2.63e9))
+    : null
+  const perMonthCost = monthsOwned ? runningTotal / monthsOwned : null
+
   return (
     <>
       <DetailHeader title={vehicle.nickname || vehicle.name} onBack={onBack} right={
@@ -81,6 +99,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
         <div className="icontabs" style={{ margin: '14px 0' }}>
           {[
             { id: 'overview', icon: 'grid', label: t('overview') },
+            { id: 'costs', icon: 'chart', label: t('runningCosts') },
             { id: 'photos', icon: 'camera', label: t('photos') },
             { id: 'documents', icon: 'doc', label: t('documents') },
             { id: 'accessories', icon: 'gift', label: t('accessories') },
@@ -142,6 +161,36 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
               <Button icon="shield" onClick={() => setEmergency(true)}>{t('showEmergency')}</Button>
               <Button variant="brand" icon="whatsapp" onClick={() => share(formatVehicle(vehicle, lang, settings))}>{t('share')}</Button>
             </div>
+          </>
+        )}
+
+        {tab === 'costs' && (
+          <>
+            <Card style={{ textAlign: 'center' }}>
+              <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('totalRunningCost')}</div>
+              <div style={{ fontSize: 32, fontWeight: 780, marginTop: 4 }} className="tnum">{money(runningTotal, cur, lang)}</div>
+              {perMonthCost != null && <div className="muted" style={{ fontSize: 12.5, marginTop: 4 }}>≈ {money(perMonthCost, cur, lang)} / {t('perMonth')}{monthsOwned ? ` · ${monthsOwned} ${t('monthsOwned')}` : ''}</div>}
+            </Card>
+            <div className="stat-grid" style={{ marginTop: 12 }}>
+              <Stat label={t('costPerKm')} value={costPerKm != null ? money(costPerKm, cur, lang) : '—'} />
+              <Stat label={t('economy')} value={consumption ? `${consumption.toFixed(1)}` : '—'} sub={consumption ? t('consumption') : ''} />
+            </div>
+            {costBreakdown.length > 0 && (
+              <>
+                <Section title={t('costBreakdown')} />
+                <Card><Bars data={costBreakdown} format={(v) => money(v, cur, lang)} /></Card>
+              </>
+            )}
+            {serviceDue.length > 0 && (
+              <Card style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div className="lead t-warn" style={{ width: 42, height: 42, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="wrench" size={20} /></div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700 }}>{t('predictedService')}</div>
+                  <div className="muted" style={{ fontSize: 13 }}>{serviceDue[0].s.work}{serviceDue[0].dDate != null ? ` · ${fmtDate(serviceDue[0].s.nextDate, lang, settings.dateFormat)}` : ''}{serviceDue[0].kmLeft != null ? ` · ${Math.max(0, Math.round(serviceDue[0].kmLeft))} km` : ''}</div>
+                </div>
+              </Card>
+            )}
+            <p className="hint center" style={{ marginTop: 12 }}>{t('runningCostsHint')}</p>
           </>
         )}
 

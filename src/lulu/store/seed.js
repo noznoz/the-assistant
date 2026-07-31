@@ -108,6 +108,14 @@ export function maybeSeed() {
   db.insert('wishlist', { name: 'Dyson Airwrap', category: 'home', priority: 'want', price: 2400, currency: 'SAR', forWho: 'Layla', purchased: false })
   db.insert('wishlist', { name: 'Maldives family trip', category: 'travel', priority: 'someday', price: 60000, currency: 'SAR', forWho: 'Family', note: 'Eid break next year', purchased: false })
 
+  // Net-worth history — a rising trend that crosses the SR 2M milestone.
+  const nwSeed = [1620000, 1710000, 1795000, 1880000, 1948000, 2020000, 2088000, 2150000, 2214000]
+  nwSeed.forEach((value, i) => {
+    const dt = new Date(); dt.setMonth(dt.getMonth() - (nwSeed.length - i))
+    const month = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`
+    db.insert('networth', { month, value, assets: value + 1400000, liabilities: 1400000 })
+  })
+
   // Savings goals
   db.insert('goals', { name: 'Hajj fund', target: 60000, saved: 38000, currency: 'SAR', targetDate: d(150), icon: 'sparkle', note: 'For the whole family' })
   db.insert('goals', { name: 'Maldives family trip', target: 60000, saved: 12000, currency: 'SAR', targetDate: d(300), icon: 'trip' })
