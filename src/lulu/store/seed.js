@@ -157,7 +157,21 @@ export function maybeSeed() {
     { amount: 3200, category: 'hotels', merchant: 'Habitas AlUla', method: 'credit', date: d(20), tripId: trip.id, classification: 'personal' },
     { amount: 850, category: 'dining', merchant: 'Local restaurant', method: 'credit', date: d(21), tripId: trip.id, classification: 'personal' },
     { amount: 1200, category: 'entertainment', merchant: 'Desert tour', method: 'credit', date: d(22), tripId: trip.id, classification: 'personal' },
-  ].forEach(e => db.insert('expenses', e))
+  ].forEach(e => db.insert('expenses', e));
+  // Trip itinerary + packing to demonstrate the planner.
+  [
+    { date: d(20), time: '14:00', title: 'Check in — Habitas AlUla', note: 'Confirmation #AL-8842' },
+    { date: d(20), time: '19:30', title: 'Dinner at the resort' },
+    { date: d(21), time: '08:00', title: 'Hegra guided tour', note: 'Meet at reception' },
+    { date: d(22), time: '16:00', title: 'Desert 4x4 & sunset', note: 'Bring jackets' },
+    { date: d(24), time: '11:00', title: 'Check out & drive back' },
+  ].forEach(x => db.insert('itinerary', { ...x, tripId: trip.id }))
+  db.update('trips', trip.id, { packing: [
+    { id: 'pk1', text: 'Passports & IDs', done: true },
+    { id: 'pk2', text: 'Chargers', done: false },
+    { id: 'pk3', text: 'Sunscreen & hats', done: false },
+    { id: 'pk4', text: 'Kids’ medication', done: false },
+  ] })
   const proj = db.insert('projects', { name: 'House Renovation', budget: 60000, note: 'Villa upgrade' });
   [
     { amount: 12500, category: 'household', merchant: 'IKEA', method: 'credit', date: d(-5), projectId: proj.id, classification: 'personal' },

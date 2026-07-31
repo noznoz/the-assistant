@@ -311,6 +311,12 @@ export const STRINGS = {
     debtHint: 'An estimate from current balances, rates and monthly payments.',
     hijriCalendar: 'Hijri calendar', todayHijri: 'Today (Hijri)', islamicOccasions: 'Islamic occasions', ah: 'AH',
     hijriHint: 'Dates use the Umm al-Qura calendar and may shift by a day.',
+    // trip planner
+    itinerary: 'Itinerary', packing: 'Packing',
+    noItinerary: 'No plans yet', itineraryHint: 'Build a day-by-day plan for this trip.', addPlan: 'Add plan',
+    planPlaceholder: 'e.g. Hegra guided tour', unscheduled: 'Unscheduled',
+    packingList: 'Packing list', packingPlaceholder: 'Add an item…', tripDocsHint: 'Tickets, bookings and travel documents.',
+    leftLabel: 'left',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -622,6 +628,12 @@ export const STRINGS = {
     debtHint: 'تقدير مبني على الأرصدة والفوائد والأقساط الشهرية الحالية.',
     hijriCalendar: 'التقويم الهجري', todayHijri: 'اليوم (هجري)', islamicOccasions: 'المناسبات الإسلامية', ah: 'هـ',
     hijriHint: 'التواريخ حسب تقويم أم القرى وقد تتغيّر بيوم.',
+    // trip planner
+    itinerary: 'البرنامج', packing: 'الأمتعة',
+    noItinerary: 'لا خطط بعد', itineraryHint: 'ابنِ خطة يومية لهذه الرحلة.', addPlan: 'إضافة خطة',
+    planPlaceholder: 'مثال: جولة في الحِجر', unscheduled: 'غير مجدول',
+    packingList: 'قائمة الأمتعة', packingPlaceholder: 'أضف عنصراً…', tripDocsHint: 'التذاكر والحجوزات ومستندات السفر.',
+    leftLabel: 'متبقٍ',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',
