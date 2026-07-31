@@ -322,6 +322,15 @@ export const STRINGS = {
     overweight: 'over', underweight: 'under', targetsSum: 'Targets total', shouldBe100: 'should be 100%',
     autoCategorized: 'Categorized from history:', suggestedCategory: 'Suggested category:',
     detectedRecurring: 'Possible recurring charges', detectedHint: 'Spotted in your recent expenses — add any as a subscription.',
+    // work / departments
+    myManager: 'My manager', setYourManager: 'Set your manager', toDiscuss: 'To discuss', fromBoss: 'From boss',
+    toDiscussWithBoss: 'To discuss with my boss', assignedByBoss: 'Assigned by my boss',
+    departments: 'Departments', noDepartments: 'No departments yet', departmentsHint: 'Build your team structure — add a department, then its members.',
+    addDepartment: 'Add department', editDepartment: 'Edit department', departmentName: 'Department name', departmentPlaceholder: 'Operations, Sales, Finance…',
+    departmentHead: 'Department head', head: 'Head', noHead: 'No head set', membersLower: 'members', tasksLower: 'tasks',
+    team: 'Team', teamMembers: 'Team members', noMembers: 'No members yet', addMember: 'Add member', editMember: 'Edit member', makeHead: 'Make head',
+    departmentTasks: 'Department tasks', assignTaskHint: 'Create a task and assign it to a team member.',
+    taskPlaceholder: 'e.g. Prepare Q3 report', assignTo: 'Assign to', direction: 'Direction', deadline: 'Deadline',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -644,6 +653,15 @@ export const STRINGS = {
     overweight: 'زيادة', underweight: 'نقص', targetsSum: 'مجموع الأهداف', shouldBe100: 'يجب أن يكون ١٠٠٪',
     autoCategorized: 'مصنّف من السجل:', suggestedCategory: 'فئة مقترحة:',
     detectedRecurring: 'رسوم متكررة محتملة', detectedHint: 'رُصدت في مصاريفك الأخيرة — أضف أياً منها كاشتراك.',
+    // work / departments
+    myManager: 'مديري', setYourManager: 'حدّد مديرك', toDiscuss: 'للمناقشة', fromBoss: 'من المدير',
+    toDiscussWithBoss: 'لمناقشتها مع مديري', assignedByBoss: 'مُكلّف بها من مديري',
+    departments: 'الأقسام', noDepartments: 'لا أقسام بعد', departmentsHint: 'ابنِ هيكل فريقك — أضف قسماً ثم أعضاءه.',
+    addDepartment: 'إضافة قسم', editDepartment: 'تعديل القسم', departmentName: 'اسم القسم', departmentPlaceholder: 'العمليات، المبيعات، المالية…',
+    departmentHead: 'رئيس القسم', head: 'الرئيس', noHead: 'لا رئيس محدد', membersLower: 'أعضاء', tasksLower: 'مهام',
+    team: 'الفريق', teamMembers: 'أعضاء الفريق', noMembers: 'لا أعضاء بعد', addMember: 'إضافة عضو', editMember: 'تعديل العضو', makeHead: 'تعيين رئيساً',
+    departmentTasks: 'مهام القسم', assignTaskHint: 'أنشئ مهمة وكلّف بها عضواً في الفريق.',
+    taskPlaceholder: 'مثال: إعداد تقرير الربع الثالث', assignTo: 'إسناد إلى', direction: 'الاتجاه', deadline: 'الموعد النهائي',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',

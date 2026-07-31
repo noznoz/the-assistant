@@ -63,6 +63,7 @@ import StaffScreen from './features/staff/StaffScreen.jsx'
 import DebtPayoffScreen from './features/finance/DebtPayoffScreen.jsx'
 import HijriScreen from './features/hijri/HijriScreen.jsx'
 import AllocationScreen from './features/finance/AllocationScreen.jsx'
+import WorkScreen from './features/work/WorkScreen.jsx'
 
 const MAIN_TABS = ['today', 'tasks', 'garage', 'expenses', 'more']
 
@@ -146,6 +147,7 @@ function Router() {
       case 'debtpayoff': return <DebtPayoffScreen go={go} />
       case 'hijri': return <HijriScreen go={go} />
       case 'allocation': return <AllocationScreen go={go} />
+      case 'work': return <WorkScreen param={param} go={go} />
       case 'search': return <SearchScreen go={go} />
       default: return <TodayScreen go={go} />
     }
@@ -156,6 +158,7 @@ function Router() {
     : ['projects', 'expensereport', 'budgets', 'subscriptions', 'income', 'investments', 'accounts', 'networth', 'zakat', 'trends', 'liabilities', 'moneycal', 'statement', 'properties', 'forecast', 'goals', 'debtpayoff', 'allocation'].includes(tab) ? 'expenses'
     : ['inbox', 'people', 'documents', 'trips', 'reports', 'calendar', 'settings', 'notes', 'rewards', 'profile', 'message', 'groups', 'valuables', 'week', 'memberships', 'renewals', 'monthlyreport', 'emergency', 'wishlist', 'appointments', 'occasions', 'staff', 'hijri'].includes(tab) ? 'more'
     : tab === 'dashboard' ? 'today'
+    : tab === 'work' ? 'tasks'
     : tab
 
   const progress = Math.min(1, pull / 72)

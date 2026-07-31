@@ -62,7 +62,10 @@ export default function TasksScreen({ param, go }) {
   return (
     <>
       <TopBar title={t('tasks')} right={
-        <button className="iconbtn" onClick={() => setSheet({ search: true })} aria-label={t('search')}><Icon name="search" size={18} /></button>
+        <>
+          <button className="iconbtn" onClick={() => go('work')} aria-label={t('work')}><Icon name="report" size={18} /></button>
+          <button className="iconbtn" onClick={() => setSheet({ search: true })} aria-label={t('search')}><Icon name="search" size={18} /></button>
+        </>
       } />
       <div className="screen">
         {sheet?.search != null && (
