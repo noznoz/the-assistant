@@ -220,6 +220,18 @@ export const WISH_PRIORITIES = [
 ]
 export const findWishPriority = (id) => WISH_PRIORITIES.find(x => x.id === id)
 
+// Appointment / health-calendar types.
+export const APPOINTMENT_TYPES = [
+  { id: 'doctor', en: 'Doctor', ar: 'طبيب', icon: 'shield' },
+  { id: 'dentist', en: 'Dentist', ar: 'أسنان', icon: 'sparkle' },
+  { id: 'vaccination', en: 'Vaccination', ar: 'تطعيم', icon: 'shield' },
+  { id: 'checkup', en: 'Check-up', ar: 'فحص دوري', icon: 'shield' },
+  { id: 'school', en: 'School', ar: 'مدرسة', icon: 'doc' },
+  { id: 'meeting', en: 'Meeting', ar: 'اجتماع', icon: 'people' },
+  { id: 'other', en: 'Other', ar: 'أخرى', icon: 'calendar' },
+]
+export const findAppointmentType = (id) => APPOINTMENT_TYPES.find(x => x.id === id)
+
 export const findIncomeSource = (id) => INCOME_SOURCES.find(x => x.id === id)
 export const findInvestmentType = (id) => INVESTMENT_TYPES.find(x => x.id === id)
 export const findAccountType = (id) => ACCOUNT_TYPES.find(x => x.id === id)

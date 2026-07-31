@@ -287,6 +287,14 @@ export const STRINGS = {
     moveUp: 'Move up', moveDown: 'Move down', resetDefault: 'Reset to default',
     dashBrief: 'Morning brief', dashAssistant: 'Needs attention', dashPrayer: 'Prayer times', dashStats: 'Progress & spending',
     dashQuick: 'Quick actions', dashRenewals: 'Renewals', dashNotes: 'Quick notes',
+    // reports center + appointments + occasions
+    financialReports: 'Financial reports', activityReview: 'Activity review',
+    appointments: 'Appointments', noAppointments: 'No appointments yet', appointmentsHint: 'Track doctor, dentist, school and other dates for the family.',
+    editAppointment: 'Edit appointment', appointmentTitle: 'Title', appointmentPlaceholder: 'e.g. Pediatric check-up',
+    who: 'Who', time: 'Time', location: 'Location', locationPlaceholder: 'Clinic, hospital, school…', past: 'Past',
+    occasions: 'Gifts & occasions', noOccasions: 'No occasions yet', occasionsHint: 'Add birthdays and anniversaries to family members and they appear here.',
+    occasionsFooter: 'Gift ideas are pulled from your wishlist by who they’re for.',
+    anniversary: 'Anniversary', turning: 'turning', giftIdeas: 'Gift ideas', addIdea: 'Add idea', noGiftIdeas: 'No ideas saved yet.',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -574,6 +582,14 @@ export const STRINGS = {
     moveUp: 'تحريك لأعلى', moveDown: 'تحريك لأسفل', resetDefault: 'إعادة للافتراضي',
     dashBrief: 'ملخص الصباح', dashAssistant: 'يحتاج انتباه', dashPrayer: 'أوقات الصلاة', dashStats: 'التقدّم والإنفاق',
     dashQuick: 'إجراءات سريعة', dashRenewals: 'التجديدات', dashNotes: 'ملاحظات سريعة',
+    // reports center + appointments + occasions
+    financialReports: 'التقارير المالية', activityReview: 'مراجعة النشاط',
+    appointments: 'المواعيد', noAppointments: 'لا توجد مواعيد بعد', appointmentsHint: 'تابع مواعيد الطبيب والأسنان والمدرسة وغيرها للعائلة.',
+    editAppointment: 'تعديل الموعد', appointmentTitle: 'العنوان', appointmentPlaceholder: 'مثال: فحص أطفال',
+    who: 'لِمَن', time: 'الوقت', location: 'المكان', locationPlaceholder: 'عيادة، مستشفى، مدرسة…', past: 'سابقة',
+    occasions: 'الهدايا والمناسبات', noOccasions: 'لا توجد مناسبات بعد', occasionsHint: 'أضف أعياد الميلاد والذكرى السنوية لأفراد العائلة لتظهر هنا.',
+    occasionsFooter: 'أفكار الهدايا مأخوذة من قائمة رغباتك حسب المستفيد.',
+    anniversary: 'ذكرى سنوية', turning: 'يُتمّ', giftIdeas: 'أفكار الهدايا', addIdea: 'إضافة فكرة', noGiftIdeas: 'لا أفكار محفوظة بعد.',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',

@@ -29,6 +29,7 @@ export default function WeekScreen({ go }) {
   const income = useCollection('income')
   const people = useCollection('people')
   const trips = useCollection('trips')
+  const appointments = useCollection('appointments')
 
   const d = useMemo(() => {
     const within = (ds) => { const dd = daysUntil(ds); return dd != null && dd >= 0 && dd <= WK }
@@ -49,9 +50,10 @@ export default function WeekScreen({ go }) {
 
     const birthdays = people.items.map(p => ({ p, dd: daysToBirthday(p.birthday) })).filter(x => x.dd != null && x.dd <= WK).sort((a, b) => a.dd - b.dd)
     const upTrips = trips.items.filter(tr => { const dd = daysUntil(tr.start); return dd != null && dd >= 0 && dd <= 30 }).sort((a, b) => (a.start || '').localeCompare(b.start || ''))
+    const weekAppts = appointments.items.filter(a => within(a.date)).sort((a, b) => `${a.date}${a.time || ''}`.localeCompare(`${b.date}${b.time || ''}`))
 
-    return { weekTasks, bills, dueOut, expectIn, birthdays, upTrips }
-  }, [tasks.items, subs.items, vehicles.items, income.items, people.items, trips.items, rates, lang])
+    return { weekTasks, bills, dueOut, expectIn, birthdays, upTrips, weekAppts }
+  }, [tasks.items, subs.items, vehicles.items, income.items, people.items, trips.items, appointments.items, rates, lang])
 
   const shareDigest = () => {
     const L = lang === 'ar'
@@ -63,7 +65,8 @@ export default function WeekScreen({ go }) {
     share(lines.join('\n'))
   }
 
-  const empty = !d.weekTasks.length && !d.bills.length && !d.birthdays.length && !d.upTrips.length
+  const nameFor = (id) => (people.items.find(p => p.id === id) || {}).name
+  const empty = !d.weekTasks.length && !d.bills.length && !d.birthdays.length && !d.upTrips.length && !d.weekAppts.length
 
   return (
     <>
@@ -115,6 +118,18 @@ export default function WeekScreen({ go }) {
                     <div className={`lead ${b.kind === 'income' ? 't-ok' : b.kind === 'renewal' ? 't-danger' : 't-warn'}`}><Icon name={b.kind === 'income' ? 'wallet' : b.kind === 'renewal' ? 'shield' : 'wallet'} size={18} /></div>
                     <div className="body"><div className="title">{b.title}</div><div className="meta">{relativeDay(b.date, lang)}</div></div>
                     {b.amount > 0 && <b className={`tnum ${b.kind === 'income' ? 't-ok' : ''}`}>{b.kind === 'income' ? '+' : ''}{money(b.amount, cur, lang)}</b>}
+                  </div>
+                ))}
+              </>
+            )}
+
+            {d.weekAppts.length > 0 && (
+              <>
+                <Section title={t('appointments')} count={d.weekAppts.length} action={t('view')} onAction={() => go('appointments')} />
+                {d.weekAppts.map(a => (
+                  <div className="li" key={'ap' + a.id} onClick={() => go('appointments')}>
+                    <div className="lead t-brand"><Icon name="calendar" size={18} /></div>
+                    <div className="body"><div className="title">{a.title}{nameFor(a.personId) ? ` · ${nameFor(a.personId)}` : ''}</div><div className="meta">{relativeDay(a.date, lang)}{a.time ? ` · ${a.time}` : ''}</div></div>
                   </div>
                 ))}
               </>

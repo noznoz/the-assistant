@@ -50,7 +50,24 @@ export default function ReportsScreen({ go }) {
         <button className="iconbtn" onClick={() => share(text)} aria-label={t('share')}><Icon name="share" size={18} /></button>
       } />
       <div className="screen">
-        <div style={{ margin: '14px 0' }}>
+        <Section title={t('financialReports')} />
+        <div className="qa-grid">
+          {[
+            { id: 'monthlyreport', icon: 'report', label: t('monthlyReport') },
+            { id: 'trends', icon: 'chart', label: t('trends') },
+            { id: 'statement', icon: 'doc', label: t('monthlyStatement') },
+            { id: 'networth', icon: 'shield', label: t('netWorth') },
+            { id: 'zakat', icon: 'sparkle', label: t('zakat') },
+            { id: 'expensereport', icon: 'wallet', label: t('expenses') },
+          ].map(rp => (
+            <button key={rp.id} className="qa" onClick={() => go(rp.id)}>
+              <span className="ic"><Icon name={rp.icon} size={22} /></span>{rp.label}
+            </button>
+          ))}
+        </div>
+
+        <Section title={t('activityReview')} />
+        <div style={{ margin: '4px 0 14px' }}>
           <Segmented value={period} onChange={setPeriod} options={[
             { value: 'daily', label: lang === 'ar' ? 'يومي' : 'Daily' },
             { value: 'weekly', label: lang === 'ar' ? 'أسبوعي' : 'Weekly' },

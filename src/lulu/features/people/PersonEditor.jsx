@@ -14,7 +14,7 @@ export default function PersonEditor({ initial = {}, onClose, onSaved }) {
   const groups = useCollection('groups')
   const [f, setF] = useState({
     name: '', photo: '', jobTitle: '', company: '', mobile: '', whatsapp: '',
-    email: '', relationship: 'family', birthday: '', notes: '', groupIds: [],
+    email: '', relationship: 'family', birthday: '', anniversary: '', notes: '', groupIds: [],
     bloodType: '', allergies: '', conditions: '', medications: '', doctor: '', healthInsurer: '', healthPolicy: '',
     iqamaNumber: '', iqamaExpiry: '', passportNumber: '', passportExpiry: '', licenseExpiry: '', nationalId: '', nationalIdExpiry: '', ...initial,
   })
@@ -87,6 +87,7 @@ export default function PersonEditor({ initial = {}, onClose, onSaved }) {
         <Field label={t('email')}><Input value={f.email} onChange={set('email')} inputMode="email" /></Field>
         <Field label={t('birthday')}><Input type="date" value={f.birthday} onChange={set('birthday')} /></Field>
       </div>
+      <Field label={t('anniversary')} hint={t('optional')}><Input type="date" value={f.anniversary} onChange={set('anniversary')} /></Field>
       <div className="row2">
         <Field label={t('jobTitle')}><Input value={f.jobTitle} onChange={set('jobTitle')} /></Field>
         <Field label={t('company')}><Input value={f.company} onChange={set('company')} /></Field>

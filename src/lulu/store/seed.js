@@ -116,6 +116,14 @@ export function maybeSeed() {
     db.insert('networth', { month, value, assets: value + 1400000, liabilities: 1400000 })
   })
 
+  // Appointments / health calendar (personIds wired after people are seeded below)
+  const apptSeed = [
+    { title: 'Pediatric check-up', type: 'checkup', who: 'Omar', date: d(4), time: '16:30', location: 'Dr. Sami Clinic, Riyadh' },
+    { title: 'Dental cleaning', type: 'dentist', who: 'Layla', date: d(9), time: '11:00', location: 'Smile Dental' },
+    { title: 'Annual physical', type: 'doctor', who: '', date: d(20), time: '09:00', location: 'Dr. Soliman Fakeeh Hospital' },
+    { title: 'School parents evening', type: 'school', who: 'Noura', date: d(2), time: '18:00', location: 'British International School' },
+  ]
+
   // Savings goals
   db.insert('goals', { name: 'Hajj fund', target: 60000, saved: 38000, currency: 'SAR', targetDate: d(150), icon: 'sparkle', note: 'For the whole family' })
   db.insert('goals', { name: 'Maldives family trip', target: 60000, saved: 12000, currency: 'SAR', targetDate: d(300), icon: 'trip' })
@@ -146,7 +154,7 @@ export function maybeSeed() {
   ].forEach(e => db.insert('expenses', e))
 
   const people = [
-    { name: 'Layla', relationship: 'family', jobTitle: 'Spouse', mobile: '+966500000010', whatsapp: '+966500000010', birthday: d(40), bloodType: 'A+', healthInsurer: 'Bupa Arabia', healthPolicy: 'BUP-8842', passportNumber: 'K1234567', passportExpiry: d(75), nationalId: '1088xxxxxx', iqamaExpiry: '' },
+    { name: 'Layla', relationship: 'family', jobTitle: 'Spouse', mobile: '+966500000010', whatsapp: '+966500000010', birthday: d(40), anniversary: d(23), bloodType: 'A+', healthInsurer: 'Bupa Arabia', healthPolicy: 'BUP-8842', passportNumber: 'K1234567', passportExpiry: d(75), nationalId: '1088xxxxxx', iqamaExpiry: '' },
     { name: 'Omar', relationship: 'family', jobTitle: 'Son', mobile: '+966500000011', whatsapp: '+966500000011', birthday: d(9), bloodType: 'O+', allergies: 'Peanuts', doctor: 'Dr. Sami (Pediatrics)', passportNumber: 'K2345678', passportExpiry: d(18) },
     { name: 'Noura', relationship: 'family', jobTitle: 'Daughter', mobile: '+966500000012', whatsapp: '+966500000012', birthday: d(120), bloodType: 'A-', passportExpiry: d(-12) },
     { name: 'Khalid Al-Otaibi', jobTitle: 'CFO', company: 'Group Finance', relationship: 'colleague', mobile: '+966500000001' },
@@ -159,6 +167,9 @@ export function maybeSeed() {
   const gWork = db.insert('groups', { name: 'Work', icon: 'flag' })
   const groupFor = (rel) => rel === 'family' ? [gFamily.id] : ['colleague', 'report', 'manager'].includes(rel) ? [gWork.id] : []
   const savedPeople = people.map(p => db.insert('people', { ...p, groupIds: groupFor(p.relationship) }))
+  // Now that people exist, seed appointments linked to them by name.
+  const personIdByName = (nm) => (savedPeople.find(p => p.name === nm) || {}).id || ''
+  apptSeed.forEach(a => db.insert('appointments', { title: a.title, type: a.type, personId: personIdByName(a.who), date: a.date, time: a.time, location: a.location }))
   // A couple of family-assigned tasks to demonstrate delegation.
   const layla = savedPeople[0], omar = savedPeople[1]
   db.insert('tasks', { title: 'Pick up the AlUla trip documents', type: 'request', classification: 'personal', priority: 'high', status: 'waiting_someone', dueDate: todayISO(), assigneeId: layla.id, assignedTo: layla.name })
