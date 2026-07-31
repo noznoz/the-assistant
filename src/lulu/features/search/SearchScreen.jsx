@@ -30,6 +30,7 @@ export default function SearchScreen({ go }) {
     data.valuables?.forEach(x => push(t('valuables'), 'gift', 'valuables', x, `${x.name} ${x.brand || ''} ${x.model || ''} ${x.serial || ''}`))
     data.memberships?.forEach(x => push(t('memberships'), 'gift', 'memberships', x, `${x.name} ${x.tier || ''} ${x.number || ''}`))
     data.wishlist?.forEach(x => push(t('wishlist'), 'gift', 'wishlist', x, `${x.name} ${x.forWho || ''} ${x.note || ''}`))
+    data.goals?.forEach(x => push(t('savingsGoals'), 'sparkle', 'goals', x, `${x.name} ${x.note || ''}`))
     data.people?.forEach(x => push(t('people'), 'people', 'people', x, `${x.name} ${x.company || ''} ${x.jobTitle || ''}`))
     data.documents?.forEach(x => push(t('documents'), 'doc', 'documents', x, x.title))
     data.notes?.forEach(x => push(t('quickNotes'), 'note', 'notes', x, x.text || ''))

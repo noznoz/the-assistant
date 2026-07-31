@@ -161,6 +161,9 @@ export default function ExpensesScreen({ go }) {
           <button className="qa" onClick={() => go('forecast')}>
             <span className="ic"><Icon name="chart" size={22} /></span>{t('cashflowForecast')}
           </button>
+          <button className="qa" onClick={() => go('goals')}>
+            <span className="ic"><Icon name="sparkle" size={22} /></span>{t('savingsGoals')}
+          </button>
           <button className="qa" onClick={() => go('trends')}>
             <span className="ic"><Icon name="chart" size={22} /></span>{t('trends')}
           </button>
