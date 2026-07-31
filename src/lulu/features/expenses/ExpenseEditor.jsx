@@ -7,8 +7,9 @@ import { PAYMENT_METHODS, categoryOptions, label } from '../../lib/domain.js'
 import { todayISO, toSar, money } from '../../lib/format.js'
 import { defaultAccountName } from '../../lib/accounts.js'
 import { saveAttachment, removeAttachment } from '../../lib/files.js'
+import { scanReceipt, ocrSupported } from '../../lib/ocr.js'
 
-export default function ExpenseEditor({ initial, onClose, onSaved }) {
+export default function ExpenseEditor({ initial, onClose, onSaved, autoScan = false }) {
   const { t, lang } = useT()
   const { settings, updateSettings } = useSettings()
   const expenses = useCollection('expenses')
@@ -28,18 +29,39 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
   const [newProj, setNewProj] = useState(null)    // inline "add project" text or null
   const [newAcct, setNewAcct] = useState(null)    // inline "add account" text or null
   const [busy, setBusy] = useState(false)
+  const [scanMsg, setScanMsg] = useState('')   // feedback after an assisted scan
   const camRef = useRef()
   const recRef = useRef()
+  const scanCamRef = useRef()
 
-  const addReceipts = async (fileList) => {
+  const addReceipts = async (fileList, { scan = false } = {}) => {
     if (!fileList || !fileList.length) return
     setBusy(true)
     try {
       const added = []
       for (const file of Array.from(fileList)) added.push(await saveAttachment(file))
       setF(prev => ({ ...prev, receipts: [...(prev.receipts || []), ...added] }))
+      // Assisted capture: read the photo on-device and pre-fill empty fields.
+      if (scan) {
+        const first = Array.from(fileList).find(f => /^image\//.test(f.type))
+        const guess = first ? await scanReceipt(first) : {}
+        if (guess.amount || guess.date || guess.merchant) {
+          setF(prev => ({
+            ...prev,
+            amount: prev.amount || (guess.amount != null ? String(guess.amount) : prev.amount),
+            date: guess.date || prev.date,
+            merchant: prev.merchant || guess.merchant || prev.merchant,
+          }))
+          setScanMsg(t('scanFilled'))
+        } else {
+          setScanMsg(ocrSupported() ? t('scanNoText') : t('scanAttached'))
+        }
+      }
     } finally { setBusy(false) }
   }
+
+  // When launched from the "Scan receipt" quick action, open the camera at once.
+  React.useEffect(() => { if (autoScan) scanCamRef.current?.click() }, [autoScan])
   const removeReceipt = async (att) => {
     await removeAttachment(att)
     setF(prev => ({ ...prev, receipts: (prev.receipts || []).filter(a => a.id !== att.id) }))
@@ -215,10 +237,13 @@ export default function ExpenseEditor({ initial, onClose, onSaved }) {
 
       {/* Receipt */}
       <Field label={t('receipt')}>
-        <div className="row2">
+        <Button block icon="receipt" onClick={() => scanCamRef.current?.click()}>{t('scanReceipt')}</Button>
+        <div className="row2" style={{ marginTop: 8 }}>
           <Button icon="camera" onClick={() => camRef.current?.click()}>{t('takePhoto')}</Button>
           <Button icon="upload" onClick={() => recRef.current?.click()}>{t('chooseFile')}</Button>
         </div>
+        {scanMsg && <p className="hint" style={{ margin: '6px 2px 0', fontWeight: 600, color: 'var(--brand-600)' }}><Icon name="sparkle" size={13} /> {scanMsg}</p>}
+        <input ref={scanCamRef} type="file" accept="image/*" capture="environment" hidden onChange={e => { addReceipts(e.target.files, { scan: true }); e.target.value = '' }} />
         <input ref={camRef} type="file" accept="image/*" capture="environment" hidden onChange={e => { addReceipts(e.target.files); e.target.value = '' }} />
         <input ref={recRef} type="file" accept="image/*,application/pdf" multiple hidden onChange={e => { addReceipts(e.target.files); e.target.value = '' }} />
         {busy && <p className="muted" style={{ fontSize: 12, margin: '4px 2px' }}><span className="spinner" style={{ width: 14, height: 14, display: 'inline-block', verticalAlign: 'middle' }} /> …</p>}

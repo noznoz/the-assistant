@@ -159,7 +159,7 @@ export default function TodayScreen({ go }) {
           {QUICK.map(q => (
             <button key={q.id} className="qa" onClick={() => {
               if (q.id === 'message') { go('message'); return }
-              if (q.id === 'receipt' || q.id === 'voice') { toast.show(t('comingSoon')); return }
+              if (q.id === 'voice') { toast.show(t('comingSoon')); return }
               setEditor(q.id)
             }}>
               <span className="ic"><Icon name={q.icon} size={22} /></span>
@@ -225,6 +225,7 @@ export default function TodayScreen({ go }) {
       {editor === 'request' && <TaskEditor initial={{ type: 'request', status: 'waiting_someone' }} onClose={closeEditor} onSaved={() => toast.show(t('savedToast'))} />}
       {editor === 'appointment' && <TaskEditor initial={{ type: 'meeting_action' }} onClose={closeEditor} onSaved={() => toast.show(t('savedToast'))} />}
       {editor === 'expense' && <ExpenseEditor onClose={closeEditor} onSaved={() => toast.show(t('savedToast'))} />}
+      {editor === 'receipt' && <ExpenseEditor autoScan onClose={closeEditor} onSaved={() => toast.show(t('savedToast'))} />}
       {editor === 'vehicle' && <VehicleEditor onClose={closeEditor} onSaved={() => toast.show(t('savedToast'))} />}
       {editor === 'note' && <NoteEditor onClose={closeEditor} onSaved={() => toast.show(t('savedToast'))} />}
       {toast.node}

@@ -257,6 +257,16 @@ export const STRINGS = {
     monthlyReport: 'Monthly report', monthlyreport: 'Monthly report', netCashflow: 'Net cashflow', summary: 'Summary',
     totalAssets: 'Total assets', shareAsPdf: 'Share as PDF', reportShareHint: 'Opens your print sheet — choose “Save to Files” or share as PDF.',
     preparingReport: 'Preparing report…', backupHint: 'Save a copy of everything to a file — keep it safe or move to a new phone.',
+    // receipt scan + forecast + emergency
+    scanFilled: 'Filled from your receipt — please check the amount.', scanNoText: 'Receipt attached — couldn’t read it, add the amount.', scanAttached: 'Receipt attached — add the amount.',
+    cashflowForecast: 'Cashflow forecast', netMonthly: 'Net per month', perMonthAfterBills: 'left over each month after bills',
+    projectedBalance: 'Projected balance', monthlyRunRate: 'Monthly run rate', days: 'days',
+    recurringIncome: 'Recurring income', loanPayments: 'Loan payments', installments: 'Installments',
+    forecastWarn: 'At this rate your balance dips below zero — review upcoming bills.',
+    forecastHint: 'An estimate from recurring income, bills and your recent average spending.',
+    emergencyCard: 'Emergency card', emergencyIntro: 'Medical essentials & key contacts, ready to share.',
+    emergencyEmpty: 'No medical info yet', emergencyEmptyHint: 'Add blood type, allergies and contacts to family members and they appear here.',
+    emergencyFooter: 'Tip: keep this current — it could matter one day.',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -514,6 +524,16 @@ export const STRINGS = {
     monthlyReport: 'التقرير الشهري', monthlyreport: 'التقرير الشهري', netCashflow: 'صافي التدفق النقدي', summary: 'ملخص',
     totalAssets: 'إجمالي الأصول', shareAsPdf: 'مشاركة كـ PDF', reportShareHint: 'يفتح صفحة الطباعة — اختر "حفظ في الملفات" أو المشاركة كـ PDF.',
     preparingReport: 'جارٍ تجهيز التقرير…', backupHint: 'احفظ نسخة من كل شيء في ملف — للأمان أو للنقل إلى هاتف جديد.',
+    // receipt scan + forecast + emergency
+    scanFilled: 'تم التعبئة من الإيصال — تحقّق من المبلغ.', scanNoText: 'أُرفق الإيصال — تعذّرت القراءة، أضف المبلغ.', scanAttached: 'أُرفق الإيصال — أضف المبلغ.',
+    cashflowForecast: 'توقّع التدفق النقدي', netMonthly: 'الصافي شهرياً', perMonthAfterBills: 'يتبقّى شهرياً بعد الفواتير',
+    projectedBalance: 'الرصيد المتوقّع', monthlyRunRate: 'المعدّل الشهري', days: 'يوم',
+    recurringIncome: 'دخل متكرّر', loanPayments: 'أقساط القروض', installments: 'التقسيط',
+    forecastWarn: 'بهذا المعدّل سينخفض رصيدك دون الصفر — راجع الفواتير القادمة.',
+    forecastHint: 'تقدير مبني على الدخل المتكرّر والفواتير ومتوسّط إنفاقك الأخير.',
+    emergencyCard: 'بطاقة الطوارئ', emergencyIntro: 'المعلومات الطبية الأساسية وجهات الاتصال، جاهزة للمشاركة.',
+    emergencyEmpty: 'لا توجد معلومات طبية بعد', emergencyEmptyHint: 'أضف فصيلة الدم والحساسية وجهات الاتصال لأفراد العائلة لتظهر هنا.',
+    emergencyFooter: 'نصيحة: حافظ على تحديثها — قد تهمّ يوماً ما.',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',
