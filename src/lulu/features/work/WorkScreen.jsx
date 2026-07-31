@@ -3,10 +3,16 @@ import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Section, Sheet, Field, Input, TextArea, Select, Chip, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
-import { PRIORITIES, findPriority } from '../../lib/domain.js'
+import { PRIORITIES, findPriority, findStatus } from '../../lib/domain.js'
 import { fmtDate, relativeDay, isOverdue, todayISO } from '../../lib/format.js'
-import { whatsappToPerson, formatAssignment } from '../../lib/share.js'
+import { whatsappToPerson, formatAssignment, formatTaskDetail, emailShare, share } from '../../lib/share.js'
+import { uid } from '../../store/db.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
+
+function subProgress(task) {
+  const s = task.subtasks || []
+  return { total: s.length, done: s.filter(x => x.done).length }
+}
 
 // Work / organisation hub: your manager (two-way tasks) + departments, members
 // and department tasks assigned to team members. All tasks live in the shared
@@ -28,6 +34,7 @@ function WorkHome({ go }) {
   const tasks = useCollection('tasks')
   const [editDep, setEditDep] = useState(null)
   const [bossTask, setBossTask] = useState(null)   // { boss: 'up'|'down' } or task
+  const [bossSheet, setBossSheet] = useState(null)
   const [editBoss, setEditBoss] = useState(false)
   const toast = useToast()
 
@@ -41,7 +48,12 @@ function WorkHome({ go }) {
 
   return (
     <>
-      <DetailHeader title={t('work')} onBack={() => go('tasks')} />
+      <DetailHeader title={t('work')} onBack={() => go('tasks')} right={
+        <>
+          <button className="iconbtn" onClick={() => go('workboard')} aria-label={t('dashboard')}><Icon name="grid" size={18} /></button>
+          <button className="iconbtn" onClick={() => go('meetings')} aria-label={t('meetings')}><Icon name="note" size={18} /></button>
+        </>
+      } />
       <div className="screen">
         {/* Manager / boss */}
         <Section title={t('myManager')} action={t('edit')} onAction={() => setEditBoss(true)} />
@@ -65,13 +77,13 @@ function WorkHome({ go }) {
         {toDiscuss.length > 0 && (
           <>
             <Section title={t('toDiscussWithBoss')} count={toDiscuss.length} />
-            <Card tight>{toDiscuss.map(x => <BossRow key={x.id} task={x} lang={lang} settings={settings} onOpen={() => setBossTask(x)} onDone={() => { tasks.patch(x.id, { status: 'completed' }); toast.show('✓') }} />)}</Card>
+            <Card tight>{toDiscuss.map(x => <BossRow key={x.id} task={x} lang={lang} settings={settings} onOpen={() => setBossSheet(x)} onDone={() => { tasks.patch(x.id, { status: 'completed' }); toast.show('✓') }} />)}</Card>
           </>
         )}
         {fromBoss.length > 0 && (
           <>
             <Section title={t('assignedByBoss')} count={fromBoss.length} />
-            <Card tight>{fromBoss.map(x => <BossRow key={x.id} task={x} lang={lang} settings={settings} onOpen={() => setBossTask(x)} onDone={() => { tasks.patch(x.id, { status: 'completed' }); toast.show('✓') }} />)}</Card>
+            <Card tight>{fromBoss.map(x => <BossRow key={x.id} task={x} lang={lang} settings={settings} onOpen={() => setBossSheet(x)} onDone={() => { tasks.patch(x.id, { status: 'completed' }); toast.show('✓') }} />)}</Card>
           </>
         )}
 
@@ -99,6 +111,7 @@ function WorkHome({ go }) {
       <Fab onClick={() => setEditDep({})} />
       {editDep && <DepartmentEditor initial={editDep.id ? editDep : {}} members={members.items} onClose={() => setEditDep(null)} onSaved={() => toast.show(t('savedToast'))} />}
       {bossTask && <WorkTaskEditor mode="boss" initial={bossTask.id ? bossTask : { boss: bossTask.boss }} onClose={() => setBossTask(null)} onSaved={() => toast.show(t('savedToast'))} />}
+      {bossSheet && <WorkTaskSheet task={bossSheet} onClose={() => setBossSheet(null)} onEdit={() => { const x = bossSheet; setBossSheet(null); setBossTask(x) }} onSaved={() => toast.show(t('savedToast'))} />}
       {editBoss && <ManagerEditor settings={settings} updateSettings={updateSettings} onClose={() => setEditBoss(false)} onSaved={() => toast.show(t('savedToast'))} />}
       {toast.node}
     </>
@@ -133,6 +146,7 @@ function DepartmentDetail({ dep, go, onBack }) {
   const [editDep, setEditDep] = useState(false)
   const [memEditor, setMemEditor] = useState(null)
   const [taskEditor, setTaskEditor] = useState(null)
+  const [taskSheet, setTaskSheet] = useState(null)
   const toast = useToast()
 
   const team = members.items.filter(m => m.departmentId === dep.id)
@@ -201,12 +215,13 @@ function DepartmentDetail({ dep, go, onBack }) {
                     <button className={`check ${done ? 'on' : ''}`} onClick={() => tasks.patch(x.id, { status: done ? 'new' : 'completed' })} aria-label={t('markComplete')}>
                       {done && <Icon name="check" size={16} stroke={3} />}
                     </button>
-                    <div className="body" onClick={() => setTaskEditor(x)}>
+                    <div className="body" onClick={() => setTaskSheet(x)}>
                       <div className="title">{x.title}</div>
                       <div className="meta">
                         {x.assignedTo && <span>{x.assignedTo}</span>}
                         {pr && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>· <span style={{ width: 7, height: 7, borderRadius: 4, background: pr.color }} />{t(pr.key)}</span>}
                         {x.dueDate && <span className={overdue ? 't-danger' : ''}>· {relativeDay(x.dueDate, lang)}</span>}
+                        {(() => { const p = subProgress(x); return p.total > 0 ? <span>· ☑ {p.done}/{p.total}</span> : null })()}
                       </div>
                     </div>
                     {(() => { const asg = members.items.find(mm => mm.id === x.memberId); return asg && (asg.whatsapp || asg.mobile) ? <button className="iconbtn" aria-label="WhatsApp" onClick={() => whatsappToPerson(asg, formatAssignment(x, asg, lang, settings))}><Icon name="whatsapp" size={16} /></button> : null })()}
@@ -221,6 +236,7 @@ function DepartmentDetail({ dep, go, onBack }) {
       {editDep && <DepartmentEditor initial={dep} members={team} onClose={() => setEditDep(false)} onSaved={() => toast.show(t('savedToast'))} onDeleted={onBack} />}
       {memEditor && <MemberEditor departmentId={dep.id} initial={memEditor.id ? memEditor : {}} onClose={() => setMemEditor(null)} onSaved={() => toast.show(t('savedToast'))} />}
       {taskEditor && <WorkTaskEditor mode="dept" departmentId={dep.id} members={team} initial={taskEditor.id ? taskEditor : {}} onClose={() => setTaskEditor(null)} onSaved={() => toast.show(t('savedToast'))} />}
+      {taskSheet && <WorkTaskSheet task={taskSheet} department={dep} members={team} onClose={() => setTaskSheet(null)} onEdit={() => { const x = taskSheet; setTaskSheet(null); setTaskEditor(x) }} onSaved={() => toast.show(t('savedToast'))} />}
       {toast.node}
     </>
   )
@@ -306,6 +322,60 @@ function ManagerEditor({ settings, updateSettings, onClose, onSaved }) {
   )
 }
 
+function WorkTaskSheet({ task, department, members = [], onClose, onEdit, onSaved }) {
+  const { t, lang } = useT()
+  const { settings } = useSettings()
+  const tasks = useCollection('tasks')
+  const live = tasks.items.find(x => x.id === task.id) || task
+  const subs = live.subtasks || []
+  const assignee = members.find(m => m.id === live.memberId)
+  const pr = findPriority(live.priority)
+  const st = findStatus(live.status)
+  const done = live.status === 'completed'
+
+  const toggleSub = (id) => tasks.patch(live.id, { subtasks: subs.map(s => s.id === id ? { ...s, done: !s.done } : s) })
+  const detail = () => formatTaskDetail(live, lang, settings, { department: department?.name })
+
+  return (
+    <Sheet title={live.title} onClose={onClose}>
+      <div className="muted" style={{ marginTop: -6, marginBottom: 12, fontSize: 13 }}>
+        {[department?.name, live.assignedTo, pr && t(pr.key), st && t(st.key)].filter(Boolean).join(' · ')}
+      </div>
+      {live.description && <p style={{ marginBottom: 14 }}>{live.description}</p>}
+      {live.dueDate && <p className="muted" style={{ marginBottom: 14, fontSize: 13 }}><Icon name="calendar" size={13} /> {t('deadline')}: {fmtDate(live.dueDate, lang, settings.dateFormat)}</p>}
+
+      {subs.length > 0 && (
+        <>
+          <div style={{ fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '2px 2px 6px' }}>{t('checklist')} · {subs.filter(s => s.done).length}/{subs.length}</div>
+          <div style={{ marginBottom: 14 }}>
+            {subs.map(s => (
+              <div key={s.id} className="li" style={{ margin: 0 }}>
+                <button className={`check ${s.done ? 'on' : ''}`} onClick={() => toggleSub(s.id)} aria-label={t('markComplete')}>{s.done && <Icon name="check" size={14} stroke={3} />}</button>
+                <div className="body"><div className="title" style={{ fontSize: 14, textDecoration: s.done ? 'line-through' : 'none', opacity: s.done ? 0.6 : 1 }}>{s.text}</div></div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      <div className="stack">
+        <Button block icon="check" onClick={() => { tasks.patch(live.id, { status: done ? 'new' : 'completed' }); onSaved && onSaved(); onClose() }}>{done ? t('st_new') : t('markComplete')}</Button>
+        {assignee && (assignee.whatsapp || assignee.mobile) && (
+          <Button block variant="brand" icon="whatsapp" onClick={() => whatsappToPerson(assignee, detail())}>{t('sendOnWhatsApp')} · {assignee.name}</Button>
+        )}
+        <div className="row2">
+          <Button icon="whatsapp" onClick={() => share(detail())}>{t('shareWhatsApp')}</Button>
+          <Button icon="mail" onClick={() => emailShare(live.title, detail())}>{t('email')}</Button>
+        </div>
+        <div className="row2">
+          <Button icon="edit" onClick={onEdit}>{t('edit')}</Button>
+          <Button variant="danger" icon="trash" onClick={() => { tasks.remove(live.id); onClose() }}>{t('delete')}</Button>
+        </div>
+      </div>
+    </Sheet>
+  )
+}
+
 const WORK_STATUSES = ['new', 'in_progress', 'waiting_someone', 'waiting_me', 'completed']
 
 function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, onSaved }) {
@@ -313,10 +383,15 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
   const tasks = useCollection('tasks')
   const [f, setF] = useState({
     title: '', description: '', dueDate: '', priority: 'medium', status: 'new',
-    memberId: '', boss: '', classification: 'work', ...initial,
+    memberId: '', boss: '', classification: 'work', subtasks: [], ...initial,
   })
   const [err, setErr] = useState('')
+  const [subText, setSubText] = useState('')
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
+  const subs = f.subtasks || []
+  const addSub = () => { const v = subText.trim(); if (!v) return; setF({ ...f, subtasks: [...subs, { id: uid(), text: v, done: false }] }); setSubText('') }
+  const toggleSub = (id) => setF({ ...f, subtasks: subs.map(s => s.id === id ? { ...s, done: !s.done } : s) })
+  const removeSub = (id) => setF({ ...f, subtasks: subs.filter(s => s.id !== id) })
   const submit = () => {
     if (!f.title.trim()) { setErr(t('required')); return }
     const assignee = members.find(m => m.id === f.memberId)
@@ -367,6 +442,24 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
         <div className="chip-row">
           {PRIORITIES.map(p => <Chip key={p.id} selectable on={f.priority === p.id} onClick={() => setF({ ...f, priority: p.id })}>{t(p.key)}</Chip>)}
         </div>
+      </div>
+
+      {/* Checklist / sub-tasks */}
+      <label style={{ display: 'block', fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '14px 2px 7px' }}>
+        {t('checklist')}{subs.length ? ` · ${subs.filter(s => s.done).length}/${subs.length}` : ''}
+      </label>
+      {subs.map(s => (
+        <div key={s.id} className="li" style={{ margin: 0 }}>
+          <button className={`check ${s.done ? 'on' : ''}`} onClick={() => toggleSub(s.id)} aria-label={t('markComplete')}>
+            {s.done && <Icon name="check" size={14} stroke={3} />}
+          </button>
+          <div className="body"><div className="title" style={{ fontSize: 14, textDecoration: s.done ? 'line-through' : 'none', opacity: s.done ? 0.6 : 1 }}>{s.text}</div></div>
+          <button className="iconbtn" aria-label={t('delete')} onClick={() => removeSub(s.id)}><Icon name="x" size={15} /></button>
+        </div>
+      ))}
+      <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+        <Input value={subText} onChange={e => setSubText(e.target.value)} placeholder={t('addSubtask')} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSub() } }} style={{ flex: 1 }} />
+        <Button icon="plus" onClick={addSub}>{t('add')}</Button>
       </div>
     </Sheet>
   )

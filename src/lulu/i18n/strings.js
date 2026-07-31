@@ -331,6 +331,15 @@ export const STRINGS = {
     team: 'Team', teamMembers: 'Team members', noMembers: 'No members yet', addMember: 'Add member', editMember: 'Edit member', makeHead: 'Make head',
     departmentTasks: 'Department tasks', assignTaskHint: 'Create a task and assign it to a team member.',
     taskPlaceholder: 'e.g. Prepare Q3 report', assignTo: 'Assign to', direction: 'Direction', deadline: 'Deadline',
+    checklist: 'Checklist', addSubtask: 'Add a sub-task…', dashboard: 'Dashboard', department: 'Department',
+    // work dashboard + meetings
+    workDashboard: 'Work dashboard', openTasks: 'Open tasks', dueThisWeek: 'Due this week', withBoss: 'With boss',
+    byDepartment: 'By department', memberWorkload: 'Member workload', workloadHint: 'Assign tasks to members to see their load here.',
+    meetings: 'Meetings', noMeetings: 'No meetings yet', meetingsHint: 'Log meeting notes and turn action points into tasks.',
+    addMeeting: 'Add meeting', editMeeting: 'Edit meeting', meetingTitle: 'Title', meetingPlaceholder: 'e.g. Weekly ops sync',
+    attendees: 'Attendees', attendeesPlaceholder: 'Names, comma separated', context: 'Context', external: 'External',
+    actionItems: 'Action items', addActionItem: 'Add an action item…', toTask: 'To task', taskCreated: 'Task created',
+    meetingNotesPlaceholder: 'Discussion, decisions, notes…',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -662,6 +671,15 @@ export const STRINGS = {
     team: 'الفريق', teamMembers: 'أعضاء الفريق', noMembers: 'لا أعضاء بعد', addMember: 'إضافة عضو', editMember: 'تعديل العضو', makeHead: 'تعيين رئيساً',
     departmentTasks: 'مهام القسم', assignTaskHint: 'أنشئ مهمة وكلّف بها عضواً في الفريق.',
     taskPlaceholder: 'مثال: إعداد تقرير الربع الثالث', assignTo: 'إسناد إلى', direction: 'الاتجاه', deadline: 'الموعد النهائي',
+    checklist: 'قائمة المهام', addSubtask: 'إضافة مهمة فرعية…', dashboard: 'لوحة', department: 'القسم',
+    // work dashboard + meetings
+    workDashboard: 'لوحة العمل', openTasks: 'مهام مفتوحة', dueThisWeek: 'مستحقة هذا الأسبوع', withBoss: 'مع المدير',
+    byDepartment: 'حسب القسم', memberWorkload: 'حمل الأعضاء', workloadHint: 'أسند مهاماً للأعضاء لرؤية حِملهم هنا.',
+    meetings: 'الاجتماعات', noMeetings: 'لا اجتماعات بعد', meetingsHint: 'دوّن ملاحظات الاجتماع وحوّل النقاط إلى مهام.',
+    addMeeting: 'إضافة اجتماع', editMeeting: 'تعديل الاجتماع', meetingTitle: 'العنوان', meetingPlaceholder: 'مثال: اجتماع العمليات الأسبوعي',
+    attendees: 'الحضور', attendeesPlaceholder: 'الأسماء مفصولة بفواصل', context: 'السياق', external: 'خارجي',
+    actionItems: 'بنود العمل', addActionItem: 'إضافة بند عمل…', toTask: 'إلى مهمة', taskCreated: 'أُنشئت المهمة',
+    meetingNotesPlaceholder: 'النقاش والقرارات والملاحظات…',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',
