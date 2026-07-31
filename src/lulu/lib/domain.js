@@ -199,6 +199,27 @@ export const MEMBERSHIP_CATEGORIES = [
 ]
 export const findMembershipCategory = (id) => MEMBERSHIP_CATEGORIES.find(x => x.id === id)
 
+// Wishlist — things to buy or aspire to, with a priority and rough cost.
+export const WISH_CATEGORIES = [
+  { id: 'tech', en: 'Tech & gadgets', ar: 'تقنية', icon: 'doc' },
+  { id: 'watch', en: 'Watches', ar: 'ساعات', icon: 'clock' },
+  { id: 'car', en: 'Cars & vehicles', ar: 'مركبات', icon: 'car' },
+  { id: 'home', en: 'Home', ar: 'المنزل', icon: 'doc' },
+  { id: 'fashion', en: 'Fashion', ar: 'أزياء', icon: 'gift' },
+  { id: 'travel', en: 'Travel & experiences', ar: 'سفر وتجارب', icon: 'trip' },
+  { id: 'gift', en: 'Gifts', ar: 'هدايا', icon: 'gift' },
+  { id: 'other', en: 'Other', ar: 'أخرى', icon: 'sparkle' },
+]
+export const findWishCategory = (id) => WISH_CATEGORIES.find(x => x.id === id)
+
+// Wishlist priority — how much you want it.
+export const WISH_PRIORITIES = [
+  { id: 'must', en: 'Must have', ar: 'ضروري', tint: 't-danger', color: 'var(--danger)' },
+  { id: 'want', en: 'Want', ar: 'أرغبه', tint: 't-warn', color: 'var(--warn)' },
+  { id: 'someday', en: 'Someday', ar: 'يوماً ما', tint: 't-info', color: 'var(--info)' },
+]
+export const findWishPriority = (id) => WISH_PRIORITIES.find(x => x.id === id)
+
 export const findIncomeSource = (id) => INCOME_SOURCES.find(x => x.id === id)
 export const findInvestmentType = (id) => INVESTMENT_TYPES.find(x => x.id === id)
 export const findAccountType = (id) => ACCOUNT_TYPES.find(x => x.id === id)

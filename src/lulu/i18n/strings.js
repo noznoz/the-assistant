@@ -267,6 +267,13 @@ export const STRINGS = {
     emergencyCard: 'Emergency card', emergencyIntro: 'Medical essentials & key contacts, ready to share.',
     emergencyEmpty: 'No medical info yet', emergencyEmptyHint: 'Add blood type, allergies and contacts to family members and they appear here.',
     emergencyFooter: 'Tip: keep this current — it could matter one day.',
+    // wishlist
+    wishlist: 'Wishlist', wishlistEmpty: 'Your wishlist is empty', wishlistHint: 'Save things you want to buy, track prices and share the list.',
+    addWish: 'Add to wishlist', editWish: 'Edit item', wishName: 'What do you want?', wishNamePlaceholder: 'e.g. Sony WH-1000XM6, Patek Philippe…',
+    estimatedTotal: 'Estimated total', itemsWanted: 'Items wanted', wanted: 'Wanted', bought: 'Bought',
+    markBought: 'Got it', moveBack: 'Move back', markedBought: '✓ Marked as bought',
+    estimatedPrice: 'Estimated price', link: 'Link', forWho: 'For', forWhoPlaceholder: 'Myself, Layla, Omar…', targetDate: 'Target date',
+    change: 'Change', addPhoto: 'Add photo', remove: 'Remove',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -534,6 +541,13 @@ export const STRINGS = {
     emergencyCard: 'بطاقة الطوارئ', emergencyIntro: 'المعلومات الطبية الأساسية وجهات الاتصال، جاهزة للمشاركة.',
     emergencyEmpty: 'لا توجد معلومات طبية بعد', emergencyEmptyHint: 'أضف فصيلة الدم والحساسية وجهات الاتصال لأفراد العائلة لتظهر هنا.',
     emergencyFooter: 'نصيحة: حافظ على تحديثها — قد تهمّ يوماً ما.',
+    // wishlist
+    wishlist: 'قائمة الرغبات', wishlistEmpty: 'قائمة رغباتك فارغة', wishlistHint: 'احفظ ما ترغب بشرائه، وتابع الأسعار وشارك القائمة.',
+    addWish: 'إضافة إلى القائمة', editWish: 'تعديل العنصر', wishName: 'ماذا تريد؟', wishNamePlaceholder: 'مثال: Sony WH-1000XM6، Patek Philippe…',
+    estimatedTotal: 'الإجمالي التقديري', itemsWanted: 'عناصر مرغوبة', wanted: 'مرغوب', bought: 'تم الشراء',
+    markBought: 'تم شراؤه', moveBack: 'إرجاع', markedBought: '✓ تم وضعه كمشترى',
+    estimatedPrice: 'السعر التقديري', link: 'رابط', forWho: 'لِـ', forWhoPlaceholder: 'لنفسي، ليلى، عمر…', targetDate: 'التاريخ المستهدف',
+    change: 'تغيير', addPhoto: 'إضافة صورة', remove: 'إزالة',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',

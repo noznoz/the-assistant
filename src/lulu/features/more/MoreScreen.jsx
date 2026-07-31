@@ -15,6 +15,7 @@ const ITEMS = [
   { id: 'calendar', icon: 'calendar' },
   { id: 'people', icon: 'people', collection: 'people' },
   { id: 'properties', icon: 'doc', collection: 'properties' },
+  { id: 'wishlist', icon: 'gift', collection: 'wishlist' },
   { id: 'valuables', icon: 'gift', collection: 'valuables' },
   { id: 'memberships', icon: 'gift', collection: 'memberships' },
   { id: 'documents', icon: 'doc', collection: 'documents' },
@@ -34,6 +35,7 @@ export default function MoreScreen({ go }) {
     inbox: useCollection('inbox').items.length,
     notes: useCollection('notes').items.length,
     people: useCollection('people').items.length,
+    wishlist: useCollection('wishlist').items.filter(x => !x.purchased).length,
     properties: useCollection('properties').items.length,
     valuables: useCollection('valuables').items.length,
     memberships: useCollection('memberships').items.length,
@@ -79,7 +81,7 @@ export default function MoreScreen({ go }) {
             </button>
           ))}
         </Card>
-        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v3.0</p>
+        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v3.1</p>
       </div>
     </>
   )
