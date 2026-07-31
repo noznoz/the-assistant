@@ -108,6 +108,11 @@ export function maybeSeed() {
   db.insert('wishlist', { name: 'Dyson Airwrap', category: 'home', priority: 'want', price: 2400, currency: 'SAR', forWho: 'Layla', purchased: false })
   db.insert('wishlist', { name: 'Maldives family trip', category: 'travel', priority: 'someday', price: 60000, currency: 'SAR', forWho: 'Family', note: 'Eid break next year', purchased: false })
 
+  // Savings goals
+  db.insert('goals', { name: 'Hajj fund', target: 60000, saved: 38000, currency: 'SAR', targetDate: d(150), icon: 'sparkle', note: 'For the whole family' })
+  db.insert('goals', { name: 'Maldives family trip', target: 60000, saved: 12000, currency: 'SAR', targetDate: d(300), icon: 'trip' })
+  db.insert('goals', { name: 'Emergency buffer', target: 200000, saved: 200000, currency: 'SAR', icon: 'shield', note: '6 months of expenses — done' })
+
   // Subscriptions / recurring bills
   db.insert('subscriptions', { name: 'Netflix', amount: 56, currency: 'SAR', cycle: 'monthly', category: 'subscriptions', method: 'credit', nextDue: d(3), active: true })
   db.insert('subscriptions', { name: 'iCloud+', amount: 11.99, currency: 'SAR', cycle: 'monthly', category: 'subscriptions', method: 'apple_pay', nextDue: d(12), active: true })

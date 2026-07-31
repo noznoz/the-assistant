@@ -274,6 +274,11 @@ export const STRINGS = {
     markBought: 'Got it', moveBack: 'Move back', markedBought: '✓ Marked as bought',
     estimatedPrice: 'Estimated price', link: 'Link', forWho: 'For', forWhoPlaceholder: 'Myself, Layla, Omar…', targetDate: 'Target date',
     change: 'Change', addPhoto: 'Add photo', remove: 'Remove',
+    // savings goals
+    savingsGoals: 'Savings goals', noGoals: 'No goals yet', goalsHint: 'Set targets and watch your savings grow toward them.',
+    addGoal: 'Add goal', editGoal: 'Edit goal', goalName: 'Goal', goalNamePlaceholder: 'Hajj fund, new watch, Maldives…',
+    goalTarget: 'Target amount', alreadySaved: 'Already saved', savedSoFar: 'Saved so far', goalTotal: 'Target total',
+    addFunds: 'Add funds', toGo: 'to go', goalReached: '🎉 Goal reached', fromWishlist: 'From wishlist',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -548,6 +553,11 @@ export const STRINGS = {
     markBought: 'تم شراؤه', moveBack: 'إرجاع', markedBought: '✓ تم وضعه كمشترى',
     estimatedPrice: 'السعر التقديري', link: 'رابط', forWho: 'لِـ', forWhoPlaceholder: 'لنفسي، ليلى، عمر…', targetDate: 'التاريخ المستهدف',
     change: 'تغيير', addPhoto: 'إضافة صورة', remove: 'إزالة',
+    // savings goals
+    savingsGoals: 'أهداف الادخار', noGoals: 'لا توجد أهداف بعد', goalsHint: 'حدّد أهدافاً وشاهد مدّخراتك تنمو نحوها.',
+    addGoal: 'إضافة هدف', editGoal: 'تعديل الهدف', goalName: 'الهدف', goalNamePlaceholder: 'صندوق الحج، ساعة جديدة، المالديف…',
+    goalTarget: 'المبلغ المستهدف', alreadySaved: 'المُدّخر حالياً', savedSoFar: 'المُدّخر', goalTotal: 'إجمالي الهدف',
+    addFunds: 'إضافة مبلغ', toGo: 'متبقٍ', goalReached: '🎉 تحقّق الهدف', fromWishlist: 'من قائمة الرغبات',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',
