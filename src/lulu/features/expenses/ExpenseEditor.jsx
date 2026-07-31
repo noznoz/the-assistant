@@ -1,13 +1,14 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useMemo, useEffect } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { Sheet, Field, Input, TextArea, Select, Button, Chip } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
-import { PAYMENT_METHODS, categoryOptions, label } from '../../lib/domain.js'
+import { PAYMENT_METHODS, categoryOptions, catLabel, label } from '../../lib/domain.js'
 import { todayISO, toSar, money } from '../../lib/format.js'
 import { defaultAccountName } from '../../lib/accounts.js'
 import { saveAttachment, removeAttachment } from '../../lib/files.js'
 import { scanReceipt, ocrSupported } from '../../lib/ocr.js'
+import { suggestCategory } from '../../lib/smart.js'
 
 export default function ExpenseEditor({ initial, onClose, onSaved, autoScan = false }) {
   const { t, lang } = useT()
@@ -125,6 +126,14 @@ export default function ExpenseEditor({ initial, onClose, onSaved, autoScan = fa
 
   const catOpts = categoryOptions(lang, settings.customCategories)
 
+  // Smart category: learn the usual category for a merchant from past expenses.
+  const catSuggestion = useMemo(() => suggestCategory(f.merchant, expenses.items), [f.merchant, expenses.items])
+  const [autoCat, setAutoCat] = useState(false)
+  useEffect(() => {
+    if (catSuggestion && f.category === 'other' && !initial?.id) { setF(prev => ({ ...prev, category: catSuggestion })); setAutoCat(true) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [catSuggestion])
+
   return (
     <Sheet title={initial?.id ? t('editExpense') : t('newExpense')} onClose={onClose}
       footer={<div className="stack">
@@ -146,11 +155,21 @@ export default function ExpenseEditor({ initial, onClose, onSaved, autoScan = fa
       )}
 
       <Field label={t('category')}>
-        <Select value={f.category} onChange={onCategory}>
+        <Select value={f.category} onChange={(e) => { setAutoCat(false); onCategory(e) }}>
           {catOpts.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           <option value="__addcat">{t('addCategory')}</option>
         </Select>
       </Field>
+      {autoCat && catSuggestion === f.category && (
+        <p className="hint" style={{ marginTop: -8, marginBottom: 12, fontWeight: 600, color: 'var(--brand-600)' }}>
+          <Icon name="sparkle" size={12} /> {t('autoCategorized')} {catLabel(catSuggestion, lang)}
+        </p>
+      )}
+      {!autoCat && catSuggestion && catSuggestion !== f.category && (
+        <p className="hint" style={{ marginTop: -8, marginBottom: 12 }}>
+          {t('suggestedCategory')} <button type="button" className="link-btn" onClick={() => { setF({ ...f, category: catSuggestion }); setAutoCat(true) }}>{catLabel(catSuggestion, lang)}</button>
+        </p>
+      )}
       {newCat != null && (
         <div className="row2" style={{ marginTop: -6, marginBottom: 12 }}>
           <Input value={newCat} onChange={e => setNewCat(e.target.value)} placeholder={t('customCategoryName')} autoFocus />

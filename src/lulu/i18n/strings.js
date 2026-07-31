@@ -317,6 +317,11 @@ export const STRINGS = {
     planPlaceholder: 'e.g. Hegra guided tour', unscheduled: 'Unscheduled',
     packingList: 'Packing list', packingPlaceholder: 'Add an item…', tripDocsHint: 'Tickets, bookings and travel documents.',
     leftLabel: 'left',
+    // portfolio allocation + smart expenses
+    allocation: 'Allocation', editTargets: 'Edit targets', byAssetType: 'By asset type', target: 'Target',
+    overweight: 'over', underweight: 'under', targetsSum: 'Targets total', shouldBe100: 'should be 100%',
+    autoCategorized: 'Categorized from history:', suggestedCategory: 'Suggested category:',
+    detectedRecurring: 'Possible recurring charges', detectedHint: 'Spotted in your recent expenses — add any as a subscription.',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -634,6 +639,11 @@ export const STRINGS = {
     planPlaceholder: 'مثال: جولة في الحِجر', unscheduled: 'غير مجدول',
     packingList: 'قائمة الأمتعة', packingPlaceholder: 'أضف عنصراً…', tripDocsHint: 'التذاكر والحجوزات ومستندات السفر.',
     leftLabel: 'متبقٍ',
+    // portfolio allocation + smart expenses
+    allocation: 'التوزيع', editTargets: 'تعديل الأهداف', byAssetType: 'حسب نوع الأصل', target: 'الهدف',
+    overweight: 'زيادة', underweight: 'نقص', targetsSum: 'مجموع الأهداف', shouldBe100: 'يجب أن يكون ١٠٠٪',
+    autoCategorized: 'مصنّف من السجل:', suggestedCategory: 'فئة مقترحة:',
+    detectedRecurring: 'رسوم متكررة محتملة', detectedHint: 'رُصدت في مصاريفك الأخيرة — أضف أياً منها كاشتراك.',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',

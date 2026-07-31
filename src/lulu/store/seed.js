@@ -115,6 +115,16 @@ export function maybeSeed() {
   db.insert('wishlist', { name: 'Dyson Airwrap', category: 'home', priority: 'want', price: 2400, currency: 'SAR', forWho: 'Layla', purchased: false })
   db.insert('wishlist', { name: 'Maldives family trip', category: 'travel', priority: 'someday', price: 60000, currency: 'SAR', forWho: 'Family', note: 'Eid break next year', purchased: false })
 
+  // A recurring utility charge across 3 months (fuels the "detected recurring"
+  // suggestion) plus repeat merchants so category auto-suggest has history.
+  ;[
+    { amount: 480, category: 'utilities', merchant: 'STC', method: 'credit', date: d(-2), classification: 'personal' },
+    { amount: 495, category: 'utilities', merchant: 'STC', method: 'credit', date: d(-33), classification: 'personal' },
+    { amount: 470, category: 'utilities', merchant: 'STC', method: 'credit', date: d(-63), classification: 'personal' },
+    { amount: 320, category: 'dining', merchant: 'Nozomi', method: 'amex', date: d(-6), classification: 'personal' },
+    { amount: 410, category: 'dining', merchant: 'Nozomi', method: 'amex', date: d(-26), classification: 'personal' },
+  ].forEach(e => db.insert('expenses', e))
+
   // Household staff
   db.insert('staff', { name: 'Rahul', role: 'driver', nationality: 'Indian', mobile: '+966500000021', whatsapp: '+966500000021', salary: 2200, currency: 'SAR', iqamaNumber: '2412xxxxxx', iqamaExpiry: d(28), passportExpiry: d(210), contractEnd: d(400) })
   db.insert('staff', { name: 'Maria', role: 'nanny', nationality: 'Filipino', mobile: '+966500000022', whatsapp: '+966500000022', salary: 1800, currency: 'SAR', iqamaNumber: '2418xxxxxx', iqamaExpiry: d(120), passportExpiry: d(-8) })
