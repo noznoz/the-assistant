@@ -98,6 +98,7 @@ export const DEFAULT_SETTINGS = {
   dashboard: null,       // Today-screen card order/visibility (null = default)
   targetAllocation: {},  // desired investment mix by type { [typeId]: percent }
   favorites: [],         // pinned section ids shown at the top of More
+  navTabs: null,         // user-chosen middle bottom-bar tabs (null = default)
 }
 
 export function readSettings() {
