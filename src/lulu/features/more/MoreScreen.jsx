@@ -1,56 +1,101 @@
-import React from 'react'
+import React, { useState, useMemo } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { TopBar } from '../../ui/AppShell.jsx'
-import { Card } from '../../ui/primitives.jsx'
+import { Card, Section } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
+import { useStore, useSettings } from '../../store/StoreProvider.jsx'
 
-const ITEMS = [
-  { id: 'week', icon: 'calendar', route: 'week' },
-  { id: 'renewals', icon: 'shield' },
-  { id: 'emergency', icon: 'shield' },
-  { id: 'monthlyreport', icon: 'report' },
-  { id: 'inbox', icon: 'inbox', collection: 'inbox' },
-  { id: 'notes', icon: 'note', collection: 'notes' },
-  { id: 'calendar', icon: 'calendar' },
-  { id: 'people', icon: 'people', collection: 'people' },
-  { id: 'staff', icon: 'people', collection: 'staff' },
-  { id: 'appointments', icon: 'calendar', collection: 'appointments' },
-  { id: 'occasions', icon: 'cake' },
-  { id: 'hijri', icon: 'calendar' },
-  { id: 'spiritual', icon: 'sparkle' },
-  { id: 'giving', icon: 'gift' },
-  { id: 'keepintouch', icon: 'people' },
-  { id: 'properties', icon: 'doc', collection: 'properties' },
-  { id: 'wishlist', icon: 'gift', collection: 'wishlist' },
-  { id: 'valuables', icon: 'gift', collection: 'valuables' },
-  { id: 'memberships', icon: 'gift', collection: 'memberships' },
-  { id: 'documents', icon: 'doc', collection: 'documents' },
-  { id: 'trips', icon: 'trip', collection: 'trips' },
-  { id: 'reports', icon: 'report' },
-  { id: 'notifications', icon: 'bell' },
-  { id: 'settings', icon: 'cog' },
+// Grouped, colour-coded navigation. Each group has an accent tint so the long
+// list scans as a map rather than one flat column.
+const GROUPS = [
+  {
+    key: 'grpPlan', tint: 't-info', items: [
+      { id: 'week', icon: 'calendar' },
+      { id: 'calendar', icon: 'calendar' },
+      { id: 'appointments', icon: 'clock', collection: 'appointments' },
+      { id: 'renewals', icon: 'shield' },
+      { id: 'emergency', icon: 'shield', label: 'emergencyCard' },
+      { id: 'notifications', icon: 'bell' },
+      { id: 'inbox', icon: 'inbox', collection: 'inbox' },
+      { id: 'notes', icon: 'note', collection: 'notes' },
+    ],
+  },
+  {
+    key: 'grpPeople', tint: 't-brand', items: [
+      { id: 'people', icon: 'people', collection: 'people' },
+      { id: 'keepintouch', icon: 'bell', label: 'keepInTouch' },
+      { id: 'occasions', icon: 'cake' },
+      { id: 'staff', icon: 'wrench', collection: 'staff', label: 'householdStaff' },
+    ],
+  },
+  {
+    key: 'grpHome', tint: 't-ok', items: [
+      { id: 'properties', icon: 'doc', collection: 'properties' },
+      { id: 'valuables', icon: 'gift', collection: 'valuables' },
+      { id: 'memberships', icon: 'wallet', collection: 'memberships' },
+      { id: 'wishlist', icon: 'gift', collection: 'wishlist' },
+      { id: 'documents', icon: 'doc', collection: 'documents' },
+      { id: 'trips', icon: 'trip', collection: 'trips' },
+    ],
+  },
+  {
+    key: 'grpFaith', tint: 't-warn', items: [
+      { id: 'spiritual', icon: 'sparkle' },
+      { id: 'hijri', icon: 'calendar', label: 'hijriCalendar' },
+      { id: 'giving', icon: 'gift' },
+    ],
+  },
+  {
+    key: 'grpReports', tint: 't-brand', items: [
+      { id: 'monthlyreport', icon: 'report', label: 'monthlyReport' },
+      { id: 'reports', icon: 'chart' },
+      { id: 'settings', icon: 'cog' },
+    ],
+  },
 ]
+
+const ALL_ITEMS = GROUPS.flatMap(g => g.items.map(it => ({ ...it, tint: g.tint })))
 
 export default function MoreScreen({ go }) {
   const { t } = useT()
-  const { settings } = useSettings()
+  const { data } = useStore()
+  const { settings, updateSettings } = useSettings()
+  const [q, setQ] = useState('')
   const p = settings.profile || {}
+  const favorites = settings.favorites || []
+
   const initials = (p.fullName || settings.name || '')
     .split(' ').filter(Boolean).slice(0, 2).map(s => s[0]).join('').toUpperCase() || 'NB'
-  const store = {
-    inbox: useCollection('inbox').items.length,
-    notes: useCollection('notes').items.length,
-    people: useCollection('people').items.length,
-    staff: useCollection('staff').items.length,
-    appointments: useCollection('appointments').items.length,
-    wishlist: useCollection('wishlist').items.filter(x => !x.purchased).length,
-    properties: useCollection('properties').items.length,
-    valuables: useCollection('valuables').items.length,
-    memberships: useCollection('memberships').items.length,
-    documents: useCollection('documents').items.length,
-    trips: useCollection('trips').items.length,
+  const count = (it) => it.collection ? (data[it.collection] || []).length : 0
+
+  const toggleFav = (id) => {
+    const next = favorites.includes(id) ? favorites.filter(x => x !== id) : [...favorites, id]
+    updateSettings({ favorites: next })
   }
+
+  const lbl = (it) => t(it.label || it.id)
+  const s = q.trim().toLowerCase()
+  const matches = useMemo(() => s ? ALL_ITEMS.filter(it => lbl(it).toLowerCase().includes(s)) : [], [s])
+  const favItems = favorites.map(id => ALL_ITEMS.find(it => it.id === id)).filter(Boolean)
+
+  const Row = ({ it, i, first }) => (
+    <div style={{ display: 'flex', alignItems: 'center', borderTop: !first && i ? '1px solid var(--line)' : 0 }}>
+      <button onClick={() => go(it.id)} style={{
+        flex: 1, display: 'flex', alignItems: 'center', gap: 14, padding: '13px 4px 13px 12px',
+        background: 'transparent', border: 0, color: 'var(--ink)', minWidth: 0,
+      }}>
+        <span className={`lead ${it.tint}`} style={{ width: 38, height: 38, borderRadius: 11, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+          <Icon name={it.icon} size={20} />
+        </span>
+        <span style={{ flex: 1, textAlign: 'start', fontWeight: 600, fontSize: 15 }}>{lbl(it)}</span>
+        {count(it) > 0 && <span className="chip">{count(it)}</span>}
+      </button>
+      <button onClick={() => toggleFav(it.id)} aria-label={t('pin')} className="iconbtn" style={{ marginInlineEnd: 6, opacity: favorites.includes(it.id) ? 1 : 0.4, color: favorites.includes(it.id) ? 'var(--brand-600)' : 'var(--ink-3)' }}>
+        <Icon name="star" size={17} stroke={favorites.includes(it.id) ? 2.6 : 1.8} />
+      </button>
+    </div>
+  )
+
   return (
     <>
       <TopBar title={t('more')} />
@@ -75,22 +120,41 @@ export default function MoreScreen({ go }) {
           <Icon name="chevron" size={18} style={{ color: 'var(--ink-3)' }} />
         </button>
 
-        <Card tight flat style={{ padding: 6, marginTop: 14 }}>
-          {ITEMS.map((it, i) => (
-            <button key={it.id} onClick={() => go(it.id)} style={{
-              width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 12px',
-              background: 'transparent', border: 0, borderTop: i ? '1px solid var(--line)' : 0, color: 'var(--ink)',
-            }}>
-              <span style={{ width: 38, height: 38, borderRadius: 11, background: 'var(--brand-tint)', color: 'var(--brand-600)', display: 'grid', placeItems: 'center' }}>
-                <Icon name={it.icon} size={20} />
-              </span>
-              <span style={{ flex: 1, textAlign: 'start', fontWeight: 600, fontSize: 15 }}>{t(it.id)}</span>
-              {it.collection && store[it.collection] > 0 && <span className="chip">{store[it.collection]}</span>}
-              <Icon name="chevron" size={18} style={{ color: 'var(--ink-3)' }} />
-            </button>
-          ))}
-        </Card>
-        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v4.0</p>
+        {/* Search / filter */}
+        <div className="field" style={{ marginTop: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--surface-2)', border: '1px solid var(--line-2)', borderRadius: 'var(--r-md)', padding: '0 12px' }}>
+            <Icon name="search" size={18} style={{ color: 'var(--ink-3)' }} />
+            <input className="input" style={{ border: 0, background: 'transparent', padding: '11px 0' }} value={q} onChange={e => setQ(e.target.value)} placeholder={t('searchSections')} />
+            {q && <button className="iconbtn" aria-label={t('cancel')} onClick={() => setQ('')}><Icon name="x" size={16} /></button>}
+          </div>
+        </div>
+
+        {s ? (
+          <Card tight flat style={{ padding: 6, marginTop: 12 }}>
+            {matches.length === 0 ? <p className="muted center" style={{ padding: 16 }}>{t('nothingHere')}</p>
+              : matches.map((it, i) => <Row key={it.id} it={it} i={i} />)}
+          </Card>
+        ) : (
+          <>
+            {favItems.length > 0 && (
+              <>
+                <Section title={t('favorites')} />
+                <Card tight flat style={{ padding: 6 }}>
+                  {favItems.map((it, i) => <Row key={it.id} it={it} i={i} />)}
+                </Card>
+              </>
+            )}
+            {GROUPS.map(g => (
+              <React.Fragment key={g.key}>
+                <Section title={t(g.key)} />
+                <Card tight flat style={{ padding: 6 }}>
+                  {g.items.map((it, i) => <Row key={it.id} it={{ ...it, tint: g.tint }} i={i} first />)}
+                </Card>
+              </React.Fragment>
+            ))}
+          </>
+        )}
+        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v4.1</p>
       </div>
     </>
   )

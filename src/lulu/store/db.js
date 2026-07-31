@@ -97,6 +97,7 @@ export const DEFAULT_SETTINGS = {
   accounts: ['Salary account', 'Other account'], // funding accounts an expense can be paid from
   dashboard: null,       // Today-screen card order/visibility (null = default)
   targetAllocation: {},  // desired investment mix by type { [typeId]: percent }
+  favorites: [],         // pinned section ids shown at the top of More
 }
 
 export function readSettings() {

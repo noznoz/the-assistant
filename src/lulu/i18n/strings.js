@@ -350,6 +350,10 @@ export const STRINGS = {
     lastContacted: 'Last contacted', noKeepInTouch: 'No reminders set', keepInTouchHint: 'Set a reach-out cadence on a contact and they appear here.',
     reachOutNow: 'Reach out now', comingUp: 'Coming up', dueNow: 'Due now', markedContacted: '✓ Marked as contacted', contacted: 'Contacted', lastLabel: 'last',
     keepInTouchFooter: 'Tapping WhatsApp also marks them as contacted today.',
+    // navigation groups
+    grpPlan: 'Plan & alerts', grpPeople: 'People & network', grpHome: 'Home & assets', grpFaith: 'Faith', grpReports: 'Reports & settings',
+    favorites: 'Favorites', searchSections: 'Search sections…', pin: 'Pin',
+    finOverview: 'Overview', finPlan: 'Plan & save', finGrow: 'Wealth & debt', finTrack: 'Track',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -700,6 +704,10 @@ export const STRINGS = {
     lastContacted: 'آخر تواصل', noKeepInTouch: 'لا تذكيرات محددة', keepInTouchHint: 'حدّد وتيرة تواصل لجهة اتصال لتظهر هنا.',
     reachOutNow: 'تواصل الآن', comingUp: 'قريباً', dueNow: 'مستحق الآن', markedContacted: '✓ تم وضعه كمتواصَل', contacted: 'تواصلت', lastLabel: 'آخر',
     keepInTouchFooter: 'الضغط على واتساب يضعه أيضاً كمتواصَل اليوم.',
+    // navigation groups
+    grpPlan: 'التخطيط والتنبيهات', grpPeople: 'الأشخاص والشبكة', grpHome: 'المنزل والأصول', grpFaith: 'الروحانيات', grpReports: 'التقارير والإعدادات',
+    favorites: 'المفضلة', searchSections: 'ابحث في الأقسام…', pin: 'تثبيت',
+    finOverview: 'نظرة عامة', finPlan: 'التخطيط والادخار', finGrow: 'الثروة والديون', finTrack: 'المتابعة',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',
