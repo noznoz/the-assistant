@@ -94,7 +94,14 @@ export function maybeSeed() {
 
   // Properties / real estate
   db.insert('properties', { name: 'Family villa', type: 'villa', address: 'Al Malqa, Riyadh', purchasePrice: 1800000, currentValue: 1950000, currency: 'SAR', ownership: 'finance', monthlyRent: 0, note: 'Primary residence' })
-  db.insert('properties', { name: 'Rental flat — Jeddah', type: 'apartment', address: 'Al Shati, Jeddah', purchasePrice: 1200000, currentValue: 1350000, currency: 'SAR', ownership: 'owned', monthlyRent: 4500, rentedTo: 'Mr. Faisal', contractEnd: d(64) })
+  const propFlat = db.insert('properties', { name: 'Rental flat — Jeddah', type: 'apartment', address: 'Al Shati, Jeddah', purchasePrice: 1200000, currentValue: 1350000, currency: 'SAR', ownership: 'owned', monthlyRent: 4500, rentedTo: 'Mr. Faisal', contractEnd: d(64) });
+  [
+    { kind: 'rent', amount: 4500, date: d(-3), note: 'February rent' },
+    { kind: 'rent', amount: 4500, date: d(-33), note: 'January rent' },
+    { kind: 'utility', amount: 620, date: d(-12), note: 'Electricity & water' },
+    { kind: 'maintenance', amount: 850, date: d(-20), note: 'AC service' },
+    { kind: 'fee', amount: 300, date: d(-40), note: 'Building service fee' },
+  ].forEach(l => db.insert('propertylog', { ...l, propertyId: propFlat.id, currency: 'SAR' }))
 
   // Valuables & warranties
   db.insert('valuables', { name: 'Rolex Submariner', category: 'watch', brand: 'Rolex', value: 48000, currency: 'SAR', purchaseDate: d(-400), warrantyExpiry: d(1400), receipts: [] })
@@ -107,6 +114,11 @@ export function maybeSeed() {
   db.insert('wishlist', { name: 'PlayStation 5 Pro', category: 'tech', priority: 'must', price: 3200, currency: 'SAR', forWho: 'Omar', targetDate: d(9), note: 'Birthday gift', purchased: false })
   db.insert('wishlist', { name: 'Dyson Airwrap', category: 'home', priority: 'want', price: 2400, currency: 'SAR', forWho: 'Layla', purchased: false })
   db.insert('wishlist', { name: 'Maldives family trip', category: 'travel', priority: 'someday', price: 60000, currency: 'SAR', forWho: 'Family', note: 'Eid break next year', purchased: false })
+
+  // Household staff
+  db.insert('staff', { name: 'Rahul', role: 'driver', nationality: 'Indian', mobile: '+966500000021', whatsapp: '+966500000021', salary: 2200, currency: 'SAR', iqamaNumber: '2412xxxxxx', iqamaExpiry: d(28), passportExpiry: d(210), contractEnd: d(400) })
+  db.insert('staff', { name: 'Maria', role: 'nanny', nationality: 'Filipino', mobile: '+966500000022', whatsapp: '+966500000022', salary: 1800, currency: 'SAR', iqamaNumber: '2418xxxxxx', iqamaExpiry: d(120), passportExpiry: d(-8) })
+  db.insert('staff', { name: 'Joseph', role: 'gardener', nationality: 'Sri Lankan', mobile: '+966500000023', salary: 1200, currency: 'SAR', iqamaExpiry: d(75) })
 
   // Net-worth history — a rising trend that crosses the SR 2M milestone.
   const nwSeed = [1620000, 1710000, 1795000, 1880000, 1948000, 2020000, 2088000, 2150000, 2214000]

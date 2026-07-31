@@ -220,6 +220,28 @@ export const WISH_PRIORITIES = [
 ]
 export const findWishPriority = (id) => WISH_PRIORITIES.find(x => x.id === id)
 
+// Household staff roles.
+export const STAFF_ROLES = [
+  { id: 'driver', en: 'Driver', ar: 'سائق', icon: 'car' },
+  { id: 'maid', en: 'Housemaid', ar: 'عاملة منزلية', icon: 'people' },
+  { id: 'nanny', en: 'Nanny', ar: 'مربية', icon: 'people' },
+  { id: 'cook', en: 'Cook', ar: 'طبّاخ', icon: 'gift' },
+  { id: 'gardener', en: 'Gardener', ar: 'بستاني', icon: 'trip' },
+  { id: 'guard', en: 'Guard', ar: 'حارس', icon: 'shield' },
+  { id: 'other', en: 'Other', ar: 'أخرى', icon: 'people' },
+]
+export const findStaffRole = (id) => STAFF_ROLES.find(x => x.id === id)
+
+// Property ledger entry kinds.
+export const PROPERTY_LOG_KINDS = [
+  { id: 'rent', en: 'Rent received', ar: 'إيجار مستلم', icon: 'wallet', income: true },
+  { id: 'utility', en: 'Utility bill', ar: 'فاتورة خدمات', icon: 'wallet' },
+  { id: 'maintenance', en: 'Maintenance', ar: 'صيانة', icon: 'wrench' },
+  { id: 'fee', en: 'Fees & service', ar: 'رسوم وخدمات', icon: 'doc' },
+  { id: 'other', en: 'Other', ar: 'أخرى', icon: 'wallet' },
+]
+export const findPropertyLogKind = (id) => PROPERTY_LOG_KINDS.find(x => x.id === id)
+
 // Appointment / health-calendar types.
 export const APPOINTMENT_TYPES = [
   { id: 'doctor', en: 'Doctor', ar: 'طبيب', icon: 'shield' },

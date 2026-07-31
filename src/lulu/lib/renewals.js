@@ -15,7 +15,7 @@ const PERSON_DOCS = [
 
 export function buildRenewals({
   people = [], vehicles = [], documents = [], memberships = [],
-  valuables = [], properties = [], t, lang = 'en',
+  valuables = [], properties = [], staff = [], t, lang = 'en',
 } = {}) {
   const out = []
   const add = (o) => { if (o.date) { const d = daysUntil(o.date); if (d != null) out.push({ ...o, days: d }) } }
@@ -24,6 +24,12 @@ export function buildRenewals({
     add({ id: `p-${doc.field}-${p.id}`, icon: doc.icon, cat: 'person',
       title: `${p.name} — ${t(doc.key)}`, sub: t('personal'), date: p[doc.field], go: 'people' })
   }))
+
+  staff.forEach(s => {
+    add({ id: `s-iq-${s.id}`, icon: 'shield', cat: 'staff', title: `${s.name} — ${t('iqama')}`, sub: t('householdStaff'), date: s.iqamaExpiry, go: 'staff' })
+    add({ id: `s-pp-${s.id}`, icon: 'trip', cat: 'staff', title: `${s.name} — ${t('passport')}`, sub: t('householdStaff'), date: s.passportExpiry, go: 'staff' })
+    add({ id: `s-ct-${s.id}`, icon: 'doc', cat: 'staff', title: `${s.name} — ${t('contractEnd')}`, sub: t('householdStaff'), date: s.contractEnd, go: 'staff' })
+  })
 
   vehicles.forEach(v => {
     const name = v.nickname || v.name
