@@ -18,6 +18,9 @@ const ITEMS = [
   { id: 'appointments', icon: 'calendar', collection: 'appointments' },
   { id: 'occasions', icon: 'cake' },
   { id: 'hijri', icon: 'calendar' },
+  { id: 'spiritual', icon: 'sparkle' },
+  { id: 'giving', icon: 'gift' },
+  { id: 'keepintouch', icon: 'people' },
   { id: 'properties', icon: 'doc', collection: 'properties' },
   { id: 'wishlist', icon: 'gift', collection: 'wishlist' },
   { id: 'valuables', icon: 'gift', collection: 'valuables' },
@@ -87,7 +90,7 @@ export default function MoreScreen({ go }) {
             </button>
           ))}
         </Card>
-        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v3.9</p>
+        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v4.0</p>
       </div>
     </>
   )

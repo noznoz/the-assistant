@@ -63,7 +63,10 @@ export default function ZakatScreen({ go }) {
   return (
     <>
       <DetailHeader title={t('zakat')} onBack={() => go('expenses')} right={
-        <button className="iconbtn" onClick={shareStatement} aria-label={t('share')}><Icon name="share" size={18} /></button>
+        <>
+          <button className="iconbtn" onClick={() => go('giving')} aria-label={t('giving')}><Icon name="gift" size={18} /></button>
+          <button className="iconbtn" onClick={shareStatement} aria-label={t('share')}><Icon name="share" size={18} /></button>
+        </>
       } />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>

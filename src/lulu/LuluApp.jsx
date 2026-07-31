@@ -66,6 +66,9 @@ import AllocationScreen from './features/finance/AllocationScreen.jsx'
 import WorkScreen from './features/work/WorkScreen.jsx'
 import WorkDashboardScreen from './features/work/WorkDashboardScreen.jsx'
 import MeetingsScreen from './features/work/MeetingsScreen.jsx'
+import SpiritualScreen from './features/spiritual/SpiritualScreen.jsx'
+import GivingScreen from './features/giving/GivingScreen.jsx'
+import KeepInTouchScreen from './features/people/KeepInTouchScreen.jsx'
 
 const MAIN_TABS = ['today', 'tasks', 'garage', 'expenses', 'more']
 
@@ -152,6 +155,9 @@ function Router() {
       case 'work': return <WorkScreen param={param} go={go} />
       case 'workboard': return <WorkDashboardScreen go={go} />
       case 'meetings': return <MeetingsScreen param={param} go={go} />
+      case 'spiritual': return <SpiritualScreen go={go} />
+      case 'giving': return <GivingScreen go={go} />
+      case 'keepintouch': return <KeepInTouchScreen go={go} />
       case 'search': return <SearchScreen go={go} />
       default: return <TodayScreen go={go} />
     }
@@ -160,7 +166,7 @@ function Router() {
   // Bottom nav highlights a main tab; sub-screens fall under "more".
   const activeTab = MAIN_TABS.includes(tab) ? tab
     : ['projects', 'expensereport', 'budgets', 'subscriptions', 'income', 'investments', 'accounts', 'networth', 'zakat', 'trends', 'liabilities', 'moneycal', 'statement', 'properties', 'forecast', 'goals', 'debtpayoff', 'allocation'].includes(tab) ? 'expenses'
-    : ['inbox', 'people', 'documents', 'trips', 'reports', 'calendar', 'settings', 'notes', 'rewards', 'profile', 'message', 'groups', 'valuables', 'week', 'memberships', 'renewals', 'monthlyreport', 'emergency', 'wishlist', 'appointments', 'occasions', 'staff', 'hijri'].includes(tab) ? 'more'
+    : ['inbox', 'people', 'documents', 'trips', 'reports', 'calendar', 'settings', 'notes', 'rewards', 'profile', 'message', 'groups', 'valuables', 'week', 'memberships', 'renewals', 'monthlyreport', 'emergency', 'wishlist', 'appointments', 'occasions', 'staff', 'hijri', 'spiritual', 'giving', 'keepintouch'].includes(tab) ? 'more'
     : tab === 'dashboard' ? 'today'
     : ['work', 'workboard', 'meetings'].includes(tab) ? 'tasks'
     : tab

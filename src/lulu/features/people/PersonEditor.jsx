@@ -16,7 +16,8 @@ export default function PersonEditor({ initial = {}, onClose, onSaved }) {
     name: '', photo: '', jobTitle: '', company: '', mobile: '', whatsapp: '',
     email: '', relationship: 'family', birthday: '', anniversary: '', notes: '', groupIds: [],
     bloodType: '', allergies: '', conditions: '', medications: '', doctor: '', healthInsurer: '', healthPolicy: '',
-    iqamaNumber: '', iqamaExpiry: '', passportNumber: '', passportExpiry: '', licenseExpiry: '', nationalId: '', nationalIdExpiry: '', ...initial,
+    iqamaNumber: '', iqamaExpiry: '', passportNumber: '', passportExpiry: '', licenseExpiry: '', nationalId: '', nationalIdExpiry: '',
+    keepInTouchDays: 0, lastContacted: '', ...initial,
   })
   const toggleGroup = (id) => setF(prev => {
     const cur = prev.groupIds || []
@@ -107,6 +108,17 @@ export default function PersonEditor({ initial = {}, onClose, onSaved }) {
       <div className="row2">
         <Field label={t('healthInsurer')}><Input value={f.healthInsurer} onChange={set('healthInsurer')} /></Field>
         <Field label={t('healthPolicy')}><Input value={f.healthPolicy} onChange={set('healthPolicy')} /></Field>
+      </div>
+
+      <div style={{ margin: '10px 2px 8px', fontSize: 13, fontWeight: 700, color: 'var(--ink-2)' }}>{t('keepInTouch')}</div>
+      <div className="row2">
+        <Field label={t('reachOutEvery')}>
+          <Select value={String(f.keepInTouchDays || 0)} onChange={e => setF(prev => ({ ...prev, keepInTouchDays: Number(e.target.value) }))} options={[
+            { value: '0', label: t('off') }, { value: '7', label: t('weekly') }, { value: '30', label: t('monthly') },
+            { value: '90', label: t('quarterly') }, { value: '180', label: t('biannual') }, { value: '365', label: t('yearly') },
+          ]} />
+        </Field>
+        <Field label={t('lastContacted')} hint={t('optional')}><Input type="date" value={f.lastContacted} onChange={set('lastContacted')} /></Field>
       </div>
 
       <div style={{ margin: '10px 2px 8px', fontSize: 13, fontWeight: 700, color: 'var(--ink-2)' }}>{t('identityDocs')}</div>

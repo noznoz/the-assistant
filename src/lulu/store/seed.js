@@ -146,6 +146,17 @@ export function maybeSeed() {
   db.insert('staff', { name: 'Maria', role: 'nanny', nationality: 'Filipino', mobile: '+966500000022', whatsapp: '+966500000022', salary: 1800, currency: 'SAR', iqamaNumber: '2418xxxxxx', iqamaExpiry: d(120), passportExpiry: d(-8) })
   db.insert('staff', { name: 'Joseph', role: 'gardener', nationality: 'Sri Lankan', mobile: '+966500000023', salary: 1200, currency: 'SAR', iqamaExpiry: d(75) })
 
+  // Spiritual — a few days of prayer tracking to seed a streak.
+  for (let i = 1; i <= 5; i++) {
+    db.insert('spiritual', { date: d(-i), prayers: { fajr: true, dhuhr: true, asr: true, maghrib: true, isha: true }, quran: i % 2 ? 4 : 2, fasted: false })
+  }
+  db.insert('spiritual', { date: todayISO(), prayers: { fajr: true, dhuhr: true, asr: false, maghrib: false, isha: false }, quran: 3, fasted: false })
+
+  // Charity & Zakat giving
+  db.insert('giving', { type: 'zakat', amount: 42000, currency: 'SAR', cause: 'Orphans', date: d(-40), note: 'Annual Zakat — first tranche' })
+  db.insert('giving', { type: 'sadaqah', amount: 1500, currency: 'SAR', cause: 'Mosque', date: d(-10) })
+  db.insert('giving', { type: 'sadaqah', amount: 800, currency: 'SAR', cause: 'Family in need', date: d(-3) })
+
   // Net-worth history — a rising trend that crosses the SR 2M milestone.
   const nwSeed = [1620000, 1710000, 1795000, 1880000, 1948000, 2020000, 2088000, 2150000, 2214000]
   nwSeed.forEach((value, i) => {
@@ -209,8 +220,8 @@ export function maybeSeed() {
     { name: 'Layla', relationship: 'family', jobTitle: 'Spouse', mobile: '+966500000010', whatsapp: '+966500000010', birthday: d(40), anniversary: d(23), bloodType: 'A+', healthInsurer: 'Bupa Arabia', healthPolicy: 'BUP-8842', passportNumber: 'K1234567', passportExpiry: d(75), nationalId: '1088xxxxxx', iqamaExpiry: '' },
     { name: 'Omar', relationship: 'family', jobTitle: 'Son', mobile: '+966500000011', whatsapp: '+966500000011', birthday: d(9), bloodType: 'O+', allergies: 'Peanuts', doctor: 'Dr. Sami (Pediatrics)', passportNumber: 'K2345678', passportExpiry: d(18) },
     { name: 'Noura', relationship: 'family', jobTitle: 'Daughter', mobile: '+966500000012', whatsapp: '+966500000012', birthday: d(120), bloodType: 'A-', passportExpiry: d(-12) },
-    { name: 'Khalid Al-Otaibi', jobTitle: 'CFO', company: 'Group Finance', relationship: 'colleague', mobile: '+966500000001' },
-    { name: 'Ahmed Al-Sayed', jobTitle: 'Partner', company: 'Al-Sayed Legal', relationship: 'supplier', mobile: '+966500000002' },
+    { name: 'Khalid Al-Otaibi', jobTitle: 'CFO', company: 'Group Finance', relationship: 'colleague', mobile: '+966500000001', whatsapp: '+966500000001', keepInTouchDays: 30, lastContacted: d(-45) },
+    { name: 'Ahmed Al-Sayed', jobTitle: 'Partner', company: 'Al-Sayed Legal', relationship: 'supplier', mobile: '+966500000002', whatsapp: '+966500000002', keepInTouchDays: 90, lastContacted: d(-20) },
     { name: 'Sara Al-Nasser', jobTitle: 'Executive Assistant', company: 'Office', relationship: 'report', mobile: '+966500000003' },
   ]
   // Contact groups

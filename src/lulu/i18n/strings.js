@@ -340,6 +340,16 @@ export const STRINGS = {
     attendees: 'Attendees', attendeesPlaceholder: 'Names, comma separated', context: 'Context', external: 'External',
     actionItems: 'Action items', addActionItem: 'Add an action item…', toTask: 'To task', taskCreated: 'Task created',
     meetingNotesPlaceholder: 'Discussion, decisions, notes…',
+    // spiritual + giving + keep-in-touch
+    spiritual: 'Salah & spiritual', prayerStreak: 'Prayer streak', todaysPrayers: "Today's prayers",
+    quranPages: 'Quran pages today', fastingToday: 'Fasting today', last14days: 'Last 14 days',
+    giving: 'Charity & Zakat', givenThisYear: 'Given this year', zakatPaid: 'Zakat paid', sadaqah: 'Sadaqah',
+    noGiving: 'No giving logged yet', givingHint: 'Record your Zakat and Sadaqah and track it by year.',
+    recordGiving: 'Record giving', editGiving: 'Edit entry', cause: 'Cause', causePlaceholder: 'Mosque, orphans, medical…',
+    keepInTouch: 'Keep in touch', reachOutEvery: 'Reach out every', off: 'Off', quarterly: 'Quarterly', biannual: 'Every 6 months',
+    lastContacted: 'Last contacted', noKeepInTouch: 'No reminders set', keepInTouchHint: 'Set a reach-out cadence on a contact and they appear here.',
+    reachOutNow: 'Reach out now', comingUp: 'Coming up', dueNow: 'Due now', markedContacted: '✓ Marked as contacted', contacted: 'Contacted', lastLabel: 'last',
+    keepInTouchFooter: 'Tapping WhatsApp also marks them as contacted today.',
     // budgets
     budgets: 'Budgets', categoryBudgets: 'Category budgets', setBudget: 'Set a budget',
     noBudgets: 'No category budgets yet', overBudgetAlert: 'over budget', nearBudget: 'near budget',
@@ -680,6 +690,16 @@ export const STRINGS = {
     attendees: 'الحضور', attendeesPlaceholder: 'الأسماء مفصولة بفواصل', context: 'السياق', external: 'خارجي',
     actionItems: 'بنود العمل', addActionItem: 'إضافة بند عمل…', toTask: 'إلى مهمة', taskCreated: 'أُنشئت المهمة',
     meetingNotesPlaceholder: 'النقاش والقرارات والملاحظات…',
+    // spiritual + giving + keep-in-touch
+    spiritual: 'الصلاة والروحانيات', prayerStreak: 'سلسلة الصلاة', todaysPrayers: 'صلوات اليوم',
+    quranPages: 'صفحات القرآن اليوم', fastingToday: 'صائم اليوم', last14days: 'آخر ١٤ يوماً',
+    giving: 'الصدقة والزكاة', givenThisYear: 'ما أُعطي هذا العام', zakatPaid: 'الزكاة المدفوعة', sadaqah: 'صدقة',
+    noGiving: 'لا تبرعات مسجّلة بعد', givingHint: 'سجّل زكاتك وصدقاتك وتابعها سنوياً.',
+    recordGiving: 'تسجيل تبرّع', editGiving: 'تعديل القيد', cause: 'الجهة', causePlaceholder: 'مسجد، أيتام، علاج…',
+    keepInTouch: 'البقاء على تواصل', reachOutEvery: 'التواصل كل', off: 'إيقاف', quarterly: 'كل ٣ أشهر', biannual: 'كل ٦ أشهر',
+    lastContacted: 'آخر تواصل', noKeepInTouch: 'لا تذكيرات محددة', keepInTouchHint: 'حدّد وتيرة تواصل لجهة اتصال لتظهر هنا.',
+    reachOutNow: 'تواصل الآن', comingUp: 'قريباً', dueNow: 'مستحق الآن', markedContacted: '✓ تم وضعه كمتواصَل', contacted: 'تواصلت', lastLabel: 'آخر',
+    keepInTouchFooter: 'الضغط على واتساب يضعه أيضاً كمتواصَل اليوم.',
     // budgets
     budgets: 'الميزانيات', categoryBudgets: 'ميزانيات الفئات', setBudget: 'تعيين ميزانية',
     noBudgets: 'لا توجد ميزانيات للفئات بعد', overBudgetAlert: 'تجاوز الميزانية', nearBudget: 'قريب من الحد',
