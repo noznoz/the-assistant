@@ -3,7 +3,7 @@ import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Section, Sheet, Field, Input, TextArea, Select, Chip, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
-import { PRIORITIES, findPriority, findStatus } from '../../lib/domain.js'
+import { PRIORITIES, findPriority, findStatus, ROLE_LEVELS, roleLabel, label } from '../../lib/domain.js'
 import { fmtDate, relativeDay, isOverdue, todayISO } from '../../lib/format.js'
 import { whatsappToPerson, formatAssignment, formatTaskDetail, emailShare, share } from '../../lib/share.js'
 import { teamSize } from '../../lib/org.js'
@@ -273,7 +273,7 @@ function DepartmentEditor({ initial, members = [], onClose, onSaved, onDeleted }
 // Renders the reporting hierarchy: managers with their direct reports nested
 // beneath, recursively. A "+" under anyone adds a direct report to them.
 function OrgTree({ team, dep, depth = 0, parentId = '', members, departments, onEdit, onAddReport, toast }) {
-  const { t } = useT()
+  const { t, lang } = useT()
   // Roots at depth 0 = members with no manager (or a manager outside the team).
   const nodes = depth === 0
     ? team.filter(m => !m.reportsToId || !team.some(x => x.id === m.reportsToId))
@@ -285,7 +285,7 @@ function OrgTree({ team, dep, depth = 0, parentId = '', members, departments, on
         <div className={`lead ${dep.headId === m.id ? 't-brand' : ''}`} style={{ background: dep.headId === m.id ? undefined : 'var(--surface-2)' }}><Icon name={dep.headId === m.id ? 'flag' : 'people'} size={17} /></div>
         <div className="body" onClick={() => onEdit(m)}>
           <div className="title">{m.name}{dep.headId === m.id ? ` · ${t('head')}` : ''}</div>
-          <div className="meta">{[m.title, m.mobile].filter(Boolean).join(' · ')}</div>
+          <div className="meta">{[roleLabel(m, lang), m.mobile].filter(Boolean).join(' · ')}</div>
         </div>
         {(() => { const n = teamSize(m.id, team); return n > 0 ? <span className="chip" title={t('teamSizeLabel')}>{n}</span> : null })()}
         <button className="iconbtn" aria-label={t('addReport')} onClick={() => onAddReport(m.id)}><Icon name="plus" size={16} /></button>
@@ -297,10 +297,12 @@ function OrgTree({ team, dep, depth = 0, parentId = '', members, departments, on
 }
 
 function MemberEditor({ departmentId, team = [], initial, onClose, onSaved }) {
-  const { t } = useT()
+  const { t, lang } = useT()
   const members = useCollection('members')
   const departments = useCollection('departments')
-  const [f, setF] = useState({ name: '', title: '', mobile: '', whatsapp: '', email: '', reportsToId: '', departmentId, ...initial })
+  // Default a brand-new person's level to Officer unless it's the first (Head).
+  const defaultRole = initial.id ? '' : (team.length === 0 ? 'head' : 'officer')
+  const [f, setF] = useState({ name: '', role: defaultRole, mobile: '', whatsapp: '', email: '', reportsToId: '', departmentId, ...initial })
   const [err, setErr] = useState('')
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const managers = team.filter(m => m.id !== initial.id)
@@ -308,8 +310,8 @@ function MemberEditor({ departmentId, team = [], initial, onClose, onSaved }) {
     if (!f.name.trim()) { setErr(t('required')); return }
     const rec = { ...f, name: f.name.trim(), departmentId }
     const saved = initial.id ? members.save({ ...rec, id: initial.id }) : members.add(rec)
-    // First person added with no manager becomes the department head.
-    if (!initial.id && !f.reportsToId && team.length === 0) departments.patch(departmentId, { headId: saved.id })
+    // Choosing the "Head" level (or being the first member) sets the department head.
+    if (f.role === 'head' || (!initial.id && !f.reportsToId && team.length === 0)) departments.patch(departmentId, { headId: saved.id })
     onSaved && onSaved(); onClose()
   }
   return (
@@ -319,15 +321,17 @@ function MemberEditor({ departmentId, team = [], initial, onClose, onSaved }) {
         {initial.id && <Button block variant="danger" icon="trash" onClick={() => { members.remove(initial.id); onClose() }}>{t('delete')}</Button>}
       </div>}>
       <Field label={t('name')} required error={err}><Input value={f.name} onChange={set('name')} autoFocus /></Field>
-      <Field label={t('jobTitle')} hint={t('optional')}><Input value={f.title} onChange={set('title')} placeholder={t('rolePlaceholder')} /></Field>
-      {managers.length > 0 && (
-        <Field label={t('reportsTo')} hint={t('optional')}>
+      <div className="row2">
+        <Field label={t('level')}>
+          <Select value={f.role} onChange={set('role')} options={ROLE_LEVELS.map(r => ({ value: r.id, label: label(r, lang) }))} />
+        </Field>
+        <Field label={t('reportsTo')}>
           <Select value={f.reportsToId} onChange={set('reportsToId')}>
             <option value="">{t('topLevel')}</option>
             {managers.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
           </Select>
         </Field>
-      )}
+      </div>
       <div className="row2">
         <Field label={t('mobile')}><Input value={f.mobile} onChange={set('mobile')} inputMode="tel" placeholder="+9665…" /></Field>
         <Field label={t('whatsapp')}><Input value={f.whatsapp} onChange={set('whatsapp')} inputMode="tel" placeholder="+9665…" /></Field>
