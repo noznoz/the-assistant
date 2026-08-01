@@ -18,7 +18,7 @@ export const NAV_SECTIONS = {
   spiritual: { icon: 'sparkle' },
   giving: { icon: 'gift' },
 }
-export const DEFAULT_NAV = ['tasks', 'garage', 'expenses']
+export const DEFAULT_NAV = ['tasks', 'work', 'expenses']
 
 export function navMiddle(settings) {
   const chosen = (settings?.navTabs && settings.navTabs.length ? settings.navTabs : DEFAULT_NAV)
