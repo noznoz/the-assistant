@@ -66,6 +66,7 @@ import AllocationScreen from './features/finance/AllocationScreen.jsx'
 import WorkScreen from './features/work/WorkScreen.jsx'
 import WorkDashboardScreen from './features/work/WorkDashboardScreen.jsx'
 import MeetingsScreen from './features/work/MeetingsScreen.jsx'
+import OrgChartScreen from './features/work/OrgChartScreen.jsx'
 import SpiritualScreen from './features/spiritual/SpiritualScreen.jsx'
 import GivingScreen from './features/giving/GivingScreen.jsx'
 import KeepInTouchScreen from './features/people/KeepInTouchScreen.jsx'
@@ -156,6 +157,7 @@ function Router() {
       case 'work': return <WorkScreen param={param} go={go} />
       case 'workboard': return <WorkDashboardScreen go={go} />
       case 'meetings': return <MeetingsScreen param={param} go={go} />
+      case 'orgchart': return <OrgChartScreen go={go} />
       case 'spiritual': return <SpiritualScreen go={go} />
       case 'giving': return <GivingScreen go={go} />
       case 'keepintouch': return <KeepInTouchScreen go={go} />
@@ -170,7 +172,7 @@ function Router() {
   // otherwise everything falls back to More.
   const parentOf = (tb) => {
     if (['projects', 'expensereport', 'budgets', 'subscriptions', 'income', 'investments', 'accounts', 'networth', 'zakat', 'trends', 'liabilities', 'moneycal', 'statement', 'properties', 'forecast', 'goals', 'debtpayoff', 'allocation'].includes(tb)) return 'expenses'
-    if (['work', 'workboard', 'meetings'].includes(tb)) return 'tasks'
+    if (['work', 'workboard', 'meetings', 'orgchart'].includes(tb)) return 'tasks'
     if (tb === 'dashboard') return 'today'
     return 'more'
   }
