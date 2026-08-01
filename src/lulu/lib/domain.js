@@ -220,6 +220,24 @@ export const WISH_PRIORITIES = [
 ]
 export const findWishPriority = (id) => WISH_PRIORITIES.find(x => x.id === id)
 
+// Reporting levels for a work team member (used in the org hierarchy).
+export const ROLE_LEVELS = [
+  { id: 'head', en: 'Head', ar: 'رئيس' },
+  { id: 'deputy', en: 'Deputy', ar: 'نائب' },
+  { id: 'manager', en: 'Manager', ar: 'مدير' },
+  { id: 'lead', en: 'Team lead', ar: 'قائد فريق' },
+  { id: 'officer', en: 'Officer', ar: 'موظف' },
+  { id: 'coordinator', en: 'Coordinator', ar: 'منسّق' },
+  { id: 'specialist', en: 'Specialist', ar: 'أخصائي' },
+  { id: 'other', en: 'Other', ar: 'أخرى' },
+]
+export const findRole = (id) => ROLE_LEVELS.find(x => x.id === id)
+export function roleLabel(member, lang) {
+  if (!member) return ''
+  const r = findRole(member.role)
+  return r ? label(r, lang) : (member.title || '')
+}
+
 // Household staff roles.
 export const STAFF_ROLES = [
   { id: 'driver', en: 'Driver', ar: 'سائق', icon: 'car' },

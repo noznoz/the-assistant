@@ -343,6 +343,7 @@ export const STRINGS = {
     orgChart: 'Org chart', orgHint: 'Add a manager, then add people who report to them.', orgFooter: 'Tap ＋ under anyone to add a direct report.',
     addReport: 'Add report', reportsTo: 'Reports to', topLevel: 'Top level (no manager)', rolePlaceholder: 'e.g. Operations Manager',
     me: 'Me', you: 'You', teamSizeLabel: 'Team size', orgChartFooter: 'Tap a name to open its department. The number is their total team.',
+    level: 'Level',
     // spiritual + giving + keep-in-touch
     spiritual: 'Salah & spiritual', prayerStreak: 'Prayer streak', todaysPrayers: "Today's prayers",
     quranPages: 'Quran pages today', fastingToday: 'Fasting today', last14days: 'Last 14 days',
@@ -702,6 +703,7 @@ export const STRINGS = {
     orgChart: 'الهيكل التنظيمي', orgHint: 'أضف مديراً ثم أضف من يتبعون له.', orgFooter: 'اضغط ＋ أسفل أي شخص لإضافة تابع مباشر له.',
     addReport: 'إضافة تابع', reportsTo: 'يتبع لـ', topLevel: 'أعلى مستوى (بلا مدير)', rolePlaceholder: 'مثال: مدير العمليات',
     me: 'أنا', you: 'أنت', teamSizeLabel: 'حجم الفريق', orgChartFooter: 'اضغط على اسم لفتح قسمه. الرقم هو إجمالي فريقه.',
+    level: 'المستوى',
     // spiritual + giving + keep-in-touch
     spiritual: 'الصلاة والروحانيات', prayerStreak: 'سلسلة الصلاة', todaysPrayers: 'صلوات اليوم',
     quranPages: 'صفحات القرآن اليوم', fastingToday: 'صائم اليوم', last14days: 'آخر ١٤ يوماً',
