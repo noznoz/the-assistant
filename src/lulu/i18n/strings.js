@@ -340,6 +340,8 @@ export const STRINGS = {
     attendees: 'Attendees', attendeesPlaceholder: 'Names, comma separated', context: 'Context', external: 'External',
     actionItems: 'Action items', addActionItem: 'Add an action item…', toTask: 'To task', taskCreated: 'Task created',
     meetingNotesPlaceholder: 'Discussion, decisions, notes…',
+    orgChart: 'Org chart', orgHint: 'Add a manager, then add people who report to them.', orgFooter: 'Tap ＋ under anyone to add a direct report.',
+    addReport: 'Add report', reportsTo: 'Reports to', topLevel: 'Top level (no manager)', rolePlaceholder: 'e.g. Operations Manager',
     // spiritual + giving + keep-in-touch
     spiritual: 'Salah & spiritual', prayerStreak: 'Prayer streak', todaysPrayers: "Today's prayers",
     quranPages: 'Quran pages today', fastingToday: 'Fasting today', last14days: 'Last 14 days',
@@ -696,6 +698,8 @@ export const STRINGS = {
     attendees: 'الحضور', attendeesPlaceholder: 'الأسماء مفصولة بفواصل', context: 'السياق', external: 'خارجي',
     actionItems: 'بنود العمل', addActionItem: 'إضافة بند عمل…', toTask: 'إلى مهمة', taskCreated: 'أُنشئت المهمة',
     meetingNotesPlaceholder: 'النقاش والقرارات والملاحظات…',
+    orgChart: 'الهيكل التنظيمي', orgHint: 'أضف مديراً ثم أضف من يتبعون له.', orgFooter: 'اضغط ＋ أسفل أي شخص لإضافة تابع مباشر له.',
+    addReport: 'إضافة تابع', reportsTo: 'يتبع لـ', topLevel: 'أعلى مستوى (بلا مدير)', rolePlaceholder: 'مثال: مدير العمليات',
     // spiritual + giving + keep-in-touch
     spiritual: 'الصلاة والروحانيات', prayerStreak: 'سلسلة الصلاة', todaysPrayers: 'صلوات اليوم',
     quranPages: 'صفحات القرآن اليوم', fastingToday: 'صائم اليوم', last14days: 'آخر ١٤ يوماً',
