@@ -154,7 +154,7 @@ export default function MoreScreen({ go }) {
             ))}
           </>
         )}
-        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v4.3</p>
+        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v4.4</p>
       </div>
     </>
   )

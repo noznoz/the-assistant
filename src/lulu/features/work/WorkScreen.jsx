@@ -6,6 +6,7 @@ import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { PRIORITIES, findPriority, findStatus } from '../../lib/domain.js'
 import { fmtDate, relativeDay, isOverdue, todayISO } from '../../lib/format.js'
 import { whatsappToPerson, formatAssignment, formatTaskDetail, emailShare, share } from '../../lib/share.js'
+import { teamSize } from '../../lib/org.js'
 import { uid } from '../../store/db.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
 
@@ -50,6 +51,7 @@ function WorkHome({ go }) {
     <>
       <DetailHeader title={t('work')} onBack={() => go('tasks')} right={
         <>
+          <button className="iconbtn" onClick={() => go('orgchart')} aria-label={t('orgChart')}><Icon name="people" size={18} /></button>
           <button className="iconbtn" onClick={() => go('workboard')} aria-label={t('dashboard')}><Icon name="grid" size={18} /></button>
           <button className="iconbtn" onClick={() => go('meetings')} aria-label={t('meetings')}><Icon name="note" size={18} /></button>
         </>
@@ -285,6 +287,7 @@ function OrgTree({ team, dep, depth = 0, parentId = '', members, departments, on
           <div className="title">{m.name}{dep.headId === m.id ? ` · ${t('head')}` : ''}</div>
           <div className="meta">{[m.title, m.mobile].filter(Boolean).join(' · ')}</div>
         </div>
+        {(() => { const n = teamSize(m.id, team); return n > 0 ? <span className="chip" title={t('teamSizeLabel')}>{n}</span> : null })()}
         <button className="iconbtn" aria-label={t('addReport')} onClick={() => onAddReport(m.id)}><Icon name="plus" size={16} /></button>
         {(m.whatsapp || m.mobile) && <button className="iconbtn" aria-label="WhatsApp" onClick={() => whatsappToPerson(m, '')}><Icon name="whatsapp" size={16} /></button>}
       </div>
