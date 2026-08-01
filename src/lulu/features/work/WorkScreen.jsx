@@ -49,7 +49,7 @@ function WorkHome({ go }) {
 
   return (
     <>
-      <DetailHeader title={t('work')} onBack={() => go('tasks')} right={
+      <DetailHeader title={t('work')} onBack={() => go('more')} right={
         <>
           <button className="iconbtn" onClick={() => go('orgchart')} aria-label={t('orgChart')}><Icon name="people" size={18} /></button>
           <button className="iconbtn" onClick={() => go('workboard')} aria-label={t('dashboard')}><Icon name="grid" size={18} /></button>

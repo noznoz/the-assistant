@@ -355,7 +355,7 @@ export const STRINGS = {
     reachOutNow: 'Reach out now', comingUp: 'Coming up', dueNow: 'Due now', markedContacted: '✓ Marked as contacted', contacted: 'Contacted', lastLabel: 'last',
     keepInTouchFooter: 'Tapping WhatsApp also marks them as contacted today.',
     // navigation groups
-    grpPlan: 'Plan & alerts', grpPeople: 'People & network', grpHome: 'Home & assets', grpFaith: 'Faith', grpReports: 'Reports & settings',
+    grpWork: 'Work & organisation', grpPlan: 'Plan & alerts', grpPeople: 'People & network', grpHome: 'Home & assets', grpFaith: 'Faith', grpReports: 'Reports & settings',
     favorites: 'Favorites', searchSections: 'Search sections…', pin: 'Pin',
     finOverview: 'Overview', finPlan: 'Plan & save', finGrow: 'Wealth & debt', finTrack: 'Track',
     navigation: 'Navigation', bottomTabs: 'Bottom tabs', bottomTabsHint: 'Choose which sections sit in the bottom bar. Today and More are always shown.',
@@ -715,7 +715,7 @@ export const STRINGS = {
     reachOutNow: 'تواصل الآن', comingUp: 'قريباً', dueNow: 'مستحق الآن', markedContacted: '✓ تم وضعه كمتواصَل', contacted: 'تواصلت', lastLabel: 'آخر',
     keepInTouchFooter: 'الضغط على واتساب يضعه أيضاً كمتواصَل اليوم.',
     // navigation groups
-    grpPlan: 'التخطيط والتنبيهات', grpPeople: 'الأشخاص والشبكة', grpHome: 'المنزل والأصول', grpFaith: 'الروحانيات', grpReports: 'التقارير والإعدادات',
+    grpWork: 'العمل والتنظيم', grpPlan: 'التخطيط والتنبيهات', grpPeople: 'الأشخاص والشبكة', grpHome: 'المنزل والأصول', grpFaith: 'الروحانيات', grpReports: 'التقارير والإعدادات',
     favorites: 'المفضلة', searchSections: 'ابحث في الأقسام…', pin: 'تثبيت',
     finOverview: 'نظرة عامة', finPlan: 'التخطيط والادخار', finGrow: 'الثروة والديون', finTrack: 'المتابعة',
     navigation: 'التنقّل', bottomTabs: 'أشرطة الأسفل', bottomTabsHint: 'اختر الأقسام التي تظهر في الشريط السفلي. الرئيسية والمزيد تظهران دائماً.',

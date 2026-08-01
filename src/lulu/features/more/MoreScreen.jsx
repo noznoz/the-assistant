@@ -9,6 +9,14 @@ import { useStore, useSettings } from '../../store/StoreProvider.jsx'
 // list scans as a map rather than one flat column.
 const GROUPS = [
   {
+    key: 'grpWork', tint: 't-brand', items: [
+      { id: 'work', icon: 'report' },
+      { id: 'orgchart', icon: 'people', label: 'orgChart' },
+      { id: 'workboard', icon: 'grid', label: 'workDashboard' },
+      { id: 'meetings', icon: 'note' },
+    ],
+  },
+  {
     key: 'grpPlan', tint: 't-info', items: [
       { id: 'week', icon: 'calendar' },
       { id: 'calendar', icon: 'calendar' },
@@ -154,7 +162,7 @@ export default function MoreScreen({ go }) {
             ))}
           </>
         )}
-        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v4.5</p>
+        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v4.6</p>
       </div>
     </>
   )
