@@ -179,23 +179,17 @@ function DepartmentDetail({ dep, go, onBack }) {
 
         {tab === 'team' && (
           <>
-            <Section title={t('teamMembers')} count={team.length} action={t('add')} onAction={() => setMemEditor({})} />
+            <Section title={t('orgChart')} count={team.length} action={t('addMember')} onAction={() => setMemEditor({})} />
             {team.length === 0 ? (
-              <Empty icon="people" title={t('noMembers')}
+              <Empty icon="people" title={t('noMembers')} text={t('orgHint')}
                 action={<Button variant="primary" icon="plus" onClick={() => setMemEditor({})}>{t('addMember')}</Button>} />
-            ) : team.map(m => (
-              <SwipeRow key={m.id} onEdit={() => setMemEditor(m)} onDelete={() => { members.remove(m.id); if (dep.headId === m.id) departments.patch(dep.id, { headId: '' }); toast.show(t('deletedToast')) }}>
-                <div className="li" onClick={() => setMemEditor(m)}>
-                  <div className="lead t-brand"><Icon name="people" size={18} /></div>
-                  <div className="body">
-                    <div className="title">{m.name}{dep.headId === m.id ? ` · ${t('head')}` : ''}</div>
-                    <div className="meta">{[m.title, m.mobile].filter(Boolean).join(' · ')}</div>
-                  </div>
-                  {dep.headId !== m.id && <button className="btn sm" onClick={(e) => { e.stopPropagation(); departments.patch(dep.id, { headId: m.id }); toast.show(t('savedToast')) }}>{t('makeHead')}</button>}
-                  {(m.whatsapp || m.mobile) && <button className="iconbtn" aria-label="WhatsApp" onClick={(e) => { e.stopPropagation(); whatsappToPerson(m, '') }}><Icon name="whatsapp" size={16} /></button>}
-                </div>
-              </SwipeRow>
-            ))}
+            ) : (
+              <Card tight>
+                <OrgTree team={team} dep={dep} depth={0} parentId="" members={members} departments={departments}
+                  onEdit={(m) => setMemEditor(m)} onAddReport={(id) => setMemEditor({ reportsToId: id })} toast={toast} />
+              </Card>
+            )}
+            <p className="hint" style={{ marginTop: 10 }}>{t('orgFooter')}</p>
           </>
         )}
 
@@ -234,7 +228,7 @@ function DepartmentDetail({ dep, go, onBack }) {
       </div>
       <Fab onClick={() => tab === 'tasks' ? setTaskEditor({}) : setMemEditor({})} />
       {editDep && <DepartmentEditor initial={dep} members={team} onClose={() => setEditDep(false)} onSaved={() => toast.show(t('savedToast'))} onDeleted={onBack} />}
-      {memEditor && <MemberEditor departmentId={dep.id} initial={memEditor.id ? memEditor : {}} onClose={() => setMemEditor(null)} onSaved={() => toast.show(t('savedToast'))} />}
+      {memEditor && <MemberEditor departmentId={dep.id} team={team} initial={memEditor} onClose={() => setMemEditor(null)} onSaved={() => toast.show(t('savedToast'))} />}
       {taskEditor && <WorkTaskEditor mode="dept" departmentId={dep.id} members={team} initial={taskEditor.id ? taskEditor : {}} onClose={() => setTaskEditor(null)} onSaved={() => toast.show(t('savedToast'))} />}
       {taskSheet && <WorkTaskSheet task={taskSheet} department={dep} members={team} onClose={() => setTaskSheet(null)} onEdit={() => { const x = taskSheet; setTaskSheet(null); setTaskEditor(x) }} onSaved={() => toast.show(t('savedToast'))} />}
       {toast.node}
@@ -274,16 +268,45 @@ function DepartmentEditor({ initial, members = [], onClose, onSaved, onDeleted }
   )
 }
 
-function MemberEditor({ departmentId, initial, onClose, onSaved }) {
+// Renders the reporting hierarchy: managers with their direct reports nested
+// beneath, recursively. A "+" under anyone adds a direct report to them.
+function OrgTree({ team, dep, depth = 0, parentId = '', members, departments, onEdit, onAddReport, toast }) {
+  const { t } = useT()
+  // Roots at depth 0 = members with no manager (or a manager outside the team).
+  const nodes = depth === 0
+    ? team.filter(m => !m.reportsToId || !team.some(x => x.id === m.reportsToId))
+    : team.filter(m => m.reportsToId === parentId)
+  return nodes.map(m => (
+    <React.Fragment key={m.id}>
+      <div className="li" style={{ marginInlineStart: depth * 16 }}>
+        {depth > 0 && <span style={{ width: 10, color: 'var(--ink-3)', flexShrink: 0 }}>└</span>}
+        <div className={`lead ${dep.headId === m.id ? 't-brand' : ''}`} style={{ background: dep.headId === m.id ? undefined : 'var(--surface-2)' }}><Icon name={dep.headId === m.id ? 'flag' : 'people'} size={17} /></div>
+        <div className="body" onClick={() => onEdit(m)}>
+          <div className="title">{m.name}{dep.headId === m.id ? ` · ${t('head')}` : ''}</div>
+          <div className="meta">{[m.title, m.mobile].filter(Boolean).join(' · ')}</div>
+        </div>
+        <button className="iconbtn" aria-label={t('addReport')} onClick={() => onAddReport(m.id)}><Icon name="plus" size={16} /></button>
+        {(m.whatsapp || m.mobile) && <button className="iconbtn" aria-label="WhatsApp" onClick={() => whatsappToPerson(m, '')}><Icon name="whatsapp" size={16} /></button>}
+      </div>
+      <OrgTree team={team} dep={dep} depth={depth + 1} parentId={m.id} members={members} departments={departments} onEdit={onEdit} onAddReport={onAddReport} toast={toast} />
+    </React.Fragment>
+  ))
+}
+
+function MemberEditor({ departmentId, team = [], initial, onClose, onSaved }) {
   const { t } = useT()
   const members = useCollection('members')
-  const [f, setF] = useState({ name: '', title: '', mobile: '', whatsapp: '', email: '', departmentId, ...initial })
+  const departments = useCollection('departments')
+  const [f, setF] = useState({ name: '', title: '', mobile: '', whatsapp: '', email: '', reportsToId: '', departmentId, ...initial })
   const [err, setErr] = useState('')
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
+  const managers = team.filter(m => m.id !== initial.id)
   const submit = () => {
     if (!f.name.trim()) { setErr(t('required')); return }
     const rec = { ...f, name: f.name.trim(), departmentId }
-    initial.id ? members.save({ ...rec, id: initial.id }) : members.add(rec)
+    const saved = initial.id ? members.save({ ...rec, id: initial.id }) : members.add(rec)
+    // First person added with no manager becomes the department head.
+    if (!initial.id && !f.reportsToId && team.length === 0) departments.patch(departmentId, { headId: saved.id })
     onSaved && onSaved(); onClose()
   }
   return (
@@ -293,7 +316,15 @@ function MemberEditor({ departmentId, initial, onClose, onSaved }) {
         {initial.id && <Button block variant="danger" icon="trash" onClick={() => { members.remove(initial.id); onClose() }}>{t('delete')}</Button>}
       </div>}>
       <Field label={t('name')} required error={err}><Input value={f.name} onChange={set('name')} autoFocus /></Field>
-      <Field label={t('jobTitle')} hint={t('optional')}><Input value={f.title} onChange={set('title')} /></Field>
+      <Field label={t('jobTitle')} hint={t('optional')}><Input value={f.title} onChange={set('title')} placeholder={t('rolePlaceholder')} /></Field>
+      {managers.length > 0 && (
+        <Field label={t('reportsTo')} hint={t('optional')}>
+          <Select value={f.reportsToId} onChange={set('reportsToId')}>
+            <option value="">{t('topLevel')}</option>
+            {managers.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+          </Select>
+        </Field>
+      )}
       <div className="row2">
         <Field label={t('mobile')}><Input value={f.mobile} onChange={set('mobile')} inputMode="tel" placeholder="+9665…" /></Field>
         <Field label={t('whatsapp')}><Input value={f.whatsapp} onChange={set('whatsapp')} inputMode="tel" placeholder="+9665…" /></Field>
