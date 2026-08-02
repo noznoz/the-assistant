@@ -286,7 +286,7 @@ export const STRINGS = {
     customizeHome: 'Customize home', customizeHint: 'Toggle cards on or off and reorder them with the arrows.',
     moveUp: 'Move up', moveDown: 'Move down', resetDefault: 'Reset to default',
     dashBrief: 'Morning brief', dashAssistant: 'Needs attention', dashPrayer: 'Prayer times', dashStats: 'Progress & spending',
-    dashQuick: 'Quick actions', dashRenewals: 'Renewals', dashNotes: 'Quick notes',
+    dashQuick: 'Quick actions', dashWork: 'Work follow-ups', dashRenewals: 'Renewals', dashNotes: 'Quick notes',
     // reports center + appointments + occasions
     financialReports: 'Financial reports', activityReview: 'Activity review',
     appointments: 'Appointments', noAppointments: 'No appointments yet', appointmentsHint: 'Track doctor, dentist, school and other dates for the family.',
@@ -334,7 +334,7 @@ export const STRINGS = {
     selected: 'selected', everyone: 'Everyone', assignMultiHint: 'Pick one person, several, or a whole department — even across departments.',
     repeat: 'Repeat', repeatHint: 'Auto-creates the next one when completed', listView: 'List', boardView: 'Board', moveBack: 'Move back', moveForward: 'Move forward',
     followUps: 'Follow-ups', allClear: 'All clear', followUpsHint: "Tasks you've delegated and items from your boss show up here.", awaitingOthers: 'awaiting others', onTrack: 'On track',
-    waitingOnOthers: 'Waiting on others', nudge: 'Nudge', shareDigest: 'Share digest', weeklyDigest: 'Weekly work digest', digestHint: "Share a summary of this week's work with your team.", other: 'Other', withBoss: 'With boss',
+    waitingOnOthers: 'Waiting on others', nudge: 'Nudge', shareDigest: 'Share digest', weeklyDigest: 'Weekly work digest', digestHint: "Share a summary of this week's work with your team.", other: 'Other',
     checklist: 'Checklist', addSubtask: 'Add a sub-task…', dashboard: 'Dashboard', department: 'Department',
     // work dashboard + meetings
     workDashboard: 'Work dashboard', openTasks: 'Open tasks', dueThisWeek: 'Due this week', withBoss: 'With boss',
@@ -651,7 +651,7 @@ export const STRINGS = {
     customizeHome: 'تخصيص الرئيسية', customizeHint: 'فعّل البطاقات أو أخفِها وأعد ترتيبها بالأسهم.',
     moveUp: 'تحريك لأعلى', moveDown: 'تحريك لأسفل', resetDefault: 'إعادة للافتراضي',
     dashBrief: 'ملخص الصباح', dashAssistant: 'يحتاج انتباه', dashPrayer: 'أوقات الصلاة', dashStats: 'التقدّم والإنفاق',
-    dashQuick: 'إجراءات سريعة', dashRenewals: 'التجديدات', dashNotes: 'ملاحظات سريعة',
+    dashQuick: 'إجراءات سريعة', dashWork: 'متابعات العمل', dashRenewals: 'التجديدات', dashNotes: 'ملاحظات سريعة',
     // reports center + appointments + occasions
     financialReports: 'التقارير المالية', activityReview: 'مراجعة النشاط',
     appointments: 'المواعيد', noAppointments: 'لا توجد مواعيد بعد', appointmentsHint: 'تابع مواعيد الطبيب والأسنان والمدرسة وغيرها للعائلة.',
@@ -699,7 +699,7 @@ export const STRINGS = {
     selected: 'محدد', everyone: 'الجميع', assignMultiHint: 'اختر شخصاً واحداً أو عدة أشخاص أو قسماً كاملاً — حتى عبر الأقسام.',
     repeat: 'التكرار', repeatHint: 'يُنشئ المهمة التالية تلقائياً عند الإكمال', listView: 'قائمة', boardView: 'لوحة', moveBack: 'إرجاع', moveForward: 'تقديم',
     followUps: 'المتابعات', allClear: 'كل شيء منجز', followUpsHint: 'المهام التي أسندتها والبنود من مديرك تظهر هنا.', awaitingOthers: 'بانتظار الآخرين', onTrack: 'على المسار',
-    waitingOnOthers: 'بانتظار الآخرين', nudge: 'تذكير', shareDigest: 'مشاركة الملخص', weeklyDigest: 'ملخص العمل الأسبوعي', digestHint: 'شارك ملخص عمل هذا الأسبوع مع فريقك.', other: 'أخرى', withBoss: 'مع المدير',
+    waitingOnOthers: 'بانتظار الآخرين', nudge: 'تذكير', shareDigest: 'مشاركة الملخص', weeklyDigest: 'ملخص العمل الأسبوعي', digestHint: 'شارك ملخص عمل هذا الأسبوع مع فريقك.', other: 'أخرى',
     checklist: 'قائمة المهام', addSubtask: 'إضافة مهمة فرعية…', dashboard: 'لوحة', department: 'القسم',
     // work dashboard + meetings
     workDashboard: 'لوحة العمل', openTasks: 'مهام مفتوحة', dueThisWeek: 'مستحقة هذا الأسبوع', withBoss: 'مع المدير',

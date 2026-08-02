@@ -11,6 +11,7 @@ import { normalizeDashboard } from '../../lib/dashboard.js'
 import PrayerCard from './PrayerCard.jsx'
 import { share, formatAgenda } from '../../lib/share.js'
 import { findPriority } from '../../lib/domain.js'
+import { taskMemberIds } from '../../lib/org.js'
 import TaskEditor from '../tasks/TaskEditor.jsx'
 import ExpenseEditor from '../expenses/ExpenseEditor.jsx'
 import VehicleEditor from '../garage/VehicleEditor.jsx'
@@ -147,6 +148,33 @@ export default function TodayScreen({ go }) {
         </div>
       </>
     ),
+    work: (() => {
+      const workOpen = open.filter(x => x.classification === 'work')
+      if (!workOpen.length) return null
+      const awaiting = workOpen.filter(x => !x.boss && taskMemberIds(x).length)
+      const overdueW = awaiting.filter(x => isOverdue(x.dueDate))
+      const fromBoss = workOpen.filter(x => x.boss === 'down')
+      const dueSoon = workOpen.filter(x => { const dd = daysUntil(x.dueDate); return dd != null && dd >= 0 && dd <= 7 })
+      return (
+        <>
+          <Section title={t('work')} count={workOpen.length} action={t('view')} onAction={() => go('work')} />
+          <Card tight>
+            <div className="li" onClick={() => go('followup')}>
+              <div className={`lead ${overdueW.length ? 't-danger' : 't-warn'}`}><Icon name="bell" size={18} /></div>
+              <div className="body">
+                <div className="title">{awaiting.length} {t('awaitingOthers')}</div>
+                <div className="meta">
+                  {overdueW.length > 0 ? <span className="t-danger">{overdueW.length} {t('overdue')}</span> : <span>{t('onTrack')}</span>}
+                  {dueSoon.length > 0 && <span> · {dueSoon.length} {t('dueThisWeek')}</span>}
+                  {fromBoss.length > 0 && <span> · {fromBoss.length} {t('fromBoss')}</span>}
+                </div>
+              </div>
+              <Icon name="chevron" size={15} style={{ color: 'var(--ink-3)' }} />
+            </div>
+          </Card>
+        </>
+      )
+    })(),
     renewals: renewals.length > 0 ? (
       <>
         <Section title={t('renewals')} count={renewals.length} />
