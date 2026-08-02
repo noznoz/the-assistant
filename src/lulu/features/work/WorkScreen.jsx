@@ -131,7 +131,10 @@ function WorkHome({ go }) {
   const workTasks = tasks.items
     .filter(x => x.classification === 'work' && !x.boss && x.status !== 'completed' && x.status !== 'cancelled')
     .sort((a, b) => (isOverdue(b.dueDate) - isOverdue(a.dueDate)) || ((a.dueDate || '9999').localeCompare(b.dueDate || '9999')))
-  const deptName = (id) => (departments.items.find(dp => dp.id === id) || {}).name
+  const deptNamesOf = (x) => {
+    const ids = (x.departmentIds && x.departmentIds.length) ? x.departmentIds : (x.departmentId ? [x.departmentId] : [])
+    return ids.map(id => (departments.items.find(dp => dp.id === id) || {}).name).filter(Boolean).join(', ')
+  }
 
   return (
     <>
@@ -206,7 +209,7 @@ function WorkHome({ go }) {
                       <div className="title">{x.title}</div>
                       <div className="meta">
                         {x.assignedTo && <span>{x.assignedTo}</span>}
-                        {deptName(x.departmentId) && <span>· {deptName(x.departmentId)}</span>}
+                        {deptNamesOf(x) && <span>· {deptNamesOf(x)}</span>}
                         {pr && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>· <span style={{ width: 7, height: 7, borderRadius: 4, background: pr.color }} />{t(pr.key)}</span>}
                         {x.dueDate && <span className={overdue ? 't-danger' : ''}>· {relativeDay(x.dueDate, lang)}</span>}
                         {x.repeat && <span>· ↻</span>}
@@ -288,7 +291,7 @@ function DepartmentDetail({ dep, go, onBack }) {
 
   const team = members.items.filter(m => m.departmentId === dep.id)
   const head = members.items.find(m => m.id === dep.headId)
-  const inThisDept = (x) => x.departmentId === dep.id || taskMemberIds(x).some(id => team.some(m => m.id === id))
+  const inThisDept = (x) => x.departmentId === dep.id || (x.departmentIds || []).includes(dep.id) || taskMemberIds(x).some(id => team.some(m => m.id === id))
   const depTasks = tasks.items.filter(x => inThisDept(x) && x.status !== 'cancelled')
     .sort((a, b) => (a.status === 'completed' ? 1 : 0) - (b.status === 'completed' ? 1 : 0) || (a.dueDate || '9999').localeCompare(b.dueDate || '9999'))
   const memberName = (id) => (members.items.find(m => m.id === id) || {}).name
@@ -573,20 +576,27 @@ function WorkTaskSheet({ task, department, members = [], onClose, onEdit, onSave
   const { settings } = useSettings()
   const tasks = useCollection('tasks')
   const allMembers = useCollection('members')
+  const departments = useCollection('departments')
   const live = tasks.items.find(x => x.id === task.id) || task
   const subs = live.subtasks || []
   const assignees = allMembers.items.filter(m => taskMemberIds(live).includes(m.id))
+  const waAssignees = assignees.filter(a => a.whatsapp || a.mobile)
   const pr = findPriority(live.priority)
   const st = findStatus(live.status)
   const done = live.status === 'completed'
+  const deptNames = (() => {
+    const ids = (live.departmentIds && live.departmentIds.length) ? live.departmentIds : (live.departmentId ? [live.departmentId] : [])
+    const names = ids.map(id => (departments.items.find(d => d.id === id) || {}).name).filter(Boolean)
+    return names.join(', ') || (department?.name || '')
+  })()
 
   const toggleSub = (id) => tasks.patch(live.id, { subtasks: subs.map(s => s.id === id ? { ...s, done: !s.done } : s) })
-  const detail = () => formatTaskDetail(live, lang, settings, { department: department?.name })
+  const detail = (recipient) => formatTaskDetail(live, lang, settings, { departments: deptNames, recipient })
 
   return (
     <Sheet title={live.title} onClose={onClose}>
       <div className="muted" style={{ marginTop: -6, marginBottom: 12, fontSize: 13 }}>
-        {[department?.name, live.assignedTo, pr && t(pr.key), st && t(st.key)].filter(Boolean).join(' · ')}
+        {[deptNames, live.assignedTo, pr && t(pr.key), st && t(st.key)].filter(Boolean).join(' · ')}
       </div>
       {live.description && <p style={{ marginBottom: 14 }}>{live.description}</p>}
       {live.dueDate && <p className="muted" style={{ marginBottom: 14, fontSize: 13 }}><Icon name="calendar" size={13} /> {t('deadline')}: {fmtDate(live.dueDate, lang, settings.dateFormat)}</p>}
@@ -607,14 +617,29 @@ function WorkTaskSheet({ task, department, members = [], onClose, onEdit, onSave
 
       <div className="stack">
         <Button block icon="check" onClick={() => { done ? tasks.patch(live.id, { status: 'new' }) : completeWorkTask(live, tasks); onSaved && onSaved(); onClose() }}>{done ? t('st_new') : t('markComplete')}</Button>
-        {assignees.filter(a => a.whatsapp || a.mobile).map(a => (
-          <Button key={a.id} block variant="brand" icon="whatsapp" onClick={() => whatsappToPerson(a, detail())}>{t('sendOnWhatsApp')} · {a.name}</Button>
-        ))}
+
+        {/* Notify assignees directly — one compact chip per person with a number */}
+        {waAssignees.length > 0 && (
+          <div>
+            <label style={{ display: 'block', fontSize: 12.5, fontWeight: 650, color: 'var(--ink-2)', margin: '4px 2px 7px' }}>{t('notifyOnWhatsApp')}</label>
+            <div className="chip-row">
+              {waAssignees.map(a => (
+                <Chip key={a.id} onClick={() => whatsappToPerson(a, detail((a.name || '').split(' ')[0]))} style={{ color: 'var(--ok)', borderColor: 'var(--ok)' }}>
+                  <Icon name="whatsapp" size={14} /> {a.name}
+                </Chip>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Share the task anywhere */}
+        <label style={{ display: 'block', fontSize: 12.5, fontWeight: 650, color: 'var(--ink-2)', margin: '8px 2px 4px' }}>{t('shareTask')}</label>
         <div className="row2">
           <Button icon="whatsapp" onClick={() => share(detail())}>{t('shareWhatsApp')}</Button>
           <Button icon="mail" onClick={() => emailShare(live.title, detail())}>{t('email')}</Button>
         </div>
-        <div className="row2">
+
+        <div className="row2" style={{ marginTop: 4 }}>
           <Button icon="edit" onClick={onEdit}>{t('edit')}</Button>
           <Button variant="danger" icon="trash" onClick={() => { tasks.remove(live.id); onClose() }}>{t('delete')}</Button>
         </div>
@@ -637,11 +662,18 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
     memberId: '', boss: '', classification: 'work', subtasks: [], repeat: '', ...initial,
   })
   const [memberIds, setMemberIds] = useState(() => taskMemberIds(initial))
+  const [deptIds, setDeptIds] = useState(() => {
+    if (Array.isArray(initial?.departmentIds) && initial.departmentIds.length) return initial.departmentIds
+    if (mode === 'dept' && departmentId) return [departmentId]
+    if (initial?.departmentId) return [initial.departmentId]
+    return []
+  })
+  const toggleDeptId = (id) => setDeptIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
   const [err, setErr] = useState('')
   const [subText, setSubText] = useState('')
   const [memberQuery, setMemberQuery] = useState('')
   const [assignOpen, setAssignOpen] = useState(false)
-  const [showMore, setShowMore] = useState(() => !!((initial?.subtasks?.length) || initial?.repeat || (initial?.status && initial.status !== 'new') || (mode !== 'dept' && initial?.departmentId)))
+  const [showMore, setShowMore] = useState(() => !!((initial?.subtasks?.length) || initial?.repeat || (initial?.status && initial.status !== 'new') || (initial?.departmentIds?.length > 1) || (mode !== 'dept' && initial?.departmentId)))
 
   // Quick due-date presets.
   const plusDays = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10) }
@@ -685,12 +717,15 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
     const summary = mode === 'boss'
       ? (f.assignedTo || '')
       : assigneeSummary({ memberIds }, allMembers.items, departments.items)
-    // Primary department: keep the editor's dept, else the first assignee's.
+    // Departments: the chosen set (falling back to the editor's dept or the
+    // first assignee's). The first one is kept as the primary for legacy use.
     const firstMember = allMembers.items.find(m => m.id === memberIds[0])
+    let dIds = deptIds.slice()
+    if (!dIds.length) { const fb = mode === 'dept' ? departmentId : (f.departmentId || (firstMember ? firstMember.departmentId : '')); if (fb) dIds = [fb] }
     const rec = {
       ...f, title: f.title.trim(), classification: 'work',
       memberIds, memberId: memberIds[0] || '',
-      departmentId: mode === 'dept' ? departmentId : (f.departmentId || (firstMember ? firstMember.departmentId : '')),
+      departmentIds: dIds, departmentId: dIds[0] || '',
       assignedTo: summary,
       status: mode !== 'boss' && memberIds.length && f.status === 'new' ? 'waiting_someone' : f.status,
     }
@@ -805,13 +840,20 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
       </button>
       {showMore && (
         <>
-          {mode !== 'dept' && mode !== 'boss' && (
-            <Field label={t('department')} hint={t('optional')}>
-              <Select value={f.departmentId || ''} onChange={set('departmentId')}>
-                <option value="">{t('none')}</option>
-                {departments.items.map(dep => <option key={dep.id} value={dep.id}>{dep.name}</option>)}
-              </Select>
-            </Field>
+          {mode !== 'boss' && departments.items.length > 0 && (
+            <div style={{ marginBottom: 4 }}>
+              <label style={{ display: 'flex', justifyContent: 'space-between', ...secStyle }}>
+                <span>{t('departments')}</span>
+                <span className="muted" style={{ fontWeight: 500 }}>{deptIds.length ? `${deptIds.length} ${t('selected')}` : t('optional')}</span>
+              </label>
+              <div className="chip-row">
+                {departments.items.map(dep => (
+                  <Chip key={dep.id} selectable on={deptIds.includes(dep.id)} onClick={() => toggleDeptId(dep.id)}>
+                    {deptIds.includes(dep.id) && <Icon name="check" size={12} stroke={3} />} {dep.name}
+                  </Chip>
+                ))}
+              </div>
+            </div>
           )}
           <div className="row2">
             <Field label={t('status')}>

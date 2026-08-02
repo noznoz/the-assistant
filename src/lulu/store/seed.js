@@ -137,7 +137,7 @@ export function maybeSeed() {
   // Whole-department task (everyone in Operations).
   db.insert('tasks', { title: 'Complete annual safety training', description: 'All operations staff to finish the online modules.', classification: 'work', departmentId: opsDept.id, memberIds: [mFaisal.id, mSara.id], memberId: mFaisal.id, assignedTo: 'Operations', status: 'waiting_someone', priority: 'medium', dueDate: d(20) })
   // Cross-department task (Operations + Sales).
-  db.insert('tasks', { title: 'Plan Q4 kickoff event', description: 'Joint effort between Ops and Sales.', classification: 'work', departmentId: opsDept.id, memberIds: [mSara.id, mOmar.id], memberId: mSara.id, assignedTo: 'Sara Khan, Omar Nasser', status: 'in_progress', priority: 'high', dueDate: d(15) })
+  db.insert('tasks', { title: 'Plan Q4 kickoff event', description: 'Joint effort between Ops and Sales.', classification: 'work', departmentId: opsDept.id, departmentIds: [opsDept.id, salesDept.id], memberIds: [mSara.id, mOmar.id], memberId: mSara.id, assignedTo: 'Sara Khan, Omar Nasser', status: 'in_progress', priority: 'high', dueDate: d(15) })
   db.insert('tasks', { title: 'Discuss 2026 budget with CEO', description: 'Bring capex priorities.', classification: 'work', boss: 'up', priority: 'high', dueDate: d(3) })
   db.insert('tasks', { title: 'Board deck requested by CEO', classification: 'work', boss: 'down', priority: 'critical', dueDate: d(2) })
   db.insert('meetings', { title: 'Weekly ops sync', date: d(-1), attendees: 'Faisal, Sara', context: 'team', departmentId: opsDept.id, notes: 'Reviewed Q3 pipeline and vendor risks. Agreed to fast-track two renewals.', actions: [{ id: 'ma1', text: 'Send vendor list to Sara' }, { id: 'ma2', text: 'Book finance review' }] })

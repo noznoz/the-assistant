@@ -76,21 +76,30 @@ export function emailShare(subject, body, to = '') {
 }
 
 // Full detail of a work/department task for sharing (WhatsApp or email).
+const PR_DOT = { critical: '🔴', high: '🟠', medium: '🔵', low: '⚪' }
+
 export function formatTaskDetail(task, lang = 'en', settings = {}, extra = {}) {
   const L = lang === 'ar'
   const pr = findPriority(task.priority)
   const st = findStatus(task.status)
-  const lines = [`📋 *${task.title}*`]
-  if (task.description) lines.push('', task.description)
+  const lines = []
+  if (extra.recipient) lines.push(L ? `مرحباً ${extra.recipient}،` : `Hi ${extra.recipient},`, '')
+  lines.push(`📋 *${task.title}*`)
+  const dept = extra.departments || extra.department
   const meta = []
-  if (extra.department) meta.push(`${L ? 'القسم' : 'Department'}: ${extra.department}`)
-  if (task.assignedTo) meta.push(`${L ? 'مُسند إلى' : 'Assigned to'}: ${task.assignedTo}`)
-  if (pr) meta.push(`${L ? 'الأولوية' : 'Priority'}: ${STRINGS[lang]?.[pr.key] ?? STRINGS.en[pr.key]}`)
-  if (st) meta.push(`${L ? 'الحالة' : 'Status'}: ${STRINGS[lang]?.[st.key] ?? STRINGS.en[st.key]}`)
-  if (task.dueDate) meta.push(`${L ? 'الموعد النهائي' : 'Deadline'}: ${fmtDate(task.dueDate, lang, settings.dateFormat)}`)
-  if (meta.length) lines.push('', ...meta.map(m => `• ${m}`))
+  if (dept) meta.push(`🏢 ${L ? 'القسم' : 'Dept'}: ${dept}`)
+  if (task.assignedTo) meta.push(`👤 ${L ? 'مُسند إلى' : 'Owner'}: ${task.assignedTo}`)
+  if (pr) meta.push(`${PR_DOT[pr.id] || '•'} ${L ? 'الأولوية' : 'Priority'}: ${STRINGS[lang]?.[pr.key] ?? STRINGS.en[pr.key]}`)
+  if (st) meta.push(`📌 ${L ? 'الحالة' : 'Status'}: ${STRINGS[lang]?.[st.key] ?? STRINGS.en[st.key]}`)
+  if (task.dueDate) meta.push(`🗓️ ${L ? 'الموعد النهائي' : 'Due'}: ${fmtDate(task.dueDate, lang, settings.dateFormat)} (${relativeDay(task.dueDate, lang)})`)
+  if (meta.length) lines.push('', ...meta)
+  if (task.description) lines.push('', `📝 ${task.description}`)
   const subs = task.subtasks || []
-  if (subs.length) { lines.push('', L ? 'المهام الفرعية:' : 'Checklist:'); subs.forEach(s => lines.push(`${s.done ? '☑' : '☐'} ${s.text}`)) }
+  if (subs.length) {
+    const done = subs.filter(s => s.done).length
+    lines.push('', `✅ ${L ? 'قائمة المهام' : 'Checklist'} (${done}/${subs.length}):`)
+    subs.forEach(s => lines.push(`${s.done ? '☑' : '⬜'} ${s.text}`))
+  }
   lines.push('', '— The Assistant')
   return lines.join('\n')
 }

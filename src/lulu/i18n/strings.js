@@ -238,6 +238,7 @@ export const STRINGS = {
     weekEmptyHint: 'Nothing due in the next 7 days.', tasksThisWeek: 'Tasks this week', timeline: 'Timeline', byType: 'By type',
     tomorrow: 'Tomorrow', nextWeek: 'Next week', inThreeDays: 'In 3 days', searchPeople: 'Search people…',
     assignPeople: 'Assign people', moreOptions: 'More options', fewerOptions: 'Fewer options',
+    notifyOnWhatsApp: 'Notify on WhatsApp', shareTask: 'Share task',
     moneyThisWeek: 'Money this week', shareWeekAhead: 'Share the week ahead',
     // health & memberships
     healthMedical: 'Health & medical', allergies: 'Allergies', allergiesPlaceholder: 'e.g. penicillin, nuts',
@@ -610,6 +611,7 @@ export const STRINGS = {
     weekEmptyHint: 'لا شيء مستحق خلال 7 أيام.', tasksThisWeek: 'مهام هذا الأسبوع', timeline: 'الجدول الزمني', byType: 'حسب النوع',
     tomorrow: 'غداً', nextWeek: 'الأسبوع القادم', inThreeDays: 'خلال 3 أيام', searchPeople: 'ابحث عن أشخاص…',
     assignPeople: 'إسناد لأشخاص', moreOptions: 'خيارات إضافية', fewerOptions: 'خيارات أقل',
+    notifyOnWhatsApp: 'تنبيه عبر واتساب', shareTask: 'مشاركة المهمة',
     moneyThisWeek: 'مالية هذا الأسبوع', shareWeekAhead: 'مشاركة الأسبوع القادم',
     // health & memberships
     healthMedical: 'الصحة والطب', allergies: 'الحساسية', allergiesPlaceholder: 'مثل البنسلين، المكسرات',
