@@ -354,6 +354,7 @@ export const STRINGS = {
     lastContacted: 'Last contacted', noKeepInTouch: 'No reminders set', keepInTouchHint: 'Set a reach-out cadence on a contact and they appear here.',
     reachOutNow: 'Reach out now', comingUp: 'Coming up', dueNow: 'Due now', markedContacted: '✓ Marked as contacted', contacted: 'Contacted', lastLabel: 'last',
     keepInTouchFooter: 'Tapping WhatsApp also marks them as contacted today.',
+    fromContacts: 'Import from phone contacts', importContacts: 'Import contacts', contactsImported: 'contacts added', contactsNotSupported: 'Phone contact import needs Chrome on Android. On iPhone, add contacts manually.', selectContacts: 'Select contacts',
     // navigation groups
     grpWork: 'Work & organisation', grpPlan: 'Plan & alerts', grpPeople: 'People & network', grpHome: 'Home & assets', grpFaith: 'Faith', grpReports: 'Reports & settings',
     favorites: 'Favorites', searchSections: 'Search sections…', pin: 'Pin',
@@ -714,6 +715,7 @@ export const STRINGS = {
     lastContacted: 'آخر تواصل', noKeepInTouch: 'لا تذكيرات محددة', keepInTouchHint: 'حدّد وتيرة تواصل لجهة اتصال لتظهر هنا.',
     reachOutNow: 'تواصل الآن', comingUp: 'قريباً', dueNow: 'مستحق الآن', markedContacted: '✓ تم وضعه كمتواصَل', contacted: 'تواصلت', lastLabel: 'آخر',
     keepInTouchFooter: 'الضغط على واتساب يضعه أيضاً كمتواصَل اليوم.',
+    fromContacts: 'استيراد من جهات اتصال الهاتف', importContacts: 'استيراد جهات الاتصال', contactsImported: 'جهة اتصال أُضيفت', contactsNotSupported: 'استيراد جهات الاتصال يتطلب متصفح كروم على أندرويد. على آيفون أضِف جهات الاتصال يدوياً.', selectContacts: 'اختر جهات الاتصال',
     // navigation groups
     grpWork: 'العمل والتنظيم', grpPlan: 'التخطيط والتنبيهات', grpPeople: 'الأشخاص والشبكة', grpHome: 'المنزل والأصول', grpFaith: 'الروحانيات', grpReports: 'التقارير والإعدادات',
     favorites: 'المفضلة', searchSections: 'ابحث في الأقسام…', pin: 'تثبيت',

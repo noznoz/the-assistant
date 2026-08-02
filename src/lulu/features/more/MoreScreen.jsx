@@ -38,6 +38,7 @@ const GROUPS = [
   },
   {
     key: 'grpHome', tint: 't-ok', items: [
+      { id: 'garage', icon: 'car', collection: 'vehicles' },
       { id: 'properties', icon: 'doc', collection: 'properties' },
       { id: 'valuables', icon: 'gift', collection: 'valuables' },
       { id: 'memberships', icon: 'wallet', collection: 'memberships' },
@@ -162,7 +163,7 @@ export default function MoreScreen({ go }) {
             ))}
           </>
         )}
-        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v4.7</p>
+        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v4.8</p>
       </div>
     </>
   )

@@ -5,6 +5,7 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { RELATIONSHIPS, label } from '../../lib/domain.js'
 import { makeThumb } from '../../lib/files.js'
+import { pickContacts, contactPickerSupported } from '../../lib/contacts.js'
 
 // Shared person/family editor. `onSaved(person)` receives the saved record so
 // callers (e.g. the task editor) can immediately select a newly-added member.
@@ -33,6 +34,11 @@ export default function PersonEditor({ initial = {}, onClose, onSaved }) {
     if (!file) return
     const thumb = await makeThumb(file, 320)
     if (thumb) setF(prev => ({ ...prev, photo: thumb }))
+  }
+
+  const fromContacts = async () => {
+    const [c] = await pickContacts({ multiple: false })
+    if (c) setF(prev => ({ ...prev, name: c.name || prev.name, mobile: c.mobile || prev.mobile, whatsapp: c.mobile || prev.whatsapp, email: c.email || prev.email }))
   }
 
   const submit = () => {
@@ -65,6 +71,9 @@ export default function PersonEditor({ initial = {}, onClose, onSaved }) {
         <input ref={photoRef} type="file" accept="image/*" hidden onChange={(e) => { pickPhoto(e.target.files); e.target.value = '' }} />
       </div>
 
+      {!initial.id && contactPickerSupported() && (
+        <Button block icon="people" onClick={fromContacts} style={{ marginBottom: 12 }}>{t('fromContacts')}</Button>
+      )}
       <Field label={t('name')} required error={err}><Input value={f.name} onChange={set('name')} autoFocus /></Field>
       <Field label={t('relationship')}>
         <Select value={f.relationship} onChange={set('relationship')} options={RELATIONSHIPS.map(r => ({ value: r.id, label: label(r, lang) }))} />

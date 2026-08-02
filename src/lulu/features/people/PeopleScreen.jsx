@@ -8,6 +8,7 @@ import { whatsappToPerson, personDigits } from '../../lib/share.js'
 import PersonEditor from './PersonEditor.jsx'
 import PersonProfile from './PersonProfile.jsx'
 import SwipeRow from '../../ui/SwipeRow.jsx'
+import { pickContacts, contactPickerSupported } from '../../lib/contacts.js'
 
 export default function PeopleScreen({ go }) {
   const { t, lang } = useT()
@@ -22,6 +23,17 @@ export default function PeopleScreen({ go }) {
   const current = viewing && people.items.find(p => p.id === viewing.id)
   if (current) {
     return <PersonProfile person={current} onBack={() => setViewing(null)} onDeleted={() => setViewing(null)} />
+  }
+
+  const importFromContacts = async () => {
+    const picked = await pickContacts({ multiple: true })
+    if (!picked.length) return
+    let added = 0
+    for (const c of picked) {
+      people.add({ name: c.name, mobile: c.mobile, whatsapp: c.mobile, email: c.email, relationship: 'colleague' })
+      added++
+    }
+    toast.show(`${added} ${t('contactsImported')}`)
   }
 
   const openFor = (p) => tasks.items.filter(x =>
@@ -40,6 +52,7 @@ export default function PeopleScreen({ go }) {
     <>
       <DetailHeader title={t('people')} onBack={() => go('more')} right={
         <>
+          {contactPickerSupported() && <button className="iconbtn" onClick={importFromContacts} aria-label={t('importContacts')}><Icon name="download" size={18} /></button>}
           <button className="iconbtn" onClick={() => go('keepintouch')} aria-label={t('keepInTouch')}><Icon name="bell" size={18} /></button>
           <button className="iconbtn" onClick={() => go('groups')} aria-label={t('groups')}><Icon name="people" size={18} /></button>
           <button className="iconbtn" onClick={() => go('message')} aria-label={t('sendMessage')} style={{ color: 'var(--ok)' }}><Icon name="whatsapp" size={18} /></button>

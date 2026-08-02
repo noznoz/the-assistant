@@ -8,6 +8,7 @@ import { fmtDate, relativeDay, isOverdue, todayISO } from '../../lib/format.js'
 import { whatsappToPerson, formatAssignment, formatTaskDetail, emailShare, share } from '../../lib/share.js'
 import { teamSize } from '../../lib/org.js'
 import { uid } from '../../store/db.js'
+import { pickContacts, contactPickerSupported } from '../../lib/contacts.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
 
 function subProgress(task) {
@@ -306,6 +307,10 @@ function MemberEditor({ departmentId, team = [], initial, onClose, onSaved }) {
   const [err, setErr] = useState('')
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const managers = team.filter(m => m.id !== initial.id)
+  const fromContacts = async () => {
+    const [c] = await pickContacts({ multiple: false })
+    if (c) setF(prev => ({ ...prev, name: c.name || prev.name, mobile: c.mobile || prev.mobile, whatsapp: c.mobile || prev.whatsapp, email: c.email || prev.email }))
+  }
   const submit = () => {
     if (!f.name.trim()) { setErr(t('required')); return }
     const rec = { ...f, name: f.name.trim(), departmentId }
@@ -320,6 +325,9 @@ function MemberEditor({ departmentId, team = [], initial, onClose, onSaved }) {
         <Button variant="primary" block onClick={submit}>{t('save')}</Button>
         {initial.id && <Button block variant="danger" icon="trash" onClick={() => { members.remove(initial.id); onClose() }}>{t('delete')}</Button>}
       </div>}>
+      {!initial.id && contactPickerSupported() && (
+        <Button block icon="download" onClick={fromContacts} style={{ marginBottom: 12 }}>{t('fromContacts')}</Button>
+      )}
       <Field label={t('name')} required error={err}><Input value={f.name} onChange={set('name')} autoFocus /></Field>
       <div className="row2">
         <Field label={t('level')}>
