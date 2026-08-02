@@ -299,8 +299,10 @@ function OrgTree({ team, dep, depth = 0, parentId = '', members, departments, on
 
 function MemberEditor({ departmentId, team = [], initial, onClose, onSaved }) {
   const { t, lang } = useT()
+  const { settings } = useSettings()
   const members = useCollection('members')
   const departments = useCollection('departments')
+  const youName = (settings.profile || {}).fullName || settings.name || t('me')
   // Default a brand-new person's level to Officer unless it's the first (Head).
   const defaultRole = initial.id ? '' : (team.length === 0 ? 'head' : 'officer')
   const [f, setF] = useState({ name: '', role: defaultRole, mobile: '', whatsapp: '', email: '', reportsToId: '', departmentId, ...initial })
@@ -335,7 +337,7 @@ function MemberEditor({ departmentId, team = [], initial, onClose, onSaved }) {
         </Field>
         <Field label={t('reportsTo')}>
           <Select value={f.reportsToId} onChange={set('reportsToId')}>
-            <option value="">{t('topLevel')}</option>
+            <option value="">{t('reportsToYou')} — {youName}</option>
             {managers.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
           </Select>
         </Field>
