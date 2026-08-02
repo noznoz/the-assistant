@@ -29,7 +29,7 @@ export default function OrgChartScreen({ go }) {
           <div className={`lead ${dep.headId === m.id ? 't-brand' : ''}`} style={{ background: dep.headId === m.id ? undefined : 'var(--surface-2)' }}><Icon name={dep.headId === m.id ? 'flag' : 'people'} size={16} /></div>
           <div className="body" onClick={() => go(`work/${dep.id}`)}>
             <div className="title">{m.name}{dep.headId === m.id ? ` · ${t('head')}` : ''}</div>
-            <div className="meta">{roleLabel(m, lang)}</div>
+            <div className="meta">{[m.title, roleLabel(m, lang)].filter(Boolean).join(' · ')}</div>
           </div>
           {n > 0 && <span className="chip" title={t('teamSizeLabel')}>{n}</span>}
           {(m.whatsapp || m.mobile) && <button className="iconbtn" aria-label="WhatsApp" onClick={() => whatsappToPerson(m, '')}><Icon name="whatsapp" size={15} /></button>}

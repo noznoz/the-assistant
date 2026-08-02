@@ -167,7 +167,7 @@ function DepartmentDetail({ dep, go, onBack }) {
         {head && (
           <Card style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 12 }}>
             <span className="lead t-brand" style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="flag" size={18} /></span>
-            <div style={{ flex: 1 }}><div style={{ fontWeight: 700 }}>{head.name}</div><div className="muted" style={{ fontSize: 12.5 }}>{t('departmentHead')}</div></div>
+            <div style={{ flex: 1 }}><div style={{ fontWeight: 700 }}>{head.name}</div><div className="muted" style={{ fontSize: 12.5 }}>{[head.title, t('departmentHead')].filter(Boolean).join(' · ')}</div></div>
             {(head.whatsapp || head.mobile) && <button className="iconbtn" aria-label="WhatsApp" onClick={() => whatsappToPerson(head, '')}><Icon name="whatsapp" size={16} /></button>}
           </Card>
         )}
@@ -286,7 +286,7 @@ function OrgTree({ team, dep, depth = 0, parentId = '', members, departments, on
         <div className={`lead ${dep.headId === m.id ? 't-brand' : ''}`} style={{ background: dep.headId === m.id ? undefined : 'var(--surface-2)' }}><Icon name={dep.headId === m.id ? 'flag' : 'people'} size={17} /></div>
         <div className="body" onClick={() => onEdit(m)}>
           <div className="title">{m.name}{dep.headId === m.id ? ` · ${t('head')}` : ''}</div>
-          <div className="meta">{[roleLabel(m, lang), m.mobile].filter(Boolean).join(' · ')}</div>
+          <div className="meta">{[m.title, roleLabel(m, lang), m.mobile].filter(Boolean).join(' · ')}</div>
         </div>
         {(() => { const n = teamSize(m.id, team); return n > 0 ? <span className="chip" title={t('teamSizeLabel')}>{n}</span> : null })()}
         <button className="iconbtn" aria-label={t('addReport')} onClick={() => onAddReport(m.id)}><Icon name="plus" size={16} /></button>
@@ -305,7 +305,7 @@ function MemberEditor({ departmentId, team = [], initial, onClose, onSaved }) {
   const youName = (settings.profile || {}).fullName || settings.name || t('me')
   // Default a brand-new person's level to Officer unless it's the first (Head).
   const defaultRole = initial.id ? '' : (team.length === 0 ? 'head' : 'officer')
-  const [f, setF] = useState({ name: '', role: defaultRole, mobile: '', whatsapp: '', email: '', reportsToId: '', departmentId, ...initial })
+  const [f, setF] = useState({ name: '', title: '', role: defaultRole, mobile: '', whatsapp: '', email: '', reportsToId: '', departmentId, ...initial })
   const [err, setErr] = useState('')
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const managers = team.filter(m => m.id !== initial.id)
@@ -331,6 +331,7 @@ function MemberEditor({ departmentId, team = [], initial, onClose, onSaved }) {
         <Button block icon="download" onClick={fromContacts} style={{ marginBottom: 12 }}>{t('fromContacts')}</Button>
       )}
       <Field label={t('name')} required error={err}><Input value={f.name} onChange={set('name')} autoFocus /></Field>
+      <Field label={t('jobTitle')} hint={t('optional')}><Input value={f.title} onChange={set('title')} placeholder={t('rolePlaceholder')} /></Field>
       <div className="row2">
         <Field label={t('level')}>
           <Select value={f.role} onChange={set('role')} options={ROLE_LEVELS.map(r => ({ value: r.id, label: label(r, lang) }))} />
