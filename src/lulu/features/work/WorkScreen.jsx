@@ -6,7 +6,7 @@ import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { PRIORITIES, findPriority, findStatus, ROLE_LEVELS, roleLabel, label } from '../../lib/domain.js'
 import { fmtDate, relativeDay, isOverdue, todayISO } from '../../lib/format.js'
 import { whatsappToPerson, formatAssignment, formatTaskDetail, emailShare, share } from '../../lib/share.js'
-import { teamSize } from '../../lib/org.js'
+import { teamSize, taskMemberIds, assigneeSummary } from '../../lib/org.js'
 import { uid } from '../../store/db.js'
 import { pickContacts, contactPickerSupported } from '../../lib/contacts.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
@@ -154,7 +154,8 @@ function DepartmentDetail({ dep, go, onBack }) {
 
   const team = members.items.filter(m => m.departmentId === dep.id)
   const head = members.items.find(m => m.id === dep.headId)
-  const depTasks = tasks.items.filter(x => x.departmentId === dep.id && x.status !== 'cancelled')
+  const inThisDept = (x) => x.departmentId === dep.id || taskMemberIds(x).some(id => team.some(m => m.id === id))
+  const depTasks = tasks.items.filter(x => inThisDept(x) && x.status !== 'cancelled')
     .sort((a, b) => (a.status === 'completed' ? 1 : 0) - (b.status === 'completed' ? 1 : 0) || (a.dueDate || '9999').localeCompare(b.dueDate || '9999'))
   const memberName = (id) => (members.items.find(m => m.id === id) || {}).name
 
@@ -375,9 +376,10 @@ function WorkTaskSheet({ task, department, members = [], onClose, onEdit, onSave
   const { t, lang } = useT()
   const { settings } = useSettings()
   const tasks = useCollection('tasks')
+  const allMembers = useCollection('members')
   const live = tasks.items.find(x => x.id === task.id) || task
   const subs = live.subtasks || []
-  const assignee = members.find(m => m.id === live.memberId)
+  const assignees = allMembers.items.filter(m => taskMemberIds(live).includes(m.id))
   const pr = findPriority(live.priority)
   const st = findStatus(live.status)
   const done = live.status === 'completed'
@@ -409,9 +411,9 @@ function WorkTaskSheet({ task, department, members = [], onClose, onEdit, onSave
 
       <div className="stack">
         <Button block icon="check" onClick={() => { tasks.patch(live.id, { status: done ? 'new' : 'completed' }); onSaved && onSaved(); onClose() }}>{done ? t('st_new') : t('markComplete')}</Button>
-        {assignee && (assignee.whatsapp || assignee.mobile) && (
-          <Button block variant="brand" icon="whatsapp" onClick={() => whatsappToPerson(assignee, detail())}>{t('sendOnWhatsApp')} · {assignee.name}</Button>
-        )}
+        {assignees.filter(a => a.whatsapp || a.mobile).map(a => (
+          <Button key={a.id} block variant="brand" icon="whatsapp" onClick={() => whatsappToPerson(a, detail())}>{t('sendOnWhatsApp')} · {a.name}</Button>
+        ))}
         <div className="row2">
           <Button icon="whatsapp" onClick={() => share(detail())}>{t('shareWhatsApp')}</Button>
           <Button icon="mail" onClick={() => emailShare(live.title, detail())}>{t('email')}</Button>
@@ -430,10 +432,13 @@ const WORK_STATUSES = ['new', 'in_progress', 'waiting_someone', 'waiting_me', 'c
 function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, onSaved }) {
   const { t } = useT()
   const tasks = useCollection('tasks')
+  const allMembers = useCollection('members')
+  const departments = useCollection('departments')
   const [f, setF] = useState({
     title: '', description: '', dueDate: '', priority: 'medium', status: 'new',
     memberId: '', boss: '', classification: 'work', subtasks: [], ...initial,
   })
+  const [memberIds, setMemberIds] = useState(() => taskMemberIds(initial))
   const [err, setErr] = useState('')
   const [subText, setSubText] = useState('')
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
@@ -441,14 +446,34 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
   const addSub = () => { const v = subText.trim(); if (!v) return; setF({ ...f, subtasks: [...subs, { id: uid(), text: v, done: false }] }); setSubText('') }
   const toggleSub = (id) => setF({ ...f, subtasks: subs.map(s => s.id === id ? { ...s, done: !s.done } : s) })
   const removeSub = (id) => setF({ ...f, subtasks: subs.filter(s => s.id !== id) })
+
+  // Assignment: pick any number of members across any department. Tapping a
+  // department's "Everyone" chip toggles all of its members at once.
+  const toggleMember = (id) => setMemberIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+  const deptMemberIds = (depId) => allMembers.items.filter(m => m.departmentId === depId).map(m => m.id)
+  const deptAllOn = (depId) => { const ids = deptMemberIds(depId); return ids.length > 0 && ids.every(id => memberIds.includes(id)) }
+  const toggleDept = (depId) => {
+    const ids = deptMemberIds(depId)
+    setMemberIds(prev => deptAllOn(depId) ? prev.filter(x => !ids.includes(x)) : [...new Set([...prev, ...ids])])
+  }
+  // Departments shown: the current one first, then the rest (for cross-dept).
+  const orderedDepts = mode === 'dept'
+    ? [...departments.items.filter(d => d.id === departmentId), ...departments.items.filter(d => d.id !== departmentId)]
+    : departments.items
+
   const submit = () => {
     if (!f.title.trim()) { setErr(t('required')); return }
-    const assignee = members.find(m => m.id === f.memberId)
+    const summary = mode === 'boss'
+      ? (f.assignedTo || '')
+      : assigneeSummary({ memberIds }, allMembers.items, departments.items)
+    // Primary department: keep the editor's dept, else the first assignee's.
+    const firstMember = allMembers.items.find(m => m.id === memberIds[0])
     const rec = {
       ...f, title: f.title.trim(), classification: 'work',
-      departmentId: mode === 'dept' ? departmentId : (f.departmentId || ''),
-      assignedTo: assignee ? assignee.name : (mode === 'boss' ? (f.assignedTo || '') : ''),
-      status: mode === 'dept' && f.memberId && f.status === 'new' ? 'waiting_someone' : f.status,
+      memberIds, memberId: memberIds[0] || '',
+      departmentId: mode === 'dept' ? departmentId : (f.departmentId || (firstMember ? firstMember.departmentId : '')),
+      assignedTo: summary,
+      status: mode !== 'boss' && memberIds.length && f.status === 'new' ? 'waiting_someone' : f.status,
     }
     initial.id ? tasks.save({ ...rec, id: initial.id }) : tasks.add(rec)
     onSaved && onSaved(); onClose()
@@ -464,13 +489,35 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
       </div>}>
       <Field label={t('appointmentTitle')} required error={err}><Input value={f.title} onChange={set('title')} placeholder={t('taskPlaceholder')} autoFocus /></Field>
       <Field label={t('description')}><TextArea value={f.description} onChange={set('description')} placeholder={t('descriptionPlaceholder')} /></Field>
-      {mode === 'dept' && (
-        <Field label={t('assignTo')}>
-          <Select value={f.memberId} onChange={set('memberId')}>
-            <option value="">{t('unassigned')}</option>
-            {members.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-          </Select>
-        </Field>
+      {mode !== 'boss' && (
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '0 2px 7px' }}>
+            <span>{t('assignTo')}</span>
+            <span className="muted" style={{ fontWeight: 500 }}>{memberIds.length ? `${memberIds.length} ${t('selected')}` : t('unassigned')}</span>
+          </label>
+          {orderedDepts.map(dep => {
+            const dm = allMembers.items.filter(m => m.departmentId === dep.id)
+            if (!dm.length) return null
+            return (
+              <div key={dep.id} style={{ marginBottom: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '4px 2px' }}>
+                  <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--ink-2)' }}>{dep.name}</span>
+                  <Chip selectable on={deptAllOn(dep.id)} onClick={() => toggleDept(dep.id)}>
+                    <Icon name="people" size={12} /> {t('everyone')}
+                  </Chip>
+                </div>
+                <div className="chip-row">
+                  {dm.map(m => (
+                    <Chip key={m.id} selectable on={memberIds.includes(m.id)} onClick={() => toggleMember(m.id)}>
+                      {memberIds.includes(m.id) && <Icon name="check" size={12} stroke={3} />} {m.name}
+                    </Chip>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+          <p className="hint" style={{ margin: '4px 2px 0' }}>{t('assignMultiHint')}</p>
+        </div>
       )}
       {mode === 'boss' && (
         <Field label={t('direction')}>

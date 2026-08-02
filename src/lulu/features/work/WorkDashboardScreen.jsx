@@ -4,6 +4,7 @@ import { DetailHeader, Card, Stat, Section, Empty } from '../../ui/primitives.js
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { isOverdue, isToday, daysUntil, relativeDay } from '../../lib/format.js'
+import { taskMemberIds } from '../../lib/org.js'
 
 // A read-only overview of work: open/overdue counts, boss items, per-department
 // load and per-member workload.
@@ -26,8 +27,8 @@ export default function WorkDashboardScreen({ go }) {
     })).sort((a, b) => b.open - a.open)
     const byMember = members.items.map(m => ({
       m,
-      open: open.filter(x => x.memberId === m.id).length,
-      overdue: overdue.filter(x => x.memberId === m.id).length,
+      open: open.filter(x => taskMemberIds(x).includes(m.id)).length,
+      overdue: overdue.filter(x => taskMemberIds(x).includes(m.id)).length,
     })).filter(x => x.open > 0).sort((a, b) => b.open - a.open)
     return { open, overdue, thisWeek, boss, byDept, byMember }
   }, [tasks.items, departments.items, members.items])

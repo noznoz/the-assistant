@@ -331,6 +331,7 @@ export const STRINGS = {
     team: 'Team', teamMembers: 'Team members', noMembers: 'No members yet', addMember: 'Add member', editMember: 'Edit member', makeHead: 'Make head',
     departmentTasks: 'Department tasks', assignTaskHint: 'Create a task and assign it to a team member.',
     taskPlaceholder: 'e.g. Prepare Q3 report', assignTo: 'Assign to', direction: 'Direction', deadline: 'Deadline',
+    selected: 'selected', everyone: 'Everyone', assignMultiHint: 'Pick one person, several, or a whole department — even across departments.',
     checklist: 'Checklist', addSubtask: 'Add a sub-task…', dashboard: 'Dashboard', department: 'Department',
     // work dashboard + meetings
     workDashboard: 'Work dashboard', openTasks: 'Open tasks', dueThisWeek: 'Due this week', withBoss: 'With boss',
@@ -692,6 +693,7 @@ export const STRINGS = {
     team: 'الفريق', teamMembers: 'أعضاء الفريق', noMembers: 'لا أعضاء بعد', addMember: 'إضافة عضو', editMember: 'تعديل العضو', makeHead: 'تعيين رئيساً',
     departmentTasks: 'مهام القسم', assignTaskHint: 'أنشئ مهمة وكلّف بها عضواً في الفريق.',
     taskPlaceholder: 'مثال: إعداد تقرير الربع الثالث', assignTo: 'إسناد إلى', direction: 'الاتجاه', deadline: 'الموعد النهائي',
+    selected: 'محدد', everyone: 'الجميع', assignMultiHint: 'اختر شخصاً واحداً أو عدة أشخاص أو قسماً كاملاً — حتى عبر الأقسام.',
     checklist: 'قائمة المهام', addSubtask: 'إضافة مهمة فرعية…', dashboard: 'لوحة', department: 'القسم',
     // work dashboard + meetings
     workDashboard: 'لوحة العمل', openTasks: 'مهام مفتوحة', dueThisWeek: 'مستحقة هذا الأسبوع', withBoss: 'مع المدير',
