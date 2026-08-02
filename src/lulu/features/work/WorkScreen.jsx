@@ -116,6 +116,7 @@ function WorkHome({ go }) {
   const [editBoss, setEditBoss] = useState(false)
   const [bossUpdate, setBossUpdate] = useState(false)
   const [taskEditor, setTaskEditor] = useState(null)
+  const [taskSheet, setTaskSheet] = useState(null)
   const toast = useToast()
 
   const boss = settings.profile?.managerName
@@ -127,6 +128,10 @@ function WorkHome({ go }) {
   const depOpen = (id) => openWork.filter(x => x.departmentId === id).length
   const waitingOnOthers = openWork.filter(x => !x.boss && taskMemberIds(x).length)
   const waitingOverdue = waitingOnOthers.filter(x => isOverdue(x.dueDate)).length
+  const workTasks = tasks.items
+    .filter(x => x.classification === 'work' && !x.boss && x.status !== 'completed' && x.status !== 'cancelled')
+    .sort((a, b) => (isOverdue(b.dueDate) - isOverdue(a.dueDate)) || ((a.dueDate || '9999').localeCompare(b.dueDate || '9999')))
+  const deptName = (id) => (departments.items.find(dp => dp.id === id) || {}).name
 
   return (
     <>
@@ -183,6 +188,38 @@ function WorkHome({ go }) {
           </>
         )}
 
+        {/* All open work tasks — tap to open (edit / delete), swipe for quick actions */}
+        <Section title={t('tasks')} count={workTasks.length} action={t('newTask')} onAction={() => setTaskEditor({})} />
+        {workTasks.length === 0 ? (
+          <Empty icon="check" title={t('nothingHere')} text={t('assignTaskHint')}
+            action={<Button variant="primary" icon="plus" onClick={() => setTaskEditor({})}>{t('newTask')}</Button>} />
+        ) : (
+          <Card tight>
+            {workTasks.slice(0, 12).map(x => {
+              const pr = findPriority(x.priority)
+              const overdue = isOverdue(x.dueDate)
+              return (
+                <SwipeRow key={x.id} onEdit={() => setTaskEditor(x)} onDelete={() => { tasks.remove(x.id); toast.show(t('deletedToast')) }}>
+                  <div className="li">
+                    <button className="check" onClick={() => completeWorkTask(x, tasks)} aria-label={t('markComplete')} />
+                    <div className="body" onClick={() => setTaskSheet(x)}>
+                      <div className="title">{x.title}</div>
+                      <div className="meta">
+                        {x.assignedTo && <span>{x.assignedTo}</span>}
+                        {deptName(x.departmentId) && <span>· {deptName(x.departmentId)}</span>}
+                        {pr && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>· <span style={{ width: 7, height: 7, borderRadius: 4, background: pr.color }} />{t(pr.key)}</span>}
+                        {x.dueDate && <span className={overdue ? 't-danger' : ''}>· {relativeDay(x.dueDate, lang)}</span>}
+                        {x.repeat && <span>· ↻</span>}
+                      </div>
+                    </div>
+                    <Icon name="chevron" size={15} style={{ color: 'var(--ink-3)' }} />
+                  </div>
+                </SwipeRow>
+              )
+            })}
+          </Card>
+        )}
+
         {/* Departments */}
         <Section title={t('departments')} count={departments.items.length} action={t('add')} onAction={() => setEditDep({})} />
         {departments.items.length === 0 ? (
@@ -211,6 +248,7 @@ function WorkHome({ go }) {
       {bossSheet && <WorkTaskSheet task={bossSheet} onClose={() => setBossSheet(null)} onEdit={() => { const x = bossSheet; setBossSheet(null); setBossTask(x) }} onSaved={() => toast.show(t('savedToast'))} />}
       {editBoss && <ManagerEditor settings={settings} updateSettings={updateSettings} onClose={() => setEditBoss(false)} onSaved={() => toast.show(t('savedToast'))} />}
       {bossUpdate && <BossUpdateSheet onClose={() => setBossUpdate(false)} toast={toast} />}
+      {taskSheet && <WorkTaskSheet task={taskSheet} department={departments.items.find(dp => dp.id === taskSheet.departmentId)} onClose={() => setTaskSheet(null)} onEdit={() => { const x = taskSheet; setTaskSheet(null); setTaskEditor(x) }} onSaved={() => toast.show(t('savedToast'))} />}
       {toast.node}
     </>
   )
@@ -602,6 +640,8 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
   const [err, setErr] = useState('')
   const [subText, setSubText] = useState('')
   const [memberQuery, setMemberQuery] = useState('')
+  const [assignOpen, setAssignOpen] = useState(false)
+  const [showMore, setShowMore] = useState(() => !!((initial?.subtasks?.length) || initial?.repeat || (initial?.status && initial.status !== 'new') || (mode !== 'dept' && initial?.departmentId)))
 
   // Quick due-date presets.
   const plusDays = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10) }
@@ -687,48 +727,57 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
         </Field>
       )}
 
-      {/* Assignees — selected summary, search, and per-department pickers */}
+      {/* Assignees — collapsed to a summary by default; expand to pick */}
       {mode !== 'boss' && (
         <div style={{ marginBottom: 4 }}>
-          <label style={{ display: 'flex', justifyContent: 'space-between', ...secStyle }}>
+          <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', ...secStyle }}>
             <span>{t('assignTo')}</span>
-            <span className="muted" style={{ fontWeight: 500 }}>{memberIds.length ? `${memberIds.length} ${t('selected')}` : t('unassigned')}</span>
+            <button type="button" className="link-btn" style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--brand-600)' }} onClick={() => setAssignOpen(o => !o)}>
+              {assignOpen ? t('done') : (memberIds.length ? t('edit') : t('assignPeople'))}
+            </button>
           </label>
-          {memberIds.length > 0 && (
-            <div className="chip-row" style={{ marginBottom: 8 }}>
+          {memberIds.length > 0 ? (
+            <div className="chip-row" style={{ marginBottom: assignOpen ? 8 : 0 }}>
               {memberIds.map(id => { const m = allMembers.items.find(x => x.id === id); return m ? (
                 <Chip key={id} on onClick={() => toggleMember(id)}>{m.name} <Icon name="x" size={11} /></Chip>
               ) : null })}
             </div>
-          )}
-          {allMembers.items.length > 6 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--surface-2)', border: '1px solid var(--line-2)', borderRadius: 'var(--r-md)', padding: '0 12px', marginBottom: 10 }}>
-              <Icon name="search" size={16} style={{ color: 'var(--ink-3)' }} />
-              <input className="input" style={{ border: 0, background: 'transparent', padding: '10px 0' }} value={memberQuery} onChange={e => setMemberQuery(e.target.value)} placeholder={t('searchPeople')} />
-              {memberQuery && <button className="iconbtn" aria-label={t('cancel')} onClick={() => setMemberQuery('')}><Icon name="x" size={15} /></button>}
-            </div>
-          )}
-          {q ? (
-            <div className="chip-row">
-              {allMembers.items.filter(m => (m.name || '').toLowerCase().includes(q)).map(renderMember)}
-              {allMembers.items.filter(m => (m.name || '').toLowerCase().includes(q)).length === 0 && <span className="muted" style={{ fontSize: 13, padding: '4px 2px' }}>{t('nothingHere')}</span>}
-            </div>
-          ) : (
-            orderedDepts.map(dep => {
-              const dm = allMembers.items.filter(m => m.departmentId === dep.id)
-              if (!dm.length) return null
-              return (
-                <div key={dep.id} style={{ marginBottom: 10 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '2px 2px 6px' }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-2)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>{dep.name}</span>
-                    <Chip selectable on={deptAllOn(dep.id)} onClick={() => toggleDept(dep.id)}><Icon name="people" size={12} /> {t('everyone')}</Chip>
-                  </div>
-                  <div className="chip-row">{dm.map(renderMember)}</div>
+          ) : (!assignOpen && (
+            <button type="button" onClick={() => setAssignOpen(true)} style={{ width: '100%', textAlign: 'start', padding: '11px 12px', borderRadius: 'var(--r-md)', border: '1px dashed var(--line-2)', background: 'var(--surface-2)', color: 'var(--ink-3)', fontSize: 14 }}>
+              <Icon name="people" size={14} /> {t('assignPeople')}
+            </button>
+          ))}
+          {assignOpen && (
+            <div style={{ marginTop: 8 }}>
+              {allMembers.items.length > 6 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--surface-2)', border: '1px solid var(--line-2)', borderRadius: 'var(--r-md)', padding: '0 12px', marginBottom: 10 }}>
+                  <Icon name="search" size={16} style={{ color: 'var(--ink-3)' }} />
+                  <input className="input" style={{ border: 0, background: 'transparent', padding: '10px 0' }} value={memberQuery} onChange={e => setMemberQuery(e.target.value)} placeholder={t('searchPeople')} />
+                  {memberQuery && <button className="iconbtn" aria-label={t('cancel')} onClick={() => setMemberQuery('')}><Icon name="x" size={15} /></button>}
                 </div>
-              )
-            })
+              )}
+              {q ? (
+                <div className="chip-row">
+                  {allMembers.items.filter(m => (m.name || '').toLowerCase().includes(q)).map(renderMember)}
+                  {allMembers.items.filter(m => (m.name || '').toLowerCase().includes(q)).length === 0 && <span className="muted" style={{ fontSize: 13, padding: '4px 2px' }}>{t('nothingHere')}</span>}
+                </div>
+              ) : (
+                orderedDepts.map(dep => {
+                  const dm = allMembers.items.filter(m => m.departmentId === dep.id)
+                  if (!dm.length) return null
+                  return (
+                    <div key={dep.id} style={{ marginBottom: 10 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '2px 2px 6px' }}>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-2)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>{dep.name}</span>
+                        <Chip selectable on={deptAllOn(dep.id)} onClick={() => toggleDept(dep.id)}><Icon name="people" size={12} /> {t('everyone')}</Chip>
+                      </div>
+                      <div className="chip-row">{dm.map(renderMember)}</div>
+                    </div>
+                  )
+                })
+              )}
+            </div>
           )}
-          <p className="hint" style={{ margin: '2px 2px 0' }}>{t('assignMultiHint')}</p>
         </div>
       )}
 
@@ -750,33 +799,46 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
       </div>
       <Input type="date" value={f.dueDate} onChange={set('dueDate')} />
 
-      {/* Status + repeat */}
-      <div className="row2" style={{ marginTop: 12 }}>
-        <Field label={t('status')}>
-          <Select value={f.status} onChange={set('status')} options={WORK_STATUSES.map(s => ({ value: s, label: t('st_' + s) }))} />
-        </Field>
-        <Field label={t('repeat')} hint={t('repeatHint')}>
-          <Select value={f.repeat} onChange={set('repeat')} options={REPEAT_OPTIONS.map(r => ({ value: r, label: r ? t(r) : t('off') }))} />
-        </Field>
-      </div>
-
-      {/* Checklist / sub-tasks */}
-      <label style={{ display: 'block', fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '14px 2px 7px' }}>
-        {t('checklist')}{subs.length ? ` · ${subs.filter(s => s.done).length}/${subs.length}` : ''}
-      </label>
-      {subs.map(s => (
-        <div key={s.id} className="li" style={{ margin: 0 }}>
-          <button className={`check ${s.done ? 'on' : ''}`} onClick={() => toggleSub(s.id)} aria-label={t('markComplete')}>
-            {s.done && <Icon name="check" size={14} stroke={3} />}
-          </button>
-          <div className="body"><div className="title" style={{ fontSize: 14, textDecoration: s.done ? 'line-through' : 'none', opacity: s.done ? 0.6 : 1 }}>{s.text}</div></div>
-          <button className="iconbtn" aria-label={t('delete')} onClick={() => removeSub(s.id)}><Icon name="x" size={15} /></button>
-        </div>
-      ))}
-      <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
-        <Input value={subText} onChange={e => setSubText(e.target.value)} placeholder={t('addSubtask')} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSub() } }} style={{ flex: 1 }} />
-        <Button icon="plus" onClick={addSub}>{t('add')}</Button>
-      </div>
+      {/* Advanced options collapsed by default to keep the form light */}
+      <button type="button" className="link-btn" style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '16px 2px 4px', fontSize: 13, fontWeight: 600, color: 'var(--ink-2)' }} onClick={() => setShowMore(o => !o)}>
+        <Icon name="chevron" size={14} style={{ transform: showMore ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }} /> {showMore ? t('fewerOptions') : t('moreOptions')}
+      </button>
+      {showMore && (
+        <>
+          {mode !== 'dept' && mode !== 'boss' && (
+            <Field label={t('department')} hint={t('optional')}>
+              <Select value={f.departmentId || ''} onChange={set('departmentId')}>
+                <option value="">{t('none')}</option>
+                {departments.items.map(dep => <option key={dep.id} value={dep.id}>{dep.name}</option>)}
+              </Select>
+            </Field>
+          )}
+          <div className="row2">
+            <Field label={t('status')}>
+              <Select value={f.status} onChange={set('status')} options={WORK_STATUSES.map(s => ({ value: s, label: t('st_' + s) }))} />
+            </Field>
+            <Field label={t('repeat')} hint={t('repeatHint')}>
+              <Select value={f.repeat} onChange={set('repeat')} options={REPEAT_OPTIONS.map(r => ({ value: r, label: r ? t(r) : t('off') }))} />
+            </Field>
+          </div>
+          <label style={{ display: 'block', fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '8px 2px 7px' }}>
+            {t('checklist')}{subs.length ? ` · ${subs.filter(s => s.done).length}/${subs.length}` : ''}
+          </label>
+          {subs.map(s => (
+            <div key={s.id} className="li" style={{ margin: 0 }}>
+              <button className={`check ${s.done ? 'on' : ''}`} onClick={() => toggleSub(s.id)} aria-label={t('markComplete')}>
+                {s.done && <Icon name="check" size={14} stroke={3} />}
+              </button>
+              <div className="body"><div className="title" style={{ fontSize: 14, textDecoration: s.done ? 'line-through' : 'none', opacity: s.done ? 0.6 : 1 }}>{s.text}</div></div>
+              <button className="iconbtn" aria-label={t('delete')} onClick={() => removeSub(s.id)}><Icon name="x" size={15} /></button>
+            </div>
+          ))}
+          <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+            <Input value={subText} onChange={e => setSubText(e.target.value)} placeholder={t('addSubtask')} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSub() } }} style={{ flex: 1 }} />
+            <Button icon="plus" onClick={addSub}>{t('add')}</Button>
+          </div>
+        </>
+      )}
     </Sheet>
   )
 }
