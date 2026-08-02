@@ -115,6 +115,7 @@ function WorkHome({ go }) {
   const [bossSheet, setBossSheet] = useState(null)
   const [editBoss, setEditBoss] = useState(false)
   const [bossUpdate, setBossUpdate] = useState(false)
+  const [taskEditor, setTaskEditor] = useState(null)
   const toast = useToast()
 
   const boss = settings.profile?.managerName
@@ -203,7 +204,8 @@ function WorkHome({ go }) {
           )
         })}
       </div>
-      <Fab onClick={() => setEditDep({})} />
+      <Fab onClick={() => setTaskEditor({})} />
+      {taskEditor && <WorkTaskEditor mode="general" initial={taskEditor.id ? taskEditor : {}} onClose={() => setTaskEditor(null)} onSaved={() => toast.show(t('savedToast'))} />}
       {editDep && <DepartmentEditor initial={editDep.id ? editDep : {}} members={members.items} onClose={() => setEditDep(null)} onSaved={() => toast.show(t('savedToast'))} />}
       {bossTask && <WorkTaskEditor mode="boss" initial={bossTask.id ? bossTask : { boss: bossTask.boss }} onClose={() => setBossTask(null)} onSaved={() => toast.show(t('savedToast'))} />}
       {bossSheet && <WorkTaskSheet task={bossSheet} onClose={() => setBossSheet(null)} onEdit={() => { const x = bossSheet; setBossSheet(null); setBossTask(x) }} onSaved={() => toast.show(t('savedToast'))} />}
@@ -645,6 +647,14 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
       </div>}>
       <Field label={t('appointmentTitle')} required error={err}><Input value={f.title} onChange={set('title')} placeholder={t('taskPlaceholder')} autoFocus /></Field>
       <Field label={t('description')}><TextArea value={f.description} onChange={set('description')} placeholder={t('descriptionPlaceholder')} /></Field>
+      {mode !== 'dept' && mode !== 'boss' && (
+        <Field label={t('department')} hint={t('optional')}>
+          <Select value={f.departmentId || ''} onChange={set('departmentId')}>
+            <option value="">{t('none')}</option>
+            {departments.items.map(dep => <option key={dep.id} value={dep.id}>{dep.name}</option>)}
+          </Select>
+        </Field>
+      )}
       {mode !== 'boss' && (
         <div style={{ marginBottom: 12 }}>
           <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '0 2px 7px' }}>
