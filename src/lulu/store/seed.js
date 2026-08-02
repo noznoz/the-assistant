@@ -127,6 +127,8 @@ export function maybeSeed() {
   db.update('departments', salesDept.id, { headId: mOmar.id })
   db.insert('tasks', { title: 'Prepare Q3 operations report', description: 'Consolidate regional KPIs and cost variances.', classification: 'work', departmentId: opsDept.id, memberId: mFaisal.id, assignedTo: mFaisal.name, status: 'waiting_someone', priority: 'high', dueDate: d(5), subtasks: [{ id: 'sb1', text: 'Collect KPI data', done: true }, { id: 'sb2', text: 'Draft summary', done: false }, { id: 'sb3', text: 'Review with finance', done: false }] })
   db.insert('tasks', { title: 'Vendor contract renewals', classification: 'work', departmentId: opsDept.id, memberId: mSara.id, assignedTo: mSara.name, status: 'waiting_someone', priority: 'medium', dueDate: d(12) })
+  // Recurring weekly report (regenerates on completion).
+  db.insert('tasks', { title: 'Weekly operations report', classification: 'work', departmentId: opsDept.id, memberIds: [mSara.id], memberId: mSara.id, assignedTo: mSara.name, status: 'in_progress', priority: 'medium', dueDate: d(3), repeat: 'weekly' })
   db.insert('tasks', { title: 'Follow up Q3 pipeline', classification: 'work', departmentId: salesDept.id, memberId: mOmar.id, assignedTo: mOmar.name, status: 'waiting_someone', priority: 'high', dueDate: d(4) })
   // Whole-department task (everyone in Operations).
   db.insert('tasks', { title: 'Complete annual safety training', description: 'All operations staff to finish the online modules.', classification: 'work', departmentId: opsDept.id, memberIds: [mFaisal.id, mSara.id], memberId: mFaisal.id, assignedTo: 'Operations', status: 'waiting_someone', priority: 'medium', dueDate: d(20) })

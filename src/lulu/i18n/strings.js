@@ -332,6 +332,9 @@ export const STRINGS = {
     departmentTasks: 'Department tasks', assignTaskHint: 'Create a task and assign it to a team member.',
     taskPlaceholder: 'e.g. Prepare Q3 report', assignTo: 'Assign to', direction: 'Direction', deadline: 'Deadline',
     selected: 'selected', everyone: 'Everyone', assignMultiHint: 'Pick one person, several, or a whole department — even across departments.',
+    repeat: 'Repeat', repeatHint: 'Auto-creates the next one when completed', listView: 'List', boardView: 'Board', moveBack: 'Move back', moveForward: 'Move forward',
+    followUps: 'Follow-ups', allClear: 'All clear', followUpsHint: "Tasks you've delegated and items from your boss show up here.", awaitingOthers: 'awaiting others', onTrack: 'On track',
+    waitingOnOthers: 'Waiting on others', nudge: 'Nudge', shareDigest: 'Share digest', weeklyDigest: 'Weekly work digest', digestHint: "Share a summary of this week's work with your team.", other: 'Other', withBoss: 'With boss',
     checklist: 'Checklist', addSubtask: 'Add a sub-task…', dashboard: 'Dashboard', department: 'Department',
     // work dashboard + meetings
     workDashboard: 'Work dashboard', openTasks: 'Open tasks', dueThisWeek: 'Due this week', withBoss: 'With boss',
@@ -694,6 +697,9 @@ export const STRINGS = {
     departmentTasks: 'مهام القسم', assignTaskHint: 'أنشئ مهمة وكلّف بها عضواً في الفريق.',
     taskPlaceholder: 'مثال: إعداد تقرير الربع الثالث', assignTo: 'إسناد إلى', direction: 'الاتجاه', deadline: 'الموعد النهائي',
     selected: 'محدد', everyone: 'الجميع', assignMultiHint: 'اختر شخصاً واحداً أو عدة أشخاص أو قسماً كاملاً — حتى عبر الأقسام.',
+    repeat: 'التكرار', repeatHint: 'يُنشئ المهمة التالية تلقائياً عند الإكمال', listView: 'قائمة', boardView: 'لوحة', moveBack: 'إرجاع', moveForward: 'تقديم',
+    followUps: 'المتابعات', allClear: 'كل شيء منجز', followUpsHint: 'المهام التي أسندتها والبنود من مديرك تظهر هنا.', awaitingOthers: 'بانتظار الآخرين', onTrack: 'على المسار',
+    waitingOnOthers: 'بانتظار الآخرين', nudge: 'تذكير', shareDigest: 'مشاركة الملخص', weeklyDigest: 'ملخص العمل الأسبوعي', digestHint: 'شارك ملخص عمل هذا الأسبوع مع فريقك.', other: 'أخرى', withBoss: 'مع المدير',
     checklist: 'قائمة المهام', addSubtask: 'إضافة مهمة فرعية…', dashboard: 'لوحة', department: 'القسم',
     // work dashboard + meetings
     workDashboard: 'لوحة العمل', openTasks: 'مهام مفتوحة', dueThisWeek: 'مستحقة هذا الأسبوع', withBoss: 'مع المدير',

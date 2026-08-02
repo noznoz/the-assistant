@@ -11,6 +11,7 @@ const GROUPS = [
   {
     key: 'grpWork', tint: 't-brand', items: [
       { id: 'work', icon: 'report' },
+      { id: 'followup', icon: 'bell', label: 'followUps' },
       { id: 'orgchart', icon: 'people', label: 'orgChart' },
       { id: 'workboard', icon: 'grid', label: 'workDashboard' },
       { id: 'meetings', icon: 'note' },

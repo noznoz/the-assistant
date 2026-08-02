@@ -16,6 +16,35 @@ function subProgress(task) {
   return { total: s.length, done: s.filter(x => x.done).length }
 }
 
+// Next due date for a recurring task, advanced from its current due date (or
+// today) by the repeat interval.
+function nextDueDate(fromISO, repeat) {
+  const base = fromISO ? new Date(fromISO + 'T00:00:00') : new Date()
+  if (repeat === 'weekly') base.setDate(base.getDate() + 7)
+  else if (repeat === 'monthly') base.setMonth(base.getMonth() + 1)
+  else if (repeat === 'quarterly') base.setMonth(base.getMonth() + 3)
+  else return ''
+  return base.toISOString().slice(0, 10)
+}
+
+// Mark a work task complete — and, if it repeats, spawn the next occurrence
+// with a fresh due date and reset checklist.
+function completeWorkTask(task, tasks) {
+  tasks.patch(task.id, { status: 'completed' })
+  if (task.repeat) {
+    const { id, createdAt, updatedAt, ...rest } = task
+    const assigned = (Array.isArray(task.memberIds) && task.memberIds.length) || task.memberId || task.boss
+    tasks.add({
+      ...rest,
+      status: assigned ? 'waiting_someone' : 'new',
+      dueDate: nextDueDate(task.dueDate, task.repeat),
+      subtasks: (task.subtasks || []).map(s => ({ ...s, done: false })),
+    })
+  }
+}
+
+const REPEAT_OPTIONS = ['', 'weekly', 'monthly', 'quarterly']
+
 // Work / organisation hub: your manager (two-way tasks) + departments, members
 // and department tasks assigned to team members. All tasks live in the shared
 // `tasks` collection tagged classification:'work'.
@@ -47,11 +76,14 @@ function WorkHome({ go }) {
 
   const depCount = (id) => members.items.filter(m => m.departmentId === id).length
   const depOpen = (id) => openWork.filter(x => x.departmentId === id).length
+  const waitingOnOthers = openWork.filter(x => !x.boss && taskMemberIds(x).length)
+  const waitingOverdue = waitingOnOthers.filter(x => isOverdue(x.dueDate)).length
 
   return (
     <>
       <DetailHeader title={t('work')} onBack={() => go('more')} right={
         <>
+          <button className="iconbtn" onClick={() => go('followup')} aria-label={t('followUps')}><Icon name="bell" size={18} /></button>
           <button className="iconbtn" onClick={() => go('orgchart')} aria-label={t('orgChart')}><Icon name="people" size={18} /></button>
           <button className="iconbtn" onClick={() => go('workboard')} aria-label={t('dashboard')}><Icon name="grid" size={18} /></button>
           <button className="iconbtn" onClick={() => go('meetings')} aria-label={t('meetings')}><Icon name="note" size={18} /></button>
@@ -77,16 +109,27 @@ function WorkHome({ go }) {
           </div>
         </Card>
 
+        {waitingOnOthers.length > 0 && (
+          <button onClick={() => go('followup')} style={{ width: '100%', marginTop: 12, display: 'flex', alignItems: 'center', gap: 12, padding: 14, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--r-lg)', color: 'var(--ink)' }}>
+            <span className={`lead ${waitingOverdue ? 't-danger' : 't-warn'}`} style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="bell" size={18} /></span>
+            <span style={{ flex: 1, textAlign: 'start' }}>
+              <span style={{ display: 'block', fontWeight: 700 }}>{t('followUps')}</span>
+              <span className="muted" style={{ display: 'block', fontSize: 12.5 }}>{waitingOnOthers.length} {t('awaitingOthers')}{waitingOverdue > 0 ? ` · ${waitingOverdue} ${t('overdue')}` : ''}</span>
+            </span>
+            <Icon name="chevron" size={16} style={{ color: 'var(--ink-3)' }} />
+          </button>
+        )}
+
         {toDiscuss.length > 0 && (
           <>
             <Section title={t('toDiscussWithBoss')} count={toDiscuss.length} />
-            <Card tight>{toDiscuss.map(x => <BossRow key={x.id} task={x} lang={lang} settings={settings} onOpen={() => setBossSheet(x)} onDone={() => { tasks.patch(x.id, { status: 'completed' }); toast.show('✓') }} />)}</Card>
+            <Card tight>{toDiscuss.map(x => <BossRow key={x.id} task={x} lang={lang} settings={settings} onOpen={() => setBossSheet(x)} onDone={() => { completeWorkTask(x, tasks); toast.show('✓') }} />)}</Card>
           </>
         )}
         {fromBoss.length > 0 && (
           <>
             <Section title={t('assignedByBoss')} count={fromBoss.length} />
-            <Card tight>{fromBoss.map(x => <BossRow key={x.id} task={x} lang={lang} settings={settings} onOpen={() => setBossSheet(x)} onDone={() => { tasks.patch(x.id, { status: 'completed' }); toast.show('✓') }} />)}</Card>
+            <Card tight>{fromBoss.map(x => <BossRow key={x.id} task={x} lang={lang} settings={settings} onOpen={() => setBossSheet(x)} onDone={() => { completeWorkTask(x, tasks); toast.show('✓') }} />)}</Card>
           </>
         )}
 
@@ -146,6 +189,7 @@ function DepartmentDetail({ dep, go, onBack }) {
   const members = useCollection('members')
   const tasks = useCollection('tasks')
   const [tab, setTab] = useState('team')
+  const [taskView, setTaskView] = useState('list')
   const [editDep, setEditDep] = useState(false)
   const [memEditor, setMemEditor] = useState(null)
   const [taskEditor, setTaskEditor] = useState(null)
@@ -200,9 +244,17 @@ function DepartmentDetail({ dep, go, onBack }) {
         {tab === 'tasks' && (
           <>
             <Section title={t('departmentTasks')} count={depTasks.length} action={t('add')} onAction={() => setTaskEditor({})} />
+            {depTasks.length > 0 && (
+              <div className="chip-row" style={{ marginBottom: 10 }}>
+                <Chip selectable on={taskView === 'list'} onClick={() => setTaskView('list')}><Icon name="check" size={13} /> {t('listView')}</Chip>
+                <Chip selectable on={taskView === 'board'} onClick={() => setTaskView('board')}><Icon name="grid" size={13} /> {t('boardView')}</Chip>
+              </div>
+            )}
             {depTasks.length === 0 ? (
               <Empty icon="check" title={t('nothingHere')} text={t('assignTaskHint')}
                 action={<Button variant="primary" icon="plus" onClick={() => setTaskEditor({})}>{t('newTask')}</Button>} />
+            ) : taskView === 'board' ? (
+              <WorkBoard tasks={depTasks} lang={lang} tasksCol={tasks} onOpen={setTaskSheet} />
             ) : depTasks.map(x => {
               const pr = findPriority(x.priority)
               const done = x.status === 'completed'
@@ -210,7 +262,7 @@ function DepartmentDetail({ dep, go, onBack }) {
               return (
                 <SwipeRow key={x.id} onEdit={() => setTaskEditor(x)} onDelete={() => { tasks.remove(x.id); toast.show(t('deletedToast')) }}>
                   <div className={`li ${done ? 'done' : ''}`}>
-                    <button className={`check ${done ? 'on' : ''}`} onClick={() => tasks.patch(x.id, { status: done ? 'new' : 'completed' })} aria-label={t('markComplete')}>
+                    <button className={`check ${done ? 'on' : ''}`} onClick={() => done ? tasks.patch(x.id, { status: 'new' }) : completeWorkTask(x, tasks)} aria-label={t('markComplete')}>
                       {done && <Icon name="check" size={16} stroke={3} />}
                     </button>
                     <div className="body" onClick={() => setTaskSheet(x)}>
@@ -220,6 +272,7 @@ function DepartmentDetail({ dep, go, onBack }) {
                         {pr && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>· <span style={{ width: 7, height: 7, borderRadius: 4, background: pr.color }} />{t(pr.key)}</span>}
                         {x.dueDate && <span className={overdue ? 't-danger' : ''}>· {relativeDay(x.dueDate, lang)}</span>}
                         {(() => { const p = subProgress(x); return p.total > 0 ? <span>· ☑ {p.done}/{p.total}</span> : null })()}
+                        {x.repeat && <span>· ↻ {t(x.repeat)}</span>}
                       </div>
                     </div>
                     {(() => { const asg = members.items.find(mm => mm.id === x.memberId); return asg && (asg.whatsapp || asg.mobile) ? <button className="iconbtn" aria-label="WhatsApp" onClick={() => whatsappToPerson(asg, formatAssignment(x, asg, lang, settings))}><Icon name="whatsapp" size={16} /></button> : null })()}
@@ -237,6 +290,59 @@ function DepartmentDetail({ dep, go, onBack }) {
       {taskSheet && <WorkTaskSheet task={taskSheet} department={dep} members={team} onClose={() => setTaskSheet(null)} onEdit={() => { const x = taskSheet; setTaskSheet(null); setTaskEditor(x) }} onSaved={() => toast.show(t('savedToast'))} />}
       {toast.node}
     </>
+  )
+}
+
+// Kanban board: one column per status, cards move between columns with the
+// chevron buttons (drag isn't reliable on touch, so tap-to-move is used).
+function WorkBoard({ tasks, lang, tasksCol, onOpen }) {
+  const { t } = useT()
+  const cols = WORK_STATUSES
+  const idx = (s) => Math.max(0, cols.indexOf(s || 'new'))
+  const move = (task, dir) => {
+    const ni = Math.min(cols.length - 1, Math.max(0, idx(task.status) + dir))
+    const ns = cols[ni]
+    if (ns === task.status) return
+    if (ns === 'completed') completeWorkTask(task, tasksCol)
+    else tasksCol.patch(task.id, { status: ns })
+  }
+  return (
+    <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 8, WebkitOverflowScrolling: 'touch' }}>
+      {cols.map(s => {
+        const items = tasks.filter(x => (x.status || 'new') === s)
+        return (
+          <div key={s} style={{ minWidth: 176, flex: '0 0 176px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, fontWeight: 700, color: 'var(--ink-2)', margin: '0 2px 8px' }}>
+              <span>{t('st_' + s)}</span><span className="chip">{items.length}</span>
+            </div>
+            <div className="stack" style={{ gap: 8 }}>
+              {items.map(x => {
+                const pr = findPriority(x.priority)
+                const overdue = x.status !== 'completed' && isOverdue(x.dueDate)
+                return (
+                  <div key={x.id} className="card tight" style={{ padding: 10 }}>
+                    <div onClick={() => onOpen(x)}>
+                      <div style={{ fontWeight: 650, fontSize: 14 }}>{x.title}</div>
+                      <div className="muted" style={{ fontSize: 12, marginTop: 3 }}>
+                        {[x.assignedTo, x.dueDate && relativeDay(x.dueDate, lang)].filter(Boolean).join(' · ')}
+                        {overdue && <span className="t-danger"> · {t('overdue')}</span>}
+                        {x.repeat && <span> · ↻</span>}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                      <button className="iconbtn" aria-label={t('moveBack')} disabled={idx(s) === 0} style={{ opacity: idx(s) === 0 ? 0.3 : 1 }} onClick={() => move(x, -1)}><Icon name="chevron" size={16} style={{ transform: 'rotate(180deg)' }} /></button>
+                      {pr && <span style={{ width: 8, height: 8, borderRadius: 4, background: pr.color }} />}
+                      <button className="iconbtn" aria-label={t('moveForward')} disabled={idx(s) === cols.length - 1} style={{ opacity: idx(s) === cols.length - 1 ? 0.3 : 1 }} onClick={() => move(x, 1)}><Icon name="chevron" size={16} /></button>
+                    </div>
+                  </div>
+                )
+              })}
+              {items.length === 0 && <div className="muted" style={{ fontSize: 12, textAlign: 'center', padding: '8px 0' }}>—</div>}
+            </div>
+          </div>
+        )
+      })}
+    </div>
   )
 }
 
@@ -410,7 +516,7 @@ function WorkTaskSheet({ task, department, members = [], onClose, onEdit, onSave
       )}
 
       <div className="stack">
-        <Button block icon="check" onClick={() => { tasks.patch(live.id, { status: done ? 'new' : 'completed' }); onSaved && onSaved(); onClose() }}>{done ? t('st_new') : t('markComplete')}</Button>
+        <Button block icon="check" onClick={() => { done ? tasks.patch(live.id, { status: 'new' }) : completeWorkTask(live, tasks); onSaved && onSaved(); onClose() }}>{done ? t('st_new') : t('markComplete')}</Button>
         {assignees.filter(a => a.whatsapp || a.mobile).map(a => (
           <Button key={a.id} block variant="brand" icon="whatsapp" onClick={() => whatsappToPerson(a, detail())}>{t('sendOnWhatsApp')} · {a.name}</Button>
         ))}
@@ -436,7 +542,7 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
   const departments = useCollection('departments')
   const [f, setF] = useState({
     title: '', description: '', dueDate: '', priority: 'medium', status: 'new',
-    memberId: '', boss: '', classification: 'work', subtasks: [], ...initial,
+    memberId: '', boss: '', classification: 'work', subtasks: [], repeat: '', ...initial,
   })
   const [memberIds, setMemberIds] = useState(() => taskMemberIds(initial))
   const [err, setErr] = useState('')
@@ -533,6 +639,9 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
           <Select value={f.status} onChange={set('status')} options={WORK_STATUSES.map(s => ({ value: s, label: t('st_' + s) }))} />
         </Field>
       </div>
+      <Field label={t('repeat')} hint={t('repeatHint')}>
+        <Select value={f.repeat} onChange={set('repeat')} options={REPEAT_OPTIONS.map(r => ({ value: r, label: r ? t(r) : t('off') }))} />
+      </Field>
       <div style={{ marginTop: 4 }}>
         <label style={{ display: 'block', fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '0 2px 7px' }}>{t('priority')}</label>
         <div className="chip-row">
