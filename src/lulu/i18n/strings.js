@@ -234,7 +234,7 @@ export const STRINGS = {
     totalValue: 'Total value',
     // week ahead
     weekAhead: 'Week ahead', week: 'Week ahead', allClear: 'All clear',
-    weekEmptyHint: 'Nothing due in the next 7 days.', tasksThisWeek: 'Tasks this week',
+    weekEmptyHint: 'Nothing due in the next 7 days.', tasksThisWeek: 'Tasks this week', timeline: 'Timeline', byType: 'By type',
     moneyThisWeek: 'Money this week', shareWeekAhead: 'Share the week ahead',
     // health & memberships
     healthMedical: 'Health & medical', allergies: 'Allergies', allergiesPlaceholder: 'e.g. penicillin, nuts',
@@ -601,7 +601,7 @@ export const STRINGS = {
     totalValue: 'القيمة الإجمالية',
     // week ahead
     weekAhead: 'الأسبوع القادم', week: 'الأسبوع القادم', allClear: 'كل شيء تمام',
-    weekEmptyHint: 'لا شيء مستحق خلال 7 أيام.', tasksThisWeek: 'مهام هذا الأسبوع',
+    weekEmptyHint: 'لا شيء مستحق خلال 7 أيام.', tasksThisWeek: 'مهام هذا الأسبوع', timeline: 'الجدول الزمني', byType: 'حسب النوع',
     moneyThisWeek: 'مالية هذا الأسبوع', shareWeekAhead: 'مشاركة الأسبوع القادم',
     // health & memberships
     healthMedical: 'الصحة والطب', allergies: 'الحساسية', allergiesPlaceholder: 'مثل البنسلين، المكسرات',
