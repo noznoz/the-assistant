@@ -4,6 +4,7 @@ import { DetailHeader, Sheet, Field, Input, Select, Button, Empty, Fab, Chip, us
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { DOC_CATEGORIES, docCategoryOptions, docCatLabel, label } from '../../lib/domain.js'
+import { DOC_LINK_TYPES, docItemName, linkTypeOfDoc, resolveDocLink } from '../../lib/docLink.js'
 import { fmtDate, daysUntil } from '../../lib/format.js'
 import {
   saveAttachment, removeAttachment, getAttachmentFile, shareAttachments,
@@ -15,6 +16,11 @@ export default function DocumentsScreen({ go }) {
   const { t, lang } = useT()
   const { settings } = useSettings()
   const docs = useCollection('documents')
+  const vehicles = useCollection('vehicles')
+  const people = useCollection('people')
+  const properties = useCollection('properties')
+  const trips = useCollection('trips')
+  const linkColls = { vehicles: vehicles.items, people: people.items, properties: properties.items, trips: trips.items }
   const [editor, setEditor] = useState(null)
   const [viewing, setViewing] = useState(null)
   const [filter, setFilter] = useState('all')
@@ -77,6 +83,7 @@ export default function DocumentsScreen({ go }) {
                     <div className="title">{d.title}</div>
                     <div className="meta">
                       {docCatLabel(d.category, lang)}
+                      {(() => { const lk = resolveDocLink(d, linkColls); return lk ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>· <Icon name={lk.icon} size={11} /> {lk.name}</span> : null })()}
                       {count > 0 && <span>· {count} {count === 1 ? t('documentTitle') : t('attachments')}</span>}
                       {d.expiry && <span>· {fmtDate(d.expiry, lang, settings.dateFormat)}</span>}
                     </div>
@@ -108,12 +115,23 @@ export function DocEditor({ initial, onClose, onSaved, onToast }) {
   const { t, lang } = useT()
   const { settings, updateSettings } = useSettings()
   const docs = useCollection('documents')
+  const vehicles = useCollection('vehicles')
+  const people = useCollection('people')
+  const properties = useCollection('properties')
+  const trips = useCollection('trips')
+  const linkColls = { vehicles: vehicles.items, people: people.items, properties: properties.items, trips: trips.items }
   const [f, setF] = useState({ title: '', category: 'id', expiry: '', notes: '', attachments: [], ...initial })
   const [busy, setBusy] = useState(false)
   const [newCat, setNewCat] = useState(null)
+  const [linkType, setLinkType] = useState(() => linkTypeOfDoc(initial))
   const cameraRef = useRef()
   const fileRef = useRef()
   const set = (k) => (e) => setF(prev => ({ ...prev, [k]: e.target.value }))
+
+  const clearLinks = (obj) => { const o = { ...obj }; DOC_LINK_TYPES.forEach(l => { delete o[l.field] }); return o }
+  const onLinkType = (e) => { setLinkType(e.target.value); setF(prev => clearLinks(prev)) }
+  const onLinkItem = (field) => (e) => setF(prev => ({ ...clearLinks(prev), [field]: e.target.value || undefined }))
+  const linkDef = DOC_LINK_TYPES.find(l => l.type === linkType)
 
   const onCategory = (e) => {
     if (e.target.value === '__addcat') { setNewCat(''); return }
@@ -205,6 +223,20 @@ export function DocEditor({ initial, onClose, onSaved, onToast }) {
           <Button onClick={addCategory}>{t('add')}</Button>
         </div>
       )}
+      <Field label={t('relatedTo')} hint={t('optional')}>
+        <Select value={linkType} onChange={onLinkType}>
+          <option value="">{t('none')}</option>
+          {DOC_LINK_TYPES.map(l => <option key={l.type} value={l.type}>{t(l.tkey)}</option>)}
+        </Select>
+      </Field>
+      {linkDef && (
+        <Field label={t(linkDef.tkey)}>
+          <Select value={f[linkDef.field] || ''} onChange={onLinkItem(linkDef.field)}>
+            <option value="">{t('select')}</option>
+            {(linkColls[linkDef.collection] || []).map(it => <option key={it.id} value={it.id}>{docItemName(it)}</option>)}
+          </Select>
+        </Field>
+      )}
       <Field label={t('policyExpiry')} hint={t('optional')}><Input type="date" value={f.expiry} onChange={set('expiry')} /></Field>
       <Field label={t('notesField')}><Input value={f.notes} onChange={set('notes')} /></Field>
     </Sheet>
@@ -215,6 +247,11 @@ export function DocEditor({ initial, onClose, onSaved, onToast }) {
 export function DocumentViewer({ doc, onBack, onEdit, onDelete, onToast }) {
   const { t, lang } = useT()
   const { settings } = useSettings()
+  const vehicles = useCollection('vehicles')
+  const people = useCollection('people')
+  const properties = useCollection('properties')
+  const trips = useCollection('trips')
+  const link = resolveDocLink(doc, { vehicles: vehicles.items, people: people.items, properties: properties.items, trips: trips.items })
   const catText = docCatLabel(doc.category, lang)
   const attachments = doc.attachments || []
   const [urls, setUrls] = useState({})   // id -> objectURL
@@ -266,6 +303,7 @@ export function DocumentViewer({ doc, onBack, onEdit, onDelete, onToast }) {
       <div className="screen">
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', margin: '14px 0' }}>
           <Chip tint="t-brand">{catText}</Chip>
+          {link && <Chip tint="t-info"><Icon name={link.icon} size={12} /> {link.name}</Chip>}
           {doc.expiry && <Chip tint={dd != null && dd <= 7 ? 't-danger' : dd != null && dd <= 30 ? 't-warn' : ''}>
             {t('policyExpiry')}: {fmtDate(doc.expiry, lang, settings.dateFormat)}{dd != null && dd <= 30 ? ` · ${dd}d` : ''}
           </Chip>}

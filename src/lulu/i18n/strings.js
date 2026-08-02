@@ -76,6 +76,7 @@ export const STRINGS = {
     shareViaWhatsApp: 'Share via WhatsApp / Email', openFile: 'Open', download: 'Download',
     shareHint: 'Opens the share sheet — pick WhatsApp, Mail, Messages and more.',
     page: 'Page', addDocument: 'Add document', documentTitle: 'Document', preview: 'Preview',
+    relatedTo: 'Related to', vehicle: 'Vehicle', person: 'Person', property: 'Property', trip: 'Trip', select: 'Select…',
     downloadedToast: 'Downloaded', sharedToast: 'Shared',
     // family / people / delegation
     family: 'Family', addFamily: 'Add family member', assignTask: 'Assign a task',
@@ -443,6 +444,7 @@ export const STRINGS = {
     shareViaWhatsApp: 'مشاركة عبر واتساب / البريد', openFile: 'فتح', download: 'تنزيل',
     shareHint: 'تفتح قائمة المشاركة — اختر واتساب أو البريد أو الرسائل وغيرها.',
     page: 'صفحة', addDocument: 'إضافة مستند', documentTitle: 'مستند', preview: 'معاينة',
+    relatedTo: 'مرتبط بـ', vehicle: 'مركبة', person: 'شخص', property: 'عقار', trip: 'رحلة', select: 'اختر…',
     downloadedToast: 'تم التنزيل', sharedToast: 'تمت المشاركة',
     // family / people / delegation
     family: 'العائلة', addFamily: 'إضافة فرد من العائلة', assignTask: 'إسناد مهمة',
