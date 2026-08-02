@@ -44,6 +44,9 @@ export function maybeSeed() {
 
   db.insert('documents', { title: 'Vehicle registration (Istimara)', category: 'vehicle_reg', vehicleId: vAlmas.id, expiry: d(210), notes: 'Renew via Absher', attachments: [] })
   db.insert('documents', { title: 'Insurance policy', category: 'insurance', vehicleId: vAlmas.id, expiry: d(38), attachments: [] })
+  db.insert('documents', { title: 'Passport', category: 'personal', expiry: d(400), notes: 'Renew a year before expiry', attachments: [] })
+  db.insert('documents', { title: 'Motorcycle license', category: 'custom:Motorcycle', expiry: d(150), attachments: [] })
+  db.writeSettings({ ...db.readSettings(), customDocCategories: ['Motorcycle'] })
 
   const tasks = [
     { title: 'Approve Q3 marketing budget', type: 'approval', classification: 'work', priority: 'critical', status: 'waiting_me', dueDate: todayISO(), project: 'Finance', requestedBy: 'Khalid Al-Otaibi' },

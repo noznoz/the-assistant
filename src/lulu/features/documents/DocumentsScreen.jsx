@@ -3,7 +3,7 @@ import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Sheet, Field, Input, Select, Button, Empty, Fab, Chip, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
-import { DOC_CATEGORIES, label } from '../../lib/domain.js'
+import { DOC_CATEGORIES, docCategoryOptions, docCatLabel, label } from '../../lib/domain.js'
 import { fmtDate, daysUntil } from '../../lib/format.js'
 import {
   saveAttachment, removeAttachment, getAttachmentFile, shareAttachments,
@@ -17,6 +17,7 @@ export default function DocumentsScreen({ go }) {
   const docs = useCollection('documents')
   const [editor, setEditor] = useState(null)
   const [viewing, setViewing] = useState(null)
+  const [filter, setFilter] = useState('all')
   const toast = useToast()
 
   // keep the viewed document in sync with store updates
@@ -46,8 +47,20 @@ export default function DocumentsScreen({ go }) {
             action={<Button variant="primary" icon="plus" onClick={() => setEditor({})}>{t('addDocument')}</Button>} />
         ) : (
           <div style={{ marginTop: 14 }}>
-            {docs.items.map(d => {
-              const cat = DOC_CATEGORIES.find(c => c.id === d.category)
+            {(() => {
+              // Category filter chips — only categories actually in use, plus All.
+              const used = [...new Set(docs.items.map(d => d.category || 'other'))]
+              const chips = [{ id: 'all', label: t('all') }].concat(used.map(id => ({ id, label: docCatLabel(id, lang) })))
+              if (chips.length <= 2) return null
+              return (
+                <div className="chip-row" style={{ marginBottom: 6 }}>
+                  {chips.map(c => (
+                    <Chip key={c.id} selectable on={filter === c.id} onClick={() => setFilter(c.id)}>{c.label}</Chip>
+                  ))}
+                </div>
+              )
+            })()}
+            {docs.items.filter(d => filter === 'all' || (d.category || 'other') === filter).map(d => {
               const dd = daysUntil(d.expiry)
               const thumb = (d.attachments || []).find(a => a.thumb)?.thumb
               const count = (d.attachments || []).length
@@ -63,7 +76,7 @@ export default function DocumentsScreen({ go }) {
                   <div className="body">
                     <div className="title">{d.title}</div>
                     <div className="meta">
-                      {label(cat, lang)}
+                      {docCatLabel(d.category, lang)}
                       {count > 0 && <span>· {count} {count === 1 ? t('documentTitle') : t('attachments')}</span>}
                       {d.expiry && <span>· {fmtDate(d.expiry, lang, settings.dateFormat)}</span>}
                     </div>
@@ -93,12 +106,28 @@ export default function DocumentsScreen({ go }) {
 // ---------------------------------------------------------------------------
 export function DocEditor({ initial, onClose, onSaved, onToast }) {
   const { t, lang } = useT()
+  const { settings, updateSettings } = useSettings()
   const docs = useCollection('documents')
   const [f, setF] = useState({ title: '', category: 'id', expiry: '', notes: '', attachments: [], ...initial })
   const [busy, setBusy] = useState(false)
+  const [newCat, setNewCat] = useState(null)
   const cameraRef = useRef()
   const fileRef = useRef()
   const set = (k) => (e) => setF(prev => ({ ...prev, [k]: e.target.value }))
+
+  const onCategory = (e) => {
+    if (e.target.value === '__addcat') { setNewCat(''); return }
+    setF(prev => ({ ...prev, category: e.target.value }))
+  }
+  const addCategory = () => {
+    const name = (newCat || '').trim()
+    if (!name) { setNewCat(null); return }
+    if (!(settings.customDocCategories || []).includes(name)) {
+      updateSettings({ customDocCategories: [...(settings.customDocCategories || []), name] })
+    }
+    setF(prev => ({ ...prev, category: 'custom:' + name }))
+    setNewCat(null)
+  }
 
   const addFiles = async (fileList) => {
     if (!fileList || !fileList.length) return
@@ -165,8 +194,17 @@ export function DocEditor({ initial, onClose, onSaved, onToast }) {
 
       <Field label={t('title')}><Input value={f.title} onChange={set('title')} placeholder={t('documentTitle')} /></Field>
       <Field label={t('category')}>
-        <Select value={f.category} onChange={set('category')} options={DOC_CATEGORIES.map(c => ({ value: c.id, label: label(c, lang) }))} />
+        <Select value={f.category} onChange={onCategory}>
+          {docCategoryOptions(lang, settings.customDocCategories).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          <option value="__addcat">{t('addCategory')}</option>
+        </Select>
       </Field>
+      {newCat != null && (
+        <div className="row2" style={{ marginTop: -6, marginBottom: 12 }}>
+          <Input value={newCat} onChange={e => setNewCat(e.target.value)} placeholder={t('customCategoryName')} autoFocus />
+          <Button onClick={addCategory}>{t('add')}</Button>
+        </div>
+      )}
       <Field label={t('policyExpiry')} hint={t('optional')}><Input type="date" value={f.expiry} onChange={set('expiry')} /></Field>
       <Field label={t('notesField')}><Input value={f.notes} onChange={set('notes')} /></Field>
     </Sheet>
@@ -177,7 +215,7 @@ export function DocEditor({ initial, onClose, onSaved, onToast }) {
 export function DocumentViewer({ doc, onBack, onEdit, onDelete, onToast }) {
   const { t, lang } = useT()
   const { settings } = useSettings()
-  const cat = DOC_CATEGORIES.find(c => c.id === doc.category)
+  const catText = docCatLabel(doc.category, lang)
   const attachments = doc.attachments || []
   const [urls, setUrls] = useState({})   // id -> objectURL
 
@@ -198,7 +236,7 @@ export function DocumentViewer({ doc, onBack, onEdit, onDelete, onToast }) {
 
   const shareText = [
     doc.title,
-    cat ? label(cat, lang) : '',
+    catText,
     doc.expiry ? `${t('policyExpiry')}: ${fmtDate(doc.expiry, lang, settings.dateFormat)}` : '',
   ].filter(Boolean).join('\n')
 
@@ -227,7 +265,7 @@ export function DocumentViewer({ doc, onBack, onEdit, onDelete, onToast }) {
       } />
       <div className="screen">
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', margin: '14px 0' }}>
-          <Chip tint="t-brand">{label(cat, lang)}</Chip>
+          <Chip tint="t-brand">{catText}</Chip>
           {doc.expiry && <Chip tint={dd != null && dd <= 7 ? 't-danger' : dd != null && dd <= 30 ? 't-warn' : ''}>
             {t('policyExpiry')}: {fmtDate(doc.expiry, lang, settings.dateFormat)}{dd != null && dd <= 30 ? ` · ${dd}d` : ''}
           </Chip>}

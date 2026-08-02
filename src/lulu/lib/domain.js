@@ -112,8 +112,28 @@ export const DOC_CATEGORIES = [
   { id: 'travel', en: 'Travel', ar: 'سفر' },
   { id: 'financial', en: 'Financial', ar: 'مالية' },
   { id: 'contract', en: 'Contracts', ar: 'عقود' },
+  { id: 'medical', en: 'Medical', ar: 'طبية' },
+  { id: 'property', en: 'Property', ar: 'عقارات' },
+  { id: 'education', en: 'Education', ar: 'تعليم' },
+  { id: 'personal', en: 'Personal', ar: 'شخصية' },
   { id: 'other', en: 'Other', ar: 'أخرى' },
 ]
+
+// Category options for documents: built-ins plus the user's own custom
+// categories (stored as `custom:<Label>`), with "Other" kept last.
+export function docCategoryOptions(lang = 'en', custom = []) {
+  const main = DOC_CATEGORIES.filter(c => c.id !== 'other').map(c => ({ value: c.id, label: label(c, lang) }))
+  const customs = (custom || []).map(name => ({ value: 'custom:' + name, label: name }))
+  const other = DOC_CATEGORIES.filter(c => c.id === 'other').map(c => ({ value: c.id, label: label(c, lang) }))
+  return [...main, ...customs, ...other]
+}
+
+export function docCatLabel(id, lang = 'en') {
+  if (!id) return ''
+  if (typeof id === 'string' && id.startsWith('custom:')) return id.slice(7)
+  const c = DOC_CATEGORIES.find(x => x.id === id)
+  return c ? label(c, lang) : id
+}
 
 export const CURRENCIES = ['SAR', 'USD', 'EUR', 'GBP', 'AED', 'KWD', 'BHD', 'QAR', 'OMR']
 
