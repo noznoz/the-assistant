@@ -30,7 +30,20 @@ export default function WorkDashboardScreen({ go }) {
       open: open.filter(x => taskMemberIds(x).includes(m.id)).length,
       overdue: overdue.filter(x => taskMemberIds(x).includes(m.id)).length,
     })).filter(x => x.open > 0).sort((a, b) => b.open - a.open)
-    return { open, overdue, thisWeek, boss, byDept, byMember }
+    // Per-member scorecards: completion, on-time %, and current load. A task
+    // counts as on-time if it had no due date or was completed on/before it
+    // (completion time approximated by the record's updatedAt).
+    const scorecards = members.items.map(m => {
+      const assigned = work.filter(x => taskMemberIds(x).includes(m.id))
+      if (!assigned.length) return null
+      const done = assigned.filter(x => x.status === 'completed')
+      const onTime = done.filter(x => !x.dueDate || (x.updatedAt && x.updatedAt.slice(0, 10) <= x.dueDate)).length
+      const openC = assigned.filter(x => x.status !== 'completed').length
+      const overdueC = assigned.filter(x => x.status !== 'completed' && isOverdue(x.dueDate)).length
+      const pct = done.length ? Math.round(onTime / done.length * 100) : null
+      return { m, done: done.length, onTime, open: openC, overdue: overdueC, pct }
+    }).filter(Boolean).sort((a, b) => (b.pct ?? -1) - (a.pct ?? -1) || b.done - a.done)
+    return { open, overdue, thisWeek, boss, byDept, byMember, scorecards }
   }, [tasks.items, departments.items, members.items])
 
   const maxLoad = d.byMember[0]?.open || 1
@@ -57,6 +70,30 @@ export default function WorkDashboardScreen({ go }) {
                   <b className="tnum">{open}</b>
                 </div>
               ))}
+            </Card>
+          </>
+        )}
+
+        {d.scorecards.length > 0 && (
+          <>
+            <Section title={t('teamScorecards')} />
+            <Card tight>
+              {d.scorecards.map(({ m, done, open, overdue, pct }) => {
+                const tint = pct == null ? 'muted' : pct >= 80 ? 't-ok' : pct >= 50 ? 't-warn' : 't-danger'
+                return (
+                  <div className="li" key={m.id}>
+                    <div className="lead" style={{ background: 'var(--surface-2)' }}><Icon name="people" size={17} /></div>
+                    <div className="body">
+                      <div className="title">{m.name}</div>
+                      <div className="meta">{done} {t('doneLabel')} · {open} {t('openLabel').toLowerCase()}{overdue > 0 && <span className="t-danger"> · {overdue} {t('overdue').toLowerCase()}</span>}</div>
+                    </div>
+                    <div style={{ textAlign: 'end' }}>
+                      <b className={`tnum ${tint}`} style={{ fontSize: 16 }}>{pct == null ? '—' : `${pct}%`}</b>
+                      <div className="muted" style={{ fontSize: 10.5 }}>{t('onTime')}</div>
+                    </div>
+                  </div>
+                )
+              })}
             </Card>
           </>
         )}

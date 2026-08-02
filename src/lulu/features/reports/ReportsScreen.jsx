@@ -50,6 +50,15 @@ export default function ReportsScreen({ go }) {
         <button className="iconbtn" onClick={() => share(text)} aria-label={t('share')}><Icon name="share" size={18} /></button>
       } />
       <div className="screen">
+        <button onClick={() => go('boardpack')} style={{ width: '100%', marginTop: 14, display: 'flex', alignItems: 'center', gap: 12, padding: 16, background: 'var(--brand-tint)', border: '1px solid var(--line)', borderRadius: 'var(--r-lg)', color: 'var(--ink)' }}>
+          <span className="lead t-brand" style={{ width: 42, height: 42, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="report" size={20} /></span>
+          <span style={{ flex: 1, textAlign: 'start' }}>
+            <span style={{ display: 'block', fontWeight: 750 }}>{t('boardPack')}</span>
+            <span className="muted" style={{ display: 'block', fontSize: 12.5 }}>{t('boardPackSub')}</span>
+          </span>
+          <Icon name="chevron" size={16} style={{ color: 'var(--ink-3)' }} />
+        </button>
+
         <Section title={t('financialReports')} />
         <div className="qa-grid">
           {[

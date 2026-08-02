@@ -57,6 +57,7 @@ const GROUPS = [
   },
   {
     key: 'grpReports', tint: 't-brand', items: [
+      { id: 'boardpack', icon: 'report', label: 'boardPack' },
       { id: 'monthlyreport', icon: 'report', label: 'monthlyReport' },
       { id: 'reports', icon: 'chart' },
       { id: 'settings', icon: 'cog' },

@@ -52,6 +52,7 @@ import WeekScreen from './features/week/WeekScreen.jsx'
 import MembershipsScreen from './features/memberships/MembershipsScreen.jsx'
 import RenewalsScreen from './features/renewals/RenewalsScreen.jsx'
 import MonthlyReportScreen from './features/reports/MonthlyReportScreen.jsx'
+import BoardPackScreen from './features/reports/BoardPackScreen.jsx'
 import ForecastScreen from './features/finance/ForecastScreen.jsx'
 import EmergencyScreen from './features/emergency/EmergencyScreen.jsx'
 import WishlistScreen from './features/wishlist/WishlistScreen.jsx'
@@ -144,6 +145,7 @@ function Router() {
       case 'memberships': return <MembershipsScreen go={go} />
       case 'renewals': return <RenewalsScreen go={go} />
       case 'monthlyreport': return <MonthlyReportScreen go={go} />
+      case 'boardpack': return <BoardPackScreen go={go} />
       case 'forecast': return <ForecastScreen go={go} />
       case 'emergency': return <EmergencyScreen go={go} />
       case 'wishlist': return <WishlistScreen go={go} />

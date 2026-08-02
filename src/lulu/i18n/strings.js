@@ -256,6 +256,7 @@ export const STRINGS = {
     needsAttention: 'Needs your attention', viewAll: 'View all',
     spendingUp: 'Spending is up this month', spendingDown: 'Spending is down this month',
     monthlyReport: 'Monthly report', monthlyreport: 'Monthly report', netCashflow: 'Net cashflow', summary: 'Summary',
+    boardPack: 'Board pack', boardPackSub: 'Finance, work & household in one summary', cashflow: 'Cashflow', net: 'Net', spending: 'Spending', print: 'Print', completedThisMonth: 'Completed this month', householdHorizon: 'Household horizon',
     totalAssets: 'Total assets', shareAsPdf: 'Share as PDF', reportShareHint: 'Opens your print sheet — choose “Save to Files” or share as PDF.',
     preparingReport: 'Preparing report…', backupHint: 'Save a copy of everything to a file — keep it safe or move to a new phone.',
     // receipt scan + forecast + emergency
@@ -341,6 +342,7 @@ export const STRINGS = {
     checklist: 'Checklist', addSubtask: 'Add a sub-task…', dashboard: 'Dashboard', department: 'Department',
     // work dashboard + meetings
     workDashboard: 'Work dashboard', openTasks: 'Open tasks', dueThisWeek: 'Due this week', withBoss: 'With boss',
+    teamScorecards: 'Team scorecards', onTime: 'on-time', doneLabel: 'done',
     byDepartment: 'By department', memberWorkload: 'Member workload', workloadHint: 'Assign tasks to members to see their load here.',
     meetings: 'Meetings', noMeetings: 'No meetings yet', meetingsHint: 'Log meeting notes and turn action points into tasks.',
     addMeeting: 'Add meeting', editMeeting: 'Edit meeting', meetingTitle: 'Title', meetingPlaceholder: 'e.g. Weekly ops sync',
@@ -624,6 +626,7 @@ export const STRINGS = {
     needsAttention: 'يحتاج انتباهك', viewAll: 'عرض الكل',
     spendingUp: 'الإنفاق ارتفع هذا الشهر', spendingDown: 'الإنفاق انخفض هذا الشهر',
     monthlyReport: 'التقرير الشهري', monthlyreport: 'التقرير الشهري', netCashflow: 'صافي التدفق النقدي', summary: 'ملخص',
+    boardPack: 'الحزمة التنفيذية', boardPackSub: 'المالية والعمل والمنزل في ملخص واحد', cashflow: 'التدفق النقدي', net: 'الصافي', spending: 'الإنفاق', print: 'طباعة', completedThisMonth: 'أُنجز هذا الشهر', householdHorizon: 'أفق المنزل',
     totalAssets: 'إجمالي الأصول', shareAsPdf: 'مشاركة كـ PDF', reportShareHint: 'يفتح صفحة الطباعة — اختر "حفظ في الملفات" أو المشاركة كـ PDF.',
     preparingReport: 'جارٍ تجهيز التقرير…', backupHint: 'احفظ نسخة من كل شيء في ملف — للأمان أو للنقل إلى هاتف جديد.',
     // receipt scan + forecast + emergency
@@ -709,6 +712,7 @@ export const STRINGS = {
     checklist: 'قائمة المهام', addSubtask: 'إضافة مهمة فرعية…', dashboard: 'لوحة', department: 'القسم',
     // work dashboard + meetings
     workDashboard: 'لوحة العمل', openTasks: 'مهام مفتوحة', dueThisWeek: 'مستحقة هذا الأسبوع', withBoss: 'مع المدير',
+    teamScorecards: 'بطاقات أداء الفريق', onTime: 'في الوقت', doneLabel: 'منجزة',
     byDepartment: 'حسب القسم', memberWorkload: 'حمل الأعضاء', workloadHint: 'أسند مهاماً للأعضاء لرؤية حِملهم هنا.',
     meetings: 'الاجتماعات', noMeetings: 'لا اجتماعات بعد', meetingsHint: 'دوّن ملاحظات الاجتماع وحوّل النقاط إلى مهام.',
     addMeeting: 'إضافة اجتماع', editMeeting: 'تعديل الاجتماع', meetingTitle: 'العنوان', meetingPlaceholder: 'مثال: اجتماع العمليات الأسبوعي',
