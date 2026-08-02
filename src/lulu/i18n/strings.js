@@ -335,6 +335,8 @@ export const STRINGS = {
     repeat: 'Repeat', repeatHint: 'Auto-creates the next one when completed', listView: 'List', boardView: 'Board', moveBack: 'Move back', moveForward: 'Move forward',
     followUps: 'Follow-ups', allClear: 'All clear', followUpsHint: "Tasks you've delegated and items from your boss show up here.", awaitingOthers: 'awaiting others', onTrack: 'On track',
     waitingOnOthers: 'Waiting on others', nudge: 'Nudge', shareDigest: 'Share digest', weeklyDigest: 'Weekly work digest', digestHint: "Share a summary of this week's work with your team.", other: 'Other',
+    sendStatusUpdate: 'Status update to boss', statusUpdate: 'Status update', completedThisWeek: 'Completed this week', blockedWaiting: 'Blocked / waiting', toRaiseWithYou: 'To raise with you',
+    nothingToReport: 'Nothing to report this week.', statusUpdateHint: 'Auto-drafted from your work — edit before sending.', copy: 'Copy', copied: 'Copied ✓',
     checklist: 'Checklist', addSubtask: 'Add a sub-task…', dashboard: 'Dashboard', department: 'Department',
     // work dashboard + meetings
     workDashboard: 'Work dashboard', openTasks: 'Open tasks', dueThisWeek: 'Due this week', withBoss: 'With boss',
@@ -700,6 +702,8 @@ export const STRINGS = {
     repeat: 'التكرار', repeatHint: 'يُنشئ المهمة التالية تلقائياً عند الإكمال', listView: 'قائمة', boardView: 'لوحة', moveBack: 'إرجاع', moveForward: 'تقديم',
     followUps: 'المتابعات', allClear: 'كل شيء منجز', followUpsHint: 'المهام التي أسندتها والبنود من مديرك تظهر هنا.', awaitingOthers: 'بانتظار الآخرين', onTrack: 'على المسار',
     waitingOnOthers: 'بانتظار الآخرين', nudge: 'تذكير', shareDigest: 'مشاركة الملخص', weeklyDigest: 'ملخص العمل الأسبوعي', digestHint: 'شارك ملخص عمل هذا الأسبوع مع فريقك.', other: 'أخرى',
+    sendStatusUpdate: 'تحديث الحالة للمدير', statusUpdate: 'تحديث الحالة', completedThisWeek: 'أُنجز هذا الأسبوع', blockedWaiting: 'معلّق / بانتظار', toRaiseWithYou: 'للعرض عليك',
+    nothingToReport: 'لا جديد لهذا الأسبوع.', statusUpdateHint: 'مُصاغ تلقائياً من عملك — عدّله قبل الإرسال.', copy: 'نسخ', copied: 'تم النسخ ✓',
     checklist: 'قائمة المهام', addSubtask: 'إضافة مهمة فرعية…', dashboard: 'لوحة', department: 'القسم',
     // work dashboard + meetings
     workDashboard: 'لوحة العمل', openTasks: 'مهام مفتوحة', dueThisWeek: 'مستحقة هذا الأسبوع', withBoss: 'مع المدير',

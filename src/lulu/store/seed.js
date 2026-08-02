@@ -130,6 +130,7 @@ export function maybeSeed() {
   // Recurring weekly report (regenerates on completion).
   db.insert('tasks', { title: 'Weekly operations report', classification: 'work', departmentId: opsDept.id, memberIds: [mSara.id], memberId: mSara.id, assignedTo: mSara.name, status: 'in_progress', priority: 'medium', dueDate: d(3), repeat: 'weekly' })
   db.insert('tasks', { title: 'Follow up Q3 pipeline', classification: 'work', departmentId: salesDept.id, memberId: mOmar.id, assignedTo: mOmar.name, status: 'waiting_someone', priority: 'high', dueDate: d(4) })
+  db.insert('tasks', { title: 'Signed off vendor SLA', classification: 'work', departmentId: opsDept.id, memberId: mFaisal.id, assignedTo: mFaisal.name, status: 'completed', priority: 'medium', dueDate: d(-2) })
   // Whole-department task (everyone in Operations).
   db.insert('tasks', { title: 'Complete annual safety training', description: 'All operations staff to finish the online modules.', classification: 'work', departmentId: opsDept.id, memberIds: [mFaisal.id, mSara.id], memberId: mFaisal.id, assignedTo: 'Operations', status: 'waiting_someone', priority: 'medium', dueDate: d(20) })
   // Cross-department task (Operations + Sales).

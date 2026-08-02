@@ -45,6 +45,53 @@ function completeWorkTask(task, tasks) {
 
 const REPEAT_OPTIONS = ['', 'weekly', 'monthly', 'quarterly']
 
+// A ready-to-send weekly status update for your manager: what got done,
+// what's moving, what's stuck, and what you want to raise.
+function buildBossUpdate({ tasks, lang, settings, t }) {
+  const work = tasks.filter(x => x.classification === 'work')
+  const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7)
+  const done = work.filter(x => x.status === 'completed' && x.updatedAt && new Date(x.updatedAt) >= weekAgo)
+  const progress = work.filter(x => x.status === 'in_progress')
+  const blocked = work.filter(x => x.status === 'waiting_someone' || x.status === 'waiting_me')
+  const raise = work.filter(x => x.boss === 'up' && x.status !== 'completed' && x.status !== 'cancelled')
+  const line = (x, withWho) => `• ${x.title}${withWho && x.assignedTo ? ` (${x.assignedTo})` : ''}${x.dueDate ? ` — ${relativeDay(x.dueDate, lang)}` : ''}`
+  const out = [`📊 ${t('statusUpdate')} — ${fmtDate(new Date().toISOString().slice(0, 10), lang, settings.dateFormat)}`, '']
+  const block = (label, items, withWho) => { if (items.length) { out.push(label); items.forEach(x => out.push(line(x, withWho))); out.push('') } }
+  block(`✅ ${t('completedThisWeek')}`, done, true)
+  block(`▶️ ${t('st_in_progress')}`, progress, true)
+  block(`⏳ ${t('blockedWaiting')}`, blocked, true)
+  block(`🔜 ${t('toRaiseWithYou')}`, raise, false)
+  if (out.length <= 2) out.push(t('nothingToReport'))
+  return out.join('\n').trim()
+}
+
+function BossUpdateSheet({ onClose, toast }) {
+  const { t, lang } = useT()
+  const { settings } = useSettings()
+  const tasks = useCollection('tasks')
+  const boss = settings.profile || {}
+  const [text, setText] = useState(() => buildBossUpdate({ tasks: tasks.items, lang, settings, t }))
+  const copy = async () => { try { await navigator.clipboard.writeText(text); toast && toast.show(t('copied')) } catch { toast && toast.show(text) } }
+  return (
+    <Sheet title={t('statusUpdate')} onClose={onClose}
+      footer={<div className="stack">
+        {(boss.managerWhatsapp || boss.managerMobile) && (
+          <Button variant="brand" block icon="whatsapp" onClick={() => whatsappToPerson({ whatsapp: boss.managerWhatsapp, mobile: boss.managerMobile }, text)}>
+            {t('sendOnWhatsApp')}{boss.managerName ? ` · ${boss.managerName}` : ''}
+          </Button>
+        )}
+        <div className="row2">
+          <Button icon="whatsapp" onClick={() => share(text)}>{t('shareWhatsApp')}</Button>
+          <Button icon="mail" onClick={() => emailShare(t('statusUpdate'), text)}>{t('email')}</Button>
+        </div>
+        <Button block icon="doc" onClick={copy}>{t('copy')}</Button>
+      </div>}>
+      <p className="hint" style={{ margin: '0 2px 8px' }}>{t('statusUpdateHint')}</p>
+      <TextArea value={text} onChange={e => setText(e.target.value)} rows={12} style={{ minHeight: 240, fontSize: 14, lineHeight: 1.5 }} />
+    </Sheet>
+  )
+}
+
 // Work / organisation hub: your manager (two-way tasks) + departments, members
 // and department tasks assigned to team members. All tasks live in the shared
 // `tasks` collection tagged classification:'work'.
@@ -67,6 +114,7 @@ function WorkHome({ go }) {
   const [bossTask, setBossTask] = useState(null)   // { boss: 'up'|'down' } or task
   const [bossSheet, setBossSheet] = useState(null)
   const [editBoss, setEditBoss] = useState(false)
+  const [bossUpdate, setBossUpdate] = useState(false)
   const toast = useToast()
 
   const boss = settings.profile?.managerName
@@ -107,6 +155,7 @@ function WorkHome({ go }) {
             <Button icon="plus" onClick={() => setBossTask({ boss: 'up' })}>{t('toDiscuss')}</Button>
             <Button icon="inbox" onClick={() => setBossTask({ boss: 'down' })}>{t('fromBoss')}</Button>
           </div>
+          <Button block icon="report" onClick={() => setBossUpdate(true)} style={{ marginTop: 8 }}>{t('sendStatusUpdate')}</Button>
         </Card>
 
         {waitingOnOthers.length > 0 && (
@@ -159,6 +208,7 @@ function WorkHome({ go }) {
       {bossTask && <WorkTaskEditor mode="boss" initial={bossTask.id ? bossTask : { boss: bossTask.boss }} onClose={() => setBossTask(null)} onSaved={() => toast.show(t('savedToast'))} />}
       {bossSheet && <WorkTaskSheet task={bossSheet} onClose={() => setBossSheet(null)} onEdit={() => { const x = bossSheet; setBossSheet(null); setBossTask(x) }} onSaved={() => toast.show(t('savedToast'))} />}
       {editBoss && <ManagerEditor settings={settings} updateSettings={updateSettings} onClose={() => setEditBoss(false)} onSaved={() => toast.show(t('savedToast'))} />}
+      {bossUpdate && <BossUpdateSheet onClose={() => setBossUpdate(false)} toast={toast} />}
       {toast.node}
     </>
   )
