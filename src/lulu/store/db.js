@@ -89,6 +89,8 @@ export const DEFAULT_SETTINGS = {
   biometricId: '',       // WebAuthn credential id (base64) for Face ID unlock
   notifications: false,  // on-device notifications + badge
   aiProvider: 'none',    // none | claude | openai
+  anthropicKey: '',      // Anthropic API key for the in-app assistant (on-device only)
+  aiModel: 'claude-sonnet-5', // model id used by the assistant
   monthlyBudget: 0,
   customCategories: [],  // user-added expense categories (labels)
   categoryBudgets: {},   // { [categoryId]: monthly amount }

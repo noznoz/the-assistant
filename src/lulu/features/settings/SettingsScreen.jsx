@@ -10,6 +10,7 @@ import { DEFAULT_RATES } from '../../lib/format.js'
 import * as db from '../../store/db.js'
 import { hashPin, biometricSupported, enrollBiometric } from '../../lib/lock.js'
 import { requestNotificationPermission, notificationPermission, setBadge } from '../../lib/notify.js'
+import { AI_MODELS } from '../../lib/ai.js'
 
 export default function SettingsScreen({ go }) {
   const { t } = useT()
@@ -185,15 +186,20 @@ export default function SettingsScreen({ go }) {
           )}
         </Card>
 
-        <Section title={t('aiProvider')} />
+        <Section title={t('aiAssistant')} />
         <Card className="stack">
-          <Field label={t('aiProvider')} hint="Used later for the assistant. Offline heuristics work today.">
-            <Select value={settings.aiProvider} onChange={set('aiProvider')} options={[
-              { value: 'none', label: 'Offline (built-in)' },
-              { value: 'claude', label: 'Claude API' },
-              { value: 'openai', label: 'OpenAI API' },
-            ]} />
+          <p className="hint" style={{ margin: '0 2px' }}>{t('aiKeyHint')}</p>
+          <Field label={t('aiKeyLabel')}>
+            <Input type="password" value={settings.anthropicKey} onChange={set('anthropicKey')}
+              placeholder="sk-ant-…" autoComplete="off" spellCheck={false} />
           </Field>
+          <Field label={t('aiModelLabel')}>
+            <Select value={settings.aiModel} onChange={set('aiModel')}
+              options={AI_MODELS.map(m => ({ value: m.id, label: m.label }))} />
+          </Field>
+          {settings.anthropicKey
+            ? <Button block icon="sparkle" onClick={() => go('assistant')}>{t('openAssistant')}</Button>
+            : <p className="hint" style={{ margin: '0 2px' }}>{t('aiKeyWhere')}</p>}
         </Card>
 
         <Section title={t('backup')} />

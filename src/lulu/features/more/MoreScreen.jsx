@@ -10,6 +10,7 @@ import { useStore, useSettings } from '../../store/StoreProvider.jsx'
 const GROUPS = [
   {
     key: 'grpWork', tint: 't-brand', items: [
+      { id: 'assistant', icon: 'sparkle' },
       { id: 'work', icon: 'report' },
       { id: 'followup', icon: 'bell', label: 'followUps' },
       { id: 'orgchart', icon: 'people', label: 'orgChart' },
