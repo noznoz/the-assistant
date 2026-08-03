@@ -3,7 +3,7 @@ import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Sheet, Field, Input, Select, Button, Empty, Fab, Chip, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
-import { DOC_CATEGORIES, docCategoryOptions, docCatLabel, label } from '../../lib/domain.js'
+import { DOC_CATEGORIES, docCategoryOptions, docCatLabel, VAULT_ICONS, label } from '../../lib/domain.js'
 import { DOC_LINK_TYPES, docItemName, linkTypeOfDoc, resolveDocLink } from '../../lib/docLink.js'
 import { fmtDate, daysUntil } from '../../lib/format.js'
 import {
@@ -16,6 +16,7 @@ export default function DocumentsScreen({ go }) {
   const { t, lang } = useT()
   const { settings } = useSettings()
   const docs = useCollection('documents')
+  const vaults = useCollection('vaults')
   const vehicles = useCollection('vehicles')
   const people = useCollection('people')
   const properties = useCollection('properties')
@@ -24,11 +25,11 @@ export default function DocumentsScreen({ go }) {
   const [editor, setEditor] = useState(null)
   const [viewing, setViewing] = useState(null)
   const [filter, setFilter] = useState('all')
+  const [activeVault, setActiveVault] = useState(null)   // null = folders grid; id | 'all' | 'unfiled'
+  const [vaultEditor, setVaultEditor] = useState(null)
   const toast = useToast()
 
-  // keep the viewed document in sync with store updates
   const current = viewing && docs.items.find(d => d.id === viewing.id)
-
   if (current) {
     return (
       <DocumentViewer
@@ -44,29 +45,80 @@ export default function DocumentsScreen({ go }) {
     )
   }
 
+  const isUnfiled = (d) => !d.vaultId || !vaults.items.some(v => v.id === d.vaultId)
+  const vaultDocCount = (id) => docs.items.filter(d => d.vaultId === id).length
+  const unfiledCount = docs.items.filter(isUnfiled).length
+
+  // ---- Folders (vaults) overview ----
+  if (activeVault === null) {
+    const Tile = ({ icon, name, count, onClick, dashed }) => (
+      <button onClick={onClick} style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 10, padding: 16, minHeight: 108,
+        background: dashed ? 'transparent' : 'var(--surface)', border: dashed ? '1px dashed var(--line-2)' : '1px solid var(--line)',
+        borderRadius: 'var(--r-lg)', color: 'var(--ink)', textAlign: 'start',
+      }}>
+        <span className={`lead ${dashed ? '' : 't-brand'}`} style={{ width: 44, height: 44, borderRadius: 13, display: 'grid', placeItems: 'center', background: dashed ? 'var(--surface-2)' : undefined, color: dashed ? 'var(--ink-3)' : undefined }}>
+          <Icon name={icon} size={22} />
+        </span>
+        <span style={{ minWidth: 0 }}>
+          <span style={{ display: 'block', fontWeight: 700, fontSize: 14.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{name}</span>
+          {count != null && <span className="muted" style={{ fontSize: 12 }}>{count} {count === 1 ? t('documentTitle') : t('attachments')}</span>}
+        </span>
+      </button>
+    )
+    return (
+      <>
+        <DetailHeader title={t('documents')} onBack={() => go('more')} right={
+          <button className="iconbtn" onClick={() => setVaultEditor({})} aria-label={t('newVault')}><Icon name="plus" size={18} /></button>
+        } />
+        <div className="screen">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 14 }}>
+            <Tile icon="grid" name={t('allDocuments')} count={docs.items.length} onClick={() => setActiveVault('all')} />
+            {vaults.items.map(v => (
+              <Tile key={v.id} icon={v.icon || 'doc'} name={v.name} count={vaultDocCount(v.id)} onClick={() => setActiveVault(v.id)} />
+            ))}
+            {unfiledCount > 0 && <Tile icon="inbox" name={t('unfiled')} count={unfiledCount} onClick={() => setActiveVault('unfiled')} />}
+            <Tile icon="plus" name={t('newVault')} dashed onClick={() => setVaultEditor({})} />
+          </div>
+          <p className="hint center" style={{ marginTop: 16 }}>{t('vaultsHint')}</p>
+        </div>
+        <Fab onClick={() => setEditor({})} />
+        {vaultEditor && <VaultEditor initial={vaultEditor.id ? vaultEditor : {}} onClose={() => setVaultEditor(null)} onSaved={() => toast.show(t('savedToast'))} />}
+        {editor && <DocEditor initial={editor.id ? editor : {}} onClose={() => setEditor(null)} onSaved={() => toast.show(t('savedToast'))} onToast={toast.show} />}
+        {toast.node}
+      </>
+    )
+  }
+
+  // ---- Inside a vault (or All / Unfiled) ----
+  const vault = vaults.items.find(v => v.id === activeVault)
+  const heading = activeVault === 'all' ? t('allDocuments') : activeVault === 'unfiled' ? t('unfiled') : (vault?.name || t('documents'))
+  const inVault = (d) => activeVault === 'all' ? true : activeVault === 'unfiled' ? isUnfiled(d) : d.vaultId === activeVault
+  const vaultDocs = docs.items.filter(inVault)
+  const shown = vaultDocs.filter(d => filter === 'all' || (d.category || 'other') === filter)
+
   return (
     <>
-      <DetailHeader title={t('documents')} onBack={() => go('more')} />
+      <DetailHeader title={heading} onBack={() => { setActiveVault(null); setFilter('all') }} right={
+        vault ? <button className="iconbtn" onClick={() => setVaultEditor(vault)} aria-label={t('edit')}><Icon name="cog" size={18} /></button> : null
+      } />
       <div className="screen">
-        {docs.items.length === 0 ? (
+        {vaultDocs.length === 0 ? (
           <Empty icon="doc" title={t('nothingHere')} text={t('addFiles')}
-            action={<Button variant="primary" icon="plus" onClick={() => setEditor({})}>{t('addDocument')}</Button>} />
+            action={<Button variant="primary" icon="plus" onClick={() => setEditor({ vaultId: vault?.id })}>{t('addDocument')}</Button>} />
         ) : (
           <div style={{ marginTop: 14 }}>
             {(() => {
-              // Category filter chips — only categories actually in use, plus All.
-              const used = [...new Set(docs.items.map(d => d.category || 'other'))]
+              const used = [...new Set(vaultDocs.map(d => d.category || 'other'))]
               const chips = [{ id: 'all', label: t('all') }].concat(used.map(id => ({ id, label: docCatLabel(id, lang) })))
               if (chips.length <= 2) return null
               return (
                 <div className="chip-row" style={{ marginBottom: 6 }}>
-                  {chips.map(c => (
-                    <Chip key={c.id} selectable on={filter === c.id} onClick={() => setFilter(c.id)}>{c.label}</Chip>
-                  ))}
+                  {chips.map(c => <Chip key={c.id} selectable on={filter === c.id} onClick={() => setFilter(c.id)}>{c.label}</Chip>)}
                 </div>
               )
             })()}
-            {docs.items.filter(d => filter === 'all' || (d.category || 'other') === filter).map(d => {
+            {shown.map(d => {
               const dd = daysUntil(d.expiry)
               const thumb = (d.attachments || []).find(a => a.thumb)?.thumb
               const count = (d.attachments || []).length
@@ -75,9 +127,7 @@ export default function DocumentsScreen({ go }) {
                   onDelete={async () => { for (const a of d.attachments || []) await removeAttachment(a); docs.remove(d.id); toast.show(t('deletedToast')) }}>
                 <div className="li" onClick={() => setViewing(d)}>
                   <div className="lead" style={{ padding: 0, overflow: 'hidden', background: 'var(--surface-2)' }}>
-                    {thumb
-                      ? <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : <Icon name={count ? 'doc' : 'doc'} size={18} />}
+                    {thumb ? <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Icon name="doc" size={18} />}
                   </div>
                   <div className="body">
                     <div className="title">{d.title}</div>
@@ -96,17 +146,53 @@ export default function DocumentsScreen({ go }) {
           </div>
         )}
       </div>
-      <Fab onClick={() => setEditor({})} />
+      <Fab onClick={() => setEditor({ vaultId: vault?.id })} />
       {editor && (
         <DocEditor
-          initial={editor.id ? editor : {}}
+          initial={editor.id ? editor : { vaultId: vault?.id }}
           onClose={() => setEditor(null)}
           onSaved={() => toast.show(t('savedToast'))}
           onToast={toast.show}
         />
       )}
+      {vaultEditor && <VaultEditor initial={vaultEditor.id ? vaultEditor : {}} onClose={() => setVaultEditor(null)}
+        onSaved={() => toast.show(t('savedToast'))} onDeleted={() => { setVaultEditor(null); setActiveVault(null) }} />}
       {toast.node}
     </>
+  )
+}
+
+// ---------------------------------------------------------------------------
+function VaultEditor({ initial, onClose, onSaved, onDeleted }) {
+  const { t } = useT()
+  const vaults = useCollection('vaults')
+  const [f, setF] = useState({ name: '', icon: 'doc', ...initial })
+  const [err, setErr] = useState('')
+  const submit = () => {
+    if (!f.name.trim()) { setErr(t('required')); return }
+    const rec = { ...f, name: f.name.trim() }
+    initial.id ? vaults.save({ ...rec, id: initial.id }) : vaults.add(rec)
+    onSaved && onSaved(); onClose()
+  }
+  return (
+    <Sheet title={initial.id ? t('editVault') : t('newVault')} onClose={onClose}
+      footer={<div className="stack">
+        <Button variant="primary" block onClick={submit}>{t('save')}</Button>
+        {initial.id && <Button block variant="danger" icon="trash" onClick={() => { vaults.remove(initial.id); onClose(); onDeleted && onDeleted() }}>{t('delete')}</Button>}
+      </div>}>
+      <Field label={t('name')} required error={err}><Input value={f.name} onChange={e => setF({ ...f, name: e.target.value })} placeholder={t('vaultPlaceholder')} autoFocus /></Field>
+      <Field label={t('icon')}>
+        <div className="chip-row">
+          {VAULT_ICONS.map(ic => (
+            <button key={ic} onClick={() => setF({ ...f, icon: ic })} aria-label={ic} style={{
+              width: 44, height: 44, borderRadius: 12, display: 'grid', placeItems: 'center',
+              border: f.icon === ic ? '2px solid var(--brand-500, var(--brand-600))' : '1px solid var(--line)',
+              background: f.icon === ic ? 'var(--brand-tint)' : 'var(--surface)', color: f.icon === ic ? 'var(--brand-600)' : 'var(--ink-2)',
+            }}><Icon name={ic} size={20} /></button>
+          ))}
+        </div>
+      </Field>
+    </Sheet>
   )
 }
 
@@ -115,12 +201,13 @@ export function DocEditor({ initial, onClose, onSaved, onToast }) {
   const { t, lang } = useT()
   const { settings, updateSettings } = useSettings()
   const docs = useCollection('documents')
+  const vaults = useCollection('vaults')
   const vehicles = useCollection('vehicles')
   const people = useCollection('people')
   const properties = useCollection('properties')
   const trips = useCollection('trips')
   const linkColls = { vehicles: vehicles.items, people: people.items, properties: properties.items, trips: trips.items }
-  const [f, setF] = useState({ title: '', category: 'id', expiry: '', notes: '', attachments: [], ...initial })
+  const [f, setF] = useState({ title: '', category: 'id', vaultId: '', expiry: '', notes: '', attachments: [], ...initial })
   const [busy, setBusy] = useState(false)
   const [newCat, setNewCat] = useState(null)
   const [linkType, setLinkType] = useState(() => linkTypeOfDoc(initial))
@@ -211,6 +298,12 @@ export function DocEditor({ initial, onClose, onSaved, onToast }) {
       )}
 
       <Field label={t('title')}><Input value={f.title} onChange={set('title')} placeholder={t('documentTitle')} /></Field>
+      <Field label={t('vault')} hint={t('optional')}>
+        <Select value={f.vaultId || ''} onChange={set('vaultId')}>
+          <option value="">{t('unfiled')}</option>
+          {vaults.items.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
+        </Select>
+      </Field>
       <Field label={t('category')}>
         <Select value={f.category} onChange={onCategory}>
           {docCategoryOptions(lang, settings.customDocCategories).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}

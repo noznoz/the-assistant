@@ -128,6 +128,9 @@ export function docCategoryOptions(lang = 'en', custom = []) {
   return [...main, ...customs, ...other]
 }
 
+// Icons a document vault (folder) can use.
+export const VAULT_ICONS = ['doc', 'shield', 'car', 'people', 'gift', 'wallet', 'trip', 'wrench', 'sparkle', 'star', 'calendar', 'report']
+
 export function docCatLabel(id, lang = 'en') {
   if (!id) return ''
   if (typeof id === 'string' && id.startsWith('custom:')) return id.slice(7)

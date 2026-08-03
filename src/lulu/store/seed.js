@@ -42,10 +42,13 @@ export function maybeSeed() {
   db.insert('accessories', { vehicleId: vAlmas.id, name: 'Dash cam (front + rear)', cost: 1200, date: d(-30), fitted: true })
   db.insert('accessories', { vehicleId: vRaven.id, name: 'Touratech panniers', cost: 6500, date: d(-45), fitted: true, note: 'Aluminium, 38L pair' })
 
-  db.insert('documents', { title: 'Vehicle registration (Istimara)', category: 'vehicle_reg', vehicleId: vAlmas.id, expiry: d(210), notes: 'Renew via Absher', attachments: [] })
-  db.insert('documents', { title: 'Insurance policy', category: 'insurance', vehicleId: vAlmas.id, expiry: d(38), attachments: [] })
-  db.insert('documents', { title: 'Passport', category: 'personal', expiry: d(400), notes: 'Renew a year before expiry', attachments: [] })
-  db.insert('documents', { title: 'Motorcycle license', category: 'custom:Motorcycle', expiry: d(150), attachments: [] })
+  const vaultVehicles = db.insert('vaults', { name: 'Vehicles', icon: 'car' })
+  const vaultPersonal = db.insert('vaults', { name: 'Personal', icon: 'people' })
+  const vaultProperty = db.insert('vaults', { name: 'Property', icon: 'doc' })
+  db.insert('documents', { title: 'Vehicle registration (Istimara)', category: 'vehicle_reg', vaultId: vaultVehicles.id, vehicleId: vAlmas.id, expiry: d(210), notes: 'Renew via Absher', attachments: [] })
+  db.insert('documents', { title: 'Insurance policy', category: 'insurance', vaultId: vaultVehicles.id, vehicleId: vAlmas.id, expiry: d(38), attachments: [] })
+  db.insert('documents', { title: 'Passport', category: 'personal', vaultId: vaultPersonal.id, expiry: d(400), notes: 'Renew a year before expiry', attachments: [] })
+  db.insert('documents', { title: 'Motorcycle license', category: 'custom:Motorcycle', vaultId: vaultVehicles.id, expiry: d(150), attachments: [] })
   db.writeSettings({ ...db.readSettings(), customDocCategories: ['Motorcycle'] })
 
   const tasks = [
