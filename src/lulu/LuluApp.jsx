@@ -74,6 +74,7 @@ import GivingScreen from './features/giving/GivingScreen.jsx'
 import KeepInTouchScreen from './features/people/KeepInTouchScreen.jsx'
 import NavTabsScreen from './features/settings/NavTabsScreen.jsx'
 import AssistantScreen from './features/assistant/AssistantScreen.jsx'
+import CloudScreen from './features/cloud/CloudScreen.jsx'
 
 const MAIN_TABS = ['today', 'tasks', 'garage', 'expenses', 'more']
 
@@ -168,6 +169,7 @@ function Router() {
       case 'keepintouch': return <KeepInTouchScreen go={go} />
       case 'navtabs': return <NavTabsScreen go={go} />
       case 'assistant': return <AssistantScreen go={go} />
+      case 'cloud': return <CloudScreen go={go} />
       case 'search': return <SearchScreen go={go} />
       default: return <TodayScreen go={go} />
     }

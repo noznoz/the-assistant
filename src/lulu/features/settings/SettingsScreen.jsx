@@ -186,6 +186,12 @@ export default function SettingsScreen({ go }) {
           )}
         </Card>
 
+        <Section title={t('cloudFamily')} />
+        <Card className="stack">
+          <p className="hint" style={{ margin: '0 2px' }}>{t('cloudSettingsHint')}</p>
+          <Button block icon="globe" onClick={() => go('cloud')}>{t('cloudManage')}</Button>
+        </Card>
+
         <Section title={t('aiAssistant')} />
         <Card className="stack">
           <p className="hint" style={{ margin: '0 2px' }}>{t('aiKeyHint')}</p>

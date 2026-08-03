@@ -73,7 +73,47 @@ export function upsert(name, rec) {
 }
 
 export function softDelete(name, id) {
-  update(name, id, { deletedAt: nowISO() })
+  return update(name, id, { deletedAt: nowISO() })
+}
+
+// ---- Cloud sync helpers ----
+// Raw upsert used by cloud sync: writes the record verbatim (preserving its id,
+// timestamps and deletedAt) instead of generating new ones like insert() does.
+export function putRaw(name, rec) {
+  if (!rec || !rec.id) return
+  const rows = readRaw(name)
+  const i = rows.findIndex(r => r.id === rec.id)
+  if (i >= 0) rows[i] = rec
+  else rows.unshift(rec)
+  writeCollection(name, rows)
+}
+
+// Merge a batch of remote records into local storage, last-write-wins by
+// updatedAt. `byCollection` is { collectionName: [record, …] }. Returns the set
+// of collection names that actually changed, so callers can reload just those.
+export function mergeRemote(byCollection) {
+  const changed = new Set()
+  Object.entries(byCollection || {}).forEach(([name, recs]) => {
+    if (!COLLECTIONS.includes(name) || !Array.isArray(recs)) return
+    const rows = readRaw(name)
+    const idx = new Map(rows.map(r => [r.id, r]))
+    let dirty = false
+    recs.forEach(rec => {
+      if (!rec || !rec.id) return
+      const cur = idx.get(rec.id)
+      if (!cur || (rec.updatedAt || '') > (cur.updatedAt || '')) { idx.set(rec.id, rec); dirty = true }
+    })
+    if (dirty) { writeCollection(name, [...idx.values()]); changed.add(name) }
+  })
+  return changed
+}
+
+// Every local record across all collections, tagged with its collection — used
+// for the first full push to the cloud after signing in.
+export function allRecords() {
+  const out = []
+  COLLECTIONS.forEach(c => readRaw(c).forEach(r => out.push({ collection: c, record: r })))
+  return out
 }
 
 // ---- Settings (single object, not a collection) ----

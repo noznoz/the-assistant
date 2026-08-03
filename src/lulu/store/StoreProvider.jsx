@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react'
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react'
 import * as db from './db.js'
+import * as cloud from '../lib/cloud.js'
 import { maybeSeed } from './seed.js'
 
 const StoreCtx = createContext(null)
@@ -24,24 +25,28 @@ export function StoreProvider({ children }) {
   const add = useCallback((name, fields) => {
     const rec = db.insert(name, fields)
     reload(name)
+    cloud.pushRecord(name, rec)
     return rec
   }, [reload])
 
   const patch = useCallback((name, id, p) => {
     const rec = db.update(name, id, p)
     reload(name)
+    cloud.pushRecord(name, rec)
     return rec
   }, [reload])
 
   const save = useCallback((name, rec) => {
     const out = db.upsert(name, rec)
     reload(name)
+    cloud.pushRecord(name, out)
     return out
   }, [reload])
 
   const remove = useCallback((name, id) => {
-    db.softDelete(name, id)
+    const rec = db.softDelete(name, id)
     reload(name)
+    cloud.pushRecord(name, rec)
   }, [reload])
 
   const updateSettings = useCallback((partial) => {
@@ -59,7 +64,26 @@ export function StoreProvider({ children }) {
     setSettings(db.readSettings())
   }, [])
 
-  const store = useMemo(() => ({ data, add, patch, save, remove, reload, reloadAll }), [data, add, patch, save, remove, reload, reloadAll])
+  // Full two-way cloud sync (push local, pull remote), then refresh state if
+  // anything changed. Safe no-op when cloud isn't configured / signed in.
+  const cloudSync = useCallback(async () => {
+    if (!cloud.isReady()) return
+    const changed = await cloud.syncNow()
+    if (changed && changed.size) reloadAll()
+  }, [reloadAll])
+
+  // On launch: sync once, then poll for remote changes while the app is open.
+  useEffect(() => {
+    let alive = true
+    cloudSync()
+    const t = setInterval(() => {
+      if (!cloud.isReady()) return
+      cloud.pullAll().then(ch => { if (alive && ch && ch.size) reloadAll() })
+    }, 20000)
+    return () => { alive = false; clearInterval(t) }
+  }, [cloudSync, reloadAll])
+
+  const store = useMemo(() => ({ data, add, patch, save, remove, reload, reloadAll, cloudSync }), [data, add, patch, save, remove, reload, reloadAll, cloudSync])
   const settingsValue = useMemo(() => ({ settings, updateSettings }), [settings, updateSettings])
 
   return (
