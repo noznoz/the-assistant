@@ -343,6 +343,17 @@ export const ACCESSORY_STATUSES = [
   { id: 'wishlist', en: 'Wishlist', ar: 'قائمة الرغبات' },
 ]
 export const accessoryStatus = (a) => a && a.status ? a.status : (a && a.fitted === false ? 'wishlist' : 'fitted')
+
+// Accessory groups (categories) for a vehicle.
+export const ACCESSORY_GROUPS = [
+  { id: 'accessory', en: 'Accessory', ar: 'إكسسوار', icon: 'wrench' },
+  { id: 'gears', en: 'Gears', ar: 'معدات', icon: 'wrench' },
+  { id: 'performance', en: 'Performance', ar: 'أداء', icon: 'gauge' },
+  { id: 'protection', en: 'Protection', ar: 'حماية', icon: 'shield' },
+]
+export const accessoryGroup = (a) => { const g = a && a.group; return ACCESSORY_GROUPS.some(x => x.id === g) ? g : 'accessory' }
+// Full cost of an accessory: item + shipping + installation.
+export const accessoryTotal = (a) => (Number(a.cost) || 0) + (Number(a.shipping) || 0) + (Number(a.install) || 0)
 export const findDocCategory = byId(DOC_CATEGORIES)
 
 export function label(item, lang) {
