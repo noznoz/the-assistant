@@ -4,7 +4,7 @@ import { DetailHeader, Card, Section, Stat, Bars, Button, Sheet, Field, Input, T
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { catLabel } from '../../lib/domain.js'
-import { money, fmtDate, expenseSar } from '../../lib/format.js'
+import { money, fmtDate, expenseSar, todayISO } from '../../lib/format.js'
 import { share, formatExpenseSummary } from '../../lib/share.js'
 import { exportXlsx, printHtml } from '../../lib/exporters.js'
 import ExpenseEditor from '../expenses/ExpenseEditor.jsx'
@@ -35,17 +35,18 @@ export default function ProjectsScreen({ param, go }) {
             action={<Button variant="primary" icon="plus" onClick={() => setEditor({})}>{t('newProject')}</Button>} />
         ) : (
           <div style={{ marginTop: 14 }}>
-            {projects.items.map(p => {
+            {[...projects.items].sort((a, b) => (a.status === 'ended' ? 1 : 0) - (b.status === 'ended' ? 1 : 0)).map(p => {
               const total = totalFor(p.id)
               const budget = Number(p.budget) || 0
               const pct = budget ? Math.min(1, total / budget) : 0
+              const ended = p.status === 'ended'
               return (
                 <SwipeRow key={p.id} onEdit={() => setEditor(p)} onDelete={() => { projects.remove(p.id); toast.show(t('deletedToast')) }}>
-                <Card className="tight" onClick={() => go(`projects/${p.id}`)}>
+                <Card className="tight" onClick={() => go(`projects/${p.id}`)} style={ended ? { opacity: 0.72 } : undefined}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span className="lead t-brand" style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="report" size={18} /></span>
+                    <span className={`lead ${ended ? '' : 't-brand'}`} style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center', background: ended ? 'var(--surface-2)' : undefined }}><Icon name={ended ? 'check' : 'report'} size={18} /></span>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 700 }}>{p.name}</div>
+                      <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>{p.name}{ended && <span className="chip" style={{ fontSize: 10.5 }}>{t('ended')}</span>}</div>
                       <div className="muted" style={{ fontSize: 13 }}>{money(total, cur, lang)}{budget ? ` / ${money(budget, cur, lang)}` : ''}</div>
                     </div>
                     <Icon name="chevron" size={18} style={{ color: 'var(--ink-3)' }} />
@@ -83,19 +84,32 @@ function ProjectDetail({ project, go, onBack }) {
   const [edit, setEdit] = useState(false)
   const toast = useToast()
 
+  const rates = settings.rates
   const mine = expenses.items.filter(e => e.projectId === project.id)
     .sort((a, b) => (b.date || '').localeCompare(a.date || ''))
-  const total = mine.reduce((s, e) => s + expenseSar(e, settings.rates), 0)
+  const total = mine.reduce((s, e) => s + expenseSar(e, rates), 0)
   const budget = Number(project.budget) || 0
   const pct = budget ? Math.min(1, total / budget) : 0
+  const remaining = budget - total
+  const r2 = (n) => Math.round(n * 100) / 100
 
-  const rates = settings.rates
   const byCat = {}
   mine.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + expenseSar(e, rates) })
   const catRows = Object.entries(byCat).sort((a, b) => b[1] - a[1])
   const bars = catRows.slice(0, 8).map(([id, v]) => ({ label: catLabel(id, lang), value: v }))
-  const remaining = budget - total
-  const r2 = (n) => Math.round(n * 100) / 100
+
+  // Dashboard stats
+  const count = mine.length
+  const avg = count ? total / count : 0
+  const largest = mine.reduce((m, e) => Math.max(m, expenseSar(e, rates)), 0)
+  const dates = mine.map(e => e.date).filter(Boolean).sort()
+  const firstDate = dates[0], lastDate = dates[dates.length - 1]
+  const isEnded = project.status === 'ended'
+  const byMonth = {}
+  mine.forEach(e => { const mk = (e.date || '').slice(0, 7); if (mk) byMonth[mk] = (byMonth[mk] || 0) + expenseSar(e, rates) })
+  const monthBars = Object.entries(byMonth).sort((a, b) => a[0].localeCompare(b[0])).slice(-6)
+    .map(([mk, v]) => ({ label: new Date(mk + '-01T00:00:00').toLocaleDateString(lang === 'ar' ? 'ar' : 'en', { month: 'short' }), value: v }))
+  const setEnded = (on) => projects.patch(project.id, { status: on ? 'ended' : 'active', endedAt: on ? todayISO() : '' })
 
   const exportExcel = () => {
     const aoa = [
@@ -137,6 +151,12 @@ function ProjectDetail({ project, go, onBack }) {
         <button className="iconbtn" onClick={() => setEdit(true)} aria-label={t('edit')}><Icon name="cog" size={18} /></button>
       } />
       <div className="screen">
+        {isEnded && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '14px 0 0', padding: '8px 12px', borderRadius: 'var(--r-md)', background: 'var(--surface-2)', color: 'var(--ink-2)', fontSize: 13, fontWeight: 600 }}>
+            <Icon name="check" size={15} /> {t('projectEnded')}{project.endedAt ? ` · ${fmtDate(project.endedAt, lang, settings.dateFormat)}` : ''}
+          </div>
+        )}
+
         <Card style={{ marginTop: 14, textAlign: 'center' }}>
           <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('projectTotal')}</div>
           <div style={{ fontSize: 34, fontWeight: 780, marginTop: 4 }} className="tnum">{money(total, cur, lang)}</div>
@@ -152,16 +172,36 @@ function ProjectDetail({ project, go, onBack }) {
           )}
         </Card>
 
+        {/* KPI tiles */}
+        <div className="stat-grid" style={{ marginTop: 12 }}>
+          {budget > 0 && <Stat label={t('budget')} value={money(budget, cur, lang)} />}
+          {budget > 0 && <Stat label={remaining >= 0 ? t('remaining') : t('overBudget')} value={money(Math.abs(remaining), cur, lang)} sub={budget ? `${Math.round(pct * 100)}% ${t('used')}` : ''} />}
+          <Stat label={t('entries')} value={String(count)} />
+          <Stat label={t('avgPerExpense')} value={money(avg, cur, lang)} />
+          <Stat label={t('largest')} value={money(largest, cur, lang)} />
+          {firstDate && <Stat label={t('period')} value={fmtDate(firstDate, lang, settings.dateFormat)} sub={lastDate && lastDate !== firstDate ? `→ ${fmtDate(lastDate, lang, settings.dateFormat)}` : ''} />}
+        </div>
+
         <div className="row2" style={{ marginTop: 12 }}>
           <Button variant="primary" icon="plus" onClick={() => setAddExp(true)}>{t('addExpenseTo')}</Button>
           <Button icon="whatsapp" onClick={() => share(`🗂️ *${project.name}*\n\n` + formatExpenseSummary(mine, lang, settings))}>{t('share')}</Button>
         </div>
+        <Button block icon={isEnded ? 'refresh' : 'check'} style={{ marginTop: 8 }} onClick={() => { setEnded(!isEnded); toast.show(isEnded ? t('reopened') : t('projectEnded')) }}>
+          {isEnded ? t('reopenProject') : t('markEnded')}
+        </Button>
 
         <Section title={t('projectDashboard')} />
         <div className="row2">
           <Button icon="download" onClick={exportExcel}>{t('exportExcel')}</Button>
           <Button icon="doc" onClick={exportPdf}>{t('exportPdf')}</Button>
         </div>
+
+        {monthBars.length > 1 && (
+          <>
+            <Section title={t('monthlyTrend')} />
+            <Card><Bars data={monthBars} format={(v) => money(v, cur, lang)} /></Card>
+          </>
+        )}
 
         {bars.length > 0 && (
           <>
