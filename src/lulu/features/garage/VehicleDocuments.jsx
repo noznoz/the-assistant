@@ -3,7 +3,7 @@ import Icon from '../../ui/Icon.jsx'
 import { Button, Empty, Chip, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
-import { DOC_CATEGORIES, label } from '../../lib/domain.js'
+import { docCatLabel } from '../../lib/domain.js'
 import { fmtDate, daysUntil } from '../../lib/format.js'
 import { removeAttachment } from '../../lib/files.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
@@ -16,6 +16,8 @@ export default function VehicleDocuments({ vehicle }) {
   const { t, lang } = useT()
   const { settings } = useSettings()
   const docs = useCollection('documents')
+  const vaults = useCollection('vaults')
+  const vaultName = (id) => (vaults.items.find(v => v.id === id) || {}).name
   const [editor, setEditor] = useState(null)
   const [viewing, setViewing] = useState(null)
   const toast = useToast()
@@ -44,7 +46,6 @@ export default function VehicleDocuments({ vehicle }) {
       ) : (
         <div style={{ marginTop: 12 }}>
           {mine.map(d => {
-            const cat = DOC_CATEGORIES.find(c => c.id === d.category)
             const dd = daysUntil(d.expiry)
             const thumb = (d.attachments || []).find(a => a.thumb)?.thumb
             const count = (d.attachments || []).length
@@ -58,7 +59,8 @@ export default function VehicleDocuments({ vehicle }) {
                 <div className="body">
                   <div className="title">{d.title}</div>
                   <div className="meta">
-                    {label(cat, lang)}
+                    {docCatLabel(d.category, lang)}
+                    {vaultName(d.vaultId) && <span>· <Icon name="grid" size={11} /> {vaultName(d.vaultId)}</span>}
                     {count > 0 && <span>· {count} {count === 1 ? t('documentTitle') : t('attachments')}</span>}
                     {d.expiry && <span>· {fmtDate(d.expiry, lang, settings.dateFormat)}</span>}
                   </div>

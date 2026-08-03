@@ -38,9 +38,11 @@ export function maybeSeed() {
   db.insert('services', { vehicleId: vAlmas.id, date: d(-40), odo: '22,000 km', workshop: 'Land Rover Riyadh', work: 'Full service + brake fluid', cost: 3200, nextDate: d(50), nextOdo: '30,000 km' })
   db.insert('services', { vehicleId: vRaven.id, date: d(-15), odo: '13,500 km', workshop: 'BMW Motorrad', work: 'Chain, oil & filter', cost: 1450, nextDate: d(5), nextOdo: '18,000 km' })
 
-  db.insert('accessories', { vehicleId: vAlmas.id, name: 'Ceramic window tint', cost: 2800, date: d(-60), fitted: true, note: 'Full body, 70% front' })
-  db.insert('accessories', { vehicleId: vAlmas.id, name: 'Dash cam (front + rear)', cost: 1200, date: d(-30), fitted: true })
-  db.insert('accessories', { vehicleId: vRaven.id, name: 'Touratech panniers', cost: 6500, date: d(-45), fitted: true, note: 'Aluminium, 38L pair' })
+  db.insert('accessories', { vehicleId: vAlmas.id, name: 'Ceramic window tint', cost: 2800, date: d(-60), status: 'fitted', fitted: true, note: 'Full body, 70% front' })
+  db.insert('accessories', { vehicleId: vAlmas.id, name: 'Dash cam (front + rear)', cost: 1200, date: d(-30), status: 'fitted', fitted: true })
+  db.insert('accessories', { vehicleId: vRaven.id, name: 'Touratech panniers', cost: 6500, date: d(-45), status: 'fitted', fitted: true, note: 'Aluminium, 38L pair' })
+  db.insert('accessories', { vehicleId: vAlmas.id, name: 'Roof cross bars', cost: 3400, date: todayISO(), status: 'wishlist', fitted: false, note: 'For the Genesis roof box' })
+  db.insert('accessories', { vehicleId: vRaven.id, name: 'Auxiliary LED lights', cost: 2200, date: todayISO(), status: 'wishlist', fitted: false })
 
   const vaultVehicles = db.insert('vaults', { name: 'Vehicles', icon: 'car' })
   const vaultPersonal = db.insert('vaults', { name: 'Personal', icon: 'people' })

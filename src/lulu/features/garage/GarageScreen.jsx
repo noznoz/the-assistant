@@ -4,7 +4,7 @@ import { TopBar } from '../../ui/AppShell.jsx'
 import { Fab, Chip, Empty, Button, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
-import { findVehicleType, VEHICLE_TYPES, findOwnership, label } from '../../lib/domain.js'
+import { findVehicleType, VEHICLE_TYPES, findOwnership, vehicleTitle, label } from '../../lib/domain.js'
 import { money, daysUntil } from '../../lib/format.js'
 import VehicleEditor from './VehicleEditor.jsx'
 import VehicleProfile from './VehicleProfile.jsx'
@@ -69,8 +69,8 @@ function VehicleCard({ v, lang, cur, onClick }) {
         )}
       </div>
       <div className="info">
-        <h3>{v.name}</h3>
-        <div className="sub">{v.nickname ? `“${v.nickname}” · ` : ''}{[v.brand, v.model, v.year].filter(Boolean).join(' · ')}</div>
+        <h3>{vehicleTitle(v)}</h3>
+        <div className="sub">{v.nickname && v.nickname !== vehicleTitle(v) ? `“${v.nickname}” · ` : ''}{[v.brand, v.model, v.year].filter(Boolean).join(' · ') || t('vehicle')}</div>
         <div className="foot">
           {v.mileage && <span><Icon name="gauge" size={14} /> <b>{v.mileage}</b></span>}
           {v.currentValue && <span>{t('currentValue')}: <b>{money(v.currentValue, cur, lang)}</b></span>}

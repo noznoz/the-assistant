@@ -330,6 +330,19 @@ export const findPriority = byId(PRIORITIES)
 export const findType = byId(TASK_TYPES)
 export const findVehicleType = byId(VEHICLE_TYPES)
 export const findRelationship = byId(RELATIONSHIPS)
+
+// A display title for a vehicle, resilient to records saved without a name.
+export function vehicleTitle(v) {
+  if (!v) return ''
+  return v.name || v.nickname || [v.brand, v.model].filter(Boolean).join(' ') || ''
+}
+
+// Accessory status: fitted to the vehicle vs on the wishlist to buy.
+export const ACCESSORY_STATUSES = [
+  { id: 'fitted', en: 'Fitted', ar: 'مركّب' },
+  { id: 'wishlist', en: 'Wishlist', ar: 'قائمة الرغبات' },
+]
+export const accessoryStatus = (a) => a && a.status ? a.status : (a && a.fitted === false ? 'wishlist' : 'fitted')
 export const findDocCategory = byId(DOC_CATEGORIES)
 
 export function label(item, lang) {

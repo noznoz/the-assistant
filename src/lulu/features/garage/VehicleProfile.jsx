@@ -3,7 +3,7 @@ import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Section, Stat, Bars, Button, Sheet, Field, Input, TextArea, Chip, Empty, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
-import { findVehicleType, findOwnership, label } from '../../lib/domain.js'
+import { findVehicleType, findOwnership, vehicleTitle, label } from '../../lib/domain.js'
 import { money, fmtDate, daysUntil, expenseSar } from '../../lib/format.js'
 import { share, formatVehicle } from '../../lib/share.js'
 import VehicleEditor from './VehicleEditor.jsx'
@@ -78,7 +78,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
 
   return (
     <>
-      <DetailHeader title={vehicle.nickname || vehicle.name} onBack={onBack} right={
+      <DetailHeader title={vehicle.nickname || vehicleTitle(vehicle)} onBack={onBack} right={
         <button className="iconbtn" onClick={() => setEdit(true)} aria-label={t('edit')}><Icon name="cog" size={18} /></button>
       } />
       <div className="screen">
@@ -91,8 +91,8 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
             </div>
           </div>
           <div className="info">
-            <h3>{vehicle.name}</h3>
-            <div className="sub">{[vehicle.brand, vehicle.model, vehicle.year].filter(Boolean).join(' · ')}</div>
+            <h3>{vehicleTitle(vehicle)}</h3>
+            <div className="sub">{[vehicle.brand, vehicle.model, vehicle.year].filter(Boolean).join(' · ') || (vehicle.nickname && vehicle.nickname !== vehicleTitle(vehicle) ? vehicle.nickname : '')}</div>
           </div>
         </div>
 
