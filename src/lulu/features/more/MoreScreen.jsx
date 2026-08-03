@@ -177,7 +177,7 @@ export default function MoreScreen({ go }) {
             ))}
           </>
         )}
-        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v4.9 · {BUILD_STAMP}</p>
+        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v5.0 · {BUILD_STAMP}</p>
       </div>
     </>
   )

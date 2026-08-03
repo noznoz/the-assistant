@@ -44,13 +44,19 @@
   border-top: 1px solid var(--line);
 }
 .navbtn {
+  position: relative;
   border: 0; background: transparent; color: var(--ink-3);
   display: flex; flex-direction: column; align-items: center; gap: 3px;
-  padding: 6px 0; font-size: 10px; font-weight: 600; letter-spacing: 0.01em;
-  transition: color 0.2s var(--ease);
+  padding: 8px 0 6px; font-size: 10px; font-weight: 600; letter-spacing: 0.01em;
+  transition: color 0.2s var(--ease), transform 0.15s var(--ease);
 }
+.navbtn:active { transform: scale(0.9); }
 .navbtn svg { width: 24px; height: 24px; }
 .navbtn.active { color: var(--brand-600); }
+.navbtn.active::before {
+  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 5px; height: 5px; border-radius: 50%; background: currentColor;
+}
 [data-theme="dark"] .navbtn.active { color: var(--brand-400); }
 
 /* ---- Cards ---- */
@@ -85,9 +91,9 @@
   transition: transform 0.12s var(--ease), background 0.2s;
 }
 .btn:active { transform: scale(0.97); }
-.btn.primary { background: var(--ink); color: var(--bg); border-color: transparent; }
-[data-theme="dark"] .btn.primary { background: var(--brand-500); color: #14110A; }
-.btn.brand { background: var(--brand-500); color: #14110A; border-color: transparent; }
+.btn.primary { background: var(--ink); color: var(--bg); border-color: transparent; box-shadow: var(--shadow-1); }
+[data-theme="dark"] .btn.primary { background: var(--brand-500); color: #14110A; box-shadow: var(--shadow-brand); }
+.btn.brand { background: var(--brand-500); color: #14110A; border-color: transparent; box-shadow: var(--shadow-brand); }
 .btn.ghost { background: transparent; }
 .btn.danger { color: var(--danger); border-color: var(--danger-tint); background: var(--danger-tint); }
 .btn.block { width: 100%; }
@@ -243,7 +249,8 @@
 .sheet .grabber { width: 40px; height: 5px; border-radius: 3px; background: var(--line-2); margin: 6px auto 14px; }
 .sheet-h { display: flex; align-items: center; gap: 10px; margin-bottom: var(--s4); }
 .sheet-h h3 { font-size: var(--fs-title); flex: 1; }
-.iconbtn { width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--surface-2); color: var(--ink-2); display: grid; place-items: center; }
+.iconbtn { width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--surface-2); color: var(--ink-2); display: grid; place-items: center; transition: transform 0.12s var(--ease), background 0.15s; }
+.iconbtn:active { transform: scale(0.9); background: var(--line); }
 .iconbtn svg { width: 18px; height: 18px; }
 
 /* ---- Empty state ---- */
@@ -316,6 +323,9 @@
 .muted { color: var(--ink-3); }
 .center { text-align: center; }
 .stack > * + * { margin-top: 12px; }
+/* Assistant "Thinking…" pulse */
+.dots { animation: dotpulse 1.3s ease-in-out infinite; }
+@keyframes dotpulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
 .spinner { width: 24px; height: 24px; border-radius: 50%; border: 3px solid var(--line-2); border-top-color: var(--brand-500); animation: spin 0.7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading-full { display: grid; place-items: center; min-height: 60vh; }
