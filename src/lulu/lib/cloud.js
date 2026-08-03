@@ -124,18 +124,30 @@ async function ensureHousehold(user) {
   if (Array.isArray(rows) && rows.length) return rows[0].household_id
   // Create a household + owner membership.
   const name = (user.email || 'My').split('@')[0]
+  // Generate the id client-side and insert with return=minimal. This avoids
+  // needing to read the new row back, which RLS blocks until the owner's
+  // membership exists (created on the next call).
+  const hid = uuid()
   const hRes = await authFetch('/rest/v1/households', {
-    method: 'POST', headers: { Prefer: 'return=representation' },
-    body: JSON.stringify({ name: `${name}'s Household` }),
+    method: 'POST', headers: { Prefer: 'return=minimal' },
+    body: JSON.stringify({ id: hid, name: `${name}'s Household` }),
   })
-  const created = await hRes.json().catch(() => [])
-  const hid = Array.isArray(created) && created[0] && created[0].id
-  if (!hid) throw new Error('Could not create a household — check the SQL setup ran.')
-  await authFetch('/rest/v1/household_members', {
+  if (!hRes.ok) { const e = await hRes.json().catch(() => ({})); throw new Error(e.message || `Could not create a household (${hRes.status}). Check the setup SQL ran.`) }
+  const mRes = await authFetch('/rest/v1/household_members', {
     method: 'POST',
     body: JSON.stringify({ household_id: hid, user_id: user.id, email: user.email, role: 'owner' }),
   })
+  if (!mRes.ok) { const e = await mRes.json().catch(() => ({})); throw new Error(e.message || `Could not join the new household (${mRes.status}).`) }
   return hid
+}
+
+// RFC4122 v4 UUID — native when available, small fallback otherwise.
+function uuid() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
+  })
 }
 
 // Join an existing household by its code (the household UUID). Re-pull after.
