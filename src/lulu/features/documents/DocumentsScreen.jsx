@@ -12,6 +12,12 @@ import {
 } from '../../lib/files.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
 
+// Depth-first flatten of the vault tree for indented pickers.
+function flattenVaults(vaults, parentId = '', depth = 0, out = []) {
+  vaults.filter(v => (v.parentId || '') === (parentId || '')).forEach(v => { out.push({ v, depth }); flattenVaults(vaults, v.id, depth + 1, out) })
+  return out
+}
+
 export default function DocumentsScreen({ go }) {
   const { t, lang } = useT()
   const { settings } = useSettings()
@@ -74,7 +80,7 @@ export default function DocumentsScreen({ go }) {
         <div className="screen">
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 14 }}>
             <Tile icon="grid" name={t('allDocuments')} count={docs.items.length} onClick={() => setActiveVault('all')} />
-            {vaults.items.map(v => (
+            {vaults.items.filter(v => !v.parentId).map(v => (
               <Tile key={v.id} icon={v.icon || 'doc'} name={v.name} count={vaultDocCount(v.id)} onClick={() => setActiveVault(v.id)} />
             ))}
             {unfiledCount > 0 && <Tile icon="inbox" name={t('unfiled')} count={unfiledCount} onClick={() => setActiveVault('unfiled')} />}
@@ -83,7 +89,7 @@ export default function DocumentsScreen({ go }) {
           <p className="hint center" style={{ marginTop: 16 }}>{t('vaultsHint')}</p>
         </div>
         <Fab onClick={() => setEditor({})} />
-        {vaultEditor && <VaultEditor initial={vaultEditor.id ? vaultEditor : {}} onClose={() => setVaultEditor(null)} onSaved={() => toast.show(t('savedToast'))} />}
+        {vaultEditor && <VaultEditor initial={vaultEditor} onClose={() => setVaultEditor(null)} onSaved={() => toast.show(t('savedToast'))} />}
         {editor && <DocEditor initial={editor.id ? editor : {}} onClose={() => setEditor(null)} onSaved={() => toast.show(t('savedToast'))} onToast={toast.show} />}
         {toast.node}
       </>
@@ -96,14 +102,32 @@ export default function DocumentsScreen({ go }) {
   const inVault = (d) => activeVault === 'all' ? true : activeVault === 'unfiled' ? isUnfiled(d) : d.vaultId === activeVault
   const vaultDocs = docs.items.filter(inVault)
   const shown = vaultDocs.filter(d => filter === 'all' || (d.category || 'other') === filter)
+  const subVaults = vault ? vaults.items.filter(v => v.parentId === vault.id) : []
+  const goBack = () => { setFilter('all'); setActiveVault(vault && vault.parentId ? vault.parentId : null) }
 
   return (
     <>
-      <DetailHeader title={heading} onBack={() => { setActiveVault(null); setFilter('all') }} right={
-        vault ? <button className="iconbtn" onClick={() => setVaultEditor(vault)} aria-label={t('edit')}><Icon name="cog" size={18} /></button> : null
+      <DetailHeader title={heading} onBack={goBack} right={
+        vault ? <>
+          <button className="iconbtn" onClick={() => setVaultEditor({ parentId: vault.id })} aria-label={t('newSubVault')}><Icon name="plus" size={18} /></button>
+          <button className="iconbtn" onClick={() => setVaultEditor(vault)} aria-label={t('edit')}><Icon name="cog" size={18} /></button>
+        </> : null
       } />
       <div className="screen">
-        {vaultDocs.length === 0 ? (
+        {subVaults.length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 14 }}>
+            {subVaults.map(sv => (
+              <button key={sv.id} onClick={() => setActiveVault(sv.id)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 12, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--r-lg)', color: 'var(--ink)', textAlign: 'start' }}>
+                <span className="lead t-brand" style={{ width: 36, height: 36, borderRadius: 11, display: 'grid', placeItems: 'center' }}><Icon name={sv.icon || 'doc'} size={18} /></span>
+                <span style={{ minWidth: 0 }}>
+                  <span style={{ display: 'block', fontWeight: 700, fontSize: 13.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{sv.name}</span>
+                  <span className="muted" style={{ fontSize: 11.5 }}>{vaultDocCount(sv.id)} {t('documentTitle')}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+        {vaultDocs.length === 0 && subVaults.length === 0 ? (
           <Empty icon="doc" title={t('nothingHere')} text={t('addFiles')}
             action={<Button variant="primary" icon="plus" onClick={() => setEditor({ vaultId: vault?.id })}>{t('addDocument')}</Button>} />
         ) : (
@@ -155,8 +179,8 @@ export default function DocumentsScreen({ go }) {
           onToast={toast.show}
         />
       )}
-      {vaultEditor && <VaultEditor initial={vaultEditor.id ? vaultEditor : {}} onClose={() => setVaultEditor(null)}
-        onSaved={() => toast.show(t('savedToast'))} onDeleted={() => { setVaultEditor(null); setActiveVault(null) }} />}
+      {vaultEditor && <VaultEditor initial={vaultEditor} onClose={() => setVaultEditor(null)}
+        onSaved={() => toast.show(t('savedToast'))} onDeleted={() => { setVaultEditor(null); setActiveVault(vault && vault.parentId ? vault.parentId : null) }} />}
       {toast.node}
     </>
   )
@@ -166,21 +190,31 @@ export default function DocumentsScreen({ go }) {
 function VaultEditor({ initial, onClose, onSaved, onDeleted }) {
   const { t } = useT()
   const vaults = useCollection('vaults')
-  const [f, setF] = useState({ name: '', icon: 'doc', ...initial })
+  const [f, setF] = useState({ name: '', icon: 'doc', parentId: '', ...initial })
   const [err, setErr] = useState('')
+  // Valid parents exclude the vault itself and its descendants (no cycles).
+  const descendants = (id) => { const out = new Set(); const walk = (pid) => vaults.items.filter(v => v.parentId === pid).forEach(v => { out.add(v.id); walk(v.id) }); walk(id); return out }
+  const blocked = initial.id ? new Set([initial.id, ...descendants(initial.id)]) : new Set()
+  const parentOptions = flattenVaults(vaults.items).filter(({ v }) => !blocked.has(v.id))
   const submit = () => {
     if (!f.name.trim()) { setErr(t('required')); return }
-    const rec = { ...f, name: f.name.trim() }
+    const rec = { ...f, name: f.name.trim(), parentId: f.parentId || '' }
     initial.id ? vaults.save({ ...rec, id: initial.id }) : vaults.add(rec)
     onSaved && onSaved(); onClose()
   }
   return (
-    <Sheet title={initial.id ? t('editVault') : t('newVault')} onClose={onClose}
+    <Sheet title={initial.id ? t('editVault') : (f.parentId ? t('newSubVault') : t('newVault'))} onClose={onClose}
       footer={<div className="stack">
         <Button variant="primary" block onClick={submit}>{t('save')}</Button>
         {initial.id && <Button block variant="danger" icon="trash" onClick={() => { vaults.remove(initial.id); onClose(); onDeleted && onDeleted() }}>{t('delete')}</Button>}
       </div>}>
       <Field label={t('name')} required error={err}><Input value={f.name} onChange={e => setF({ ...f, name: e.target.value })} placeholder={t('vaultPlaceholder')} autoFocus /></Field>
+      <Field label={t('parentVault')} hint={t('optional')}>
+        <Select value={f.parentId || ''} onChange={e => setF({ ...f, parentId: e.target.value })}>
+          <option value="">{t('topLevelVault')}</option>
+          {parentOptions.map(({ v, depth }) => <option key={v.id} value={v.id}>{' '.repeat(depth * 2) + (depth ? '– ' : '') + v.name}</option>)}
+        </Select>
+      </Field>
       <Field label={t('icon')}>
         <div className="chip-row">
           {VAULT_ICONS.map(ic => (
@@ -210,6 +244,7 @@ export function DocEditor({ initial, onClose, onSaved, onToast }) {
   const [f, setF] = useState({ title: '', category: 'id', vaultId: '', expiry: '', notes: '', attachments: [], ...initial })
   const [busy, setBusy] = useState(false)
   const [newCat, setNewCat] = useState(null)
+  const [newVault, setNewVault] = useState(null)
   const [linkType, setLinkType] = useState(() => linkTypeOfDoc(initial))
   const cameraRef = useRef()
   const fileRef = useRef()
@@ -232,6 +267,18 @@ export function DocEditor({ initial, onClose, onSaved, onToast }) {
     }
     setF(prev => ({ ...prev, category: 'custom:' + name }))
     setNewCat(null)
+  }
+
+  const onVault = (e) => {
+    if (e.target.value === '__addvault') { setNewVault({ name: '', parentId: f.vaultId || '' }); return }
+    setF(prev => ({ ...prev, vaultId: e.target.value }))
+  }
+  const addVault = () => {
+    const name = (newVault?.name || '').trim()
+    if (!name) { setNewVault(null); return }
+    const rec = vaults.add({ name, icon: 'doc', parentId: newVault.parentId || '' })
+    setF(prev => ({ ...prev, vaultId: rec.id }))
+    setNewVault(null)
   }
 
   const addFiles = async (fileList) => {
@@ -299,11 +346,25 @@ export function DocEditor({ initial, onClose, onSaved, onToast }) {
 
       <Field label={t('title')}><Input value={f.title} onChange={set('title')} placeholder={t('documentTitle')} /></Field>
       <Field label={t('vault')} hint={t('optional')}>
-        <Select value={f.vaultId || ''} onChange={set('vaultId')}>
+        <Select value={f.vaultId || ''} onChange={onVault}>
           <option value="">{t('unfiled')}</option>
-          {vaults.items.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
+          {flattenVaults(vaults.items).map(({ v, depth }) => <option key={v.id} value={v.id}>{' '.repeat(depth * 2) + (depth ? '– ' : '') + v.name}</option>)}
+          <option value="__addvault">{t('newVault')}…</option>
         </Select>
       </Field>
+      {newVault != null && (
+        <div className="stack" style={{ marginTop: -6, marginBottom: 12 }}>
+          <Input value={newVault.name} onChange={e => setNewVault({ ...newVault, name: e.target.value })} placeholder={t('vaultPlaceholder')} autoFocus />
+          <Select value={newVault.parentId || ''} onChange={e => setNewVault({ ...newVault, parentId: e.target.value })}>
+            <option value="">{t('topLevelVault')}</option>
+            {flattenVaults(vaults.items).map(({ v, depth }) => <option key={v.id} value={v.id}>{' '.repeat(depth * 2) + (depth ? '– ' : '') + v.name}</option>)}
+          </Select>
+          <div className="row2">
+            <Button variant="primary" onClick={addVault}>{t('add')}</Button>
+            <Button onClick={() => setNewVault(null)}>{t('cancel')}</Button>
+          </div>
+        </div>
+      )}
       <Field label={t('category')}>
         <Select value={f.category} onChange={onCategory}>
           {docCategoryOptions(lang, settings.customDocCategories).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
