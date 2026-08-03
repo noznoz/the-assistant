@@ -67,6 +67,17 @@ const GROUPS = [
 
 const ALL_ITEMS = GROUPS.flatMap(g => g.items.map(it => ({ ...it, tint: g.tint })))
 
+// Build timestamp injected by Vite at build time (see vite.config define).
+const BUILD_STAMP = (() => {
+  try {
+    const iso = typeof __BUILD_TIME__ !== 'undefined' ? __BUILD_TIME__ : ''
+    if (!iso) return 'dev'
+    const d = new Date(iso)
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' +
+      d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+  } catch { return 'dev' }
+})()
+
 export default function MoreScreen({ go }) {
   const { t } = useT()
   const { data } = useStore()
@@ -165,7 +176,7 @@ export default function MoreScreen({ go }) {
             ))}
           </>
         )}
-        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v4.8</p>
+        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v4.9 · {BUILD_STAMP}</p>
       </div>
     </>
   )

@@ -5,6 +5,8 @@ import { VitePWA } from 'vite-plugin-pwa'
 export default defineConfig({
   // '/' for root-domain hosts (Vercel); '/road-heaven/' for GitHub Pages
   base: process.env.VITE_BASE || '/',
+  // Injected at build time so the More screen can show which build is live.
+  define: { __BUILD_TIME__: JSON.stringify(new Date().toISOString()) },
   server: { port: process.env.PORT ? Number(process.env.PORT) : 5173 },
   plugins: [
     react(),
