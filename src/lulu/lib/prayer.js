@@ -5,6 +5,42 @@
 
 const RIYADH = { lat: 24.7136, lng: 46.6753 }
 const DTZ = 'Asia/Riyadh'
+
+// Selectable cities for prayer times. Saudi cities first, then common travel
+// destinations. Each carries coordinates and a display timezone.
+export const PRAYER_CITIES = [
+  { id: 'riyadh', en: 'Riyadh', ar: 'الرياض', lat: 24.7136, lng: 46.6753, tz: 'Asia/Riyadh' },
+  { id: 'makkah', en: 'Makkah', ar: 'مكة المكرمة', lat: 21.3891, lng: 39.8579, tz: 'Asia/Riyadh' },
+  { id: 'madinah', en: 'Madinah', ar: 'المدينة المنورة', lat: 24.5247, lng: 39.5692, tz: 'Asia/Riyadh' },
+  { id: 'jeddah', en: 'Jeddah', ar: 'جدة', lat: 21.4858, lng: 39.1925, tz: 'Asia/Riyadh' },
+  { id: 'dammam', en: 'Dammam', ar: 'الدمام', lat: 26.4207, lng: 50.0888, tz: 'Asia/Riyadh' },
+  { id: 'khobar', en: 'Al Khobar', ar: 'الخبر', lat: 26.2794, lng: 50.2083, tz: 'Asia/Riyadh' },
+  { id: 'taif', en: 'Taif', ar: 'الطائف', lat: 21.2703, lng: 40.4158, tz: 'Asia/Riyadh' },
+  { id: 'abha', en: 'Abha', ar: 'أبها', lat: 18.2465, lng: 42.5117, tz: 'Asia/Riyadh' },
+  { id: 'tabuk', en: 'Tabuk', ar: 'تبوك', lat: 28.3838, lng: 36.5550, tz: 'Asia/Riyadh' },
+  { id: 'buraidah', en: 'Buraidah', ar: 'بريدة', lat: 26.3260, lng: 43.9750, tz: 'Asia/Riyadh' },
+  { id: 'hail', en: 'Hail', ar: 'حائل', lat: 27.5114, lng: 41.7208, tz: 'Asia/Riyadh' },
+  { id: 'jazan', en: 'Jazan', ar: 'جازان', lat: 16.8892, lng: 42.5511, tz: 'Asia/Riyadh' },
+  { id: 'najran', en: 'Najran', ar: 'نجران', lat: 17.4933, lng: 44.1277, tz: 'Asia/Riyadh' },
+  { id: 'yanbu', en: 'Yanbu', ar: 'ينبع', lat: 24.0895, lng: 38.0637, tz: 'Asia/Riyadh' },
+  { id: 'neom', en: 'NEOM', ar: 'نيوم', lat: 27.9760, lng: 35.2330, tz: 'Asia/Riyadh' },
+  { id: 'dubai', en: 'Dubai', ar: 'دبي', lat: 25.2048, lng: 55.2708, tz: 'Asia/Dubai' },
+  { id: 'abudhabi', en: 'Abu Dhabi', ar: 'أبوظبي', lat: 24.4539, lng: 54.3773, tz: 'Asia/Dubai' },
+  { id: 'doha', en: 'Doha', ar: 'الدوحة', lat: 25.2854, lng: 51.5310, tz: 'Asia/Qatar' },
+  { id: 'kuwait', en: 'Kuwait City', ar: 'الكويت', lat: 29.3759, lng: 47.9774, tz: 'Asia/Kuwait' },
+  { id: 'manama', en: 'Manama', ar: 'المنامة', lat: 26.2285, lng: 50.5860, tz: 'Asia/Bahrain' },
+  { id: 'muscat', en: 'Muscat', ar: 'مسقط', lat: 23.5880, lng: 58.3829, tz: 'Asia/Muscat' },
+  { id: 'cairo', en: 'Cairo', ar: 'القاهرة', lat: 30.0444, lng: 31.2357, tz: 'Africa/Cairo' },
+  { id: 'amman', en: 'Amman', ar: 'عمّان', lat: 31.9539, lng: 35.9106, tz: 'Asia/Amman' },
+  { id: 'istanbul', en: 'Istanbul', ar: 'إسطنبول', lat: 41.0082, lng: 28.9784, tz: 'Europe/Istanbul' },
+  { id: 'london', en: 'London', ar: 'لندن', lat: 51.5074, lng: -0.1278, tz: 'Europe/London' },
+  { id: 'paris', en: 'Paris', ar: 'باريس', lat: 48.8566, lng: 2.3522, tz: 'Europe/Paris' },
+]
+
+export function findCity(id) {
+  return PRAYER_CITIES.find(c => c.id === id) || PRAYER_CITIES[0]
+}
+export const cityName = (city, lang = 'en') => city ? (lang === 'ar' ? city.ar : city.en) : ''
 const FAJR_ANGLE = 18.5
 const ISHA_INTERVAL = 90       // minutes after Maghrib (Umm al-Qura)
 
