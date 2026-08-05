@@ -131,6 +131,8 @@ export const STRINGS = {
     dhuhr: 'Dhuhr', asr: 'Asr', maghrib: 'Maghrib', isha: 'Isha', inLabel: 'in',
     // garage extras
     emergencyInfo: 'Emergency info', fuelLog: 'Fuel', liters: 'Litres', odometer: 'Odometer',
+    noFuelYet: 'No fuel logged yet', addFuelHint: 'Log a fill-up here — add litres and the odometer to track fuel economy.', addFuelFill: 'Add fuel fill-up',
+    noVehExpensesYet: 'No expenses yet', addVehExpenseHint: 'Add any cost for this vehicle — it stays linked here and shows in your finances.',
     economy: 'Economy', costPerKm: 'Cost / km', consumption: 'L / 100 km', serviceDue: 'Service due',
     avgFill: 'Avg fill', totalFuel: 'Total fuel', fills: 'fills', showEmergency: 'Emergency card',
     // family nudge + points
@@ -531,6 +533,8 @@ export const STRINGS = {
     dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء', inLabel: 'بعد',
     // garage extras
     emergencyInfo: 'معلومات الطوارئ', fuelLog: 'الوقود', liters: 'لترات', odometer: 'العداد',
+    noFuelYet: 'لا يوجد وقود مسجّل بعد', addFuelHint: 'سجّل تعبئة هنا — أضف اللترات وقراءة العداد لتتبّع استهلاك الوقود.', addFuelFill: 'إضافة تعبئة وقود',
+    noVehExpensesYet: 'لا توجد مصاريف بعد', addVehExpenseHint: 'أضف أي تكلفة لهذه المركبة — تبقى مرتبطة هنا وتظهر في ماليتك.',
     economy: 'الاستهلاك', costPerKm: 'التكلفة / كم', consumption: 'لتر / 100 كم', serviceDue: 'صيانة مستحقة',
     avgFill: 'متوسط التعبئة', totalFuel: 'إجمالي الوقود', fills: 'تعبئات', showEmergency: 'بطاقة الطوارئ',
     // family nudge + points

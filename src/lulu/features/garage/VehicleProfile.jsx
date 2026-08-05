@@ -32,6 +32,9 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
   const isBoat = vehicle.type === 'boat'
   const myServices = services.items.filter(s => s.vehicleId === vehicle.id).sort((a, b) => (b.date || '').localeCompare(a.date || ''))
   const myExpenses = expenses.items.filter(e => e.relatedVehicle === vehicle.id)
+  const today = new Date().toISOString().slice(0, 10)
+  const addFuel = () => setExpEditor({ relatedVehicle: vehicle.id, category: 'fuel', date: today })
+  const addVehExpense = () => setExpEditor({ relatedVehicle: vehicle.id, date: today })
   const totalCost = myExpenses.reduce((s, e) => s + expenseSar(e, settings.rates), 0)
   const dd = daysUntil(vehicle.policyExpiry)
 
@@ -206,9 +209,10 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
                 <div style={{ fontSize: 26, fontWeight: 750, marginTop: 4 }} className="tnum">{money(costPerKm, cur, lang)}</div>
               </Card>
             )}
-            <Section title={t('fuelLog')} count={fuelExp.length} action={t('add')} onAction={() => go('expenses')} />
+            <Section title={t('fuelLog')} count={fuelExp.length} action={t('add')} onAction={addFuel} />
             {fuelExp.length === 0 ? (
-              <Empty icon="fuel" title={t('nothingHere')} text={t('addFiles')} />
+              <Empty icon="fuel" title={t('noFuelYet')} text={t('addFuelHint')}
+                action={<Button variant="primary" icon="plus" onClick={addFuel}>{t('addFuelFill')}</Button>} />
             ) : [...fuelExp].reverse().map(e => (
               <div className="li" key={e.id}>
                 <div className="lead t-brand"><Icon name="fuel" size={18} /></div>
@@ -258,7 +262,11 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
               <div className="k muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase' }}>{t('totalCost')}</div>
               <div style={{ fontSize: 30, fontWeight: 750, marginTop: 4 }} className="tnum">{money(totalCost, cur, lang)}</div>
             </Card>
-            {myExpenses.length === 0 ? <Empty icon="wallet" title={t('nothingHere')} /> :
+            <Section title={t('vehExpenses')} count={myExpenses.length} action={t('add')} onAction={addVehExpense} />
+            {myExpenses.length === 0 ? (
+              <Empty icon="wallet" title={t('noVehExpensesYet')} text={t('addVehExpenseHint')}
+                action={<Button variant="primary" icon="plus" onClick={addVehExpense}>{t('addExpense')}</Button>} />
+            ) : (
               myExpenses.map(e => (
                 <SwipeRow key={e.id} onEdit={() => setExpEditor(e)} onDelete={() => { expenses.remove(e.id); toast.show(t('deletedToast')) }}>
                 <div className="li" onClick={() => setExpEditor(e)}>
@@ -270,7 +278,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
                   <b className="tnum">{money(e.amount, cur, lang)}</b>
                 </div>
                 </SwipeRow>
-              ))}
+              )))}
           </>
         )}
       </div>
