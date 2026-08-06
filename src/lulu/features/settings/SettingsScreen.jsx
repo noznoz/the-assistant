@@ -15,7 +15,7 @@ import { AI_MODELS } from '../../lib/ai.js'
 export default function SettingsScreen({ go }) {
   const { t } = useT()
   const { settings, updateSettings } = useSettings()
-  const { reloadAll } = useStore()
+  const { reloadAll, removeSampleData } = useStore()
   const toast = useToast()
   const fileRef = useRef()
   const [setup, setSetup] = useState(false)   // passcode setup overlay
@@ -44,6 +44,12 @@ export default function SettingsScreen({ go }) {
       catch { toast.show('Invalid file') }
     }
     reader.readAsText(file); e.target.value = ''
+  }
+
+  const doRemoveSamples = () => {
+    if (!window.confirm(t('removeSamplesConfirm'))) return
+    const n = removeSampleData()
+    toast.show(n ? `${t('removed')} ${n}` : t('noSamplesFound'))
   }
 
   const doWipe = () => {
@@ -214,6 +220,8 @@ export default function SettingsScreen({ go }) {
           <Button block icon="download" onClick={doExport}>{t('exportData')}</Button>
           <Button block icon="upload" onClick={() => fileRef.current?.click()}>{t('importData')}</Button>
           <input ref={fileRef} type="file" accept="application/json" hidden onChange={doImport} />
+          <Button block icon="sparkle" onClick={doRemoveSamples}>{t('removeSamples')}</Button>
+          <p className="hint" style={{ margin: '0 2px' }}>{t('removeSamplesHint')}</p>
           <Button block variant="danger" icon="trash" onClick={doWipe}>{t('deleteAll')}</Button>
         </Card>
 

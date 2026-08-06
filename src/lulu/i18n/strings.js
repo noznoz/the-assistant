@@ -291,6 +291,8 @@ export const STRINGS = {
     boardPack: 'Board pack', boardPackSub: 'Finance, work & household in one summary', cashflow: 'Cashflow', net: 'Net', spending: 'Spending', print: 'Print', completedThisMonth: 'Completed this month', householdHorizon: 'Household horizon',
     totalAssets: 'Total assets', shareAsPdf: 'Share as PDF', reportShareHint: 'Opens your print sheet — choose “Save to Files” or share as PDF.',
     preparingReport: 'Preparing report…', backupHint: 'Save a copy of everything to a file — keep it safe or move to a new phone.',
+    removeSamples: 'Remove sample data', removeSamplesHint: 'Deletes the built-in demo records (sample cars, contacts, expenses…) and keeps everything you added. Also clears them from the cloud.',
+    removeSamplesConfirm: 'Remove all the built-in sample data? Your own records are kept.', removed: 'Removed', noSamplesFound: 'No sample data found',
     // receipt scan + forecast + emergency
     scanFilled: 'Filled from your receipt — please check the amount.', scanNoText: 'Receipt attached — couldn’t read it, add the amount.', scanAttached: 'Receipt attached — add the amount.',
     cashflowForecast: 'Cashflow forecast', netMonthly: 'Net per month', perMonthAfterBills: 'left over each month after bills',
@@ -693,6 +695,8 @@ export const STRINGS = {
     boardPack: 'الحزمة التنفيذية', boardPackSub: 'المالية والعمل والمنزل في ملخص واحد', cashflow: 'التدفق النقدي', net: 'الصافي', spending: 'الإنفاق', print: 'طباعة', completedThisMonth: 'أُنجز هذا الشهر', householdHorizon: 'أفق المنزل',
     totalAssets: 'إجمالي الأصول', shareAsPdf: 'مشاركة كـ PDF', reportShareHint: 'يفتح صفحة الطباعة — اختر "حفظ في الملفات" أو المشاركة كـ PDF.',
     preparingReport: 'جارٍ تجهيز التقرير…', backupHint: 'احفظ نسخة من كل شيء في ملف — للأمان أو للنقل إلى هاتف جديد.',
+    removeSamples: 'إزالة البيانات التجريبية', removeSamplesHint: 'يحذف السجلات التجريبية المدمجة (سيارات وجهات اتصال ومصاريف تجريبية…) ويُبقي كل ما أضفته أنت. ويزيلها من السحابة أيضًا.',
+    removeSamplesConfirm: 'إزالة جميع البيانات التجريبية المدمجة؟ ستبقى سجلاتك أنت.', removed: 'تمت الإزالة', noSamplesFound: 'لا توجد بيانات تجريبية',
     // receipt scan + forecast + emergency
     scanFilled: 'تم التعبئة من الإيصال — تحقّق من المبلغ.', scanNoText: 'أُرفق الإيصال — تعذّرت القراءة، أضف المبلغ.', scanAttached: 'أُرفق الإيصال — أضف المبلغ.',
     cashflowForecast: 'توقّع التدفق النقدي', netMonthly: 'الصافي شهرياً', perMonthAfterBills: 'يتبقّى شهرياً بعد الفواتير',

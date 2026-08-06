@@ -175,6 +175,7 @@ export async function listMembers() {
 // records whose data carries deletedAt, so this covers deletes too.
 export async function pushRecord(collection, record) {
   if (!isReady() || !record || !record.id) return
+  if (record.seed === true) return  // sample data stays local-only
   try {
     await authFetch('/rest/v1/records?on_conflict=household_id,id', {
       method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
@@ -189,7 +190,7 @@ export async function pushRecord(collection, record) {
 // Push every local record (first sync after signing in on a device with data).
 export async function pushAll() {
   if (!isReady()) return
-  const all = db.allRecords()
+  const all = db.allRecords().filter(({ record }) => record.seed !== true)
   for (let i = 0; i < all.length; i += 200) {
     const batch = all.slice(i, i + 200).map(({ collection, record }) => ({
       household_id: householdId(), id: record.id, collection,

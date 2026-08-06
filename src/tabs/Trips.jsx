@@ -722,7 +722,7 @@ function TripDetail({ trip, mine, currentRider, isAdmin, reminderOn, onToggleRem
             trip.meetingLat ? `📍 Maps: https://www.google.com/maps?q=${trip.meetingLat},${trip.meetingLng}` : '',
             trip.comment ? `\n💬 ${trip.comment}` : '',
             trip.notes ? `📝 ${trip.notes}` : '',
-            `\n👉 Join the crew: https://road-heaven.vercel.app`,
+            `\n👉 Join the crew: ${window.location.origin}`,
           ].filter(Boolean).join('\n'))}
           style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#25D366', fontWeight: 600, fontSize: 13, flexShrink: 0, marginLeft: 12 }}
         >

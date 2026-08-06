@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useMemo, useEf
 import * as db from './db.js'
 import * as cloud from '../lib/cloud.js'
 import { maybeSeed } from './seed.js'
+import { collectSampleRemovals } from '../lib/sampleData.js'
 
 const StoreCtx = createContext(null)
 const SettingsCtx = createContext(null)
@@ -83,7 +84,19 @@ export function StoreProvider({ children }) {
     return () => { alive = false; clearInterval(t) }
   }, [cloudSync, reloadAll])
 
-  const store = useMemo(() => ({ data, add, patch, save, remove, reload, reloadAll, cloudSync }), [data, add, patch, save, remove, reload, reloadAll, cloudSync])
+  // Remove the built-in sample/seed records (soft-delete, which also clears
+  // them from the cloud for connected users). Returns how many were removed.
+  const removeSampleData = useCallback(() => {
+    const removals = collectSampleRemovals(data)
+    removals.forEach(({ collection, id }) => {
+      const rec = db.softDelete(collection, id)
+      cloud.pushRecord(collection, rec)
+    })
+    if (removals.length) reloadAll()
+    return removals.length
+  }, [data, reloadAll])
+
+  const store = useMemo(() => ({ data, add, patch, save, remove, reload, reloadAll, cloudSync, removeSampleData }), [data, add, patch, save, remove, reload, reloadAll, cloudSync, removeSampleData])
   const settingsValue = useMemo(() => ({ settings, updateSettings }), [settings, updateSettings])
 
   return (
