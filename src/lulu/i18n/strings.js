@@ -73,6 +73,19 @@ export const STRINGS = {
     addKeyBtn: 'Add your key', aiError: 'Something went wrong. Please try again.',
     aiKeyBad: 'That API key was rejected. Check it in Settings.', aiRateLimited: 'Too many requests — wait a moment and try again.',
     aiSug1: 'What needs my attention today?', aiSug2: 'Which documents expire soon?', aiSug3: 'How much have I spent this month?',
+    // Assistant actions (tools) + voice
+    aiActionsHint: 'I can add tasks, log expenses & fuel, set appointments and save notes — just ask.',
+    aiConfirmTitle: 'Confirm before I create', aiConfirmDo: 'Confirm & create', aiRefusal: "I'm sorry — I wasn't able to help with that request.",
+    micStart: 'Voice input', micListening: 'Listening…',
+    actAddTask: 'Add task', actLogExpense: 'Log expense', actAddAppointment: 'Add appointment', actAddNote: 'Save note',
+    // Renewal radar
+    expiringSoon: 'Expiring soon', nothingExpiring: 'Nothing expiring soon — all clear.',
+    renewalOverdueN: 'overdue', renewalDueSoonN: 'due soon', renewalReminder: 'Renewal reminder',
+    // Snap & file
+    snapFile: 'Snap & file', snapFileHint: "Photograph a document or receipt — I'll read it and file it for you.",
+    snapReading: 'Reading your photo…', snapFailed: "Couldn't read that photo. Try again, or enter it manually.",
+    snapAsDocument: 'Save as document', snapAsExpense: 'Save as expense', snapReview: 'Review & save', snapRetake: 'Retake',
+    snapDetected: 'Detected', snapNeedsKey: 'Add your Anthropic API key in Settings to use Snap & file.',
     // Cloud sync + family
     cloudFamily: 'Cloud & family', cloudSettingsHint: 'Sync your data across devices and share with family.', cloudManage: 'Manage cloud & family',
     cloudConnection: 'Connection', cloudOn: 'Synced', cloudOff: 'Not connected', cloudNotSignedIn: 'Project set — sign in',
@@ -478,6 +491,19 @@ export const STRINGS = {
     addKeyBtn: 'أضف المفتاح', aiError: 'حدث خطأ ما. حاول مرة أخرى.',
     aiKeyBad: 'تم رفض هذا المفتاح. تحقق منه في الإعدادات.', aiRateLimited: 'طلبات كثيرة — انتظر لحظة ثم حاول مجددًا.',
     aiSug1: 'ما الذي يحتاج انتباهي اليوم؟', aiSug2: 'ما المستندات التي ستنتهي قريبًا؟', aiSug3: 'كم أنفقت هذا الشهر؟',
+    // Assistant actions (tools) + voice
+    aiActionsHint: 'أستطيع إضافة المهام وتسجيل المصروفات والوقود وضبط المواعيد وحفظ الملاحظات — فقط اطلب.',
+    aiConfirmTitle: 'أكِّد قبل الإنشاء', aiConfirmDo: 'تأكيد وإنشاء', aiRefusal: 'عذرًا — لم أتمكن من مساعدتك في هذا الطلب.',
+    micStart: 'إدخال صوتي', micListening: 'يستمع…',
+    actAddTask: 'إضافة مهمة', actLogExpense: 'تسجيل مصروف', actAddAppointment: 'إضافة موعد', actAddNote: 'حفظ ملاحظة',
+    // Renewal radar
+    expiringSoon: 'ينتهي قريبًا', nothingExpiring: 'لا شيء ينتهي قريبًا — كل شيء على ما يرام.',
+    renewalOverdueN: 'متأخر', renewalDueSoonN: 'يستحق قريبًا', renewalReminder: 'تذكير بالتجديد',
+    // Snap & file
+    snapFile: 'صوّر واحفظ', snapFileHint: 'صوّر مستندًا أو إيصالًا — سأقرؤه وأصنّفه لك.',
+    snapReading: 'يقرأ الصورة…', snapFailed: 'تعذّرت قراءة الصورة. أعد المحاولة أو أدخلها يدويًا.',
+    snapAsDocument: 'حفظ كمستند', snapAsExpense: 'حفظ كمصروف', snapReview: 'راجع واحفظ', snapRetake: 'إعادة التصوير',
+    snapDetected: 'تم التعرف', snapNeedsKey: 'أضف مفتاح Anthropic API في الإعدادات لاستخدام صوّر واحفظ.',
     // Cloud sync + family
     cloudFamily: 'السحابة والعائلة', cloudSettingsHint: 'زامن بياناتك بين أجهزتك وشاركها مع العائلة.', cloudManage: 'إدارة السحابة والعائلة',
     cloudConnection: 'الاتصال', cloudOn: 'متزامن', cloudOff: 'غير متصل', cloudNotSignedIn: 'تم ضبط المشروع — سجّل الدخول',

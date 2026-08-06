@@ -15,9 +15,13 @@ export const AI_MODELS = [
 
 export const DEFAULT_MODEL = 'claude-sonnet-5'
 
-// One round-trip to the Messages API. Returns the assistant's text.
+// One round-trip to the Messages API. Returns the full parsed result:
+//   { text, content, stopReason, toolUses, raw }
+// `text` is the concatenated text blocks; `content` is the raw assistant content
+// array (needed to feed tool_use back into the conversation); `toolUses` are the
+// tool_use blocks the model emitted. `tools` (optional) lets the model act.
 // Throws Error with .status on HTTP / network failure so the UI can explain it.
-export async function callClaude({ apiKey, model, system, messages, maxTokens = 2048, signal }) {
+export async function requestClaude({ apiKey, model, system, messages, tools, maxTokens = 2048, signal }) {
   let res
   try {
     res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -34,6 +38,7 @@ export async function callClaude({ apiKey, model, system, messages, maxTokens = 
         max_tokens: maxTokens,
         system,
         messages,
+        ...(tools && tools.length ? { tools } : {}),
       }),
       signal,
     })
@@ -53,11 +58,24 @@ export async function callClaude({ apiKey, model, system, messages, maxTokens = 
   }
 
   const data = await res.json()
-  if (data.stop_reason === 'refusal') return "I'm sorry — I wasn't able to help with that request."
-  const text = (data.content || [])
+  const content = data.content || []
+  const text = content
     .filter(b => b.type === 'text')
     .map(b => b.text)
     .join('\n')
     .trim()
-  return text || '…'
+  return {
+    text,
+    content,
+    stopReason: data.stop_reason,
+    toolUses: content.filter(b => b.type === 'tool_use'),
+    raw: data,
+  }
+}
+
+// Convenience wrapper for a plain text answer (no tools). Returns a string.
+export async function callClaude(opts) {
+  const r = await requestClaude(opts)
+  if (r.stopReason === 'refusal') return "I'm sorry — I wasn't able to help with that request."
+  return r.text || '…'
 }
