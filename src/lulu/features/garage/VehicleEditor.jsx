@@ -5,6 +5,7 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { VEHICLE_TYPES, OWNERSHIP_STATUSES, label } from '../../lib/domain.js'
 import { imageToDataURL } from '../../lib/files.js'
+import { usePhotoEditor } from '../../ui/PhotoEditor.jsx'
 
 export default function VehicleEditor({ initial, onClose, onSaved, onDeleted }) {
   const { t, lang } = useT()
@@ -27,12 +28,15 @@ export default function VehicleEditor({ initial, onClose, onSaved, onDeleted }) 
   const posY = parseInt(pos[1]) || 50
   const setPos = (x, y) => setF(prev => ({ ...prev, photoPos: `${x}% ${y}%` }))
 
-  const onPhoto = async (fileList) => {
+  const photo = usePhotoEditor()
+  const onPhoto = (fileList) => {
     const file = fileList && fileList[0]
     if (!file) return
-    setBusy(true)
-    try { const url = await imageToDataURL(file); if (url) setF(prev => ({ ...prev, photo: url })) }
-    finally { setBusy(false) }
+    photo.open(file, async (edited) => {
+      setBusy(true)
+      try { const url = await imageToDataURL(edited); if (url) setF(prev => ({ ...prev, photo: url, photoPos: '50% 50%' })) }
+      finally { setBusy(false) }
+    }, { aspect: 16 / 9, size: 1400 })
   }
 
   const submit = () => {
@@ -143,6 +147,7 @@ export default function VehicleEditor({ initial, onClose, onSaved, onDeleted }) 
         <Field label={t('istimara') + ' — ' + t('expiry')}><Input type="date" value={f.registrationExpiry} onChange={set('registrationExpiry')} /></Field>
       </div>
       <Field label={t('biography')} hint={t('optional')}><TextArea value={f.bio} onChange={set('bio')} /></Field>
+      {photo.node}
     </Sheet>
   )
 }

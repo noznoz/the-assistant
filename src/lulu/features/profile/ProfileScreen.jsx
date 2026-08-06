@@ -4,6 +4,7 @@ import { DetailHeader, Card, Section, Field, Input, Select, Button, useToast } f
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useSettings } from '../../store/StoreProvider.jsx'
 import { imageToDataURL } from '../../lib/files.js'
+import { usePhotoEditor } from '../../ui/PhotoEditor.jsx'
 import { share } from '../../lib/share.js'
 
 // The owner's personal profile: identity, contact, Saudi National Address,
@@ -22,12 +23,15 @@ export default function ProfileScreen({ go }) {
   useEffect(() => { updateSettings({ profile: form }) }, [form]) // eslint-disable-line react-hooks/exhaustive-deps
   const set = (k) => (e) => { const v = e.target.value; setForm(prev => ({ ...prev, [k]: v })) }
 
-  const onPhoto = async (fileList) => {
+  const photo = usePhotoEditor()
+  const onPhoto = (fileList) => {
     const file = fileList && fileList[0]
     if (!file) return
-    setBusy(true)
-    try { const url = await imageToDataURL(file, 600, 0.85); if (url) setForm(prev => ({ ...prev, photo: url })) }
-    finally { setBusy(false) }
+    photo.open(file, async (edited) => {
+      setBusy(true)
+      try { const url = await imageToDataURL(edited, 600, 0.85); if (url) setForm(prev => ({ ...prev, photo: url })) }
+      finally { setBusy(false) }
+    }, { aspect: 1, round: true, size: 800 })
   }
 
   const initials = (form.fullName || settings.name || '')
@@ -167,6 +171,7 @@ export default function ProfileScreen({ go }) {
 
         <p className="center muted" style={{ marginTop: 20, fontSize: 12 }}>{t('profileStoredLocally')}</p>
       </div>
+      {photo.node}
       {toast.node}
     </>
   )

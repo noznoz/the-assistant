@@ -57,6 +57,7 @@ export const STRINGS = {
     save: 'Save', cancel: 'Cancel', delete: 'Delete', edit: 'Edit', done: 'Done', add: 'Add',
     search: 'Search', filter: 'Filter', all: 'All', none: 'None', optional: 'optional',
     required: 'Required', close: 'Close', share: 'Share', view: 'View', back: 'Back',
+    editPhoto: 'Edit photo', useThisPhoto: 'Use photo', useOriginal: 'Original', rotate: 'Rotate', zoom: 'Zoom', reset: 'Reset',
     storageFull: 'This device is out of storage — recent changes may not be saved. Free space or back up and remove large photos/receipts.',
     // settings
     profile: 'Profile', language: 'Language', currency: 'Currency', timezone: 'Timezone',
@@ -478,6 +479,7 @@ export const STRINGS = {
     save: 'حفظ', cancel: 'إلغاء', delete: 'حذف', edit: 'تعديل', done: 'تم', add: 'إضافة',
     search: 'بحث', filter: 'تصفية', all: 'الكل', none: 'لا شيء', optional: 'اختياري',
     required: 'مطلوب', close: 'إغلاق', share: 'مشاركة', view: 'عرض', back: 'رجوع',
+    editPhoto: 'تعديل الصورة', useThisPhoto: 'استخدام الصورة', useOriginal: 'الأصلية', rotate: 'تدوير', zoom: 'تكبير', reset: 'إعادة تعيين',
     storageFull: 'مساحة تخزين الجهاز ممتلئة — قد لا تُحفظ التغييرات الأخيرة. حرِّر مساحة أو انسخ البيانات احتياطياً واحذف الصور/الإيصالات الكبيرة.',
     profile: 'الملف الشخصي', language: 'اللغة', currency: 'العملة', timezone: 'المنطقة الزمنية',
     dateFormat: 'صيغة التاريخ', appearance: 'المظهر', themeSystem: 'النظام', themeLight: 'فاتح',
