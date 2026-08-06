@@ -5,6 +5,7 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { RELATIONSHIPS, label } from '../../lib/domain.js'
 import { makeThumb } from '../../lib/files.js'
+import { usePhotoEditor } from '../../ui/PhotoEditor.jsx'
 import { pickContacts, contactPickerSupported } from '../../lib/contacts.js'
 
 // Shared person/family editor. `onSaved(person)` receives the saved record so
@@ -29,11 +30,14 @@ export default function PersonEditor({ initial = {}, onClose, onSaved }) {
   const cameraRef = useRef()
   const set = (k) => (e) => setF(prev => ({ ...prev, [k]: e.target.value }))
 
-  const pickPhoto = async (fileList) => {
+  const photo = usePhotoEditor()
+  const pickPhoto = (fileList) => {
     const file = fileList && fileList[0]
     if (!file) return
-    const thumb = await makeThumb(file, 320)
-    if (thumb) setF(prev => ({ ...prev, photo: thumb }))
+    photo.open(file, async (edited) => {
+      const thumb = await makeThumb(edited, 320)
+      if (thumb) setF(prev => ({ ...prev, photo: thumb }))
+    }, { aspect: 1, round: true, size: 640 })
   }
 
   const fromContacts = async () => {
@@ -148,6 +152,7 @@ export default function PersonEditor({ initial = {}, onClose, onSaved }) {
       <p className="muted" style={{ fontSize: 12, marginTop: 10 }}>
         <Icon name="whatsapp" size={12} /> {t('sendTaskHint')}
       </p>
+      {photo.node}
     </Sheet>
   )
 }

@@ -8,6 +8,7 @@ import { ACCESSORY_STATUSES, accessoryStatus, ACCESSORY_GROUPS, accessoryGroup, 
 import { makeThumb } from '../../lib/files.js'
 import { exportXlsx, printHtml } from '../../lib/exporters.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
+import { usePhotoEditor } from '../../ui/PhotoEditor.jsx'
 
 const groupDef = (id) => ACCESSORY_GROUPS.find(g => g.id === id) || ACCESSORY_GROUPS[0]
 const normUrl = (u) => !u ? '' : (/^https?:\/\//i.test(u) ? u : 'https://' + u)
@@ -105,7 +106,11 @@ function AccessoryEditor({ initial, vehicleId, onClose, onSaved }) {
   const [err, setErr] = useState('')
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const cameraRef = useRef(); const fileRef = useRef()
-  const pickPhoto = async (fileList) => { const file = fileList && fileList[0]; if (!file) return; const thumb = await makeThumb(file, 480); if (thumb) setF(prev => ({ ...prev, photo: thumb })) }
+  const photo = usePhotoEditor()
+  const pickPhoto = (fileList) => {
+    const file = fileList && fileList[0]; if (!file) return
+    photo.open(file, async (edited) => { const thumb = await makeThumb(edited, 480); if (thumb) setF(prev => ({ ...prev, photo: thumb })) }, { aspect: 1 })
+  }
   const submit = () => {
     if (!f.name.trim()) { setErr(t('required')); return }
     const rec = {
@@ -168,6 +173,7 @@ function AccessoryEditor({ initial, vehicleId, onClose, onSaved }) {
       <Field label={t('date')}><Input type="date" value={f.date} onChange={set('date')} /></Field>
       <Field label={t('notesField')}><TextArea value={f.note} onChange={set('note')} /></Field>
       {accessoryTotal(f) > 0 && <p className="hint" style={{ margin: '0 2px' }}>{t('total')}: {money(accessoryTotal(f), undefined, lang)}</p>}
+      {photo.node}
     </Sheet>
   )
 }

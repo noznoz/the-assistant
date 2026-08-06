@@ -4,6 +4,7 @@ import { Empty, Button, Sheet, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { saveAttachment, removeAttachment, getAttachmentFile, imageToDataURL } from '../../lib/files.js'
+import { usePhotoEditor } from '../../ui/PhotoEditor.jsx'
 
 // A photo album for one vehicle. Photos are stored as attachments (full image
 // in IndexedDB + a small thumbnail on the record), so the album stays light.
@@ -30,16 +31,18 @@ export default function VehiclePhotos({ vehicle }) {
     return () => { live = false; if (obj) URL.revokeObjectURL(obj) }
   }, [viewer])
 
-  const addPhotos = async (fileList) => {
+  const photo = usePhotoEditor()
+  const addPhotos = (fileList) => {
     if (!fileList || !fileList.length) return
-    setBusy(true)
-    try {
-      const added = []
-      for (const file of Array.from(fileList)) added.push(await saveAttachment(file))
-      vehicles.patch(vehicle.id, { album: [...album, ...added] })
-      toast.show(t('savedToast'))
-    } catch { toast.show(t('comingSoon')) }
-    finally { setBusy(false) }
+    const base = vehicle.album || []
+    const collected = []
+    photo.open(Array.from(fileList), async (edited) => {
+      try {
+        const att = await saveAttachment(edited)
+        collected.push(att)
+        vehicles.patch(vehicle.id, { album: [...base, ...collected] })
+      } catch { toast.show(t('comingSoon')) }
+    }, { aspect: 4 / 3, size: 1600, onComplete: () => { if (collected.length) toast.show(t('savedToast')) } })
   }
 
   const removePhoto = async (att) => {
@@ -98,6 +101,7 @@ export default function VehiclePhotos({ vehicle }) {
           </div>
         </Sheet>
       )}
+      {photo.node}
       {toast.node}
     </>
   )
