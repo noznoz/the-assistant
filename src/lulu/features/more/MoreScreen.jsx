@@ -4,6 +4,7 @@ import { TopBar } from '../../ui/AppShell.jsx'
 import { Card, Section } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useStore, useSettings } from '../../store/StoreProvider.jsx'
+import { APP_VERSION, BUILD_STAMP } from '../../lib/appInfo.js'
 
 // Grouped, colour-coded navigation. Each group has an accent tint so the long
 // list scans as a map rather than one flat column.
@@ -67,17 +68,6 @@ const GROUPS = [
 ]
 
 const ALL_ITEMS = GROUPS.flatMap(g => g.items.map(it => ({ ...it, tint: g.tint })))
-
-// Build timestamp injected by Vite at build time (see vite.config define).
-const BUILD_STAMP = (() => {
-  try {
-    const iso = typeof __BUILD_TIME__ !== 'undefined' ? __BUILD_TIME__ : ''
-    if (!iso) return 'dev'
-    const d = new Date(iso)
-    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' +
-      d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-  } catch { return 'dev' }
-})()
 
 export default function MoreScreen({ go }) {
   const { t } = useT()
@@ -177,7 +167,7 @@ export default function MoreScreen({ go }) {
             ))}
           </>
         )}
-        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v5.0 · {BUILD_STAMP}</p>
+        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v{APP_VERSION} · {BUILD_STAMP}</p>
       </div>
     </>
   )

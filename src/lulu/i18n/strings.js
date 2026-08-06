@@ -101,7 +101,7 @@ export const STRINGS = {
     cloudJoin: 'Join a household', cloudJoinHint: 'Paste a household code shared with you to see the same data.', cloudCode: 'Household code', cloudJoinBtn: 'Join household', cloudJoined: 'Joined household',
     cloudAccount: 'Account', cloudDisconnect: 'Disconnect cloud', cloudPrivacy: 'Your data syncs only to your own Supabase project. Nothing goes to us.',
     cloudConsent: 'I understand my data will leave this device and sync to my own Supabase project and any family members I invite.',
-    about: 'The Assistant', name: 'Name',
+    about: 'The Assistant', build: 'Build', name: 'Name',
     // empties / misc
     nothingHere: 'Nothing here yet', comingSoon: 'Coming soon',
     inboxSubtitle: 'Capture anything now, organise it later.',
@@ -521,7 +521,7 @@ export const STRINGS = {
     cloudJoin: 'الانضمام إلى عائلة', cloudJoinHint: 'الصق رمز العائلة الذي شورك معك لرؤية نفس البيانات.', cloudCode: 'رمز العائلة', cloudJoinBtn: 'انضمام', cloudJoined: 'تم الانضمام',
     cloudAccount: 'الحساب', cloudDisconnect: 'قطع الاتصال بالسحابة', cloudPrivacy: 'تتزامن بياناتك فقط مع مشروع Supabase الخاص بك. لا شيء يصل إلينا.',
     cloudConsent: 'أفهم أن بياناتي ستغادر هذا الجهاز وتتزامن مع مشروع Supabase الخاص بي ومع أفراد العائلة الذين أدعوهم.',
-    about: 'عن التطبيق', name: 'الاسم',
+    about: 'عن التطبيق', build: 'الإصدار', name: 'الاسم',
     nothingHere: 'لا يوجد شيء بعد', comingSoon: 'قريباً',
     inboxSubtitle: 'سجّل أي شيء الآن، ونظّمه لاحقاً.',
     capturePlaceholder: 'ما الذي يشغل بالك؟', capture: 'تسجيل', triage: 'فرز',
