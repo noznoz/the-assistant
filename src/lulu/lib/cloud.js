@@ -16,6 +16,7 @@ import * as db from '../store/db.js'
 const NS = 'lulu:v1:cloud'
 const CFG_KEY = `${NS}:config`   // { url, anonKey }
 const SES_KEY = `${NS}:session`  // { access_token, refresh_token, user, householdId }
+const CONSENT_KEY = `${NS}:consent` // '1' once the user has agreed to sync leaving the device
 
 function read(key, fb) { try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : fb } catch { return fb } }
 function write(key, v) { localStorage.setItem(key, JSON.stringify(v)) }
@@ -34,6 +35,19 @@ function setSession(s) { if (s) write(SES_KEY, s); else localStorage.removeItem(
 export function isConfigured() { return !!getConfig() }
 export function isSignedIn() { const s = getSession(); return !!(s && s.access_token && s.householdId) }
 export function isReady() { return isConfigured() && isSignedIn() }
+
+// Explicit privacy consent. The app is private/local by default; nothing is
+// pushed to the cloud until the user has knowingly agreed. This gates every
+// outbound write (pushRecord / pushAll), so ticking cloud config on without
+// consent still uploads nothing.
+export function hasConsent() { try { return localStorage.getItem(CONSENT_KEY) === '1' } catch { return false } }
+// Migration: anyone already signed in before consent existed opted into cloud
+// under the old flow — treat that as consent so their sync keeps working.
+try { if (isSignedIn() && localStorage.getItem(CONSENT_KEY) == null) localStorage.setItem(CONSENT_KEY, '1') } catch { /* ignore */ }
+export function setConsent(v) {
+  try { if (v) localStorage.setItem(CONSENT_KEY, '1'); else localStorage.removeItem(CONSENT_KEY) } catch { /* ignore */ }
+  emit()
+}
 export function currentUser() { const s = getSession(); return s && s.user }
 export function householdId() { const s = getSession(); return s && s.householdId }
 
@@ -174,7 +188,7 @@ export async function listMembers() {
 // Push one record (fire-and-forget from the store). Soft-deletes are just
 // records whose data carries deletedAt, so this covers deletes too.
 export async function pushRecord(collection, record) {
-  if (!isReady() || !record || !record.id) return
+  if (!isReady() || !hasConsent() || !record || !record.id) return
   if (record.seed === true) return  // sample data stays local-only
   try {
     await authFetch('/rest/v1/records?on_conflict=household_id,id', {
@@ -189,7 +203,7 @@ export async function pushRecord(collection, record) {
 
 // Push every local record (first sync after signing in on a device with data).
 export async function pushAll() {
-  if (!isReady()) return
+  if (!isReady() || !hasConsent()) return
   const all = db.allRecords().filter(({ record }) => record.seed !== true)
   for (let i = 0; i < all.length; i += 200) {
     const batch = all.slice(i, i + 200).map(({ collection, record }) => ({
@@ -225,4 +239,57 @@ export async function syncNow() {
   if (!isReady()) return null
   await pushAll()
   return pullAll()
+}
+
+// ---- Attachment storage (document/receipt/photo binaries) ----
+// Document records sync their metadata + thumbnail via `records`; the actual
+// files live in the private `attachments` bucket, namespaced by household so RLS
+// (is_member) scopes them to the family. Objects are keyed by the attachment id.
+const BUCKET = 'attachments'
+const UP_KEY = `${NS}:uploaded`  // { hid, ids: { [id]: 1 } } — what's already pushed
+
+function attachPath(id) { return `${householdId()}/${encodeURIComponent(id)}` }
+
+// Storage follows the same consent gate as record sync: no file leaves the
+// device until the user has agreed.
+export function storageReady() { return isReady() && hasConsent() }
+
+// Local memo of which attachments are already in this household's bucket, so a
+// reconcile pass doesn't re-upload every file each sync. Resets if the household
+// changes (a different bucket namespace).
+function uploadedState() {
+  const s = read(UP_KEY, null)
+  const hid = householdId()
+  return (s && s.hid === hid && s.ids) ? s : { hid, ids: {} }
+}
+export function isUploaded(id) { return !!uploadedState().ids[id] }
+export function markUploaded(id) { const s = uploadedState(); s.ids[id] = 1; write(UP_KEY, s) }
+
+// Upload one blob (upsert — safe to repeat). Returns whether it persisted.
+export async function uploadFile(id, blob) {
+  if (!storageReady() || !id || !blob) return false
+  try {
+    const res = await authFetch(`/storage/v1/object/${BUCKET}/${attachPath(id)}`, {
+      method: 'POST',
+      headers: { 'content-type': blob.type || 'application/octet-stream', 'x-upsert': 'true' },
+      body: blob,
+    })
+    return res.ok
+  } catch { return false }
+}
+
+// Fetch one blob back from the bucket (private → authenticated endpoint + token).
+export async function downloadFile(id) {
+  if (!storageReady() || !id) return null
+  try {
+    const res = await authFetch(`/storage/v1/object/authenticated/${BUCKET}/${attachPath(id)}`, { method: 'GET' })
+    if (!res.ok) return null
+    return await res.blob()
+  } catch { return null }
+}
+
+// Best-effort remote delete when an attachment is removed locally.
+export async function deleteFileRemote(id) {
+  if (!storageReady() || !id) return
+  try { await authFetch(`/storage/v1/object/${BUCKET}/${attachPath(id)}`, { method: 'DELETE' }) } catch { /* ignore */ }
 }

@@ -11,6 +11,7 @@ import * as db from '../../store/db.js'
 import { hashPin, biometricSupported, enrollBiometric } from '../../lib/lock.js'
 import { requestNotificationPermission, notificationPermission, setBadge } from '../../lib/notify.js'
 import { AI_MODELS } from '../../lib/ai.js'
+import { APP_VERSION, BUILD_STAMP } from '../../lib/appInfo.js'
 
 export default function SettingsScreen({ go }) {
   const { t } = useT()
@@ -226,7 +227,10 @@ export default function SettingsScreen({ go }) {
         </Card>
 
         <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>
-          {t('about')} · v5.0 · <span>Offline-first</span>
+          {t('about')} · v{APP_VERSION} · <span>Offline-first</span>
+        </p>
+        <p className="center muted" style={{ marginTop: 2, fontSize: 11 }}>
+          {t('build')} {BUILD_STAMP}
         </p>
       </div>
 

@@ -1,8 +1,18 @@
 # Lulu — Data Model & Database Schema
 
-Phase 1 stores each collection as a JSON array in `localStorage`. Every record
-carries `id`, `createdAt`, `updatedAt`, `deletedAt` (soft delete). The **same shape**
-maps 1:1 to the Supabase Postgres schema below (Phase 2), so migration is a copy.
+The app stores each collection as a JSON array in `localStorage` (see
+`src/lulu/store/db.js`). Every record carries `id`, `createdAt`, `updatedAt`,
+`deletedAt` (soft delete).
+
+> **What actually ships for cloud sync.** Records are mirrored verbatim into a
+> single shared `records` JSONB table scoped to a `household`, so the React UI
+> keeps its exact shape and no per-entity migration is needed. That is the
+> implemented model — the canonical DDL lives in **`supabase/schema.sql`** (also
+> shown in-app under *More → Cloud & Family*), and `src/lulu/lib/cloud.js` is the
+> client. The normalized per-entity DDL further down this page is an *alternative
+> future design* (useful if you ever want SQL-queryable columns and per-table
+> RLS); it is **not** what the current sync uses. The field lists below describe
+> the JSON shape of each record either way.
 
 ## Entities & relationships (ER overview)
 ```
@@ -52,7 +62,12 @@ users 1─┐
 name, language, currency(SAR default), timezone(Asia/Riyadh), dateFormat, theme,
 requireLock, aiProvider, monthlyBudget.
 
-## Supabase schema (Phase 2 — reference DDL)
+## Alternative normalized schema (reference DDL — NOT the shipped sync)
+> The shipped cloud sync uses the JSONB `records` table in `supabase/schema.sql`.
+> The DDL below is kept only as a reference for a possible future migration to
+> fully normalized, SQL-queryable tables. Do **not** run it expecting the app to
+> use it — it won't.
+
 Every table has RLS `owner_id = auth.uid()`. Timestamps + soft delete everywhere.
 
 ```sql

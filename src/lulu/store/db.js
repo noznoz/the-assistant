@@ -20,6 +20,25 @@ export const COLLECTIONS = [
 
 function keyFor(name) { return `${NS}:${name}` }
 
+// A localStorage write that survives a full quota. When the browser refuses the
+// write (QuotaExceededError — common once photos/receipts pile up), we don't let
+// the exception tear through a save: we surface it as a `lulu:storage-full`
+// window event (the app shows a banner) and swallow it, so the in-memory state
+// the user just changed stays intact until they free space. Returns whether the
+// write actually persisted.
+function persist(key, value) {
+  try {
+    localStorage.setItem(key, value)
+    return true
+  } catch (e) {
+    const quota = e && (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014)
+    try {
+      window.dispatchEvent(new CustomEvent('lulu:storage-full', { detail: { key, quota: !!quota } }))
+    } catch { /* non-browser / SSR */ }
+    return false
+  }
+}
+
 export function uid() {
   return 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
 }
@@ -36,7 +55,7 @@ export function readCollection(name) {
 }
 
 export function writeCollection(name, rows) {
-  localStorage.setItem(keyFor(name), JSON.stringify(rows))
+  return persist(keyFor(name), JSON.stringify(rows))
 }
 
 // Reads including soft-deleted rows (needed for correct upserts).
@@ -148,7 +167,7 @@ export function readSettings() {
   return { ...DEFAULT_SETTINGS, ...safeParse(localStorage.getItem(keyFor('settings')), {}) }
 }
 export function writeSettings(s) {
-  localStorage.setItem(keyFor('settings'), JSON.stringify(s))
+  return persist(keyFor('settings'), JSON.stringify(s))
 }
 
 // ---- Full export / import (backup) ----

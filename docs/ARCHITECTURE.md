@@ -1,5 +1,13 @@
 # Lulu — Technical Architecture
 
+> **Implementation status (ahead of the phase plan below).** Several things this
+> document describes as future seams are now built and shipping: **cloud sync +
+> family sharing** over Supabase (`lib/cloud.js`, `store/StoreProvider.jsx`,
+> `supabase/schema.sql`), the **AI assistant** with bring‑your‑own Anthropic key
+> and confirm‑before‑act tools (`features/assistant`, `lib/ai.js`), and the
+> **passcode + biometric app lock** (`ui/LockGate.jsx`, `lib/lock.js`). The
+> `db.js` interface stayed stable throughout, exactly as intended.
+
 ## Stack
 - **UI:** React 18 (functional components + hooks)
 - **Build/dev:** Vite 6

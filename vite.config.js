@@ -1,12 +1,18 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { readFileSync } from 'node:fs'
+
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url)))
 
 export default defineConfig({
   // '/' for root-domain hosts (Vercel); '/road-heaven/' for GitHub Pages
   base: process.env.VITE_BASE || '/',
-  // Injected at build time so the More screen can show which build is live.
-  define: { __BUILD_TIME__: JSON.stringify(new Date().toISOString()) },
+  // Injected at build time so the app can show which version/build is live.
+  define: {
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+    __APP_VERSION__: JSON.stringify(pkg.version),
+  },
   server: { port: process.env.PORT ? Number(process.env.PORT) : 5173 },
   plugins: [
     react(),

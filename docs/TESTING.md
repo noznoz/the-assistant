@@ -2,22 +2,27 @@
 
 ## Layers
 1. **Build gate** — `npm run build` must pass (type‑free React + Vite). Catches
-   import/syntax errors across all 62 modules.
-2. **Runtime smoke (automated)** — a headless Chromium (Playwright) loads every
-   route, opens editors and a vehicle profile, and asserts **zero page/console
-   errors**. Script lives in `docs/` guidance; re‑runnable any time (see below).
-3. **Manual acceptance** — the checklist in this file, per module.
-4. **Unit tests (Phase 2+)** — pure logic in `lib/` (`format`, `brief`, `triage`,
-   share formatters) is written as pure functions specifically so they're trivially
-   unit‑testable with Vitest.
+   import/syntax errors across every module.
+2. **Unit tests (Vitest)** — `npm test` runs the pure‑logic suite in
+   `src/lulu/**/*.test.js`: currency/date formatting (`format`), the local store's
+   CRUD + last‑write‑wins `mergeRemote` + quota‑safe writes (`db`), and the
+   assistant context builder. Add tests alongside new pure functions.
+3. **Runtime smoke (automated)** — `node smoke.mjs` builds nothing itself; run
+   `npm run smoke` (build + smoke) to launch a headless Chromium that loads **every
+   route** and asserts **zero page/console errors**. Prints `ERROR_COUNT: 0` on
+   success.
+4. **Manual acceptance** — the checklist in this file, per module.
 
-## Run the smoke test
+All three automated layers run on every push/PR via `.github/workflows/ci.yml`.
+
+## Run the tests
 ```bash
-# terminal 1
-PORT=5199 npm run dev
-# terminal 2 (Playwright/Chromium is preinstalled in this environment)
-node smoke.mjs      # loads all screens, prints ERROR_COUNT: 0
+npm test           # unit tests (Vitest, jsdom)
+npm run smoke      # build + headless-Chromium route smoke; prints ERROR_COUNT: 0
 ```
+The smoke script serves the built `dist/` itself and finds Chromium via
+`PLAYWRIGHT_BROWSERS_PATH` (falling back to `/opt/pw-browsers/chromium`); in CI,
+`npx playwright install chromium` provides it.
 
 ## Manual acceptance checklist
 **Today** — greeting matches time of day; brief reflects real data; Share agenda
