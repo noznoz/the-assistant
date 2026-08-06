@@ -4,6 +4,8 @@ import { DetailHeader, Card, Section, Field, Input, Button, useToast } from '../
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useStore } from '../../store/StoreProvider.jsx'
 import * as cloud from '../../lib/cloud.js'
+import { pickContacts, contactPickerSupported } from '../../lib/contacts.js'
+import { shareToWhatsApp } from '../../lib/share.js'
 
 // The SQL a user runs once in their Supabase project's SQL editor.
 const SETUP_SQL = `-- The Assistant — cloud sync + family. Run once in Supabase → SQL Editor.
@@ -106,6 +108,22 @@ export default function CloudScreen({ go }) {
 
   const copy = (text) => { navigator.clipboard?.writeText(text); toast.show(t('copied')) }
 
+  // Invite a family member: pick a phone contact (Android) and open WhatsApp to
+  // them with the join link; on iOS (no Contacts API) fall back to the WhatsApp
+  // share sheet so the user picks the chat there.
+  const inviteMessage = () => t('inviteMsg')
+    .replace('{link}', cloud.inviteLink())
+    .replace('{code}', cloud.householdId() || '')
+  const invite = async () => {
+    const msg = inviteMessage()
+    if (contactPickerSupported()) {
+      const list = await pickContacts({ multiple: false })
+      const digits = ((list[0] || {}).mobile || '').replace(/[^0-9]/g, '')
+      if (digits) { window.open(`https://wa.me/${digits}?text=${encodeURIComponent(msg)}`, '_blank'); return }
+    }
+    shareToWhatsApp(msg)
+  }
+
   return (
     <>
       <DetailHeader title={t('cloudFamily')} onBack={() => go('more')} />
@@ -180,7 +198,13 @@ export default function CloudScreen({ go }) {
 
             <Section title={t('cloudFamilyMembers')} />
             <Card className="stack">
-              <p className="hint" style={{ margin: '0 2px' }}>{t('cloudInviteHint')}</p>
+              <Button block variant="primary" icon="whatsapp" onClick={invite}>{t('inviteMember')}</Button>
+              <p className="hint" style={{ margin: '0 2px' }}>{t('inviteHint')}</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 12, padding: '10px 12px', background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: 10 }}>{cloud.inviteLink()}</div>
+                <Button icon="copy" onClick={() => copy(cloud.inviteLink())}>{t('copy')}</Button>
+              </div>
+              <p className="hint" style={{ margin: '6px 2px 0' }}>{t('cloudInviteHint')}</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'monospace', fontSize: 12, padding: '10px 12px', background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: 10 }}>{cloud.householdId()}</div>
                 <Button icon="copy" onClick={() => copy(cloud.householdId())}>{t('copy')}</Button>
