@@ -353,7 +353,7 @@ export const ACCESSORY_GROUPS = [
 ]
 export const accessoryGroup = (a) => { const g = a && a.group; return ACCESSORY_GROUPS.some(x => x.id === g) ? g : 'accessory' }
 // Full cost of an accessory: item + shipping + installation.
-export const accessoryTotal = (a) => (Number(a.cost) || 0) + (Number(a.shipping) || 0) + (Number(a.install) || 0)
+export const accessoryTotal = (a) => (Number(a.cost) || 0) * (Number(a.quantity) || 1) + (Number(a.shipping) || 0) + (Number(a.install) || 0)
 export const findDocCategory = byId(DOC_CATEGORIES)
 
 export function label(item, lang) {
