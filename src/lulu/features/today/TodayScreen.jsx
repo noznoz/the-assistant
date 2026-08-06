@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { Card, Section, Ring, Stat, Chip, Button, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
@@ -6,6 +6,8 @@ import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { greetingKey, fmtLongDate, isToday, isOverdue, daysUntil, money, expenseSar } from '../../lib/format.js'
 import { hijriDate } from '../../lib/prayer.js'
 import { buildBrief } from '../../lib/brief.js'
+import { buildRenewals } from '../../lib/renewals.js'
+import { runRenewalReminders } from '../../lib/notify.js'
 import { buildNotificationFeed, unreadCount } from '../../lib/notifications.js'
 import { normalizeDashboard } from '../../lib/dashboard.js'
 import PrayerCard from './PrayerCard.jsx'
@@ -41,6 +43,9 @@ export default function TodayScreen({ go }) {
   const people = useCollection('people')
   const valuables = useCollection('valuables')
   const appointments = useCollection('appointments')
+  const staff = useCollection('staff')
+  const memberships = useCollection('memberships')
+  const properties = useCollection('properties')
   const [editor, setEditor] = useState(null)
   const toast = useToast()
 
@@ -70,10 +75,19 @@ export default function TodayScreen({ go }) {
   const spentMonth = expenses.items.filter(e => new Date(e.date).getMonth() === new Date().getMonth() && new Date(e.date).getFullYear() === new Date().getFullYear())
     .reduce((s, e) => s + expenseSar(e, settings.rates), 0)
 
-  const renewals = vehicles.items
-    .map(v => ({ v, dd: daysUntil(v.policyExpiry) }))
-    .filter(x => x.dd != null && x.dd <= 45)
-    .sort((a, b) => a.dd - b.dd)
+  // Renewal radar — every expiry across the app, soonest first (red = overdue,
+  // amber = due within 30 days).
+  const radar = useMemo(() => buildRenewals({
+    people: people.items, vehicles: vehicles.items, documents: documents.items,
+    memberships: memberships.items, valuables: valuables.items, properties: properties.items, staff: staff.items, t, lang,
+  }), [people.items, vehicles.items, documents.items, memberships.items, valuables.items, properties.items, staff.items, lang])
+  const radarSoon = radar.filter(x => x.days <= 30) // overdue + due within 30 days
+  const radarTint = (d) => d < 0 ? 't-danger' : d <= 30 ? 't-warn' : 't-info'
+
+  // Fire on-device reminders at 30/14/7/1 days before each expiry (deduped).
+  useEffect(() => {
+    runRenewalReminders(radar, { enabled: settings.notifications, heading: t('renewalReminder') })
+  }, [radar, settings.notifications])
 
   const brief = buildBrief({ tasks: tasks.items, expenses: expenses.items, vehicles: vehicles.items, settings, lang })
 
@@ -175,19 +189,21 @@ export default function TodayScreen({ go }) {
         </>
       )
     })(),
-    renewals: renewals.length > 0 ? (
+    renewals: radarSoon.length > 0 ? (
       <>
-        <Section title={t('renewals')} count={renewals.length} />
-        {renewals.slice(0, 3).map(({ v, dd }) => (
-          <div className="li" key={v.id} onClick={() => go(`garage/${v.id}`)}>
-            <div className="lead t-warn"><Icon name="shield" size={20} /></div>
-            <div className="body">
-              <div className="title">{v.nickname || v.name}</div>
-              <div className="meta">{t('insurance')} · {v.insuranceCompany}</div>
+        <Section title={t('expiringSoon')} count={radarSoon.length} action={t('viewAll')} onAction={() => go('renewals')} />
+        <Card tight>
+          {radarSoon.slice(0, 4).map(it => (
+            <div className="li" key={it.id} onClick={() => go(it.go)}>
+              <div className={`lead ${radarTint(it.days)}`}><Icon name={it.icon} size={18} /></div>
+              <div className="body">
+                <div className="title">{it.title}</div>
+                <div className="meta">{it.sub}</div>
+              </div>
+              <Chip tint={radarTint(it.days)}>{it.days < 0 ? t('overdue') : `${it.days}d`}</Chip>
             </div>
-            <Chip tint={dd <= 14 ? 't-danger' : 't-warn'}>{dd}d</Chip>
-          </div>
-        ))}
+          ))}
+        </Card>
       </>
     ) : null,
     notes: notes.items.length > 0 ? (

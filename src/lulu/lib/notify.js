@@ -34,6 +34,33 @@ export async function showNotification(title, body, tag = 'the-assistant') {
   } catch { /* ignore */ }
 }
 
+// Fire on-device renewal reminders at 30 / 14 / 7 / 1 days before each expiry.
+// De-duplicated per (item id + expiry date + threshold) so every crossing pings
+// exactly once; a renewed item (new expiry date) rearms because the date is part
+// of the key. Respects the caller's notifications toggle + granted permission.
+const RENEWAL_KEY = 'lulu:renewalReminders'
+const RENEWAL_THRESHOLDS = [30, 14, 7, 1]
+
+export async function runRenewalReminders(items = [], { enabled, heading } = {}) {
+  if (!enabled) return
+  if (!notificationsSupported() || Notification.permission !== 'granted') return
+  let sent
+  try { sent = JSON.parse(localStorage.getItem(RENEWAL_KEY) || '{}') } catch { sent = {} }
+  if (!sent || typeof sent !== 'object') sent = {}
+  let changed = false
+  for (const it of items) {
+    if (!it || it.days == null || !RENEWAL_THRESHOLDS.includes(it.days)) continue
+    const key = `${it.id}@${it.date}@${it.days}`
+    if (sent[key]) continue
+    const body = it.sub ? `${it.title} · ${it.sub}` : it.title
+    // eslint-disable-next-line no-await-in-loop
+    await showNotification(heading || 'Renewal reminder', body, `renewal-${it.id}`)
+    sent[key] = new Date().toISOString().slice(0, 10)
+    changed = true
+  }
+  if (changed) { try { localStorage.setItem(RENEWAL_KEY, JSON.stringify(sent)) } catch { /* ignore */ } }
+}
+
 // Fire the daily brief at most once per calendar day.
 const BRIEF_KEY = 'lulu:lastBrief'
 export async function maybeDailyBrief(title, body) {

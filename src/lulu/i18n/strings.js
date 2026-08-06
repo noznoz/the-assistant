@@ -79,8 +79,7 @@ export const STRINGS = {
     micStart: 'Voice input', micListening: 'Listening…',
     actAddTask: 'Add task', actLogExpense: 'Log expense', actAddAppointment: 'Add appointment', actAddNote: 'Save note',
     // Renewal radar
-    expiringSoon: 'Expiring soon', nothingExpiring: 'Nothing expiring soon — all clear.',
-    renewalOverdueN: 'overdue', renewalDueSoonN: 'due soon', renewalReminder: 'Renewal reminder',
+    expiringSoon: 'Expiring soon', renewalReminder: 'Renewal reminder',
     // Snap & file
     snapFile: 'Snap & file', snapFileHint: "Photograph a document or receipt — I'll read it and file it for you.",
     snapReading: 'Reading your photo…', snapFailed: "Couldn't read that photo. Try again, or enter it manually.",
@@ -497,8 +496,7 @@ export const STRINGS = {
     micStart: 'إدخال صوتي', micListening: 'يستمع…',
     actAddTask: 'إضافة مهمة', actLogExpense: 'تسجيل مصروف', actAddAppointment: 'إضافة موعد', actAddNote: 'حفظ ملاحظة',
     // Renewal radar
-    expiringSoon: 'ينتهي قريبًا', nothingExpiring: 'لا شيء ينتهي قريبًا — كل شيء على ما يرام.',
-    renewalOverdueN: 'متأخر', renewalDueSoonN: 'يستحق قريبًا', renewalReminder: 'تذكير بالتجديد',
+    expiringSoon: 'ينتهي قريبًا', renewalReminder: 'تذكير بالتجديد',
     // Snap & file
     snapFile: 'صوّر واحفظ', snapFileHint: 'صوّر مستندًا أو إيصالًا — سأقرؤه وأصنّفه لك.',
     snapReading: 'يقرأ الصورة…', snapFailed: 'تعذّرت قراءة الصورة. أعد المحاولة أو أدخلها يدويًا.',
