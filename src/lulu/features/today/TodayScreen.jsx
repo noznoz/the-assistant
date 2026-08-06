@@ -18,8 +18,10 @@ import TaskEditor from '../tasks/TaskEditor.jsx'
 import ExpenseEditor from '../expenses/ExpenseEditor.jsx'
 import VehicleEditor from '../garage/VehicleEditor.jsx'
 import NoteEditor from '../inbox/NoteEditor.jsx'
+import SnapFile from '../snap/SnapFile.jsx'
 
 const QUICK = [
+  { id: 'snap', key: 'snapFile', icon: 'camera' },
   { id: 'task', key: 'addTask', icon: 'check' },
   { id: 'request', key: 'addRequest', icon: 'inbox' },
   { id: 'expense', key: 'addExpense', icon: 'wallet' },
@@ -285,6 +287,7 @@ export default function TodayScreen({ go }) {
       {editor === 'receipt' && <ExpenseEditor autoScan onClose={closeEditor} onSaved={() => toast.show(t('savedToast'))} />}
       {editor === 'vehicle' && <VehicleEditor onClose={closeEditor} onSaved={() => toast.show(t('savedToast'))} />}
       {editor === 'note' && <NoteEditor onClose={closeEditor} onSaved={() => toast.show(t('savedToast'))} />}
+      {editor === 'snap' && <SnapFile onClose={closeEditor} onSaved={() => toast.show(t('savedToast'))} />}
       {toast.node}
     </>
   )
