@@ -69,9 +69,12 @@ export default function CloudScreen({ go }) {
   const [err, setErr] = useState('')
   const [members, setMembers] = useState([])
   const [showSql, setShowSql] = useState(false)
+  const [consent, setConsent] = useState(cloud.hasConsent())
 
   const configured = cloud.isConfigured()
   const signedIn = cloud.isSignedIn()
+
+  const toggleConsent = (v) => { setConsent(v); cloud.setConsent(v) }
 
   useEffect(() => { if (signedIn) cloud.listMembers().then(setMembers) }, [signedIn])
 
@@ -79,7 +82,7 @@ export default function CloudScreen({ go }) {
     cloud.setConfig(url, anonKey)
     if (cloud.isConfigured()) toast.show(t('savedToast')); else toast.show(t('cloudNeedBoth'))
   }
-  const disconnect = () => { cloud.signOut(); cloud.setConfig('', ''); setUrl(''); setAnonKey('') }
+  const disconnect = () => { cloud.signOut(); cloud.setConfig('', ''); cloud.setConsent(false); setConsent(false); setUrl(''); setAnonKey('') }
 
   const auth = async (kind) => {
     setErr(''); setBusy(true)
@@ -153,10 +156,14 @@ export default function CloudScreen({ go }) {
             <Card className="stack">
               <Field label={t('email')}><Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@email.com" autoCapitalize="off" spellCheck={false} /></Field>
               <Field label={t('password')}><Input type="password" value={pass} onChange={e => setPass(e.target.value)} placeholder="••••••••" /></Field>
+              <label className="consent-row">
+                <input type="checkbox" checked={consent} onChange={e => toggleConsent(e.target.checked)} />
+                <span>{t('cloudConsent')}</span>
+              </label>
               {err && <p className="err" style={{ margin: '0 2px' }}>{err}</p>}
               <div className="row2">
-                <Button variant="primary" onClick={() => auth('in')} disabled={busy || !email || !pass}>{t('signIn')}</Button>
-                <Button onClick={() => auth('up')} disabled={busy || !email || !pass}>{t('createAccount')}</Button>
+                <Button variant="primary" onClick={() => auth('in')} disabled={busy || !email || !pass || !consent}>{t('signIn')}</Button>
+                <Button onClick={() => auth('up')} disabled={busy || !email || !pass || !consent}>{t('createAccount')}</Button>
               </div>
             </Card>
           </>

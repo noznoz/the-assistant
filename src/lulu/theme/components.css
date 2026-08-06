@@ -373,3 +373,24 @@
 .pin-key:active { transform: scale(0.92); background: var(--surface-2); }
 .pin-key.ghost { background: transparent; border-color: transparent; color: var(--brand-600); }
 [data-theme="dark"] .pin-key.ghost { color: var(--brand-400); }
+
+/* Storage-full banner — fixed above the bottom nav, warm-danger tinted. */
+.storage-alert {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(70px + env(safe-area-inset-bottom));
+  z-index: 60; width: calc(100% - 24px); max-width: 596px;
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 12px; border-radius: 14px;
+  background: var(--danger-tint); border: 1px solid var(--danger);
+  color: var(--ink); font-size: 13px; font-weight: 550;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+.storage-alert > svg { color: var(--danger); flex-shrink: 0; }
+
+/* Cloud-sync privacy consent checkbox row. */
+.consent-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 2px; font-size: 12.5px; line-height: 1.45; color: var(--ink-2);
+  cursor: pointer;
+}
+.consent-row input { margin-top: 2px; width: 17px; height: 17px; flex-shrink: 0; accent-color: var(--brand-600); }

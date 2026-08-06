@@ -68,6 +68,33 @@ const TOOLS = [
       required: ['text'],
     },
   },
+  {
+    name: 'add_person',
+    description: "Add a contact to the user's People list (family, colleague, service contact).",
+    input_schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', description: 'Full name' },
+        relationship: { type: 'string', description: 'e.g. family, friend, colleague, doctor, mechanic' },
+        phone: { type: 'string' },
+        email: { type: 'string' },
+        birthday: { type: 'string', description: 'ISO YYYY-MM-DD (optional)' },
+        notes: { type: 'string' },
+      },
+      required: ['name'],
+    },
+  },
+  {
+    name: 'complete_task',
+    description: 'Mark an existing open task as completed. Match it by title against the OPEN TASKS in the snapshot.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', description: 'The task title (or a close match) to complete' },
+      },
+      required: ['title'],
+    },
+  },
 ]
 
 function resolveVehicle(vehicles, name) {
@@ -85,6 +112,14 @@ function resolvePerson(people, name) {
   const list = people || []
   return list.find(p => (p.name || '').toLowerCase() === n)
     || list.find(p => { const x = (p.name || '').toLowerCase(); return x && (x.includes(n) || n.includes(x)) })
+    || null
+}
+function resolveOpenTask(tasks, title) {
+  if (!title) return null
+  const n = String(title).trim().toLowerCase()
+  const open = (tasks || []).filter(t => t && !t.deletedAt && t.status !== 'completed' && t.status !== 'cancelled')
+  return open.find(t => (t.title || '').toLowerCase() === n)
+    || open.find(t => { const x = (t.title || '').toLowerCase(); return x && (x.includes(n) || n.includes(x)) })
     || null
 }
 
@@ -155,6 +190,34 @@ function computeAction(tu, { data, settings, t, lang }) {
       result: 'Saved note.',
     }
   }
+  if (tu.name === 'add_person') {
+    const fields = {
+      name: input.name || t('addPerson') || 'New person',
+      relationship: input.relationship || '',
+      phone: input.phone || '',
+      email: input.email || '',
+      birthday: input.birthday || '',
+      notes: input.notes || '',
+    }
+    return {
+      collection: 'people', fields,
+      label: `${t('actAddPerson')} · ${fields.name}${fields.relationship ? ` · ${fields.relationship}` : ''}`,
+      result: `Added ${fields.name} to People.`,
+    }
+  }
+  if (tu.name === 'complete_task') {
+    const task = resolveOpenTask(data.tasks, input.title)
+    if (!task) {
+      // No confirmation card for a miss — the model gets told and can reply.
+      return { op: 'noop', label: '', result: `No open task matching "${input.title || ''}" was found.` }
+    }
+    return {
+      op: 'patch', collection: 'tasks', id: task.id,
+      patch: { status: 'completed', completedAt: todayISO() },
+      label: `${t('actCompleteTask')} · ${task.title}`,
+      result: `Marked "${task.title}" complete.`,
+    }
+  }
   return null
 }
 
@@ -165,7 +228,7 @@ function systemPrompt(data, settings, lang) {
   const name = (settings.profile && settings.profile.fullName) || settings.name || 'the user'
   return [
     `You are "The Assistant", a concise, proactive personal assistant inside ${name}'s private, offline-first personal-OS app.`,
-    `You can ANSWER questions grounded in the data snapshot below, and you can TAKE ACTIONS with the provided tools: add a task, log an expense (including fuel with the related vehicle, litres and odometer), add an appointment, and save a note.`,
+    `You can ANSWER questions grounded in the data snapshot below, and you can TAKE ACTIONS with the provided tools: add a task, log an expense (including fuel with the related vehicle, litres and odometer), add an appointment, save a note, add a person to the contacts, and mark an existing open task complete.`,
     `When the user clearly wants something created, call the matching tool. Infer sensible fields from the message and the snapshot. Use ISO YYYY-MM-DD for dates and resolve relative dates ("tomorrow", "next Friday") against Today in the snapshot. For a vehicle, pass its name or nickname exactly as it appears in the snapshot. For petrol/fuel use log_expense with category "fuel".`,
     `The app shows the user a confirmation card before anything is created, so don't ask "shall I?" — just call the tool with your best-guess fields. Only if a required detail is genuinely missing (e.g. no amount for an expense) ask one short question instead of calling the tool.`,
     `After a tool runs you receive its result; reply with a single short line beginning with "✓" that states exactly what was created (e.g. "✓ Logged SAR 250 fuel on Iron Raven").`,
@@ -194,6 +257,7 @@ export default function AssistantScreen({ go }) {
     expenses: useCollection('expenses'),
     appointments: useCollection('appointments'),
     notes: useCollection('notes'),
+    people: useCollection('people'),
   }
   const [messages, setMessages] = useState([]) // { role, content: string | blocks[] }
   const [input, setInput] = useState('')
@@ -268,7 +332,8 @@ export default function AssistantScreen({ go }) {
     const toolResults = toolUses.map(tu => {
       const action = computeAction(tu, { data, settings, t, lang })
       if (!action) return { type: 'tool_result', tool_use_id: tu.id, content: "That action isn't supported yet." }
-      collections[action.collection].add(action.fields)
+      if (action.op === 'patch') collections[action.collection].patch(action.id, action.patch)
+      else if (action.op !== 'noop') collections[action.collection].add(action.fields)
       return { type: 'tool_result', tool_use_id: tu.id, content: action.result }
     })
     const next = [...history, { role: 'user', content: toolResults }]
@@ -318,7 +383,17 @@ export default function AssistantScreen({ go }) {
   }
 
   const suggestions = [t('aiSug1'), t('aiSug2'), t('aiSug3')]
-  const pendingActions = pending ? pending.toolUses.map(tu => computeAction(tu, { data, settings, t, lang })).filter(Boolean) : []
+  // Only actions that actually change something get a confirmation card; a
+  // "noop" (e.g. complete_task that matched nothing) is applied silently so the
+  // model receives the result and can explain, with no empty card to confirm.
+  const pendingActions = pending ? pending.toolUses.map(tu => computeAction(tu, { data, settings, t, lang })).filter(a => a && a.op !== 'noop') : []
+
+  // If the model's tool calls produced nothing to confirm (all noops), feed the
+  // results back automatically rather than parking an empty card.
+  useEffect(() => {
+    if (pending && !busy && pendingActions.length === 0) confirmActions()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pending, busy])
 
   return (
     <>

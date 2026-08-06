@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "smoke": "npm run build && node smoke.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",
@@ -16,8 +19,11 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^25.0.1",
+    "playwright": "^1.62.1",
     "vite": "^6.0.7",
-    "vite-plugin-pwa": "^0.21.1"
+    "vite-plugin-pwa": "^0.21.1",
+    "vitest": "^2.1.9"
   },
   "allowScripts": {
     "esbuild@0.25.12": true

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import './theme/tokens.css'
 import './theme/components.css'
 import { StoreProvider, useStore, useSettings } from './store/StoreProvider.jsx'
@@ -77,6 +77,30 @@ import AssistantScreen from './features/assistant/AssistantScreen.jsx'
 import CloudScreen from './features/cloud/CloudScreen.jsx'
 
 const MAIN_TABS = ['today', 'tasks', 'garage', 'expenses', 'more']
+
+// Surfaces the `lulu:storage-full` event fired by db.js when a local write is
+// refused (device storage full). Without this the write fails silently and the
+// user's change is lost on reload with no explanation. The banner points them at
+// the fix (free space / remove large photos / back up & wipe).
+function StorageAlert() {
+  const { t } = useT()
+  const [shown, setShown] = useState(false)
+  useEffect(() => {
+    const onFull = () => setShown(true)
+    window.addEventListener('lulu:storage-full', onFull)
+    return () => window.removeEventListener('lulu:storage-full', onFull)
+  }, [])
+  if (!shown) return null
+  return (
+    <div role="alert" className="storage-alert">
+      <Icon name="shield" size={18} />
+      <span style={{ flex: 1 }}>{t('storageFull')}</span>
+      <button className="iconbtn" aria-label={t('close')} onClick={() => setShown(false)}>
+        <Icon name="x" size={16} />
+      </button>
+    </div>
+  )
+}
 
 function Router() {
   const { route, tab, param, go } = useRouter('today')
@@ -200,6 +224,7 @@ function Router() {
         </div>
       )}
       <ErrorBoundary key={route}>{screen}</ErrorBoundary>
+      <StorageAlert />
       <BottomNav tab={activeTab} go={go} />
     </div>
   )

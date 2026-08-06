@@ -57,6 +57,7 @@ export const STRINGS = {
     save: 'Save', cancel: 'Cancel', delete: 'Delete', edit: 'Edit', done: 'Done', add: 'Add',
     search: 'Search', filter: 'Filter', all: 'All', none: 'None', optional: 'optional',
     required: 'Required', close: 'Close', share: 'Share', view: 'View', back: 'Back',
+    storageFull: 'This device is out of storage — recent changes may not be saved. Free space or back up and remove large photos/receipts.',
     // settings
     profile: 'Profile', language: 'Language', currency: 'Currency', timezone: 'Timezone',
     dateFormat: 'Date format', appearance: 'Appearance', themeSystem: 'System', themeLight: 'Light',
@@ -78,6 +79,7 @@ export const STRINGS = {
     aiConfirmTitle: 'Confirm before I create', aiConfirmDo: 'Confirm & create', aiRefusal: "I'm sorry — I wasn't able to help with that request.",
     micStart: 'Voice input', micListening: 'Listening…',
     actAddTask: 'Add task', actLogExpense: 'Log expense', actAddAppointment: 'Add appointment', actAddNote: 'Save note',
+    actAddPerson: 'Add person', actCompleteTask: 'Complete task',
     // Renewal radar
     expiringSoon: 'Expiring soon', renewalReminder: 'Renewal reminder',
     // Snap & file
@@ -98,6 +100,7 @@ export const STRINGS = {
     cloudFamilyMembers: 'Family', cloudInviteHint: 'Share this household code with family. They create their own account, then paste the code under “Join a household”.',
     cloudJoin: 'Join a household', cloudJoinHint: 'Paste a household code shared with you to see the same data.', cloudCode: 'Household code', cloudJoinBtn: 'Join household', cloudJoined: 'Joined household',
     cloudAccount: 'Account', cloudDisconnect: 'Disconnect cloud', cloudPrivacy: 'Your data syncs only to your own Supabase project. Nothing goes to us.',
+    cloudConsent: 'I understand my data will leave this device and sync to my own Supabase project and any family members I invite.',
     about: 'The Assistant', name: 'Name',
     // empties / misc
     nothingHere: 'Nothing here yet', comingSoon: 'Coming soon',
@@ -475,6 +478,7 @@ export const STRINGS = {
     save: 'حفظ', cancel: 'إلغاء', delete: 'حذف', edit: 'تعديل', done: 'تم', add: 'إضافة',
     search: 'بحث', filter: 'تصفية', all: 'الكل', none: 'لا شيء', optional: 'اختياري',
     required: 'مطلوب', close: 'إغلاق', share: 'مشاركة', view: 'عرض', back: 'رجوع',
+    storageFull: 'مساحة تخزين الجهاز ممتلئة — قد لا تُحفظ التغييرات الأخيرة. حرِّر مساحة أو انسخ البيانات احتياطياً واحذف الصور/الإيصالات الكبيرة.',
     profile: 'الملف الشخصي', language: 'اللغة', currency: 'العملة', timezone: 'المنطقة الزمنية',
     dateFormat: 'صيغة التاريخ', appearance: 'المظهر', themeSystem: 'النظام', themeLight: 'فاتح',
     themeDark: 'داكن', security: 'الأمان', faceId: 'طلب Face ID / رمز المرور',
@@ -495,6 +499,7 @@ export const STRINGS = {
     aiConfirmTitle: 'أكِّد قبل الإنشاء', aiConfirmDo: 'تأكيد وإنشاء', aiRefusal: 'عذرًا — لم أتمكن من مساعدتك في هذا الطلب.',
     micStart: 'إدخال صوتي', micListening: 'يستمع…',
     actAddTask: 'إضافة مهمة', actLogExpense: 'تسجيل مصروف', actAddAppointment: 'إضافة موعد', actAddNote: 'حفظ ملاحظة',
+    actAddPerson: 'إضافة شخص', actCompleteTask: 'إكمال مهمة',
     // Renewal radar
     expiringSoon: 'ينتهي قريبًا', renewalReminder: 'تذكير بالتجديد',
     // Snap & file
@@ -515,6 +520,7 @@ export const STRINGS = {
     cloudFamilyMembers: 'العائلة', cloudInviteHint: 'شارك رمز العائلة هذا مع أفراد عائلتك. ينشئون حساباتهم ثم يلصقون الرمز في «الانضمام إلى عائلة».',
     cloudJoin: 'الانضمام إلى عائلة', cloudJoinHint: 'الصق رمز العائلة الذي شورك معك لرؤية نفس البيانات.', cloudCode: 'رمز العائلة', cloudJoinBtn: 'انضمام', cloudJoined: 'تم الانضمام',
     cloudAccount: 'الحساب', cloudDisconnect: 'قطع الاتصال بالسحابة', cloudPrivacy: 'تتزامن بياناتك فقط مع مشروع Supabase الخاص بك. لا شيء يصل إلينا.',
+    cloudConsent: 'أفهم أن بياناتي ستغادر هذا الجهاز وتتزامن مع مشروع Supabase الخاص بي ومع أفراد العائلة الذين أدعوهم.',
     about: 'عن التطبيق', name: 'الاسم',
     nothingHere: 'لا يوجد شيء بعد', comingSoon: 'قريباً',
     inboxSubtitle: 'سجّل أي شيء الآن، ونظّمه لاحقاً.',
