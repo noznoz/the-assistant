@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react'
 import * as db from './db.js'
 import * as cloud from '../lib/cloud.js'
+import { syncAttachments } from '../lib/files.js'
 import { maybeSeed } from './seed.js'
 import { collectSampleRemovals } from '../lib/sampleData.js'
 
@@ -71,6 +72,8 @@ export function StoreProvider({ children }) {
     if (!cloud.isReady()) return
     const changed = await cloud.syncNow()
     if (changed && changed.size) reloadAll()
+    // Mirror document/receipt binaries after the records they belong to.
+    syncAttachments().catch(() => {})
   }, [reloadAll])
 
   // On launch: sync once, then poll for remote changes while the app is open.

@@ -30,10 +30,14 @@ first‑class requirement, phased alongside features.
       tick consent before sign‑in, and it guards every outbound push
       (`lib/cloud.js` `hasConsent()` → `pushRecord`/`pushAll`). The AI provider is
       already opt‑in (bring‑your‑own‑key, stored on‑device only, never synced).
-- [ ] **Secure file storage** with signed, expiring URLs for documents/receipts.
-      *(An `attachments` bucket + member‑scoped policies are provisioned in
-      `supabase/schema.sql`; the client upload/download path is still to be wired —
-      today attachment binaries stay on the originating device.)*
+- [x] **Secure file storage** — document/receipt/photo binaries sync to a
+      **private** `attachments` bucket, namespaced by household so RLS
+      (`is_member`) scopes each file to the family; reads go through the
+      authenticated object endpoint with the user's token (no public URLs).
+      Upload is best‑effort on save with a reconcile pass after each sync
+      (`lib/files.js` `syncAttachments`), and files are lazily fetched + cached on
+      first open on another device (`lib/cloud.js` `uploadFile`/`downloadFile`).
+      All of it sits behind the same consent gate as record sync.
 - [ ] **Audit log** table for important changes (create/update/delete of key
       entities).
 

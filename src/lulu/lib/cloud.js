@@ -240,3 +240,56 @@ export async function syncNow() {
   await pushAll()
   return pullAll()
 }
+
+// ---- Attachment storage (document/receipt/photo binaries) ----
+// Document records sync their metadata + thumbnail via `records`; the actual
+// files live in the private `attachments` bucket, namespaced by household so RLS
+// (is_member) scopes them to the family. Objects are keyed by the attachment id.
+const BUCKET = 'attachments'
+const UP_KEY = `${NS}:uploaded`  // { hid, ids: { [id]: 1 } } — what's already pushed
+
+function attachPath(id) { return `${householdId()}/${encodeURIComponent(id)}` }
+
+// Storage follows the same consent gate as record sync: no file leaves the
+// device until the user has agreed.
+export function storageReady() { return isReady() && hasConsent() }
+
+// Local memo of which attachments are already in this household's bucket, so a
+// reconcile pass doesn't re-upload every file each sync. Resets if the household
+// changes (a different bucket namespace).
+function uploadedState() {
+  const s = read(UP_KEY, null)
+  const hid = householdId()
+  return (s && s.hid === hid && s.ids) ? s : { hid, ids: {} }
+}
+export function isUploaded(id) { return !!uploadedState().ids[id] }
+export function markUploaded(id) { const s = uploadedState(); s.ids[id] = 1; write(UP_KEY, s) }
+
+// Upload one blob (upsert — safe to repeat). Returns whether it persisted.
+export async function uploadFile(id, blob) {
+  if (!storageReady() || !id || !blob) return false
+  try {
+    const res = await authFetch(`/storage/v1/object/${BUCKET}/${attachPath(id)}`, {
+      method: 'POST',
+      headers: { 'content-type': blob.type || 'application/octet-stream', 'x-upsert': 'true' },
+      body: blob,
+    })
+    return res.ok
+  } catch { return false }
+}
+
+// Fetch one blob back from the bucket (private → authenticated endpoint + token).
+export async function downloadFile(id) {
+  if (!storageReady() || !id) return null
+  try {
+    const res = await authFetch(`/storage/v1/object/authenticated/${BUCKET}/${attachPath(id)}`, { method: 'GET' })
+    if (!res.ok) return null
+    return await res.blob()
+  } catch { return null }
+}
+
+// Best-effort remote delete when an attachment is removed locally.
+export async function deleteFileRemote(id) {
+  if (!storageReady() || !id) return
+  try { await authFetch(`/storage/v1/object/${BUCKET}/${attachPath(id)}`, { method: 'DELETE' }) } catch { /* ignore */ }
+}

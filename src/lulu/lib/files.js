@@ -1,7 +1,8 @@
 // Attachment helpers: save a picked/captured file, make a thumbnail, share
 // real files via the OS share sheet (WhatsApp, Mail, …), download, and open.
-import { putFile, getFile, deleteFile } from '../store/fileStore.js'
+import { putFile, getFile, deleteFile, listFileIds } from '../store/fileStore.js'
 import { uid } from '../store/db.js'
+import * as cloud from './cloud.js'
 
 // Downscale an image file to a small JPEG data URL for list/grid previews.
 export function makeThumb(file, max = 260) {
@@ -77,12 +78,15 @@ export function imageToDataURL(file, max = 1200, quality = 0.82) {
   })
 }
 
-// Persist a File to IndexedDB and return its metadata record.
+// Persist a File to IndexedDB and return its metadata record. When cloud sync is
+// on, the binary is also mirrored to the household's private bucket (best-effort;
+// syncAttachments() re-tries anything that fails here, e.g. while offline).
 export async function saveAttachment(rawFile) {
   const file = await downscaleImage(rawFile)
   const id = uid()
   await putFile(id, file)
   const thumb = await makeThumb(file)
+  if (cloud.storageReady()) cloud.uploadFile(id, file).then(ok => { if (ok) cloud.markUploaded(id) })
   return {
     id,
     name: file.name || `document-${new Date().toISOString().slice(0, 10)}`,
@@ -93,14 +97,39 @@ export async function saveAttachment(rawFile) {
   }
 }
 
+// Get the real file for an attachment. Falls back to the cloud bucket when the
+// blob isn't on this device yet (e.g. a document synced from another device),
+// caching it locally so later opens are instant.
 export async function getAttachmentFile(att) {
-  const blob = await getFile(att.id)
+  let blob = await getFile(att.id)
+  if (!blob && cloud.storageReady()) {
+    blob = await cloud.downloadFile(att.id)
+    if (blob) { try { await putFile(att.id, blob) } catch { /* cache best-effort */ } cloud.markUploaded(att.id) }
+  }
   if (!blob) return null
   return new File([blob], att.name || 'document', { type: att.type || blob.type || 'application/octet-stream' })
 }
 
 export async function removeAttachment(att) {
   try { await deleteFile(att.id) } catch { /* best effort */ }
+  try { cloud.deleteFileRemote(att.id) } catch { /* best effort */ }
+}
+
+// Reconcile pass: upload any locally-stored attachment the current household's
+// bucket doesn't have yet. Called after a record sync so files follow their
+// metadata across devices. No-op when cloud/consent is off.
+export async function syncAttachments() {
+  if (!cloud.storageReady()) return
+  const ids = await listFileIds()
+  for (const id of ids) {
+    if (cloud.isUploaded(id)) continue
+    // eslint-disable-next-line no-await-in-loop
+    const blob = await getFile(id)
+    if (!blob) continue
+    // eslint-disable-next-line no-await-in-loop
+    const ok = await cloud.uploadFile(id, blob)
+    if (ok) cloud.markUploaded(id)
+  }
 }
 
 export function downloadBlob(blob, name) {

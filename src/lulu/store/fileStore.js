@@ -34,3 +34,9 @@ async function run(mode, fn) {
 export function putFile(id, blob) { return run('readwrite', s => s.put(blob, id)) }
 export function getFile(id) { return run('readonly', s => s.get(id)) }
 export function deleteFile(id) { return run('readwrite', s => s.delete(id)) }
+
+// All locally-stored attachment ids — used by cloud sync to find files that
+// still need uploading. Returns [] when IndexedDB is unavailable.
+export async function listFileIds() {
+  try { return await run('readonly', s => s.getAllKeys()) || [] } catch { return [] }
+}
