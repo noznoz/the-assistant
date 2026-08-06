@@ -73,6 +73,7 @@ export default function AccessoriesPanel({ vehicle }) {
                   <div className="meta">
                     <span className="chip t-brand" style={{ padding: '1px 7px' }}>{label(gp, lang)}</span>
                     <span className={`chip ${st === 'wishlist' ? 't-warn' : 't-ok'}`} style={{ padding: '1px 7px' }}>{label(ACCESSORY_STATUSES.find(x => x.id === st), lang)}</span>
+                    {a.brand && <span>· {a.brand}</span>}
                     {a.installedBy && <span>· {a.installedBy}</span>}
                     {a.date && <span>· {fmtDate(a.date, lang, settings.dateFormat)}</span>}
                   </div>
@@ -96,7 +97,8 @@ function AccessoryEditor({ initial, vehicleId, onClose, onSaved }) {
   const { t, lang } = useT()
   const accessories = useCollection('accessories')
   const [f, setF] = useState({
-    name: '', group: accessoryGroup(initial), cost: '', shipping: '', install: '', installedBy: '',
+    name: '', brand: '', group: accessoryGroup(initial), cost: '', shipping: '', install: '',
+    purchasedBy: '', installedBy: '',
     website: '', photo: '', date: todayISO(), note: '', status: accessoryStatus(initial), vehicleId, ...initial,
   })
   const status = f.status || 'fitted'
@@ -137,6 +139,7 @@ function AccessoryEditor({ initial, vehicleId, onClose, onSaved }) {
       </div>
 
       <Field label={t('accessoryName')} required error={err}><Input value={f.name} onChange={set('name')} placeholder="Roof rack, dash cam…" autoFocus /></Field>
+      <Field label={t('brand')}><Input value={f.brand} onChange={set('brand')} placeholder="Thule, GoPro…" /></Field>
       <Field label={t('group')}>
         <div className="chip-row">
           {ACCESSORY_GROUPS.map(g => (
@@ -156,8 +159,9 @@ function AccessoryEditor({ initial, vehicleId, onClose, onSaved }) {
         <Field label={t('itemCost')}><Input type="number" inputMode="decimal" value={f.cost} onChange={set('cost')} placeholder="0" /></Field>
         <Field label={t('shippingCost')}><Input type="number" inputMode="decimal" value={f.shipping} onChange={set('shipping')} placeholder="0" /></Field>
       </div>
+      <Field label={t('installationCost')}><Input type="number" inputMode="decimal" value={f.install} onChange={set('install')} placeholder="0" /></Field>
       <div className="row2">
-        <Field label={t('installationCost')}><Input type="number" inputMode="decimal" value={f.install} onChange={set('install')} placeholder="0" /></Field>
+        <Field label={t('purchasedBy')}><Input value={f.purchasedBy} onChange={set('purchasedBy')} placeholder={t('purchasedByPlaceholder')} /></Field>
         <Field label={t('installedBy')}><Input value={f.installedBy} onChange={set('installedBy')} placeholder={t('installedByPlaceholder')} /></Field>
       </div>
       <Field label={t('website')}><Input value={f.website} onChange={set('website')} inputMode="url" placeholder="https://…" /></Field>
@@ -190,15 +194,15 @@ function ReportSheet({ vehicle, accessories, onClose, onToast }) {
       [t('group'), t('items'), t('total') + ' (SAR)'],
       ...byGroup.map(b => [label(b.g, lang), b.count, r2(b.total)]),
       [t('total'), rows.length, r2(grand)], [],
-      [t('accessoryName'), t('group'), t('status'), t('itemCost'), t('shippingCost'), t('installationCost'), t('total'), t('installedBy'), t('website'), t('date')],
-      ...rows.map(a => [a.name, label(groupDef(accessoryGroup(a)), lang), label(ACCESSORY_STATUSES.find(s => s.id === accessoryStatus(a)), lang), Number(a.cost) || 0, Number(a.shipping) || 0, Number(a.install) || 0, r2(accessoryTotal(a)), a.installedBy || '', a.website || '', a.date || '']),
+      [t('accessoryName'), t('brand'), t('group'), t('status'), t('itemCost'), t('shippingCost'), t('installationCost'), t('total'), t('purchasedBy'), t('installedBy'), t('website'), t('date')],
+      ...rows.map(a => [a.name, a.brand || '', label(groupDef(accessoryGroup(a)), lang), label(ACCESSORY_STATUSES.find(s => s.id === accessoryStatus(a)), lang), Number(a.cost) || 0, Number(a.shipping) || 0, Number(a.install) || 0, r2(accessoryTotal(a)), a.purchasedBy || '', a.installedBy || '', a.website || '', a.date || '']),
     ]
-    try { await exportXlsx(`${title}.xlsx`, t('accessories'), aoa, [26, 14, 10, 12, 12, 14, 12, 18, 26, 12]); onToast && onToast(t('savedToast')) }
+    try { await exportXlsx(`${title}.xlsx`, t('accessories'), aoa, [26, 16, 14, 10, 12, 12, 14, 12, 18, 18, 26, 12]); onToast && onToast(t('savedToast')) }
     catch { onToast && onToast(t('comingSoon')) }
   }
   const exportPdf = () => {
     const gRows = byGroup.map(b => `<tr><td>${escapeHtml(label(b.g, lang))}</td><td class="n">${b.count}</td><td class="n">${money(b.total, cur, lang)}</td></tr>`).join('')
-    const dRows = rows.map(a => `<tr><td>${escapeHtml(a.name)}</td><td>${escapeHtml(label(groupDef(accessoryGroup(a)), lang))}</td><td>${escapeHtml(label(ACCESSORY_STATUSES.find(s => s.id === accessoryStatus(a)), lang))}</td><td class="n">${money(accessoryTotal(a), cur, lang)}</td><td>${escapeHtml(a.installedBy || '')}</td></tr>`).join('')
+    const dRows = rows.map(a => `<tr><td>${escapeHtml(a.name)}</td><td>${escapeHtml(a.brand || '')}</td><td>${escapeHtml(label(groupDef(accessoryGroup(a)), lang))}</td><td>${escapeHtml(label(ACCESSORY_STATUSES.find(s => s.id === accessoryStatus(a)), lang))}</td><td class="n">${money(accessoryTotal(a), cur, lang)}</td><td>${escapeHtml(a.purchasedBy || '')}</td><td>${escapeHtml(a.installedBy || '')}</td></tr>`).join('')
     const body = `
       <h1>${escapeHtml(title)}</h1>
       <div class="sub">${escapeHtml(t('accessoriesReport'))} · ${new Date().toLocaleDateString()}</div>
@@ -207,7 +211,7 @@ function ReportSheet({ vehicle, accessories, onClose, onToast }) {
       <h2>${escapeHtml(t('byGroup'))}</h2>
       <table><thead><tr><th>${escapeHtml(t('group'))}</th><th class="n">${escapeHtml(t('items'))}</th><th class="n">${escapeHtml(t('total'))}</th></tr></thead><tbody>${gRows}</tbody></table>
       <h2>${escapeHtml(t('accessories'))} (${rows.length})</h2>
-      <table><thead><tr><th>${escapeHtml(t('accessoryName'))}</th><th>${escapeHtml(t('group'))}</th><th>${escapeHtml(t('status'))}</th><th class="n">${escapeHtml(t('total'))}</th><th>${escapeHtml(t('installedBy'))}</th></tr></thead><tbody>${dRows}</tbody></table>`
+      <table><thead><tr><th>${escapeHtml(t('accessoryName'))}</th><th>${escapeHtml(t('brand'))}</th><th>${escapeHtml(t('group'))}</th><th>${escapeHtml(t('status'))}</th><th class="n">${escapeHtml(t('total'))}</th><th>${escapeHtml(t('purchasedBy'))}</th><th>${escapeHtml(t('installedBy'))}</th></tr></thead><tbody>${dRows}</tbody></table>`
     printHtml(title, body)
   }
 
