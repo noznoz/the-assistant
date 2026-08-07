@@ -115,7 +115,7 @@ export const STRINGS = {
     shareViaWhatsApp: 'Share via WhatsApp / Email', openFile: 'Open', download: 'Download',
     shareHint: 'Opens the share sheet — pick WhatsApp, Mail, Messages and more.',
     page: 'Page', addDocument: 'Add document', documentTitle: 'Document', preview: 'Preview',
-    vault: 'Vault', newVault: 'New vault', newSubVault: 'New sub-vault', editVault: 'Edit vault', parentVault: 'Inside vault', topLevelVault: 'Top level (no parent)', allDocuments: 'All documents', unfiled: 'Unfiled', vaultsHint: 'Group your documents into vaults — tap a vault to open it, or + to create one.', vaultPlaceholder: 'e.g. Personal, Vehicles, Property',
+    vault: 'Vault', newVault: 'New vault', newSubVault: 'New sub-vault', editVault: 'Edit vault', deleteVault: 'Delete vault', deleteVaultQ: 'Delete this vault? Any documents or sub-folders inside move up one level.', parentVault: 'Inside vault', topLevelVault: 'Top level (no parent)', allDocuments: 'All documents', unfiled: 'Unfiled', vaultsHint: 'Group your documents into vaults — tap to open, long-press to edit or delete, or + to create one.', vaultPlaceholder: 'e.g. Personal, Vehicles, Property',
     relatedTo: 'Related to', vehicle: 'Vehicle', person: 'Person', property: 'Property', trip: 'Trip', select: 'Select…',
     downloadedToast: 'Downloaded', sharedToast: 'Shared',
     // family / people / delegation
@@ -535,7 +535,7 @@ export const STRINGS = {
     shareViaWhatsApp: 'مشاركة عبر واتساب / البريد', openFile: 'فتح', download: 'تنزيل',
     shareHint: 'تفتح قائمة المشاركة — اختر واتساب أو البريد أو الرسائل وغيرها.',
     page: 'صفحة', addDocument: 'إضافة مستند', documentTitle: 'مستند', preview: 'معاينة',
-    vault: 'خزنة', newVault: 'خزنة جديدة', newSubVault: 'خزنة فرعية جديدة', editVault: 'تعديل الخزنة', parentVault: 'داخل خزنة', topLevelVault: 'المستوى الأعلى (بدون أصل)', allDocuments: 'كل المستندات', unfiled: 'غير مصنّف', vaultsHint: 'نظّم مستنداتك في خزائن — اضغط على خزنة لفتحها، أو + لإنشاء واحدة.', vaultPlaceholder: 'مثال: شخصي، مركبات، عقارات',
+    vault: 'خزنة', newVault: 'خزنة جديدة', newSubVault: 'خزنة فرعية جديدة', editVault: 'تعديل الخزنة', deleteVault: 'حذف الخزنة', deleteVaultQ: 'حذف هذه الخزنة؟ أي مستندات أو مجلدات بداخلها ستنتقل مستوى واحد للأعلى.', parentVault: 'داخل خزنة', topLevelVault: 'المستوى الأعلى (بدون أصل)', allDocuments: 'كل المستندات', unfiled: 'غير مصنّف', vaultsHint: 'نظّم مستنداتك في خزائن — اضغط للفتح، أو اضغط مطولاً للتعديل أو الحذف، أو + لإنشاء واحدة.', vaultPlaceholder: 'مثال: شخصي، مركبات، عقارات',
     relatedTo: 'مرتبط بـ', vehicle: 'مركبة', person: 'شخص', property: 'عقار', trip: 'رحلة', select: 'اختر…',
     downloadedToast: 'تم التنزيل', sharedToast: 'تمت المشاركة',
     // family / people / delegation
