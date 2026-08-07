@@ -5,7 +5,7 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { WISH_CATEGORIES, WISH_PRIORITIES, findWishCategory, findWishPriority, label } from '../../lib/domain.js'
 import { money, toSar, fmtDate } from '../../lib/format.js'
-import { makeThumb } from '../../lib/files.js'
+import { saveCloudPhoto } from '../../lib/files.js'
 import { share } from '../../lib/share.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
 
@@ -123,8 +123,8 @@ export function WishEditor({ initial, onClose, onSaved }) {
   const pickImage = async (fileList) => {
     const file = fileList && fileList[0]
     if (!file) return
-    const thumb = await makeThumb(file, 400)
-    if (thumb) setF(prev => ({ ...prev, image: thumb }))
+    const out = await saveCloudPhoto(file, { thumbMax: 400 })
+    if (out.photo) setF(prev => ({ ...prev, image: out.photo, photoId: out.photoId }))
   }
 
   const submit = () => {

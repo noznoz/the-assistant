@@ -115,6 +115,38 @@ export async function removeAttachment(att) {
   try { cloud.deleteFileRemote(att.id) } catch { /* best effort */ }
 }
 
+// ---- Cloud-backed "card" photos (accessory / vehicle cover / avatars) ----
+// These used to be stored as a full base64 data-URI directly on the record,
+// which fills the tiny localStorage budget. Instead we keep only a small
+// thumbnail on the record (for instant, offline display) and put the full image
+// in the household cloud bucket. Returns { photo, photoId } to spread onto the
+// record. When the cloud isn't available the full image is stashed in IndexedDB
+// and uploaded on the next sync — so the heavy image never lands in localStorage.
+export async function saveCloudPhoto(rawFile, { thumbMax = 256, fullMax = 1600, quality = 0.82 } = {}) {
+  const thumb = await imageToDataURL(rawFile, thumbMax, 0.7)
+  if (!thumb) return { photo: '', photoId: '' }
+  const id = uid()
+  const full = await downscaleImage(rawFile, fullMax, quality)
+  if (cloud.storageReady()) {
+    const ok = await cloud.uploadFile(id, full)
+    if (ok) { cloud.markUploaded(id); return { photo: thumb, photoId: id } }
+  }
+  // Offline / cloud off / upload failed → keep the full locally; syncAttachments
+  // uploads it later. The record still only carries the small thumbnail.
+  try { await putFile(id, full) } catch { /* ignore */ }
+  return { photo: thumb, photoId: id }
+}
+
+// Full-resolution URL for a cloud photo (share / enlarge). Prefers a local
+// cache, else the cloud. Returns '' when unavailable. Caller revokes the URL.
+export async function cloudPhotoURL(photoId) {
+  if (!photoId) return ''
+  let blob = null
+  try { blob = await getFile(photoId) } catch { /* ignore */ }
+  if (!blob && cloud.storageReady()) blob = await cloud.downloadFile(photoId)
+  return blob ? URL.createObjectURL(blob) : ''
+}
+
 // Reconcile pass: upload any locally-stored attachment the current household's
 // bucket doesn't have yet. Called after a record sync so files follow their
 // metadata across devices. No-op when cloud/consent is off.

@@ -4,7 +4,7 @@ import { Sheet, Field, Input, Select, Button, Chip } from '../../ui/primitives.j
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { RELATIONSHIPS, label } from '../../lib/domain.js'
-import { makeThumb } from '../../lib/files.js'
+import { saveCloudPhoto } from '../../lib/files.js'
 import { usePhotoEditor } from '../../ui/PhotoEditor.jsx'
 import { pickContacts, contactPickerSupported } from '../../lib/contacts.js'
 
@@ -35,8 +35,8 @@ export default function PersonEditor({ initial = {}, onClose, onSaved }) {
     const file = fileList && fileList[0]
     if (!file) return
     photo.open(file, async (edited) => {
-      const thumb = await makeThumb(edited, 320)
-      if (thumb) setF(prev => ({ ...prev, photo: thumb }))
+      const out = await saveCloudPhoto(edited, { thumbMax: 320 })
+      if (out.photo) setF(prev => ({ ...prev, ...out }))
     }, { aspect: 1, round: true, size: 640 })
   }
 
