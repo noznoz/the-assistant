@@ -3,7 +3,7 @@ import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Section, Field, Input, Select, Button, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useSettings } from '../../store/StoreProvider.jsx'
-import { imageToDataURL } from '../../lib/files.js'
+import { saveCloudPhoto } from '../../lib/files.js'
 import { usePhotoEditor } from '../../ui/PhotoEditor.jsx'
 import { share } from '../../lib/share.js'
 
@@ -29,7 +29,7 @@ export default function ProfileScreen({ go }) {
     if (!file) return
     photo.open(file, async (edited) => {
       setBusy(true)
-      try { const url = await imageToDataURL(edited, 600, 0.85); if (url) setForm(prev => ({ ...prev, photo: url })) }
+      try { const out = await saveCloudPhoto(edited, { thumbMax: 320 }); if (out.photo) setForm(prev => ({ ...prev, ...out })) }
       finally { setBusy(false) }
     }, { aspect: 1, round: true, size: 800 })
   }

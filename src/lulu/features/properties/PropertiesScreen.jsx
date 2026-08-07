@@ -6,7 +6,7 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { PROPERTY_TYPES, findPropertyType, OWNERSHIP_STATUSES, findOwnership, label } from '../../lib/domain.js'
 import { money, toSar, fmtDate } from '../../lib/format.js'
-import { imageToDataURL } from '../../lib/files.js'
+import { saveCloudPhoto } from '../../lib/files.js'
 import { share } from '../../lib/share.js'
 import EntityDocuments from '../shared/EntityDocuments.jsx'
 import PropertyLedger from './PropertyLedger.jsx'
@@ -172,7 +172,7 @@ function PropertyEditor({ initial, onClose, onSaved, onDeleted }) {
   const [busy, setBusy] = useState(false)
   const fileRef = useRef()
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
-  const onPhoto = async (fl) => { const file = fl && fl[0]; if (!file) return; setBusy(true); try { const u = await imageToDataURL(file); if (u) setF(p => ({ ...p, photo: u })) } finally { setBusy(false) } }
+  const onPhoto = async (fl) => { const file = fl && fl[0]; if (!file) return; setBusy(true); try { const out = await saveCloudPhoto(file, { thumbMax: 480, fullMax: 2000 }); if (out.photo) setF(p => ({ ...p, ...out })) } finally { setBusy(false) } }
 
   const submit = () => {
     if (!f.name.trim()) { setErr(t('required')); return }

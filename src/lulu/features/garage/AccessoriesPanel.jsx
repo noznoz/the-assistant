@@ -5,7 +5,7 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { money, fmtDate, todayISO } from '../../lib/format.js'
 import { ACCESSORY_STATUSES, accessoryStatus, ACCESSORY_GROUPS, accessoryGroup, accessoryTotal, vehicleTitle, label } from '../../lib/domain.js'
-import { makeThumb } from '../../lib/files.js'
+import { saveCloudPhoto } from '../../lib/files.js'
 import { exportXlsx, printHtml } from '../../lib/exporters.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
 import { usePhotoEditor } from '../../ui/PhotoEditor.jsx'
@@ -117,7 +117,7 @@ function AccessoryEditor({ initial, vehicleId, onClose, onSaved }) {
   const photo = usePhotoEditor()
   const pickPhoto = (fileList) => {
     const file = fileList && fileList[0]; if (!file) return
-    photo.open(file, async (edited) => { const thumb = await makeThumb(edited, 480); if (thumb) setF(prev => ({ ...prev, photo: thumb })) }, { aspect: 1 })
+    photo.open(file, async (edited) => { const out = await saveCloudPhoto(edited, { thumbMax: 320 }); if (out.photo) setF(prev => ({ ...prev, ...out })) }, { aspect: 1 })
   }
   const submit = () => {
     if (!f.name.trim()) { setErr(t('required')); return }

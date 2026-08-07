@@ -3,7 +3,7 @@ import Icon from '../../ui/Icon.jsx'
 import { Empty, Button, Sheet, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
-import { saveAttachment, removeAttachment, getAttachmentFile, imageToDataURL } from '../../lib/files.js'
+import { saveAttachment, removeAttachment, getAttachmentFile, saveCloudPhoto } from '../../lib/files.js'
 import { usePhotoEditor } from '../../ui/PhotoEditor.jsx'
 
 // A photo album for one vehicle. Photos are stored as attachments (full image
@@ -55,8 +55,8 @@ export default function VehiclePhotos({ vehicle }) {
     setBusy(true)
     try {
       const file = await getAttachmentFile(att)
-      const cover = file ? await imageToDataURL(file, 1000, 0.82) : (att.thumb || '')
-      if (cover) vehicles.patch(vehicle.id, { photo: cover, photoPos: '50% 50%' })
+      const out = file ? await saveCloudPhoto(file, { thumbMax: 640, fullMax: 2000 }) : { photo: att.thumb || '', photoId: '' }
+      if (out.photo) vehicles.patch(vehicle.id, { photo: out.photo, photoId: out.photoId, photoPos: '50% 50%' })
       toast.show('✓ ' + t('setAsCover'))
       setViewer(null)
     } finally { setBusy(false) }
