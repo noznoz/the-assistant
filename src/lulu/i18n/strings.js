@@ -401,7 +401,7 @@ export const STRINGS = {
     meetingNotesPlaceholder: 'Discussion, decisions, notes…',
     orgChart: 'Org chart', orgHint: 'Add a manager, then add people who report to them.', orgFooter: 'Tap ＋ under anyone to add a direct report.',
     addReport: 'Add report', reportsTo: 'Reports to', topLevel: 'Top level (no manager)', rolePlaceholder: 'e.g. Operations Manager',
-    me: 'Me', you: 'You', reportsToYou: 'Reports to you', teamSizeLabel: 'Team size', orgChartFooter: 'Tap a name to open its department. The number is their total team.',
+    me: 'Me', you: 'You', reportsToYou: 'Reports to you', teamSizeLabel: 'Team size', collapse: 'Collapse', expand: 'Expand', collapseAll: 'Collapse all', expandAll: 'Expand all', orgChartFooter: 'Tap a name to open its department. Tap the arrow to collapse or expand. The number is their total team.',
     level: 'Level',
     // spiritual + giving + keep-in-touch
     spiritual: 'Salah & spiritual', prayerStreak: 'Prayer streak', todaysPrayers: "Today's prayers",
@@ -821,7 +821,7 @@ export const STRINGS = {
     meetingNotesPlaceholder: 'النقاش والقرارات والملاحظات…',
     orgChart: 'الهيكل التنظيمي', orgHint: 'أضف مديراً ثم أضف من يتبعون له.', orgFooter: 'اضغط ＋ أسفل أي شخص لإضافة تابع مباشر له.',
     addReport: 'إضافة تابع', reportsTo: 'يتبع لـ', topLevel: 'أعلى مستوى (بلا مدير)', rolePlaceholder: 'مثال: مدير العمليات',
-    me: 'أنا', you: 'أنت', reportsToYou: 'يتبع لك', teamSizeLabel: 'حجم الفريق', orgChartFooter: 'اضغط على اسم لفتح قسمه. الرقم هو إجمالي فريقه.',
+    me: 'أنا', you: 'أنت', reportsToYou: 'يتبع لك', teamSizeLabel: 'حجم الفريق', collapse: 'طيّ', expand: 'توسيع', collapseAll: 'طيّ الكل', expandAll: 'توسيع الكل', orgChartFooter: 'اضغط على اسم لفتح قسمه. اضغط على السهم للطيّ أو التوسيع. الرقم هو إجمالي فريقه.',
     level: 'المستوى',
     // spiritual + giving + keep-in-touch
     spiritual: 'الصلاة والروحانيات', prayerStreak: 'سلسلة الصلاة', todaysPrayers: 'صلوات اليوم',
