@@ -57,21 +57,30 @@ export default function DocumentsScreen({ go }) {
 
   // ---- Folders (vaults) overview ----
   if (activeVault === null) {
-    const Tile = ({ icon, name, count, onClick, dashed }) => (
-      <button onClick={onClick} style={{
-        display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 10, padding: 16, minHeight: 108,
-        background: dashed ? 'transparent' : 'var(--surface)', border: dashed ? '1px dashed var(--line-2)' : '1px solid var(--line)',
-        borderRadius: 'var(--r-lg)', color: 'var(--ink)', textAlign: 'start',
-      }}>
-        <span className={`lead ${dashed ? '' : 't-brand'}`} style={{ width: 44, height: 44, borderRadius: 13, display: 'grid', placeItems: 'center', background: dashed ? 'var(--surface-2)' : undefined, color: dashed ? 'var(--ink-3)' : undefined }}>
-          <Icon name={icon} size={22} />
-        </span>
-        <span style={{ minWidth: 0 }}>
-          <span style={{ display: 'block', fontWeight: 700, fontSize: 14.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{name}</span>
-          {count != null && <span className="muted" style={{ fontSize: 12 }}>{count} {count === 1 ? t('documentTitle') : t('attachments')}</span>}
-        </span>
-      </button>
-    )
+    const Tile = ({ icon, name, count, onClick, onLongPress, dashed }) => {
+      const lp = useRef({ timer: null, fired: false })
+      const start = () => { if (!onLongPress) return; lp.current.fired = false; lp.current.timer = setTimeout(() => { lp.current.fired = true; onLongPress() }, 500) }
+      const cancel = () => { if (lp.current.timer) { clearTimeout(lp.current.timer); lp.current.timer = null } }
+      return (
+        <button
+          onClick={() => { if (lp.current.fired) { lp.current.fired = false; return } onClick && onClick() }}
+          onPointerDown={start} onPointerUp={cancel} onPointerLeave={cancel} onPointerCancel={cancel}
+          onContextMenu={onLongPress ? (e) => e.preventDefault() : undefined}
+          style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 10, padding: 16, minHeight: 108,
+            background: dashed ? 'transparent' : 'var(--surface)', border: dashed ? '1px dashed var(--line-2)' : '1px solid var(--line)',
+            borderRadius: 'var(--r-lg)', color: 'var(--ink)', textAlign: 'start',
+          }}>
+          <span className={`lead ${dashed ? '' : 't-brand'}`} style={{ width: 44, height: 44, borderRadius: 13, display: 'grid', placeItems: 'center', background: dashed ? 'var(--surface-2)' : undefined, color: dashed ? 'var(--ink-3)' : undefined }}>
+            <Icon name={icon} size={22} />
+          </span>
+          <span style={{ minWidth: 0 }}>
+            <span style={{ display: 'block', fontWeight: 700, fontSize: 14.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{name}</span>
+            {count != null && <span className="muted" style={{ fontSize: 12 }}>{count} {count === 1 ? t('documentTitle') : t('attachments')}</span>}
+          </span>
+        </button>
+      )
+    }
     return (
       <>
         <DetailHeader title={t('documents')} onBack={() => go('more')} right={
@@ -81,7 +90,7 @@ export default function DocumentsScreen({ go }) {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 14 }}>
             <Tile icon="grid" name={t('allDocuments')} count={docs.items.length} onClick={() => setActiveVault('all')} />
             {vaults.items.filter(v => !v.parentId).map(v => (
-              <Tile key={v.id} icon={v.icon || 'doc'} name={v.name} count={vaultDocCount(v.id)} onClick={() => setActiveVault(v.id)} />
+              <Tile key={v.id} icon={v.icon || 'doc'} name={v.name} count={vaultDocCount(v.id)} onClick={() => setActiveVault(v.id)} onLongPress={() => setVaultEditor(v)} />
             ))}
             {unfiledCount > 0 && <Tile icon="inbox" name={t('unfiled')} count={unfiledCount} onClick={() => setActiveVault('unfiled')} />}
             <Tile icon="plus" name={t('newVault')} dashed onClick={() => setVaultEditor({})} />
@@ -89,7 +98,7 @@ export default function DocumentsScreen({ go }) {
           <p className="hint center" style={{ marginTop: 16 }}>{t('vaultsHint')}</p>
         </div>
         <Fab onClick={() => setEditor({})} />
-        {vaultEditor && <VaultEditor initial={vaultEditor} onClose={() => setVaultEditor(null)} onSaved={() => toast.show(t('savedToast'))} />}
+        {vaultEditor && <VaultEditor initial={vaultEditor} onClose={() => setVaultEditor(null)} onSaved={() => toast.show(t('savedToast'))} onDeleted={() => toast.show(t('deletedToast'))} />}
         {editor && <DocEditor initial={editor.id ? editor : {}} onClose={() => setEditor(null)} onSaved={() => toast.show(t('savedToast'))} onToast={toast.show} />}
         {toast.node}
       </>
@@ -190,8 +199,20 @@ export default function DocumentsScreen({ go }) {
 function VaultEditor({ initial, onClose, onSaved, onDeleted }) {
   const { t } = useT()
   const vaults = useCollection('vaults')
+  const docs = useCollection('documents')
   const [f, setF] = useState({ name: '', icon: 'doc', parentId: '', ...initial })
   const [err, setErr] = useState('')
+
+  // Delete this vault, moving any documents and sub-vaults inside it up to this
+  // vault's parent (top level if it had none) so nothing is orphaned or lost.
+  const doDelete = () => {
+    if (!window.confirm(t('deleteVaultQ'))) return
+    const pid = initial.parentId || ''
+    vaults.items.filter(v => v.parentId === initial.id).forEach(v => vaults.patch(v.id, { parentId: pid }))
+    docs.items.filter(d => d.vaultId === initial.id).forEach(d => docs.patch(d.id, { vaultId: pid }))
+    vaults.remove(initial.id)
+    onClose(); onDeleted && onDeleted()
+  }
   // Valid parents exclude the vault itself and its descendants (no cycles).
   const descendants = (id) => { const out = new Set(); const walk = (pid) => vaults.items.filter(v => v.parentId === pid).forEach(v => { out.add(v.id); walk(v.id) }); walk(id); return out }
   const blocked = initial.id ? new Set([initial.id, ...descendants(initial.id)]) : new Set()
@@ -206,7 +227,7 @@ function VaultEditor({ initial, onClose, onSaved, onDeleted }) {
     <Sheet title={initial.id ? t('editVault') : (f.parentId ? t('newSubVault') : t('newVault'))} onClose={onClose}
       footer={<div className="stack">
         <Button variant="primary" block onClick={submit}>{t('save')}</Button>
-        {initial.id && <Button block variant="danger" icon="trash" onClick={() => { vaults.remove(initial.id); onClose(); onDeleted && onDeleted() }}>{t('delete')}</Button>}
+        {initial.id && <Button block variant="danger" icon="trash" onClick={doDelete}>{t('deleteVault')}</Button>}
       </div>}>
       <Field label={t('name')} required error={err}><Input value={f.name} onChange={e => setF({ ...f, name: e.target.value })} placeholder={t('vaultPlaceholder')} autoFocus /></Field>
       <Field label={t('parentVault')} hint={t('optional')}>
