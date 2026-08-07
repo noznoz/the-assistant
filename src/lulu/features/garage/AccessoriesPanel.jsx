@@ -4,13 +4,19 @@ import { Card, Section, Sheet, Field, Input, TextArea, Chip, Button, Empty, useT
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { money, fmtDate, todayISO } from '../../lib/format.js'
-import { ACCESSORY_STATUSES, accessoryStatus, ACCESSORY_GROUPS, accessoryGroup, accessoryTotal, vehicleTitle, label } from '../../lib/domain.js'
+import { ACCESSORY_STATUSES, accessoryStatus, ACCESSORY_TYPES, accessoryType, accessoryTotal, vehicleTitle, label } from '../../lib/domain.js'
 import { saveCloudPhoto } from '../../lib/files.js'
 import { exportXlsx, printHtml } from '../../lib/exporters.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
 import { usePhotoEditor } from '../../ui/PhotoEditor.jsx'
 
-const groupDef = (id) => ACCESSORY_GROUPS.find(g => g.id === id) || ACCESSORY_GROUPS[0]
+const typeDef = (id) => ACCESSORY_TYPES.find(g => g.id === id) || ACCESSORY_TYPES[0]
+// The three browsing sections. Wishlist holds items of either type.
+const SECTIONS = [
+  { id: 'accessory', icon: 'wrench' },
+  { id: 'gear', icon: 'shield' },
+  { id: 'wishlist', icon: 'gift' },
+]
 const normUrl = (u) => !u ? '' : (/^https?:\/\//i.test(u) ? u : 'https://' + u)
 const escapeHtml = (s) => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
 
@@ -23,63 +29,73 @@ export default function AccessoriesPanel({ vehicle }) {
   const cur = settings.currency
   const accessories = useCollection('accessories')
   const [editor, setEditor] = useState(null)
-  const [group, setGroup] = useState('all')
+  const [section, setSection] = useState('accessory')  // 'accessory' | 'gear' | 'wishlist'
   const [report, setReport] = useState(false)
   const [sortDir, setSortDir] = useState('newest')  // by purchase date: 'newest' | 'oldest'
   const toast = useToast()
 
   const mine = accessories.items.filter(a => a.vehicleId === vehicle.id)
     .sort((a, b) => { const c = (a.date || '').localeCompare(b.date || ''); return sortDir === 'oldest' ? c : -c })
-  const fittedTotal = mine.filter(a => accessoryStatus(a) === 'fitted').reduce((s, a) => s + accessoryTotal(a), 0)
-  const wishTotal = mine.filter(a => accessoryStatus(a) === 'wishlist').reduce((s, a) => s + accessoryTotal(a), 0)
-  const shown = group === 'all' ? mine : mine.filter(a => accessoryGroup(a) === group)
-  const groupCount = (id) => mine.filter(a => accessoryGroup(a) === id).length
+
+  const inSection = (a, sec) => sec === 'wishlist'
+    ? accessoryStatus(a) === 'wishlist'
+    : (accessoryStatus(a) !== 'wishlist' && accessoryType(a) === sec)
+  const sectionCount = (sec) => mine.filter(a => inSection(a, sec)).length
+  const shown = mine.filter(a => inSection(a, section))
+  const sectionTotal = shown.reduce((s, a) => s + accessoryTotal(a), 0)
+  const sectionLabel = section === 'wishlist' ? t('wishlist') : label(typeDef(section), lang)
+
+  // Adding from a section pre-sets the new item's type/status.
+  const addPreset = section === 'wishlist'
+    ? { new: true, type: 'accessory', status: 'wishlist' }
+    : { new: true, type: section, status: 'fitted' }
+  const addLabel = section === 'wishlist' ? t('addToWishlist') : (section === 'gear' ? t('addGear') : t('addAccessory'))
 
   return (
     <>
+      {/* Section tabs */}
+      <div className="chip-row" style={{ margin: '2px 0 12px' }}>
+        {SECTIONS.map(s => (
+          <Chip key={s.id} selectable on={section === s.id} onClick={() => setSection(s.id)}>
+            <Icon name={s.icon} size={12} /> {s.id === 'wishlist' ? t('wishlist') : label(typeDef(s.id), lang)}{sectionCount(s.id) ? ` · ${sectionCount(s.id)}` : ''}
+          </Chip>
+        ))}
+      </div>
+
       <Card style={{ textAlign: 'center', marginBottom: 12 }}>
-        <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase' }}>{t('accessoriesValue')}</div>
-        <div style={{ fontSize: 28, fontWeight: 750, marginTop: 4 }} className="tnum">{money(fittedTotal, cur, lang)}</div>
-        <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>{mine.filter(a => accessoryStatus(a) === 'fitted').length} {t('fitted').toLowerCase()}{wishTotal > 0 ? ` · ${t('wishlist').toLowerCase()} ${money(wishTotal, cur, lang)}` : ''}</div>
+        <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase' }}>{sectionLabel}{section === 'wishlist' ? ` · ${t('total').toLowerCase()}` : ` · ${t('value') || 'value'}`}</div>
+        <div style={{ fontSize: 28, fontWeight: 750, marginTop: 4 }} className="tnum">{money(sectionTotal, cur, lang)}</div>
+        <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>{shown.length} {t('items').toLowerCase()}</div>
       </Card>
 
       <div className="row2">
-        <Button variant="primary" icon="plus" onClick={() => setEditor({})}>{t('addAccessory')}</Button>
+        <Button variant="primary" icon="plus" onClick={() => setEditor(addPreset)}>{addLabel}</Button>
         <Button icon="report" onClick={() => setReport(true)} disabled={mine.length === 0}>{t('reportLabel')}</Button>
       </div>
 
-      {mine.length === 0 ? (
-        <Empty icon="wrench" title={t('noAccessories')} text={t('accessoriesHint')} />
+      {shown.length === 0 ? (
+        <Empty icon={section === 'wishlist' ? 'gift' : (section === 'gear' ? 'shield' : 'wrench')} title={t('noAccessories')} text={t('accessoriesHint')} />
       ) : (
         <>
-          <div className="chip-row" style={{ margin: '12px 0 2px' }}>
-            <Chip selectable on={group === 'all'} onClick={() => setGroup('all')}>{t('all')} · {mine.length}</Chip>
-            {ACCESSORY_GROUPS.map(g => (
-              <Chip key={g.id} selectable on={group === g.id} onClick={() => setGroup(g.id)}>
-                <Icon name={g.icon} size={12} /> {label(g, lang)}{groupCount(g.id) ? ` · ${groupCount(g.id)}` : ''}
-              </Chip>
-            ))}
-          </div>
-          <div className="chip-row" style={{ margin: '6px 0 2px', justifyContent: 'flex-end' }}>
+          <div className="chip-row" style={{ margin: '12px 0 2px', justifyContent: 'flex-end' }}>
             <Chip onClick={() => setSortDir(d => d === 'newest' ? 'oldest' : 'newest')}>
               <Icon name="filter" size={12} /> {sortDir === 'newest' ? t('sortNewest') : t('sortOldest')}
             </Chip>
           </div>
           {shown.map(a => {
             const st = accessoryStatus(a)
-            const gp = groupDef(accessoryGroup(a))
+            const ty = typeDef(accessoryType(a))
             const tot = accessoryTotal(a)
             return (
               <SwipeRow key={a.id} onEdit={() => setEditor(a)} onDelete={() => { accessories.remove(a.id); toast.show(t('deletedToast')) }}>
               <div className="li" onClick={() => setEditor(a)}>
                 <div className="lead" style={{ padding: 0, overflow: 'hidden', background: 'var(--surface-2)', color: st === 'wishlist' ? 'var(--warn)' : 'var(--brand-600)' }}>
-                  {a.photo ? <img src={a.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Icon name={gp.icon} size={18} />}
+                  {a.photo ? <img src={a.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Icon name={ty.icon} size={18} />}
                 </div>
                 <div className="body">
                   <div className="title">{a.name}</div>
                   <div className="meta">
-                    <span className="chip t-brand" style={{ padding: '1px 7px' }}>{label(gp, lang)}</span>
-                    <span className={`chip ${st === 'wishlist' ? 't-warn' : 't-ok'}`} style={{ padding: '1px 7px' }}>{label(ACCESSORY_STATUSES.find(x => x.id === st), lang)}</span>
+                    {section === 'wishlist' && <span className="chip t-brand" style={{ padding: '1px 7px' }}>{label(ty, lang)}</span>}
                     {a.brand && <span>· {a.brand}</span>}
                     {a.color && <span>· {a.color}</span>}
                     {Number(a.quantity) > 1 && <span>· ×{a.quantity}</span>}
@@ -95,7 +111,7 @@ export default function AccessoriesPanel({ vehicle }) {
           })}
         </>
       )}
-      {editor && <AccessoryEditor initial={editor.id ? editor : {}} vehicleId={vehicle.id} onClose={() => setEditor(null)} onSaved={() => toast.show(t('savedToast'))} />}
+      {editor && <AccessoryEditor initial={editor.new ? { type: editor.type, status: editor.status } : editor} vehicleId={vehicle.id} onClose={() => setEditor(null)} onSaved={() => toast.show(t('savedToast'))} />}
       {report && <ReportSheet vehicle={vehicle} accessories={mine} onClose={() => setReport(false)} onToast={toast.show} />}
       {toast.node}
     </>
@@ -106,7 +122,7 @@ function AccessoryEditor({ initial, vehicleId, onClose, onSaved }) {
   const { t, lang } = useT()
   const accessories = useCollection('accessories')
   const [f, setF] = useState({
-    name: '', brand: '', color: '', quantity: 1, group: accessoryGroup(initial), cost: '', shipping: '', install: '',
+    name: '', brand: '', color: '', quantity: 1, type: accessoryType(initial), cost: '', shipping: '', install: '',
     purchasedBy: '', installedBy: '',
     website: '', photo: '', date: todayISO(), note: '', status: accessoryStatus(initial), vehicleId, ...initial,
   })
@@ -157,10 +173,10 @@ function AccessoryEditor({ initial, vehicleId, onClose, onSaved }) {
         <Field label={t('brand')}><Input value={f.brand} onChange={set('brand')} placeholder="Thule, GoPro…" /></Field>
         <Field label={t('color')}><Input value={f.color} onChange={set('color')} placeholder="Black, Titanium…" /></Field>
       </div>
-      <Field label={t('group')}>
+      <Field label={t('type')}>
         <div className="chip-row">
-          {ACCESSORY_GROUPS.map(g => (
-            <Chip key={g.id} selectable on={f.group === g.id} onClick={() => setF({ ...f, group: g.id })}><Icon name={g.icon} size={13} /> {label(g, lang)}</Chip>
+          {ACCESSORY_TYPES.map(g => (
+            <Chip key={g.id} selectable on={f.type === g.id} onClick={() => setF({ ...f, type: g.id })}><Icon name={g.icon} size={13} /> {label(g, lang)}</Chip>
           ))}
         </div>
       </Field>
@@ -198,12 +214,12 @@ function ReportSheet({ vehicle, accessories, onClose, onToast }) {
   const { t, lang } = useT()
   const { settings } = useSettings()
   const cur = settings.currency
-  const [sel, setSel] = useState(ACCESSORY_GROUPS.map(g => g.id))
+  const [sel, setSel] = useState(ACCESSORY_TYPES.map(g => g.id))
   const toggle = (id) => setSel(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
-  const rows = accessories.filter(a => sel.includes(accessoryGroup(a)))
+  const rows = accessories.filter(a => sel.includes(accessoryType(a)))
   const grand = rows.reduce((s, a) => s + accessoryTotal(a), 0)
-  const byGroup = ACCESSORY_GROUPS.filter(g => sel.includes(g.id)).map(g => {
-    const items = rows.filter(a => accessoryGroup(a) === g.id)
+  const byGroup = ACCESSORY_TYPES.filter(g => sel.includes(g.id)).map(g => {
+    const items = rows.filter(a => accessoryType(a) === g.id)
     return { g, count: items.length, total: items.reduce((s, a) => s + accessoryTotal(a), 0) }
   })
   const title = `${vehicleTitle(vehicle)} — ${t('accessories')}`
@@ -212,27 +228,27 @@ function ReportSheet({ vehicle, accessories, onClose, onToast }) {
   const exportExcel = async () => {
     const aoa = [
       [title], [t('generated'), new Date().toLocaleDateString()], [],
-      [t('group'), t('items'), t('total') + ' (SAR)'],
+      [t('type'), t('items'), t('total') + ' (SAR)'],
       ...byGroup.map(b => [label(b.g, lang), b.count, r2(b.total)]),
       [t('total'), rows.length, r2(grand)], [],
-      [t('accessoryName'), t('brand'), t('color'), t('group'), t('status'), t('quantity'), t('itemCost'), t('shippingCost'), t('installationCost'), t('total'), t('purchasedBy'), t('installedBy'), t('website'), t('date')],
-      ...rows.map(a => [a.name, a.brand || '', a.color || '', label(groupDef(accessoryGroup(a)), lang), label(ACCESSORY_STATUSES.find(s => s.id === accessoryStatus(a)), lang), Number(a.quantity) || 1, Number(a.cost) || 0, Number(a.shipping) || 0, Number(a.install) || 0, r2(accessoryTotal(a)), a.purchasedBy || '', a.installedBy || '', a.website || '', a.date || '']),
+      [t('accessoryName'), t('brand'), t('color'), t('type'), t('status'), t('quantity'), t('itemCost'), t('shippingCost'), t('installationCost'), t('total'), t('purchasedBy'), t('installedBy'), t('website'), t('date')],
+      ...rows.map(a => [a.name, a.brand || '', a.color || '', label(typeDef(accessoryType(a)), lang), label(ACCESSORY_STATUSES.find(s => s.id === accessoryStatus(a)), lang), Number(a.quantity) || 1, Number(a.cost) || 0, Number(a.shipping) || 0, Number(a.install) || 0, r2(accessoryTotal(a)), a.purchasedBy || '', a.installedBy || '', a.website || '', a.date || '']),
     ]
     try { await exportXlsx(`${title}.xlsx`, t('accessories'), aoa, [26, 14, 12, 14, 10, 8, 12, 12, 14, 12, 18, 18, 26, 12]); onToast && onToast(t('savedToast')) }
     catch { onToast && onToast(t('comingSoon')) }
   }
   const exportPdf = () => {
     const gRows = byGroup.map(b => `<tr><td>${escapeHtml(label(b.g, lang))}</td><td class="n">${b.count}</td><td class="n">${money(b.total, cur, lang)}</td></tr>`).join('')
-    const dRows = rows.map(a => `<tr><td>${escapeHtml(a.name)}</td><td>${escapeHtml(a.brand || '')}</td><td>${escapeHtml(a.color || '')}</td><td class="n">${Number(a.quantity) || 1}</td><td>${escapeHtml(label(groupDef(accessoryGroup(a)), lang))}</td><td>${escapeHtml(label(ACCESSORY_STATUSES.find(s => s.id === accessoryStatus(a)), lang))}</td><td class="n">${money(accessoryTotal(a), cur, lang)}</td><td>${escapeHtml(a.purchasedBy || '')}</td><td>${escapeHtml(a.installedBy || '')}</td></tr>`).join('')
+    const dRows = rows.map(a => `<tr><td>${escapeHtml(a.name)}</td><td>${escapeHtml(a.brand || '')}</td><td>${escapeHtml(a.color || '')}</td><td class="n">${Number(a.quantity) || 1}</td><td>${escapeHtml(label(typeDef(accessoryType(a)), lang))}</td><td>${escapeHtml(label(ACCESSORY_STATUSES.find(s => s.id === accessoryStatus(a)), lang))}</td><td class="n">${money(accessoryTotal(a), cur, lang)}</td><td>${escapeHtml(a.purchasedBy || '')}</td><td>${escapeHtml(a.installedBy || '')}</td></tr>`).join('')
     const body = `
       <h1>${escapeHtml(title)}</h1>
       <div class="sub">${escapeHtml(t('accessoriesReport'))} · ${new Date().toLocaleDateString()}</div>
       <div class="total brand">${money(grand, cur, lang)}</div>
       <div class="muted">${rows.length} ${escapeHtml(t('items'))}</div>
-      <h2>${escapeHtml(t('byGroup'))}</h2>
-      <table><thead><tr><th>${escapeHtml(t('group'))}</th><th class="n">${escapeHtml(t('items'))}</th><th class="n">${escapeHtml(t('total'))}</th></tr></thead><tbody>${gRows}</tbody></table>
+      <h2>${escapeHtml(t('type'))}</h2>
+      <table><thead><tr><th>${escapeHtml(t('type'))}</th><th class="n">${escapeHtml(t('items'))}</th><th class="n">${escapeHtml(t('total'))}</th></tr></thead><tbody>${gRows}</tbody></table>
       <h2>${escapeHtml(t('accessories'))} (${rows.length})</h2>
-      <table><thead><tr><th>${escapeHtml(t('accessoryName'))}</th><th>${escapeHtml(t('brand'))}</th><th>${escapeHtml(t('color'))}</th><th class="n">${escapeHtml(t('quantity'))}</th><th>${escapeHtml(t('group'))}</th><th>${escapeHtml(t('status'))}</th><th class="n">${escapeHtml(t('total'))}</th><th>${escapeHtml(t('purchasedBy'))}</th><th>${escapeHtml(t('installedBy'))}</th></tr></thead><tbody>${dRows}</tbody></table>`
+      <table><thead><tr><th>${escapeHtml(t('accessoryName'))}</th><th>${escapeHtml(t('brand'))}</th><th>${escapeHtml(t('color'))}</th><th class="n">${escapeHtml(t('quantity'))}</th><th>${escapeHtml(t('type'))}</th><th>${escapeHtml(t('status'))}</th><th class="n">${escapeHtml(t('total'))}</th><th>${escapeHtml(t('purchasedBy'))}</th><th>${escapeHtml(t('installedBy'))}</th></tr></thead><tbody>${dRows}</tbody></table>`
     printHtml(title, body)
   }
 
@@ -244,7 +260,7 @@ function ReportSheet({ vehicle, accessories, onClose, onToast }) {
       </div>}>
       <p className="hint" style={{ margin: '0 2px 8px' }}>{t('reportGroupsHint')}</p>
       <div className="chip-row" style={{ marginBottom: 14 }}>
-        {ACCESSORY_GROUPS.map(g => (
+        {ACCESSORY_TYPES.map(g => (
           <Chip key={g.id} selectable on={sel.includes(g.id)} onClick={() => toggle(g.id)}>
             {sel.includes(g.id) && <Icon name="check" size={12} stroke={3} />} {label(g, lang)}
           </Chip>
