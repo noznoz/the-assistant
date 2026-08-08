@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Field, Input, Button, Empty, Chip, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
@@ -6,6 +6,8 @@ import { useCollection } from '../../store/StoreProvider.jsx'
 import { fmtDate, fmtTime, relativeDay } from '../../lib/format.js'
 import { splitReminders } from '../../lib/reminders.js'
 import { notificationPermission, requestNotificationPermission } from '../../lib/notify.js'
+import { pushSupported, pushConfigured, isPushEnabled, enablePush, disablePush } from '../../lib/push.js'
+import * as cloud from '../../lib/cloud.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
 
 const pad = (n) => String(n).padStart(2, '0')
@@ -35,6 +37,21 @@ export default function RemindersScreen({ go }) {
   const [when, setWhen] = useState(defaultWhen)
   const [err, setErr] = useState('')
   const [perm, setPerm] = useState(notificationPermission())
+  const [bg, setBg] = useState(false)
+  const [bgBusy, setBgBusy] = useState(false)
+  useEffect(() => { isPushEnabled().then(setBg) }, [])
+
+  const toggleBg = async () => {
+    setBgBusy(true)
+    try {
+      if (bg) { await disablePush(); setBg(false); toast.show(t('savedToast')) }
+      else {
+        const r = await enablePush()
+        if (r.ok) { setBg(true); toast.show(t('bgEnabled')) }
+        else toast.show(r.reason === 'denied' ? t('reminderPermHint') : r.reason === 'not-connected' ? t('bgNeedsCloud') : t('bgNotConfigured'))
+      }
+    } finally { setBgBusy(false) }
+  }
 
   const { upcoming, past } = splitReminders(reminders.items)
 
@@ -62,6 +79,25 @@ export default function RemindersScreen({ go }) {
               <div style={{ flex: 1, fontSize: 13 }}>{t('reminderPermHint')}</div>
             </div>
             <Button variant="primary" icon="bell" onClick={askPermission}>{t('enableNotifications')}</Button>
+          </Card>
+        )}
+
+        {/* Background push (deliver while the app is closed) */}
+        {pushSupported() && (
+          <Card className="stack" style={{ marginTop: 12 }}>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <span className={`lead ${bg ? 't-ok' : 't-info'}`} style={{ flexShrink: 0 }}><Icon name="bell" size={16} /></span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>{t('bgReminders')}</div>
+                <div className="muted" style={{ fontSize: 12 }}>{bg ? t('bgOnState') : t('bgRemindersHint')}</div>
+              </div>
+            </div>
+            {!pushConfigured()
+              ? <p className="hint" style={{ margin: '0 2px' }}>{t('bgNotConfigured')}</p>
+              : !cloud.isReady()
+                ? <p className="hint" style={{ margin: '0 2px' }}>{t('bgNeedsCloud')}</p>
+                : <Button variant={bg ? 'ghost' : 'primary'} icon="bell" onClick={toggleBg} disabled={bgBusy}>{bg ? t('bgDisable') : t('bgEnable')}</Button>}
+            <p className="hint" style={{ margin: '0 2px' }}>{t('bgIosHint')}</p>
           </Card>
         )}
 
