@@ -4,6 +4,7 @@
 export const DASHBOARD_SECTIONS = [
   { key: 'brief', label: 'dashBrief' },
   { key: 'assistant', label: 'dashAssistant' },
+  { key: 'reminders', label: 'dashReminders' },
   { key: 'prayer', label: 'dashPrayer' },
   { key: 'stats', label: 'dashStats' },
   { key: 'quickActions', label: 'dashQuick' },

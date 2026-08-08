@@ -2,7 +2,7 @@
 // documents, subscriptions and birthdays. Shared by the Notifications screen
 // (to display) and the Today bell (to count unread). Each item has a stable
 // id so "seen" state can be tracked across renders.
-import { isOverdue, isToday, daysUntil, fmtDate, relativeDay } from './format.js'
+import { isOverdue, isToday, daysUntil, fmtDate, fmtTime, relativeDay } from './format.js'
 
 function daysToBirthday(bStr) {
   if (!bStr) return null
@@ -36,8 +36,19 @@ function sumMonth(expenses, ref, rates) {
   }, 0)
 }
 
-export function buildNotificationFeed({ tasks = [], vehicles = [], services = [], docs = [], subs = [], people = [], expenses = [], valuables = [], appointments = [], t, lang = 'en', settings = {} }) {
+export function buildNotificationFeed({ tasks = [], vehicles = [], services = [], docs = [], subs = [], people = [], expenses = [], valuables = [], appointments = [], reminders = [], t, lang = 'en', settings = {} }) {
   const out = []
+  // Reminders: anything due now (past & not done) or coming up within 7 days.
+  const nowMs = Date.now()
+  reminders.forEach(r => {
+    if (r.done || !r.remindAt) return
+    const ts = new Date(r.remindAt).getTime()
+    if (isNaN(ts)) return
+    const diffDays = (ts - nowMs) / 86400000
+    if (diffDays > 7) return
+    const due = ts <= nowMs
+    out.push({ id: 'rem' + r.id, tint: due ? 't-danger' : diffDays <= 1 ? 't-warn' : 't-info', icon: 'bell', title: r.text, meta: due ? t('reminderDue') : `${relativeDay(r.remindAt, lang)} · ${fmtTime(r.remindAt, lang)}`, go: 'reminders', sort: due ? -2 : diffDays - 0.1 })
+  })
   // Upcoming appointments within the next 7 days.
   appointments.forEach(a => { const dd = daysUntil(a.date); if (dd != null && dd >= 0 && dd <= 7) { const who = (people.find(p => p.id === a.personId) || {}).name; out.push({ id: 'appt' + a.id, tint: dd <= 1 ? 't-warn' : 't-info', icon: 'calendar', title: a.title + (who ? ` · ${who}` : ''), meta: `${relativeDay(a.date, lang)}${a.time ? ' · ' + a.time : ''}`, go: 'appointments', sort: dd - 0.15 }) } })
   const open = tasks.filter(x => x.status !== 'completed' && x.status !== 'cancelled')
