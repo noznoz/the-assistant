@@ -234,6 +234,26 @@ export async function pullAll() {
   } catch { return null }
 }
 
+// ---- Web-push subscriptions (background reminders) ----
+// Store this device's push subscription in the household so the scheduled
+// Edge Function can deliver reminders even when the app is closed.
+export async function savePushSubscription(sub) {
+  if (!isReady() || !sub || !sub.endpoint) return
+  const ses = getSession()
+  try {
+    await authFetch('/rest/v1/push_subscriptions?on_conflict=household_id,endpoint', {
+      method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify([{ household_id: householdId(), user_id: ses.user.id, endpoint: sub.endpoint, subscription: sub }]),
+    })
+  } catch { /* offline / not set up — safe to ignore */ }
+}
+export async function deletePushSubscription(endpoint) {
+  if (!isReady() || !endpoint) return
+  try {
+    await authFetch(`/rest/v1/push_subscriptions?household_id=eq.${householdId()}&endpoint=eq.${encodeURIComponent(endpoint)}`, { method: 'DELETE' })
+  } catch { /* ignore */ }
+}
+
 // One full two-way sync: push local, then pull remote.
 export async function syncNow() {
   if (!isReady()) return null

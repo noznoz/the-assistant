@@ -126,5 +126,26 @@ create policy attach_member_delete on storage.objects
   using (bucket_id = 'attachments'
          and public.is_member(((storage.foldername(name))[1])::uuid));
 
+-- ---------------------------------------------------------------------
+-- PUSH SUBSCRIPTIONS (optional) — background reminders while the app is closed.
+-- One row per device; the send-reminders Edge Function pushes to these. See
+-- docs/PUSH.md for the full setup (VAPID keys, function deploy, pg_cron).
+-- ---------------------------------------------------------------------
+create table if not exists public.push_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  household_id uuid references public.households on delete cascade,
+  user_id uuid references auth.users on delete cascade,
+  endpoint text not null,
+  subscription jsonb not null,
+  created_at timestamptz not null default now(),
+  unique (household_id, endpoint)
+);
+alter table public.push_subscriptions enable row level security;
+drop policy if exists ps_member_all on public.push_subscriptions;
+create policy ps_member_all on public.push_subscriptions
+  for all to authenticated
+  using (public.is_member(household_id))
+  with check (public.is_member(household_id));
+
 -- Done. In the app: More → Cloud & Family → paste your project URL + anon key,
 -- tick the privacy consent, then create an account or sign in.
