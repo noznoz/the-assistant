@@ -11,6 +11,7 @@ import Icon from './ui/Icon.jsx'
 import { usePullToRefresh } from './ui/usePullToRefresh.js'
 import LockGate from './ui/LockGate.jsx'
 import { setBadge, maybeDailyBrief } from './lib/notify.js'
+import { fireDueReminders } from './lib/reminders.js'
 import { buildBrief } from './lib/brief.js'
 import { isToday, isOverdue } from './lib/format.js'
 
@@ -75,6 +76,7 @@ import KeepInTouchScreen from './features/people/KeepInTouchScreen.jsx'
 import NavTabsScreen from './features/settings/NavTabsScreen.jsx'
 import AssistantScreen from './features/assistant/AssistantScreen.jsx'
 import CloudScreen from './features/cloud/CloudScreen.jsx'
+import RemindersScreen from './features/reminders/RemindersScreen.jsx'
 
 const MAIN_TABS = ['today', 'tasks', 'garage', 'expenses', 'more']
 
@@ -104,9 +106,19 @@ function StorageAlert() {
 
 function Router() {
   const { route, tab, param, go } = useRouter('today')
-  const { data, reloadAll } = useStore()
+  const { data, reloadAll, patch } = useStore()
   const { settings } = useSettings()
   const { lang } = useT()
+
+  // Fire any due personal reminders (while the app is open or freshly reopened).
+  useEffect(() => {
+    const check = () => fireDueReminders(data.reminders || [], { patch: (id, p) => patch('reminders', id, p) })
+    check()
+    const t = setInterval(check, 30000)
+    const onVis = () => { if (document.visibilityState === 'visible') check() }
+    document.addEventListener('visibilitychange', onVis)
+    return () => { clearInterval(t); document.removeEventListener('visibilitychange', onVis) }
+  }, [data.reminders, patch])
 
   // Keep the home-screen badge in sync with what needs attention, and fire the
   // daily brief once per day — only when the user has enabled notifications.
@@ -145,6 +157,7 @@ function Router() {
       case 'trips': return <TripsScreen go={go} />
       case 'reports': return <ReportsScreen go={go} />
       case 'notifications': return <NotificationsScreen go={go} />
+      case 'reminders': return <RemindersScreen go={go} />
       case 'calendar': return <CalendarScreen go={go} />
       case 'settings': return <SettingsScreen go={go} />
       case 'profile': return <ProfileScreen go={go} />

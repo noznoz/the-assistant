@@ -131,6 +131,11 @@ export const STRINGS = {
     rec_monthly: 'Monthly', rec_yearly: 'Yearly', repeatsToast: 'Repeated · next one added',
     // notifications
     enableNotifications: 'Enable notifications', notificationsLabel: 'Notifications & badge',
+    reminders: 'Reminders', addReminder: 'Add reminder', reminderSet: 'Reminder set',
+    reminderWhat: 'Remind me to…', reminderWhatPlaceholder: 'Call the workshop, pay the bill…', reminderWhen: 'When',
+    remindersHint: 'Add anything you want to be reminded about. You’ll get a notification when it’s due.',
+    noReminders: 'No reminders yet', reminderPermHint: 'Turn on notifications so reminders can alert you.',
+    inHour: 'In 1 hour', tonight: 'Tonight',
     notifHint: 'A daily brief plus alerts for due tasks and renewals when you open the app.',
     notifDenied: 'Blocked in your browser settings — enable notifications for this site.',
     notifOn: 'On', notifOff: 'Off',
@@ -551,6 +556,11 @@ export const STRINGS = {
     rec_monthly: 'شهرياً', rec_yearly: 'سنوياً', repeatsToast: 'تكرّرت · أُضيفت التالية',
     // notifications
     enableNotifications: 'تفعيل الإشعارات', notificationsLabel: 'الإشعارات والشارة',
+    reminders: 'التذكيرات', addReminder: 'إضافة تذكير', reminderSet: 'تم ضبط التذكير',
+    reminderWhat: 'ذكّرني بـ…', reminderWhatPlaceholder: 'اتصل بالورشة، ادفع الفاتورة…', reminderWhen: 'الوقت',
+    remindersHint: 'أضف أي شيء تريد أن تُذكَّر به. ستصلك إشعار عند حلول موعده.',
+    noReminders: 'لا توجد تذكيرات بعد', reminderPermHint: 'فعّل الإشعارات حتى تتمكن التذكيرات من تنبيهك.',
+    inHour: 'خلال ساعة', tonight: 'الليلة',
     notifHint: 'ملخص يومي وتنبيهات للمهام المستحقة والتجديدات عند فتح التطبيق.',
     notifDenied: 'محظورة في إعدادات المتصفح — فعّل الإشعارات لهذا الموقع.',
     notifOn: 'مُفعّل', notifOff: 'متوقف',

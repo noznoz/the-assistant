@@ -30,7 +30,7 @@ const ROUTES = [
   'renewals', 'monthlyreport', 'boardpack', 'forecast', 'emergency', 'wishlist',
   'goals', 'dashboard', 'appointments', 'occasions', 'staff', 'debtpayoff', 'hijri',
   'allocation', 'work', 'workboard', 'meetings', 'orgchart', 'followup', 'spiritual',
-  'giving', 'keepintouch', 'navtabs', 'assistant', 'cloud', 'search',
+  'giving', 'keepintouch', 'navtabs', 'assistant', 'cloud', 'search', 'reminders',
 ]
 
 const MIME = {
