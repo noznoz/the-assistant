@@ -28,7 +28,9 @@ export default function TaskEditor({ initial, onClose, onSaved }) {
     const v = e.target.value
     if (v === '__add') { setAddingPerson(true); return }
     const p = people.items.find(x => x.id === v)
-    setF(prev => ({ ...prev, assigneeId: v, assignedTo: p ? p.name : '' }))
+    // Carry the linked person's login id (if they're a family member) so the
+    // task can be scoped to their account and appear in their "My tasks".
+    setF(prev => ({ ...prev, assigneeId: v, assignedTo: p ? p.name : '', assigneeUserId: (p && p.userId) || '' }))
   }
 
   // A legacy task may carry an assignedTo name without a linked person id.
