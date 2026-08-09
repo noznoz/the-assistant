@@ -65,6 +65,30 @@ export async function enablePush() {
   } catch { return { ok: false, reason: 'error' } }
 }
 
+// Keep the stored subscription alive. iOS/Safari can silently drop a PWA's push
+// subscription (reboots, updates, days unopened); once that happens no
+// background reminder arrives until the user re-enables it. Called on every app
+// open: if push was enabled (permission already granted), make sure a live
+// subscription exists — re-subscribing if iOS dropped it — and re-save it to the
+// household so the scheduled function can always reach this device. Fully silent:
+// it never prompts and no-ops unless push is configured, connected and granted.
+export async function refreshPush() {
+  if (!pushSupported() || !pushConfigured()) return
+  if (!cloud.isReady || !cloud.isReady()) return
+  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return
+  try {
+    const reg = await navigator.serviceWorker.ready
+    let sub = await reg.pushManager.getSubscription()
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC),
+      })
+    }
+    await cloud.savePushSubscription(sub.toJSON())
+  } catch { /* ignore — best effort */ }
+}
+
 export async function disablePush() {
   const sub = await currentSubscription()
   if (!sub) return
