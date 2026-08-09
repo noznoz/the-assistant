@@ -349,6 +349,7 @@ export const STRINGS = {
     moveUp: 'Move up', moveDown: 'Move down', resetDefault: 'Reset to default',
     dashBrief: 'Morning brief', dashAssistant: 'Needs attention', dashPrayer: 'Prayer times', dashStats: 'Progress & spending',
     dashQuick: 'Quick actions', dashWork: 'Work follow-ups', dashRenewals: 'Renewals', dashNotes: 'Quick notes',
+    dashReminders: 'Reminders', reminderDue: 'Due now', customizeQuick: 'Quick actions', customizeQuickHint: 'Choose which quick actions show on your home screen and reorder them.',
     // reports center + appointments + occasions
     financialReports: 'Financial reports', activityReview: 'Activity review',
     appointments: 'Appointments', noAppointments: 'No appointments yet', appointmentsHint: 'Track doctor, dentist, school and other dates for the family.',
@@ -779,6 +780,7 @@ export const STRINGS = {
     moveUp: 'تحريك لأعلى', moveDown: 'تحريك لأسفل', resetDefault: 'إعادة للافتراضي',
     dashBrief: 'ملخص الصباح', dashAssistant: 'يحتاج انتباه', dashPrayer: 'أوقات الصلاة', dashStats: 'التقدّم والإنفاق',
     dashQuick: 'إجراءات سريعة', dashWork: 'متابعات العمل', dashRenewals: 'التجديدات', dashNotes: 'ملاحظات سريعة',
+    dashReminders: 'التذكيرات', reminderDue: 'حان وقته', customizeQuick: 'الإجراءات السريعة', customizeQuickHint: 'اختر الإجراءات السريعة التي تظهر في الرئيسية وأعد ترتيبها.',
     // reports center + appointments + occasions
     financialReports: 'التقارير المالية', activityReview: 'مراجعة النشاط',
     appointments: 'المواعيد', noAppointments: 'لا توجد مواعيد بعد', appointmentsHint: 'تابع مواعيد الطبيب والأسنان والمدرسة وغيرها للعائلة.',

@@ -3,7 +3,9 @@ import Icon from '../../ui/Icon.jsx'
 import { Card, Section, Ring, Stat, Chip, Button, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
-import { greetingKey, fmtLongDate, isToday, isOverdue, daysUntil, money, expenseSar } from '../../lib/format.js'
+import { greetingKey, fmtLongDate, fmtTime, relativeDay, isToday, isOverdue, daysUntil, money, expenseSar } from '../../lib/format.js'
+import { splitReminders } from '../../lib/reminders.js'
+import { normalizeQuickActions, quickActionDef } from '../../lib/quickActions.js'
 import { hijriDate } from '../../lib/prayer.js'
 import { buildBrief } from '../../lib/brief.js'
 import { buildRenewals } from '../../lib/renewals.js'
@@ -20,18 +22,6 @@ import VehicleEditor from '../garage/VehicleEditor.jsx'
 import NoteEditor from '../inbox/NoteEditor.jsx'
 import SnapFile from '../snap/SnapFile.jsx'
 
-const QUICK = [
-  { id: 'snap', key: 'snapFile', icon: 'camera' },
-  { id: 'task', key: 'addTask', icon: 'check' },
-  { id: 'request', key: 'addRequest', icon: 'inbox' },
-  { id: 'expense', key: 'addExpense', icon: 'wallet' },
-  { id: 'note', key: 'addNote', icon: 'note' },
-  { id: 'message', key: 'sendMessage', icon: 'whatsapp' },
-  { id: 'appointment', key: 'addAppointment', icon: 'calendar' },
-  { id: 'vehicle', key: 'addVehicle', icon: 'car' },
-  { id: 'receipt', key: 'scanReceipt', icon: 'receipt' },
-]
-
 export default function TodayScreen({ go }) {
   const { t, lang } = useT()
   const { settings } = useSettings()
@@ -45,6 +35,7 @@ export default function TodayScreen({ go }) {
   const people = useCollection('people')
   const valuables = useCollection('valuables')
   const appointments = useCollection('appointments')
+  const reminders = useCollection('reminders')
   const staff = useCollection('staff')
   const memberships = useCollection('memberships')
   const properties = useCollection('properties')
@@ -53,8 +44,10 @@ export default function TodayScreen({ go }) {
 
   const notifFeed = useMemo(() => buildNotificationFeed({
     tasks: tasks.items, vehicles: vehicles.items, services: services.items,
-    docs: documents.items, subs: subscriptions.items, people: people.items, expenses: expenses.items, valuables: valuables.items, appointments: appointments.items, t, lang, settings,
-  }), [tasks.items, vehicles.items, services.items, documents.items, subscriptions.items, people.items, expenses.items, valuables.items, appointments.items, lang])
+    docs: documents.items, subs: subscriptions.items, people: people.items, expenses: expenses.items, valuables: valuables.items, appointments: appointments.items, reminders: reminders.items, t, lang, settings,
+  }), [tasks.items, vehicles.items, services.items, documents.items, subscriptions.items, people.items, expenses.items, valuables.items, appointments.items, reminders.items, lang])
+
+  const upcomingReminders = useMemo(() => splitReminders(reminders.items).upcoming, [reminders.items])
   const unread = unreadCount(notifFeed, settings.notificationsSeen)
 
   const open = tasks.items.filter(x => x.status !== 'completed' && x.status !== 'cancelled')
@@ -102,6 +95,10 @@ export default function TodayScreen({ go }) {
 
   const dash = normalizeDashboard(settings.dashboard)
   const quickActionsOn = dash.some(s => s.key === 'quickActions' && s.on)
+  const quickActions = normalizeQuickActions(settings.quickActions)
+    .filter(q => q.on)
+    .map(q => quickActionDef(q.id))
+    .filter(Boolean)
 
   const sectionNodes = {
     brief: (
@@ -134,6 +131,23 @@ export default function TodayScreen({ go }) {
         </Card>
       </>
     ) : null,
+    reminders: upcomingReminders.length > 0 ? (
+      <>
+        <Section title={t('reminders')} count={upcomingReminders.length} action={t('view')} onAction={() => go('reminders')} />
+        <Card tight>
+          {upcomingReminders.slice(0, 4).map(r => (
+            <div className="li" key={r.id} onClick={() => go('reminders')}>
+              <div className="lead t-brand"><Icon name="bell" size={18} /></div>
+              <div className="body">
+                <div className="title">{r.text}</div>
+                <div className="meta">{relativeDay(r.remindAt, lang)} · {fmtTime(r.remindAt, lang)}</div>
+              </div>
+              <Icon name="chevron" size={15} style={{ color: 'var(--ink-3)' }} />
+            </div>
+          ))}
+        </Card>
+      </>
+    ) : null,
     prayer: <PrayerCard />,
     stats: (
       <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 12, marginTop: 14, alignItems: 'stretch' }}>
@@ -151,9 +165,10 @@ export default function TodayScreen({ go }) {
       <>
         <Section title={t('quickActions')} />
         <div className="qa-grid">
-          {QUICK.map(q => (
+          {quickActions.map(q => (
             <button key={q.id} className="qa" onClick={() => {
               if (q.id === 'message') { go('message'); return }
+              if (q.id === 'reminder') { go('reminders'); return }
               if (q.id === 'voice') { toast.show(t('comingSoon')); return }
               setEditor(q.id)
             }}>
