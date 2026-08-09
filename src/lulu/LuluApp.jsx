@@ -12,6 +12,7 @@ import { usePullToRefresh } from './ui/usePullToRefresh.js'
 import LockGate from './ui/LockGate.jsx'
 import { setBadge, maybeDailyBrief } from './lib/notify.js'
 import { fireDueReminders } from './lib/reminders.js'
+import { refreshPush } from './lib/push.js'
 import { buildBrief } from './lib/brief.js'
 import { isToday, isOverdue } from './lib/format.js'
 
@@ -119,6 +120,16 @@ function Router() {
     document.addEventListener('visibilitychange', onVis)
     return () => { clearInterval(t); document.removeEventListener('visibilitychange', onVis) }
   }, [data.reminders, patch])
+
+  // Keep this device's push subscription alive so background reminders keep
+  // arriving while the app is closed. iOS can silently drop the subscription;
+  // re-registering it on open (and on return to foreground) self-heals it.
+  useEffect(() => {
+    refreshPush()
+    const onVis = () => { if (document.visibilityState === 'visible') refreshPush() }
+    document.addEventListener('visibilitychange', onVis)
+    return () => document.removeEventListener('visibilitychange', onVis)
+  }, [])
 
   // Keep the home-screen badge in sync with what needs attention, and fire the
   // daily brief once per day — only when the user has enabled notifications.
