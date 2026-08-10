@@ -147,5 +147,22 @@ create policy ps_member_all on public.push_subscriptions
   using (public.is_member(household_id))
   with check (public.is_member(household_id));
 
+-- Background-alert de-duplication: one row per (household, alert_key) that has
+-- already been pushed, so the send-reminders function alerts about each dated
+-- item (task due, appointment, expiry, birthday) exactly once. Keys embed the
+-- item's date, so a changed/renewed date naturally re-arms the alert.
+create table if not exists public.push_alerts (
+  household_id uuid references public.households on delete cascade,
+  alert_key text not null,
+  sent_at timestamptz not null default now(),
+  primary key (household_id, alert_key)
+);
+alter table public.push_alerts enable row level security;
+drop policy if exists pa_member_all on public.push_alerts;
+create policy pa_member_all on public.push_alerts
+  for all to authenticated
+  using (public.is_member(household_id))
+  with check (public.is_member(household_id));
+
 -- Done. In the app: More → Cloud & Family → paste your project URL + anon key,
 -- tick the privacy consent, then create an account or sign in.
