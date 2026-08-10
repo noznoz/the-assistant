@@ -6,7 +6,7 @@ import { useCollection } from '../../store/StoreProvider.jsx'
 import { fmtDate, fmtTime, relativeDay } from '../../lib/format.js'
 import { splitReminders } from '../../lib/reminders.js'
 import { notificationPermission, requestNotificationPermission } from '../../lib/notify.js'
-import { pushSupported, pushConfigured, isPushEnabled, enablePush, disablePush } from '../../lib/push.js'
+import { pushSupported, pushConfigured, isPushEnabled, enablePush, disablePush, refreshPush } from '../../lib/push.js'
 import * as cloud from '../../lib/cloud.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
 
@@ -39,7 +39,23 @@ export default function RemindersScreen({ go }) {
   const [perm, setPerm] = useState(notificationPermission())
   const [bg, setBg] = useState(false)
   const [bgBusy, setBgBusy] = useState(false)
+  const [testBusy, setTestBusy] = useState(false)
   useEffect(() => { isPushEnabled().then(setBg) }, [])
+
+  // Send a real background push right now to check the whole pipeline
+  // (subscription → server → device) without waiting for a reminder to come due.
+  const sendTest = async () => {
+    setTestBusy(true)
+    try {
+      await refreshPush() // make sure this device's subscription is current first
+      const r = await cloud.invokeFunction('send-reminders', { test: true, household_id: cloud.householdId() })
+      if (r && r.sent > 0) toast.show(t('testPushSent'))
+      else if (r && !r.subscriptions) toast.show(t('testPushNoSub'))
+      else toast.show(t('testPushFailed'))
+    } catch {
+      toast.show(t('testPushError'))
+    } finally { setTestBusy(false) }
+  }
 
   const toggleBg = async () => {
     setBgBusy(true)
@@ -96,7 +112,10 @@ export default function RemindersScreen({ go }) {
               ? <p className="hint" style={{ margin: '0 2px' }}>{t('bgNotConfigured')}</p>
               : !cloud.isReady()
                 ? <p className="hint" style={{ margin: '0 2px' }}>{t('bgNeedsCloud')}</p>
-                : <Button variant={bg ? 'ghost' : 'primary'} icon="bell" onClick={toggleBg} disabled={bgBusy}>{bg ? t('bgDisable') : t('bgEnable')}</Button>}
+                : <>
+                  <Button variant={bg ? 'ghost' : 'primary'} icon="bell" onClick={toggleBg} disabled={bgBusy}>{bg ? t('bgDisable') : t('bgEnable')}</Button>
+                  {bg && <Button variant="ghost" icon="bell" onClick={sendTest} disabled={testBusy}>{testBusy ? t('testPushSending') : t('testPush')}</Button>}
+                </>}
             <p className="hint" style={{ margin: '0 2px' }}>{t('bgIosHint')}</p>
           </Card>
         )}
