@@ -68,9 +68,22 @@ Deno.serve(async (req) => {
     .from('records').select('household_id,id,data').eq('collection', 'reminders')
   if (error) return json({ error: error.message }, 500)
 
+  // A reminder carries up to 3 alert times (`times`) and `firedCount` (how many
+  // of the earliest have alerted). Legacy records use `remindAt` + `notified`.
+  const normalize = (d: any) => {
+    const times = (Array.isArray(d.times) && d.times.length)
+      ? [...new Set(d.times.filter(Boolean))].sort()
+      : (d.remindAt ? [d.remindAt] : [])
+    const firedCount = (typeof d.firedCount === 'number') ? d.firedCount : (d.notified ? times.length : 0)
+    const passed = times.filter((t: string) => t <= nowIso).length
+    return { times, firedCount, passed }
+  }
+
   const due = (recs ?? []).filter((r: any) => {
     const d = r.data || {}
-    return d.remindAt && d.remindAt <= nowIso && !d.notified && !d.done && !d.deletedAt
+    if (d.done || d.deletedAt) return false
+    const { firedCount, passed } = normalize(d)
+    return passed > firedCount
   })
 
   let sent = 0
@@ -91,8 +104,10 @@ Deno.serve(async (req) => {
     }
     if (delivered) {
       sent++
+      const { times, passed } = normalize((r as any).data)
+      const remindAt = times[Math.min(passed, times.length - 1)] || null
       await supabase.from('records')
-        .update({ data: { ...(r as any).data, notified: true, notifiedAt: nowIso }, updated_at: nowIso })
+        .update({ data: { ...(r as any).data, firedCount: passed, remindAt, notified: passed >= times.length, notifiedAt: nowIso }, updated_at: nowIso })
         .eq('household_id', (r as any).household_id).eq('id', (r as any).id)
     }
   }
