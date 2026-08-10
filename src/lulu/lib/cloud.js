@@ -254,6 +254,25 @@ export async function deletePushSubscription(endpoint) {
   } catch { /* ignore */ }
 }
 
+// Invoke a deployed Edge Function (e.g. send-reminders) with the signed-in
+// user's token. Used by the in-app "test push" so we can exercise the whole
+// background pipeline on demand. Returns the parsed JSON, or throws with a
+// readable message. The function must send CORS headers to allow this.
+export async function invokeFunction(name, body) {
+  const cfg = getConfig(); const ses = getSession()
+  if (!cfg) throw new Error('not-configured')
+  if (!ses || !ses.access_token) throw new Error('not-connected')
+  const res = await fetch(`${cfg.url}/functions/v1/${name}`, {
+    method: 'POST',
+    headers: { 'apikey': cfg.anonKey, 'content-type': 'application/json', 'Authorization': `Bearer ${ses.access_token}` },
+    body: JSON.stringify(body || {}),
+  })
+  const text = await res.text()
+  let data; try { data = JSON.parse(text) } catch { data = { raw: text } }
+  if (!res.ok) throw new Error(data.error || data.msg || `HTTP ${res.status}`)
+  return data
+}
+
 // One full two-way sync: push local, then pull remote.
 export async function syncNow() {
   if (!isReady()) return null

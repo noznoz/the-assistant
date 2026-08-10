@@ -23,15 +23,46 @@ const VAPID_PUBLIC = Deno.env.get('VAPID_PUBLIC_KEY') ?? ''
 const VAPID_PRIVATE = Deno.env.get('VAPID_PRIVATE_KEY') ?? ''
 const VAPID_SUBJECT = Deno.env.get('VAPID_SUBJECT') ?? 'mailto:admin@example.com'
 
-function json(obj: unknown, status = 200) {
-  return new Response(JSON.stringify(obj), { status, headers: { 'content-type': 'application/json' } })
+// Allow the app (a different origin) to invoke this for the in-app test push.
+const CORS = {
+  'access-control-allow-origin': '*',
+  'access-control-allow-headers': 'authorization, apikey, content-type',
+  'access-control-allow-methods': 'POST, OPTIONS',
 }
 
-Deno.serve(async () => {
+function json(obj: unknown, status = 200) {
+  return new Response(JSON.stringify(obj), { status, headers: { 'content-type': 'application/json', ...CORS } })
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
   if (!VAPID_PUBLIC || !VAPID_PRIVATE) return json({ error: 'VAPID keys not configured' }, 500)
   webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC, VAPID_PRIVATE)
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE)
   const nowIso = new Date().toISOString()
+
+  // Test mode: the app posts { test: true, household_id }. Send one test push to
+  // that household's subscriptions right now so the whole pipeline can be
+  // verified on demand (no due reminder needed). Dead subscriptions are pruned.
+  let body: any = {}
+  try { body = await req.json() } catch { /* cron sends no body */ }
+  if (body && body.test) {
+    const hid = body.household_id
+    if (!hid) return json({ error: 'household_id required' }, 400)
+    const { data: subs } = await supabase
+      .from('push_subscriptions').select('endpoint,subscription').eq('household_id', hid)
+    const payload = JSON.stringify({ title: 'Test push ✅', body: 'Background reminders are working.', tag: 'lulu-test' })
+    let sent = 0
+    for (const s of subs ?? []) {
+      try { await webpush.sendNotification((s as any).subscription, payload); sent++ }
+      catch (e: any) {
+        if (e && (e.statusCode === 404 || e.statusCode === 410)) {
+          await supabase.from('push_subscriptions').delete().eq('endpoint', (s as any).endpoint)
+        }
+      }
+    }
+    return json({ test: true, subscriptions: (subs ?? []).length, sent })
+  }
 
   const { data: recs, error } = await supabase
     .from('records').select('household_id,id,data').eq('collection', 'reminders')
