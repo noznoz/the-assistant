@@ -14,7 +14,7 @@ import { setBadge, maybeDailyBrief } from './lib/notify.js'
 import { fireDueReminders } from './lib/reminders.js'
 import { refreshPush } from './lib/push.js'
 import { buildBrief } from './lib/brief.js'
-import { isToday, isOverdue } from './lib/format.js'
+import { buildNotificationFeed, unreadCount } from './lib/notifications.js'
 
 import TodayScreen from './features/today/TodayScreen.jsx'
 import TasksScreen from './features/tasks/TasksScreen.jsx'
@@ -109,7 +109,7 @@ function Router() {
   const { route, tab, param, go } = useRouter('today')
   const { data, reloadAll, patch } = useStore()
   const { settings } = useSettings()
-  const { lang } = useT()
+  const { t, lang } = useT()
 
   // Fire any due personal reminders (while the app is open or freshly reopened).
   useEffect(() => {
@@ -131,16 +131,21 @@ function Router() {
     return () => document.removeEventListener('visibilitychange', onVis)
   }, [])
 
-  // Keep the home-screen badge in sync with what needs attention, and fire the
-  // daily brief once per day — only when the user has enabled notifications.
+  // Keep the home-screen icon badge in sync with the notification centre (the
+  // same unread count as the in-app bell — tasks, renewals, reminders, etc.),
+  // and fire the daily brief once per day. Only when notifications are enabled.
   useEffect(() => {
     if (!settings.notifications) { setBadge(0); return }
-    const open = (data.tasks || []).filter(x => x.status !== 'completed' && x.status !== 'cancelled')
-    const attention = open.filter(x => isOverdue(x.dueDate) || isToday(x.dueDate) || x.status === 'waiting_me').length
-    setBadge(attention)
+    const feed = buildNotificationFeed({
+      tasks: data.tasks, vehicles: data.vehicles, services: data.services,
+      docs: data.documents, subs: data.subscriptions, people: data.people,
+      expenses: data.expenses, valuables: data.valuables, appointments: data.appointments,
+      reminders: data.reminders, t, lang, settings,
+    })
+    setBadge(unreadCount(feed, settings.notificationsSeen))
     const brief = buildBrief({ tasks: data.tasks || [], expenses: data.expenses || [], vehicles: data.vehicles || [], settings, lang })
     maybeDailyBrief(settings.name ? `Good morning, ${settings.name}` : 'Your morning brief', brief)
-  }, [data.tasks, data.expenses, data.vehicles, settings.notifications, lang])
+  }, [data.tasks, data.vehicles, data.services, data.documents, data.subscriptions, data.people, data.expenses, data.valuables, data.appointments, data.reminders, settings.notifications, settings.notificationsSeen, lang])
 
   // Pull-to-refresh: re-read local data and check for a new app version.
   const onRefresh = useCallback(async () => {

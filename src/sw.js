@@ -78,8 +78,8 @@ self.addEventListener('push', (e) => {
   if (!e.data) return
   let data
   try { data = e.data.json() } catch { data = { title: 'The Assistant', body: e.data.text() } }
-  e.waitUntil(
-    self.registration.showNotification(data.title || 'The Assistant', {
+  e.waitUntil((async () => {
+    await self.registration.showNotification(data.title || 'The Assistant', {
       body: data.body || '',
       icon: 'icon-192.png',
       badge: 'icon-192.png',
@@ -87,15 +87,25 @@ self.addEventListener('push', (e) => {
       renotify: true,
       data: { url: data.url || self.registration.scope },
     })
-  )
+    // Set the home-screen icon badge to the number of notifications still
+    // showing, so the count climbs as reminders arrive while the app is closed.
+    try {
+      if (self.navigator.setAppBadge) {
+        const shown = await self.registration.getNotifications()
+        await self.navigator.setAppBadge(shown.length || 1)
+      }
+    } catch { /* Badging API unsupported */ }
+  })())
 })
 
 self.addEventListener('notificationclick', (e) => {
   e.notification.close()
-  e.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((cs) => {
-      if (cs.length) return cs[0].focus()
-      return clients.openWindow(e.notification.data?.url || self.registration.scope)
-    })
-  )
+  e.waitUntil((async () => {
+    // Opening the app hands the count back to the in-app badge logic; clear the
+    // icon badge now so it doesn't linger while the app recomputes it.
+    try { if (self.navigator.clearAppBadge) await self.navigator.clearAppBadge() } catch { /* ignore */ }
+    const cs = await clients.matchAll({ type: 'window', includeUncontrolled: true })
+    if (cs.length) return cs[0].focus()
+    return clients.openWindow(e.notification.data?.url || self.registration.scope)
+  })())
 })
