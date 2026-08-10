@@ -11,7 +11,7 @@ export const STRINGS = {
     goodMorning: 'Good morning', goodAfternoon: 'Good afternoon', goodEvening: 'Good evening',
     // today
     morningBrief: 'Morning Brief', dailyProgress: 'Daily progress', quickActions: 'Quick actions',
-    todaysTasks: "Today's tasks", highPriority: 'High priority', overdue: 'Overdue',
+    todaysTasks: "Today's tasks", dueToday: 'Due today', highPriority: 'High priority', overdue: 'Overdue',
     waitingForMe: 'Waiting for me', delegated: 'Delegated', followUpsToday: 'Follow-ups today',
     upcomingMaintenance: 'Upcoming maintenance', renewals: 'Renewals due',
     todaysSpending: "Today's spending", monthlyTotal: 'This month', quickNotes: 'Quick notes',
@@ -459,7 +459,7 @@ export const STRINGS = {
     trips: 'الرحلات', reports: 'التقارير', notifications: 'الإشعارات', settings: 'الإعدادات',
     goodMorning: 'صباح الخير', goodAfternoon: 'مساء الخير', goodEvening: 'مساء الخير',
     morningBrief: 'ملخص الصباح', dailyProgress: 'إنجاز اليوم', quickActions: 'إجراءات سريعة',
-    todaysTasks: 'مهام اليوم', highPriority: 'أولوية عالية', overdue: 'متأخرة',
+    todaysTasks: 'مهام اليوم', dueToday: 'مستحق اليوم', highPriority: 'أولوية عالية', overdue: 'متأخرة',
     waitingForMe: 'بانتظار ردّي', delegated: 'مُفوَّضة', followUpsToday: 'متابعات اليوم',
     upcomingMaintenance: 'صيانة قادمة', renewals: 'تجديدات مستحقة',
     todaysSpending: 'مصروف اليوم', monthlyTotal: 'هذا الشهر', quickNotes: 'ملاحظات سريعة',
