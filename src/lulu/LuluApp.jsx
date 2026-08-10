@@ -10,7 +10,7 @@ import ErrorBoundary from './ui/ErrorBoundary.jsx'
 import Icon from './ui/Icon.jsx'
 import { usePullToRefresh } from './ui/usePullToRefresh.js'
 import LockGate from './ui/LockGate.jsx'
-import { setBadge, maybeDailyBrief } from './lib/notify.js'
+import { setBadge, maybeDailyBrief, runDueAlerts } from './lib/notify.js'
 import { fireDueReminders } from './lib/reminders.js'
 import { refreshPush } from './lib/push.js'
 import { buildBrief } from './lib/brief.js'
@@ -143,6 +143,8 @@ function Router() {
       reminders: data.reminders, t, lang, settings,
     })
     setBadge(unreadCount(feed, settings.notificationsSeen))
+    // Sound alert for anything dated that's due today or overdue (deduped).
+    runDueAlerts(feed, { enabled: settings.notifications, heading: t('dueToday') })
     const brief = buildBrief({ tasks: data.tasks || [], expenses: data.expenses || [], vehicles: data.vehicles || [], settings, lang })
     maybeDailyBrief(settings.name ? `Good morning, ${settings.name}` : 'Your morning brief', brief)
   }, [data.tasks, data.vehicles, data.services, data.documents, data.subscriptions, data.people, data.expenses, data.valuables, data.appointments, data.reminders, settings.notifications, settings.notificationsSeen, lang])
