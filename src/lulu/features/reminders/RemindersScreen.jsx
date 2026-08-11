@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Field, Input, Button, Empty, Chip, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Field, Input, Select, Button, Empty, Chip, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { fmtDate, fmtTime, relativeDay } from '../../lib/format.js'
-import { splitReminders, buildReminderFields, reminderTimes, nextPendingTime, lastTime, pendingCount, MAX_TIMES } from '../../lib/reminders.js'
+import { splitReminders, buildReminderFields, snoozeFields, reminderTimes, nextPendingTime, lastTime, pendingCount, MAX_TIMES, REMINDER_REPEATS } from '../../lib/reminders.js'
 import { notificationPermission, requestNotificationPermission } from '../../lib/notify.js'
 import { pushSupported, pushConfigured, isPushEnabled, enablePush, disablePush, refreshPush } from '../../lib/push.js'
 import * as cloud from '../../lib/cloud.js'
@@ -37,7 +37,9 @@ export default function RemindersScreen({ go }) {
   const toast = useToast()
   const [text, setText] = useState('')
   const [times, setTimes] = useState([defaultWhen()])
+  const [repeat, setRepeat] = useState('none')
   const [editingId, setEditingId] = useState(null)
+  const [snoozeId, setSnoozeId] = useState(null)
   const [err, setErr] = useState('')
   const [perm, setPerm] = useState(notificationPermission())
   const [bg, setBg] = useState(false)
@@ -72,7 +74,17 @@ export default function RemindersScreen({ go }) {
 
   const { upcoming, past } = splitReminders(reminders.items)
 
-  const resetForm = () => { setText(''); setTimes([defaultWhen()]); setEditingId(null); setErr('') }
+  const resetForm = () => { setText(''); setTimes([defaultWhen()]); setRepeat('none'); setEditingId(null); setErr('') }
+
+  // Snooze options for a past-due reminder — reschedule to a single future time.
+  const snoozeOpts = () => {
+    const mk = (d) => { d.setSeconds(0, 0); return d.toISOString() }
+    const h = new Date(Date.now() + 60 * 60 * 1000)
+    const tn = new Date(); tn.setHours(20, 0, 0, 0); if (tn.getTime() < Date.now()) tn.setDate(tn.getDate() + 1)
+    const tm = new Date(); tm.setDate(tm.getDate() + 1); tm.setHours(9, 0, 0, 0)
+    return [{ key: 'inHour', iso: mk(h) }, { key: 'tonight', iso: mk(tn) }, { key: 'tomorrow', iso: mk(tm) }]
+  }
+  const doSnooze = (r, iso) => { reminders.patch(r.id, { ...snoozeFields(r.text, iso), repeat: r.repeat || 'none', done: false }); setSnoozeId(null); toast.show(t('reminderSet')) }
 
   const setTimeAt = (i, v) => setTimes(ts => ts.map((x, j) => j === i ? v : x))
   const addTime = () => setTimes(ts => ts.length < MAX_TIMES ? [...ts, defaultWhen()] : ts)
@@ -82,7 +94,7 @@ export default function RemindersScreen({ go }) {
     if (!text.trim()) { setErr(t('required')); return }
     const isoTimes = times.map(inputToIso).filter(Boolean)
     if (!isoTimes.length) { setErr(t('required')); return }
-    const fields = buildReminderFields(text.trim(), isoTimes)
+    const fields = { ...buildReminderFields(text.trim(), isoTimes), repeat }
     if (editingId) { reminders.patch(editingId, fields); toast.show(t('savedToast')) }
     else { reminders.add({ ...fields, done: false }); toast.show(t('reminderSet')) }
     resetForm()
@@ -93,6 +105,7 @@ export default function RemindersScreen({ go }) {
     setText(r.text || '')
     const ts = reminderTimes(r).map(isoToInput).filter(Boolean)
     setTimes(ts.length ? ts : [defaultWhen()])
+    setRepeat(r.repeat || 'none')
     setErr('')
     try { window.scrollTo({ top: 0, behavior: 'smooth' }) } catch { /* ignore */ }
   }
@@ -170,6 +183,10 @@ export default function RemindersScreen({ go }) {
               <Chip key={p.key} selectable on={times[0] === p.when} onClick={() => setTimeAt(0, p.when)}>{t(p.key)}</Chip>
             ))}
           </div>
+          <Field label={t('rec')}>
+            <Select value={repeat} onChange={e => setRepeat(e.target.value)}
+              options={REMINDER_REPEATS.map(r => ({ value: r, label: t('rec_' + r) }))} />
+          </Field>
           <Button block variant="primary" icon={editingId ? 'check' : 'bell'} onClick={save}>{editingId ? t('save') : t('addReminder')}</Button>
         </Card>
 
@@ -187,7 +204,7 @@ export default function RemindersScreen({ go }) {
                     <div className="lead t-brand"><Icon name="bell" size={16} /></div>
                     <div className="body">
                       <div className="title">{r.text}</div>
-                      <div className="meta">{whenLabel(nextPendingTime(r))}{more > 0 ? ` · +${more} ${t('moreTimes')}` : ''}</div>
+                      <div className="meta">{whenLabel(nextPendingTime(r))}{more > 0 ? ` · +${more} ${t('moreTimes')}` : ''}{r.repeat && r.repeat !== 'none' ? ` · ↻ ${t('rec_' + r.repeat)}` : ''}</div>
                     </div>
                     <button className="iconbtn" aria-label={t('markComplete')} onClick={e => { e.stopPropagation(); reminders.patch(r.id, { done: true }); toast.show('✓') }}><Icon name="check" size={16} /></button>
                   </div>
@@ -198,13 +215,23 @@ export default function RemindersScreen({ go }) {
             {past.length > 0 && <h2 className="member-h2" style={{ marginTop: 18 }}>{t('past')}</h2>}
             {past.map(r => (
               <SwipeRow key={r.id} onDelete={() => { reminders.remove(r.id); toast.show(t('deletedToast')) }}>
-                <div className="li" style={{ opacity: 0.6 }} onClick={() => startEdit(r)}>
-                  <div className={`lead ${r.done ? 't-ok' : 't-warn'}`}><Icon name={r.done ? 'check' : 'clock'} size={16} /></div>
-                  <div className="body">
+                <div className="li" style={{ opacity: r.done ? 0.6 : 1 }}>
+                  <div className={`lead ${r.done ? 't-ok' : 't-warn'}`} onClick={() => startEdit(r)}><Icon name={r.done ? 'check' : 'clock'} size={16} /></div>
+                  <div className="body" onClick={() => startEdit(r)}>
                     <div className="title" style={{ textDecoration: r.done ? 'line-through' : 'none' }}>{r.text}</div>
-                    <div className="meta">{fmtDate(lastTime(r), lang)} · {fmtTime(lastTime(r), lang)}</div>
+                    <div className="meta">{fmtDate(lastTime(r), lang)} · {fmtTime(lastTime(r), lang)}{r.repeat && r.repeat !== 'none' ? ` · ↻ ${t('rec_' + r.repeat)}` : ''}</div>
+                    {snoozeId === r.id && (
+                      <div className="chip-row" style={{ marginTop: 6 }} onClick={e => e.stopPropagation()}>
+                        {snoozeOpts().map(o => <Chip key={o.key} selectable onClick={() => doSnooze(r, o.iso)}>{t(o.key)}</Chip>)}
+                      </div>
+                    )}
                   </div>
-                  {!r.done && <button className="iconbtn" aria-label={t('markComplete')} onClick={e => { e.stopPropagation(); reminders.patch(r.id, { done: true }) }}><Icon name="check" size={16} /></button>}
+                  {!r.done && (
+                    <>
+                      <button className="iconbtn" aria-label={t('snooze')} onClick={e => { e.stopPropagation(); setSnoozeId(snoozeId === r.id ? null : r.id) }}><Icon name="clock" size={16} /></button>
+                      <button className="iconbtn" aria-label={t('markComplete')} onClick={e => { e.stopPropagation(); reminders.patch(r.id, { done: true }) }}><Icon name="check" size={16} /></button>
+                    </>
+                  )}
                 </div>
               </SwipeRow>
             ))}
