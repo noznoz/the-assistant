@@ -686,9 +686,45 @@ function flattenDeptTree(dep, team) {
   return rows
 }
 
-// Single-select picker that shows the organization chart (departments → people,
-// indented by who-reports-to-whom) and lets you tap one person to assign to.
+// Single-select team-member picker. Type a name to filter (dropdown-style), or
+// browse the whole org chart (departments → people, indented by who reports to
+// whom). Once someone is chosen it shows them with a "change" control.
 function OrgMemberPicker({ departments, members, value, onSelect, onAddMember, t }) {
+  const [query, setQuery] = useState('')
+  const box = { border: '1px solid var(--line-2)', borderRadius: 'var(--r-md)', overflow: 'hidden' }
+  const deptName = (id) => (departments.find(d => d.id === id) || {}).name || t('other')
+  const Avatar = ({ name, on }) => (
+    <span style={{ width: 28, height: 28, borderRadius: '50%', background: on ? 'var(--brand-600)' : 'var(--surface-2)', color: on ? '#fff' : 'var(--ink-2)', fontSize: 10.5, fontWeight: 750, display: 'grid', placeItems: 'center', flexShrink: 0 }}>{initialsOf(name)}</span>
+  )
+
+  // Chosen state: show the selected member with a clear/change button.
+  const selected = members.find(m => m.id === value)
+  if (selected) {
+    return (
+      <div style={{ ...box, display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px' }}>
+        <Avatar name={selected.name} on />
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span style={{ display: 'block', fontSize: 14.5, fontWeight: 700, color: 'var(--ink-1)' }}>{selected.name}</span>
+          <span style={{ display: 'block', fontSize: 12, color: 'var(--ink-3)' }}>{[selected.title, deptName(selected.departmentId)].filter(Boolean).join(' · ')}</span>
+        </span>
+        <button type="button" className="link-btn" style={{ fontSize: 13, fontWeight: 600, color: 'var(--brand-600)' }} onClick={() => onSelect('')}>{t('change')}</button>
+      </div>
+    )
+  }
+
+  const Row = ({ member, depth = 0, subtitle }) => (
+    <button type="button" onClick={() => { onSelect(member.id); setQuery('') }}
+      style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'start', padding: '10px 12px', paddingInlineStart: 12 + depth * 18, background: 'transparent', border: 0 }}>
+      <Avatar name={member.name} />
+      <span style={{ flex: 1, minWidth: 0 }}>
+        <span style={{ display: 'block', fontSize: 14.5, fontWeight: 550, color: 'var(--ink-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member.name}</span>
+        {(subtitle || member.title) && <span style={{ display: 'block', fontSize: 12, color: 'var(--ink-3)' }}>{subtitle || member.title}</span>}
+      </span>
+    </button>
+  )
+
+  const ql = query.trim().toLowerCase()
+  const matches = ql ? members.filter(m => (m.name || '').toLowerCase().includes(ql)) : []
   const withDept = new Set(departments.map(d => d.id))
   const orphans = members.filter(m => !m.departmentId || !withDept.has(m.departmentId))
   const groups = [
@@ -696,38 +732,32 @@ function OrgMemberPicker({ departments, members, value, onSelect, onAddMember, t
     ...(orphans.length ? [{ dep: { id: '__none', name: t('other'), headId: '' }, team: orphans }] : []),
   ].filter(g => g.team.length)
 
-  const Row = ({ member, depth }) => {
-    const on = value === member.id
-    return (
-      <button type="button" onClick={() => onSelect(on ? '' : member.id)}
-        style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'start', padding: '10px 12px', paddingInlineStart: 12 + depth * 18, background: on ? 'var(--brand-tint)' : 'transparent', border: 0, borderRadius: 'var(--r-sm)' }}>
-        <span style={{ width: 26, height: 26, borderRadius: '50%', background: on ? 'var(--brand-600)' : 'var(--surface-2)', color: on ? '#fff' : 'var(--ink-2)', fontSize: 10, fontWeight: 750, display: 'grid', placeItems: 'center', flexShrink: 0 }}>{initialsOf(member.name)}</span>
-        <span style={{ flex: 1, minWidth: 0 }}>
-          <span style={{ display: 'block', fontSize: 14.5, fontWeight: on ? 700 : 550, color: 'var(--ink-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member.name}</span>
-          {member.title && <span style={{ display: 'block', fontSize: 12, color: 'var(--ink-3)' }}>{member.title}</span>}
-        </span>
-        {on && <Icon name="check" size={16} stroke={3} style={{ color: 'var(--brand-600)', flexShrink: 0 }} />}
-      </button>
-    )
-  }
-
   return (
-    <div style={{ border: '1px solid var(--line-2)', borderRadius: 'var(--r-md)', overflow: 'hidden' }}>
-      <button type="button" onClick={() => onSelect('')}
-        style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'start', padding: '10px 12px', background: !value ? 'var(--brand-tint)' : 'transparent', border: 0, borderBottom: '1px solid var(--line)', fontSize: 14, color: 'var(--ink-2)' }}>
-        <span style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--surface-2)', display: 'grid', placeItems: 'center', flexShrink: 0 }}><Icon name="x" size={13} /></span>
-        {t('unassigned')}
-        {!value && <Icon name="check" size={16} stroke={3} style={{ color: 'var(--brand-600)', marginInlineStart: 'auto' }} />}
-      </button>
-      {groups.length === 0 && (
-        <div style={{ padding: '12px', fontSize: 13, color: 'var(--ink-3)' }}>{t('noTeamMembers')}</div>
-      )}
-      {groups.map(({ dep, team }) => (
-        <div key={dep.id}>
-          <div style={{ fontSize: 11.5, fontWeight: 750, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.04em', padding: '8px 12px 4px', background: 'var(--surface-2)' }}>{dep.name}</div>
-          {flattenDeptTree(dep, team).map(({ member, depth }) => <Row key={member.id} member={member} depth={depth} />)}
-        </div>
-      ))}
+    <div style={box}>
+      {/* Type-to-find */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 12px', borderBottom: '1px solid var(--line)' }}>
+        <Icon name="search" size={16} style={{ color: 'var(--ink-3)', flexShrink: 0 }} />
+        <input className="input" style={{ border: 0, background: 'transparent', padding: '11px 0', flex: 1 }} value={query} onChange={e => setQuery(e.target.value)} placeholder={t('searchTeamMember')} />
+        {query && <button type="button" className="iconbtn" aria-label={t('clear')} onClick={() => setQuery('')}><Icon name="x" size={15} /></button>}
+      </div>
+
+      <div style={{ maxHeight: 260, overflowY: 'auto' }}>
+        {ql ? (
+          matches.length
+            ? matches.map(m => <Row key={m.id} member={m} subtitle={[m.title, deptName(m.departmentId)].filter(Boolean).join(' · ')} />)
+            : <div style={{ padding: '12px', fontSize: 13, color: 'var(--ink-3)' }}>{t('nothingHere')}</div>
+        ) : groups.length === 0 ? (
+          <div style={{ padding: '12px', fontSize: 13, color: 'var(--ink-3)' }}>{t('noTeamMembers')}</div>
+        ) : (
+          groups.map(({ dep, team }) => (
+            <div key={dep.id}>
+              <div style={{ fontSize: 11.5, fontWeight: 750, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.04em', padding: '8px 12px 4px', background: 'var(--surface-2)' }}>{dep.name}</div>
+              {flattenDeptTree(dep, team).map(({ member, depth }) => <Row key={member.id} member={member} depth={depth} />)}
+            </div>
+          ))
+        )}
+      </div>
+
       {onAddMember && (
         <button type="button" onClick={onAddMember}
           style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'start', padding: '11px 12px', background: 'transparent', border: 0, borderTop: '1px solid var(--line)', color: 'var(--brand-600)', fontSize: 14, fontWeight: 600 }}>
