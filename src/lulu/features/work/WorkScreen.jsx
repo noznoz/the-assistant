@@ -770,6 +770,7 @@ function OrgMemberPicker({ departments, members, value, onSelect, onAddMember, t
 
 function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, onSaved }) {
   const { t, lang } = useT()
+  const { settings } = useSettings()
   const tasks = useCollection('tasks')
   const reminders = useCollection('reminders')
   const allMembers = useCollection('members')
@@ -842,12 +843,15 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
   const secStyle = { display: 'block', fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '12px 2px 7px' }
   const q = memberQuery.trim().toLowerCase()
 
-  const submit = () => {
-    if (!f.title.trim()) { setErr(t('required')); return }
+  const chosenMember = allMembers.items.find(m => m.id === memberIds[0])
+  const notifyMember = mode === 'boss' && chosenMember && (chosenMember.whatsapp || chosenMember.mobile) ? chosenMember : null
+
+  // Persist the task; returns the saved record, or null if validation failed.
+  const persist = () => {
+    if (!f.title.trim()) { setErr(t('required')); return null }
     // Assignment summary. Boss tasks delegate to a single member — show their
     // name directly; other modes summarise the multi-select (collapsing whole
     // departments). Falls back to any free-text assignee.
-    const chosenMember = allMembers.items.find(m => m.id === memberIds[0])
     const summary = mode === 'boss'
       ? (chosenMember ? chosenMember.name : (f.assignedTo || ''))
       : (memberIds.length ? assigneeSummary({ memberIds }, allMembers.items, departments.items) : (f.assignedTo || ''))
@@ -866,6 +870,16 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
     }
     const saved = initial.id ? tasks.save({ ...rec, id: initial.id }) : tasks.add(rec)
     syncTaskAlert(reminders, saved, alertIso)
+    return saved
+  }
+  const submit = () => { const s = persist(); if (s) { onSaved && onSaved(); onClose() } }
+  // Save, then hand the task off to the assignee over WhatsApp.
+  const submitAndNotify = () => {
+    const s = persist(); if (!s) return
+    if (notifyMember) {
+      const detail = formatTaskDetail(s, lang, settings, { recipient: (notifyMember.name || '').split(' ')[0] })
+      whatsappToPerson(notifyMember, detail)
+    }
     onSaved && onSaved(); onClose()
   }
   const title = mode === 'boss'
@@ -875,6 +889,7 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
     <>
     <Sheet title={title} onClose={onClose}
       footer={<div className="stack">
+        {notifyMember && <Button block icon="whatsapp" onClick={submitAndNotify} style={{ background: 'var(--ok)', color: '#fff', border: 0 }}>{t('saveAndNotify')}</Button>}
         <Button variant="primary" block onClick={submit}>{t('save')}</Button>
         {initial.id && <Button block variant="danger" icon="trash" onClick={() => { syncTaskAlert(reminders, { id: initial.id }, []); tasks.remove(initial.id); onClose() }}>{t('delete')}</Button>}
       </div>}>
