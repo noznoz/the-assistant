@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { dueReminders, splitReminders, buildReminderFields, reminderTimes, firedCountOf, pendingCount } from './reminders.js'
+import { dueReminders, splitReminders, buildReminderFields, reminderTimes, firedCountOf, pendingCount, nextRepeatTimes, snoozeFields } from './reminders.js'
 
 const iso = (ms) => new Date(ms).toISOString()
 
@@ -61,6 +61,37 @@ describe('multi-time reminders', () => {
     expect(reminderTimes(r)).toHaveLength(3)
     expect(firedCountOf(r)).toBe(1)
     expect(pendingCount(r)).toBe(2)
+  })
+
+  test('nextRepeatTimes advances a lapsed reminder to the next future occurrence', () => {
+    const now = Date.now()
+    const dayMs = 86400000
+    // Daily reminder whose time was 3 days ago → next occurrence is in the future,
+    // same clock time, exactly one future day.
+    const past = new Date(now - 3 * dayMs)
+    const [next] = nextRepeatTimes([past.toISOString()], 'daily', now)
+    expect(new Date(next).getTime()).toBeGreaterThan(now)
+    expect(new Date(next).getTime()).toBeLessThanOrEqual(now + dayMs)
+    expect(new Date(next).getHours()).toBe(past.getHours())
+    expect(nextRepeatTimes(['x'], 'none', now)).toBeNull()
+  })
+
+  test('weekly advance keeps a 7-day step; monthly bumps the month', () => {
+    const now = Date.now()
+    const base = new Date(now - 1000) // just passed
+    const w = new Date(nextRepeatTimes([base.toISOString()], 'weekly', now)[0])
+    expect(Math.round((w.getTime() - base.getTime()) / 86400000)).toBe(7)
+    const m = new Date(nextRepeatTimes([base.toISOString()], 'monthly', now)[0])
+    expect(m.getTime()).toBeGreaterThan(now)
+  })
+
+  test('snoozeFields reschedules to a single future time, un-fired', () => {
+    const now = Date.now()
+    const when = new Date(now + 3600000).toISOString()
+    const f = snoozeFields('call back', when)
+    expect(f.times).toEqual([when])
+    expect(f.firedCount).toBe(0)
+    expect(f.notified).toBe(false)
   })
 
   test('legacy single-time record still normalizes', () => {

@@ -78,6 +78,17 @@ Deno.serve(async (req) => {
     const passed = times.filter((t: string) => t <= nowIso).length
     return { times, firedCount, passed }
   }
+  const nowMs = Date.now()
+  const nextRepeatTimes = (times: string[], repeat: string) => {
+    const ds = times.map(t => new Date(t)).filter(d => !isNaN(d.getTime()))
+    if (!ds.length) return times
+    let guard = 0
+    do {
+      ds.forEach(d => { repeat === 'monthly' ? d.setMonth(d.getMonth() + 1) : d.setDate(d.getDate() + (repeat === 'weekly' ? 7 : 1)) })
+      guard++
+    } while (Math.max(...ds.map(d => d.getTime())) <= nowMs && guard < 400)
+    return ds.map(d => d.toISOString())
+  }
 
   const due = (recs ?? []).filter((r: any) => {
     const d = r.data || {}
@@ -104,11 +115,21 @@ Deno.serve(async (req) => {
     }
     if (delivered) {
       sent++
-      const { times, passed } = normalize((r as any).data)
-      const remindAt = times[Math.min(passed, times.length - 1)] || null
-      await supabase.from('records')
-        .update({ data: { ...(r as any).data, firedCount: passed, remindAt, notified: passed >= times.length, notifiedAt: nowIso }, updated_at: nowIso })
-        .eq('household_id', (r as any).household_id).eq('id', (r as any).id)
+      const d = (r as any).data
+      const { times, passed } = normalize(d)
+      const repeat = d.repeat
+      // Fully fired + repeating → roll forward to the next occurrence.
+      if (passed >= times.length && repeat && repeat !== 'none') {
+        const nt = nextRepeatTimes(times, repeat)
+        await supabase.from('records')
+          .update({ data: { ...d, times: nt, firedCount: 0, remindAt: nt[0], notified: false, notifiedAt: nowIso }, updated_at: nowIso })
+          .eq('household_id', (r as any).household_id).eq('id', (r as any).id)
+      } else {
+        const remindAt = times[Math.min(passed, times.length - 1)] || null
+        await supabase.from('records')
+          .update({ data: { ...d, firedCount: passed, remindAt, notified: passed >= times.length, notifiedAt: nowIso }, updated_at: nowIso })
+          .eq('household_id', (r as any).household_id).eq('id', (r as any).id)
+      }
     }
   }
 

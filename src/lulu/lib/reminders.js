@@ -13,6 +13,31 @@ import { showNotification, notificationsSupported } from './notify.js'
 
 export const MAX_TIMES = 3
 
+// Repeat options for a recurring reminder.
+export const REMINDER_REPEATS = ['none', 'daily', 'weekly', 'monthly']
+
+// The next occurrence's alert times for a repeating reminder: advance every time
+// by one period, repeatedly, until the latest is in the future (so a reminder
+// that lapsed while the app was closed lands on the next real occurrence, not a
+// burst of catch-ups). Returns null when it isn't repeating.
+export function nextRepeatTimes(times, repeat, now = Date.now()) {
+  if (!repeat || repeat === 'none' || !times.length) return null
+  const ds = times.map(t => new Date(t)).filter(d => !isNaN(d))
+  if (!ds.length) return null
+  const step = () => ds.forEach(d => {
+    if (repeat === 'monthly') d.setMonth(d.getMonth() + 1)
+    else d.setDate(d.getDate() + (repeat === 'weekly' ? 7 : 1))
+  })
+  let guard = 0
+  do { step(); guard++ } while (Math.max(...ds.map(d => d.getTime())) <= now && guard < 400)
+  return ds.map(d => d.toISOString())
+}
+
+// Reschedule a reminder to a single future time (used by "snooze").
+export function snoozeFields(text, whenIso) {
+  return buildReminderFields(text, [whenIso])
+}
+
 // Normalized, de-duplicated, ascending list of a reminder's alert times.
 export function reminderTimes(r) {
   const raw = Array.isArray(r?.times) && r.times.length ? r.times : (r?.remindAt ? [r.remindAt] : [])
@@ -75,12 +100,19 @@ export async function fireDueReminders(items, { patch, heading = 'Reminder' } = 
   if (!notificationsSupported() || Notification.permission !== 'granted') return 0
   const now = Date.now()
   const due = dueReminders(items)
+  const nowIso = new Date().toISOString()
   for (const r of due) {
     const times = reminderTimes(r)
     const passed = times.filter(t => new Date(t).getTime() <= now).length
     // eslint-disable-next-line no-await-in-loop
     await showNotification(heading, r.text || '', 'reminder-' + r.id)
-    if (patch) patch(r.id, { firedCount: passed, ...mirror(times, passed), firedAt: new Date().toISOString() })
+    if (!patch) continue
+    // Fully fired + repeating → roll forward to the next occurrence.
+    if (passed >= times.length && r.repeat && r.repeat !== 'none') {
+      const nt = nextRepeatTimes(times, r.repeat, now)
+      if (nt) { patch(r.id, { times: nt, firedCount: 0, ...mirror(nt, 0), firedAt: nowIso }); continue }
+    }
+    patch(r.id, { firedCount: passed, ...mirror(times, passed), firedAt: nowIso })
   }
   return due.length
 }
