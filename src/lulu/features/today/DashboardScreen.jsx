@@ -1,6 +1,6 @@
 import React from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Button, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Button, Chip, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useSettings } from '../../store/StoreProvider.jsx'
 import { normalizeDashboard, labelForSection } from '../../lib/dashboard.js'
@@ -41,7 +41,16 @@ export default function DashboardScreen({ go }) {
     <>
       <DetailHeader title={t('customizeHome')} onBack={() => go('today')} />
       <div className="screen">
-        <p className="hint" style={{ margin: '14px 2px 10px' }}>{t('customizeHint')}</p>
+        <h2 className="member-h2" style={{ marginTop: 14 }}>{t('homeStyle')}</h2>
+        <div className="chip-row" style={{ margin: '2px 0 6px' }}>
+          {[{ id: 'classic', label: t('homeClassic') }, { id: 'focus', label: t('homeFocus') }].map(o => (
+            <Chip key={o.id} selectable on={(settings.homeStyle || 'classic') === o.id} onClick={() => updateSettings({ homeStyle: o.id })}>{o.label}</Chip>
+          ))}
+        </div>
+        <p className="hint" style={{ margin: '0 2px 16px' }}>{t('homeStyleHint')}</p>
+
+        <h2 className="member-h2">{t('cards')}</h2>
+        <p className="hint" style={{ margin: '2px 2px 10px' }}>{t('customizeHint')}</p>
         <Card tight flat style={{ padding: 6 }}>
           {list.map((s, i) => (
             <div key={s.key} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 10px', borderTop: i ? '1px solid var(--line)' : 0 }}>
