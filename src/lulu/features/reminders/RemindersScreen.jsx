@@ -5,6 +5,7 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { fmtDate, fmtTime, relativeDay } from '../../lib/format.js'
 import { splitReminders, buildReminderFields, snoozeFields, reminderTimes, nextPendingTime, lastTime, pendingCount, MAX_TIMES, REMINDER_REPEATS } from '../../lib/reminders.js'
+import { parseWhen } from '../../lib/parseWhen.js'
 import { notificationPermission, requestNotificationPermission } from '../../lib/notify.js'
 import { pushSupported, pushConfigured, isPushEnabled, enablePush, disablePush, refreshPush } from '../../lib/push.js'
 import * as cloud from '../../lib/cloud.js'
@@ -163,6 +164,18 @@ export default function RemindersScreen({ go }) {
             <Input value={text} onChange={e => setText(e.target.value)} placeholder={t('reminderWhatPlaceholder')} autoFocus={!editingId}
               onKeyDown={e => { if (e.key === 'Enter') save() }} />
           </Field>
+          {(() => {
+            const parsed = parseWhen(text)
+            if (!parsed.at) return null
+            const apply = () => { setTimes([isoToInput(parsed.at)]); if (parsed.text) setText(parsed.text) }
+            return (
+              <button type="button" onClick={apply}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'start', padding: '9px 11px', marginTop: -4, background: 'var(--brand-tint)', color: 'var(--brand-600)', border: 0, borderRadius: 'var(--r-md)', fontSize: 13.5, fontWeight: 600 }}>
+                <Icon name="sparkle" size={15} />
+                <span style={{ flex: 1 }}>{t('setFor')} {relativeDay(parsed.at, lang)} · {fmtTime(parsed.at, lang)}{parsed.text && parsed.text !== text.trim() ? ` — “${parsed.text}”` : ''}</span>
+              </button>
+            )
+          })()}
           {times.map((when, i) => (
             <Field key={i} label={i === 0 ? t('reminderWhen') : `${t('reminderWhen')} ${i + 1}`}>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
