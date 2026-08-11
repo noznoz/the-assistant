@@ -65,6 +65,7 @@ export const STRINGS = {
     themeDark: 'Dark', security: 'Security', faceId: 'Require Face ID / passcode',
     cloudSync: 'Cloud sync', backup: 'Backup & restore', exportData: 'Export data',
     importData: 'Import data', deleteAll: 'Delete all data', aiProvider: 'AI provider',
+    importConfirm: 'Importing replaces the data on this device with the backup. Continue?', importDone: 'Backup restored', importInvalid: 'That file isn’t a valid backup',
     // AI assistant
     assistant: 'Assistant', assistantTitle: 'Your Assistant', assistantHint: 'Ask about your tasks, documents, cars, money, family and more — grounded in your own data.',
     askAnything: 'Ask anything…', thinking: 'Thinking', send: 'Send', clearChat: 'New chat',
@@ -507,6 +508,7 @@ export const STRINGS = {
     themeDark: 'داكن', security: 'الأمان', faceId: 'طلب Face ID / رمز المرور',
     cloudSync: 'المزامنة السحابية', backup: 'النسخ والاستعادة', exportData: 'تصدير البيانات',
     importData: 'استيراد البيانات', deleteAll: 'حذف كل البيانات', aiProvider: 'مزود الذكاء',
+    importConfirm: 'الاستيراد سيستبدل بيانات هذا الجهاز بالنسخة الاحتياطية. متابعة؟', importDone: 'تمت الاستعادة', importInvalid: 'هذا الملف ليس نسخة احتياطية صالحة',
     // AI assistant
     assistant: 'المساعد', assistantTitle: 'مساعدك الشخصي', assistantHint: 'اسأل عن مهامك ومستنداتك وسياراتك وأموالك وعائلتك — مبني على بياناتك أنت.',
     askAnything: 'اسأل أي شيء…', thinking: 'يفكر', send: 'إرسال', clearChat: 'محادثة جديدة',

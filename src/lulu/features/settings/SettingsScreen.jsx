@@ -38,11 +38,13 @@ export default function SettingsScreen({ go }) {
   }
 
   const doImport = (e) => {
-    const file = e.target.files?.[0]; if (!file) return
+    const file = e.target.files?.[0]; if (!file) { return }
+    // Import replaces what's on this device — confirm before overwriting.
+    if (!window.confirm(t('importConfirm'))) { e.target.value = ''; return }
     const reader = new FileReader()
     reader.onload = () => {
-      try { db.importAll(JSON.parse(reader.result)); reloadAll(); toast.show(t('savedToast')) }
-      catch { toast.show('Invalid file') }
+      try { db.importAll(JSON.parse(reader.result)); reloadAll(); toast.show(t('importDone')) }
+      catch { toast.show(t('importInvalid')) }
     }
     reader.readAsText(file); e.target.value = ''
   }
