@@ -238,6 +238,39 @@ export default function TodayScreen({ go }) {
     ) : null,
   }
 
+  // Focus style: one urgency-ranked list of everything that needs you now
+  // (overdue, due today, waiting, due reminders, imminent appointments/renewals).
+  const focus = settings.homeStyle === 'focus'
+  const rightNow = notifFeed.filter(n => n.sort <= 2)
+  const rightNowNode = (
+    <>
+      <Section title={t('rightNow')} count={rightNow.length || undefined}
+        action={notifFeed.length > rightNow.length ? t('viewAll') : undefined} onAction={() => go('notifications')} />
+      {rightNow.length === 0 ? (
+        <Card tight style={{ textAlign: 'center', padding: '22px 14px' }}>
+          <div className="lead t-ok" style={{ display: 'inline-grid', placeItems: 'center', width: 44, height: 44, borderRadius: 14, marginBottom: 8 }}><Icon name="check" size={20} /></div>
+          <div style={{ fontWeight: 750 }}>{t('allCaughtUp')}</div>
+          <div className="muted" style={{ fontSize: 12.5, marginTop: 2 }}>
+            {upcomingReminders.length ? `${t('next')}: ${upcomingReminders[0].text} · ${relativeDay(upcomingReminders[0].remindAt, lang)}` : t('allCaughtUpHint')}
+          </div>
+        </Card>
+      ) : (
+        <Card tight>
+          {rightNow.map(n => (
+            <div className="li" key={n.id} onClick={() => go(n.go)}>
+              <div className={`lead ${n.tint}`}><Icon name={n.icon} size={18} /></div>
+              <div className="body">
+                <div className="title">{n.title}</div>
+                <div className="meta">{n.meta}</div>
+              </div>
+              <Icon name="chevron" size={15} style={{ color: 'var(--ink-3)' }} />
+            </div>
+          ))}
+        </Card>
+      )}
+    </>
+  )
+
   const attentionBlock = (
     <>
       {overdue.length > 0 && <AttentionCard tint="t-danger" icon="clock" title={t('overdue')} items={overdue} go={go} lang={lang} />}
@@ -280,13 +313,23 @@ export default function TodayScreen({ go }) {
           <h1>{settings.name || 'The Assistant'}</h1>
         </div>
 
-        {dash.map(({ key, on }) => on && sectionNodes[key] ? <React.Fragment key={key}>{sectionNodes[key]}{key === 'quickActions' ? attentionBlock : null}</React.Fragment> : null)}
-        {!quickActionsOn && attentionBlock}
-
-        {open.length === 0 && overdue.length === 0 && (
-          <Card style={{ marginTop: 20, textAlign: 'center' }}>
-            <p className="muted">{t('noThingsToday')}</p>
-          </Card>
+        {focus ? (
+          <>
+            {rightNowNode}
+            {/* Keep the customizable cards, minus the ones folded into Right now. */}
+            {dash.map(({ key, on }) => on && sectionNodes[key] && key !== 'assistant' && key !== 'reminders'
+              ? <React.Fragment key={key}>{sectionNodes[key]}</React.Fragment> : null)}
+          </>
+        ) : (
+          <>
+            {dash.map(({ key, on }) => on && sectionNodes[key] ? <React.Fragment key={key}>{sectionNodes[key]}{key === 'quickActions' ? attentionBlock : null}</React.Fragment> : null)}
+            {!quickActionsOn && attentionBlock}
+            {open.length === 0 && overdue.length === 0 && (
+              <Card style={{ marginTop: 20, textAlign: 'center' }}>
+                <p className="muted">{t('noThingsToday')}</p>
+              </Card>
+            )}
+          </>
         )}
 
         <button className="link-btn" onClick={() => go('dashboard')}
