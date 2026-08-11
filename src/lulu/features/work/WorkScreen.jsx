@@ -7,6 +7,7 @@ import { PRIORITIES, findPriority, findStatus, ROLE_LEVELS, roleLabel, label } f
 import { fmtDate, relativeDay, isOverdue, todayISO } from '../../lib/format.js'
 import { whatsappToPerson, formatAssignment, formatTaskDetail, emailShare, share } from '../../lib/share.js'
 import { teamSize, taskMemberIds, assigneeSummary } from '../../lib/org.js'
+import { buildReminderFields, reminderTimes, MAX_TIMES } from '../../lib/reminders.js'
 import { uid } from '../../store/db.js'
 import { pickContacts, contactPickerSupported } from '../../lib/contacts.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
@@ -652,9 +653,30 @@ const WORK_STATUSES = ['new', 'in_progress', 'waiting_someone', 'waiting_me', 'c
 
 const initialsOf = (name) => (name || '?').split(' ').filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase()
 
+// Local datetime-local <-> ISO helpers for the task alert pickers.
+const pad2 = (n) => String(n).padStart(2, '0')
+const dtToInput = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`
+const isoToInput = (iso) => { const d = new Date(iso); return isNaN(d) ? '' : dtToInput(d) }
+const inputToIso = (s) => { const d = new Date(s); return isNaN(d) ? null : d.toISOString() }
+const defaultAlert = () => { const d = new Date(Date.now() + 60 * 60 * 1000); d.setSeconds(0, 0); return dtToInput(d) }
+
+// Task alerts reuse the reminders pipeline (on-device + background push): each
+// task with alert times has one linked reminder (keyed by taskId) whose text
+// tracks the task title. This keeps the whole notification machinery in one
+// place instead of duplicating firing logic for tasks.
+function syncTaskAlert(reminders, task, alertIso) {
+  if (!task || !task.id) return
+  const existing = reminders.items.find(r => r.taskId === task.id)
+  if (!alertIso.length) { if (existing) reminders.remove(existing.id); return }
+  const fields = buildReminderFields(task.title, alertIso)
+  if (existing) reminders.patch(existing.id, { ...fields, taskId: task.id, done: false })
+  else reminders.add({ ...fields, taskId: task.id, done: false })
+}
+
 function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, onSaved }) {
   const { t, lang } = useT()
   const tasks = useCollection('tasks')
+  const reminders = useCollection('reminders')
   const allMembers = useCollection('members')
   const departments = useCollection('departments')
   const [f, setF] = useState({
@@ -662,6 +684,11 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
     memberId: '', boss: '', classification: 'work', subtasks: [], repeat: '', ...initial,
   })
   const [memberIds, setMemberIds] = useState(() => taskMemberIds(initial))
+  // Up to 3 alert times for this task, kept as datetime-local input strings.
+  const [alertTimes, setAlertTimes] = useState(() => (Array.isArray(initial?.alertTimes) ? initial.alertTimes : []).map(isoToInput).filter(Boolean))
+  const addAlert = () => setAlertTimes(a => a.length < MAX_TIMES ? [...a, defaultAlert()] : a)
+  const setAlertAt = (i, v) => setAlertTimes(a => a.map((x, j) => j === i ? v : x))
+  const removeAlert = (i) => setAlertTimes(a => a.filter((_, j) => j !== i))
   const [deptIds, setDeptIds] = useState(() => {
     if (Array.isArray(initial?.departmentIds) && initial.departmentIds.length) return initial.departmentIds
     if (mode === 'dept' && departmentId) return [departmentId]
@@ -714,22 +741,26 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
 
   const submit = () => {
     if (!f.title.trim()) { setErr(t('required')); return }
-    const summary = mode === 'boss'
-      ? (f.assignedTo || '')
-      : assigneeSummary({ memberIds }, allMembers.items, departments.items)
+    // Assignment summary: prefer the chosen org-chart members (any mode now);
+    // fall back to a free-text assignee for boss tasks that name someone.
+    const summary = memberIds.length
+      ? assigneeSummary({ memberIds }, allMembers.items, departments.items)
+      : (f.assignedTo || '')
     // Departments: the chosen set (falling back to the editor's dept or the
     // first assignee's). The first one is kept as the primary for legacy use.
     const firstMember = allMembers.items.find(m => m.id === memberIds[0])
     let dIds = deptIds.slice()
     if (!dIds.length) { const fb = mode === 'dept' ? departmentId : (f.departmentId || (firstMember ? firstMember.departmentId : '')); if (fb) dIds = [fb] }
+    const alertIso = alertTimes.map(inputToIso).filter(Boolean)
     const rec = {
       ...f, title: f.title.trim(), classification: 'work',
       memberIds, memberId: memberIds[0] || '',
       departmentIds: dIds, departmentId: dIds[0] || '',
-      assignedTo: summary,
-      status: mode !== 'boss' && memberIds.length && f.status === 'new' ? 'waiting_someone' : f.status,
+      assignedTo: summary, alertTimes: alertIso,
+      status: memberIds.length && f.status === 'new' ? 'waiting_someone' : f.status,
     }
-    initial.id ? tasks.save({ ...rec, id: initial.id }) : tasks.add(rec)
+    const saved = initial.id ? tasks.save({ ...rec, id: initial.id }) : tasks.add(rec)
+    syncTaskAlert(reminders, saved, alertIso)
     onSaved && onSaved(); onClose()
   }
   const title = mode === 'boss'
@@ -739,7 +770,7 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
     <Sheet title={title} onClose={onClose}
       footer={<div className="stack">
         <Button variant="primary" block onClick={submit}>{t('save')}</Button>
-        {initial.id && <Button block variant="danger" icon="trash" onClick={() => { tasks.remove(initial.id); onClose() }}>{t('delete')}</Button>}
+        {initial.id && <Button block variant="danger" icon="trash" onClick={() => { syncTaskAlert(reminders, { id: initial.id }, []); tasks.remove(initial.id); onClose() }}>{t('delete')}</Button>}
       </div>}>
       <Field label={t('appointmentTitle')} required error={err}><Input value={f.title} onChange={set('title')} placeholder={t('taskPlaceholder')} autoFocus /></Field>
       <Field label={t('description')} hint={t('optional')}><TextArea value={f.description} onChange={set('description')} placeholder={t('descriptionPlaceholder')} rows={3} /></Field>
@@ -762,11 +793,13 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
         </Field>
       )}
 
-      {/* Assignees — collapsed to a summary by default; expand to pick */}
-      {mode !== 'boss' && (
+      {/* Assignees — collapsed to a summary by default; expand to pick. Shown
+          for boss tasks too, so a task from the boss can be delegated to a
+          team member straight from the org chart. */}
+      {(mode !== 'boss' || allMembers.items.length > 0) && (
         <div style={{ marginBottom: 4 }}>
           <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', ...secStyle }}>
-            <span>{t('assignTo')}</span>
+            <span>{mode === 'boss' ? t('delegateTo') : t('assignTo')}</span>
             <button type="button" className="link-btn" style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--brand-600)' }} onClick={() => setAssignOpen(o => !o)}>
               {assignOpen ? t('done') : (memberIds.length ? t('edit') : t('assignPeople'))}
             </button>
@@ -833,6 +866,21 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
         {f.dueDate && <Chip onClick={() => setF({ ...f, dueDate: '' })}><Icon name="x" size={11} /> {t('clear')}</Chip>}
       </div>
       <Input type="date" value={f.dueDate} onChange={set('dueDate')} />
+
+      {/* Alerts — up to 3 timed notifications for this task (on-device + push) */}
+      <label style={secStyle}>{t('taskAlerts')}{alertTimes.length ? ` · ${alertTimes.length}/${MAX_TIMES}` : ''}</label>
+      {alertTimes.map((v, i) => (
+        <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+          <Input type="datetime-local" value={v} onChange={e => setAlertAt(i, e.target.value)} style={{ flex: 1 }} />
+          <button className="iconbtn" aria-label={t('delete')} onClick={() => removeAlert(i)}><Icon name="x" size={16} /></button>
+        </div>
+      ))}
+      {alertTimes.length < MAX_TIMES && (
+        <button type="button" className="link-btn" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--brand-600)', fontSize: 13.5, marginBottom: 4 }} onClick={addAlert}>
+          <Icon name="plus" size={15} /> {alertTimes.length ? t('addAnotherTime') : t('addAlert')}
+        </button>
+      )}
+      {alertTimes.length > 0 && <p className="hint" style={{ margin: '2px 2px 0' }}>{t('taskAlertsHint')}</p>}
 
       {/* Advanced options collapsed by default to keep the form light */}
       <button type="button" className="link-btn" style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '16px 2px 4px', fontSize: 13, fontWeight: 600, color: 'var(--ink-2)' }} onClick={() => setShowMore(o => !o)}>
