@@ -673,6 +673,62 @@ function syncTaskAlert(reminders, task, alertIso) {
   else reminders.add({ ...fields, taskId: task.id, done: false })
 }
 
+// Order a department's members as they sit in the org chart: each manager
+// followed by their reports, indented by reporting depth (head first).
+function flattenDeptTree(dep, team) {
+  const rows = []
+  const childrenOf = (pid) => team.filter(m => (m.reportsToId || '') === pid)
+  const roots = team.filter(m => !m.reportsToId || !team.some(x => x.id === m.reportsToId))
+  roots.sort((a, b) => (b.id === dep.headId ? 1 : 0) - (a.id === dep.headId ? 1 : 0))
+  const visit = (m, depth) => { rows.push({ member: m, depth }); childrenOf(m.id).forEach(c => visit(c, depth + 1)) }
+  roots.forEach(r => visit(r, 0))
+  team.forEach(m => { if (!rows.some(r => r.member.id === m.id)) rows.push({ member: m, depth: 0 }) }) // safety (cycles)
+  return rows
+}
+
+// Single-select picker that shows the organization chart (departments → people,
+// indented by who-reports-to-whom) and lets you tap one person to assign to.
+function OrgMemberPicker({ departments, members, value, onSelect, t }) {
+  const withDept = new Set(departments.map(d => d.id))
+  const orphans = members.filter(m => !m.departmentId || !withDept.has(m.departmentId))
+  const groups = [
+    ...departments.map(d => ({ dep: d, team: members.filter(m => m.departmentId === d.id) })),
+    ...(orphans.length ? [{ dep: { id: '__none', name: t('other'), headId: '' }, team: orphans }] : []),
+  ].filter(g => g.team.length)
+
+  const Row = ({ member, depth }) => {
+    const on = value === member.id
+    return (
+      <button type="button" onClick={() => onSelect(on ? '' : member.id)}
+        style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'start', padding: '10px 12px', paddingInlineStart: 12 + depth * 18, background: on ? 'var(--brand-tint)' : 'transparent', border: 0, borderRadius: 'var(--r-sm)' }}>
+        <span style={{ width: 26, height: 26, borderRadius: '50%', background: on ? 'var(--brand-600)' : 'var(--surface-2)', color: on ? '#fff' : 'var(--ink-2)', fontSize: 10, fontWeight: 750, display: 'grid', placeItems: 'center', flexShrink: 0 }}>{initialsOf(member.name)}</span>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span style={{ display: 'block', fontSize: 14.5, fontWeight: on ? 700 : 550, color: 'var(--ink-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member.name}</span>
+          {member.title && <span style={{ display: 'block', fontSize: 12, color: 'var(--ink-3)' }}>{member.title}</span>}
+        </span>
+        {on && <Icon name="check" size={16} stroke={3} style={{ color: 'var(--brand-600)', flexShrink: 0 }} />}
+      </button>
+    )
+  }
+
+  return (
+    <div style={{ border: '1px solid var(--line-2)', borderRadius: 'var(--r-md)', overflow: 'hidden' }}>
+      <button type="button" onClick={() => onSelect('')}
+        style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'start', padding: '10px 12px', background: !value ? 'var(--brand-tint)' : 'transparent', border: 0, borderBottom: '1px solid var(--line)', fontSize: 14, color: 'var(--ink-2)' }}>
+        <span style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--surface-2)', display: 'grid', placeItems: 'center', flexShrink: 0 }}><Icon name="x" size={13} /></span>
+        {t('unassigned')}
+        {!value && <Icon name="check" size={16} stroke={3} style={{ color: 'var(--brand-600)', marginInlineStart: 'auto' }} />}
+      </button>
+      {groups.map(({ dep, team }) => (
+        <div key={dep.id}>
+          <div style={{ fontSize: 11.5, fontWeight: 750, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.04em', padding: '8px 12px 4px', background: 'var(--surface-2)' }}>{dep.name}</div>
+          {flattenDeptTree(dep, team).map(({ member, depth }) => <Row key={member.id} member={member} depth={depth} />)}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, onSaved }) {
   const { t, lang } = useT()
   const tasks = useCollection('tasks')
@@ -741,11 +797,13 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
 
   const submit = () => {
     if (!f.title.trim()) { setErr(t('required')); return }
-    // Assignment summary: prefer the chosen org-chart members (any mode now);
-    // fall back to a free-text assignee for boss tasks that name someone.
-    const summary = memberIds.length
-      ? assigneeSummary({ memberIds }, allMembers.items, departments.items)
-      : (f.assignedTo || '')
+    // Assignment summary. Boss tasks delegate to a single member — show their
+    // name directly; other modes summarise the multi-select (collapsing whole
+    // departments). Falls back to any free-text assignee.
+    const chosenMember = allMembers.items.find(m => m.id === memberIds[0])
+    const summary = mode === 'boss'
+      ? (chosenMember ? chosenMember.name : (f.assignedTo || ''))
+      : (memberIds.length ? assigneeSummary({ memberIds }, allMembers.items, departments.items) : (f.assignedTo || ''))
     // Departments: the chosen set (falling back to the editor's dept or the
     // first assignee's). The first one is kept as the primary for legacy use.
     const firstMember = allMembers.items.find(m => m.id === memberIds[0])
@@ -793,13 +851,25 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
         </Field>
       )}
 
-      {/* Assignees — collapsed to a summary by default; expand to pick. Shown
-          for boss tasks too, so a task from the boss can be delegated to a
-          team member straight from the org chart. */}
-      {(mode !== 'boss' || allMembers.items.length > 0) && (
+      {/* Boss tasks: delegate to a single team member picked from the org chart. */}
+      {mode === 'boss' && allMembers.items.length > 0 && (
+        <div style={{ marginBottom: 4 }}>
+          <label style={secStyle}>{t('delegateTo')}</label>
+          <OrgMemberPicker
+            departments={orderedDepts}
+            members={allMembers.items}
+            value={memberIds[0] || ''}
+            onSelect={(id) => setMemberIds(id ? [id] : [])}
+            t={t}
+          />
+        </div>
+      )}
+
+      {/* Other work tasks: multi-select assignees across departments. */}
+      {mode !== 'boss' && (
         <div style={{ marginBottom: 4 }}>
           <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', ...secStyle }}>
-            <span>{mode === 'boss' ? t('delegateTo') : t('assignTo')}</span>
+            <span>{t('assignTo')}</span>
             <button type="button" className="link-btn" style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--brand-600)' }} onClick={() => setAssignOpen(o => !o)}>
               {assignOpen ? t('done') : (memberIds.length ? t('edit') : t('assignPeople'))}
             </button>
