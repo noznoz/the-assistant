@@ -520,7 +520,7 @@ function MemberEditor({ departmentId, team = [], initial, onClose, onSaved }) {
     const saved = initial.id ? members.save({ ...rec, id: initial.id }) : members.add(rec)
     // Choosing the "Head" level (or being the first member) sets the department head.
     if (f.role === 'head' || (!initial.id && !f.reportsToId && team.length === 0)) departments.patch(departmentId, { headId: saved.id })
-    onSaved && onSaved(); onClose()
+    onSaved && onSaved(saved); onClose()
   }
   return (
     <Sheet title={initial.id ? t('editMember') : t('addMember')} onClose={onClose}
@@ -688,7 +688,7 @@ function flattenDeptTree(dep, team) {
 
 // Single-select picker that shows the organization chart (departments → people,
 // indented by who-reports-to-whom) and lets you tap one person to assign to.
-function OrgMemberPicker({ departments, members, value, onSelect, t }) {
+function OrgMemberPicker({ departments, members, value, onSelect, onAddMember, t }) {
   const withDept = new Set(departments.map(d => d.id))
   const orphans = members.filter(m => !m.departmentId || !withDept.has(m.departmentId))
   const groups = [
@@ -719,12 +719,21 @@ function OrgMemberPicker({ departments, members, value, onSelect, t }) {
         {t('unassigned')}
         {!value && <Icon name="check" size={16} stroke={3} style={{ color: 'var(--brand-600)', marginInlineStart: 'auto' }} />}
       </button>
+      {groups.length === 0 && (
+        <div style={{ padding: '12px', fontSize: 13, color: 'var(--ink-3)' }}>{t('noTeamMembers')}</div>
+      )}
       {groups.map(({ dep, team }) => (
         <div key={dep.id}>
           <div style={{ fontSize: 11.5, fontWeight: 750, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.04em', padding: '8px 12px 4px', background: 'var(--surface-2)' }}>{dep.name}</div>
           {flattenDeptTree(dep, team).map(({ member, depth }) => <Row key={member.id} member={member} depth={depth} />)}
         </div>
       ))}
+      {onAddMember && (
+        <button type="button" onClick={onAddMember}
+          style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'start', padding: '11px 12px', background: 'transparent', border: 0, borderTop: '1px solid var(--line)', color: 'var(--brand-600)', fontSize: 14, fontWeight: 600 }}>
+          <Icon name="plus" size={16} /> {t('addTeamMember')}
+        </button>
+      )}
     </div>
   )
 }
@@ -740,6 +749,14 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
     memberId: '', boss: '', classification: 'work', subtasks: [], repeat: '', ...initial,
   })
   const [memberIds, setMemberIds] = useState(() => taskMemberIds(initial))
+  // Quick-add a team member from the delegate picker (boss tasks) when there's
+  // no org chart yet. Ensures a department exists, then opens the member editor.
+  const [addMemberDept, setAddMemberDept] = useState(null)
+  const startAddMember = () => {
+    let depId = departments.items[0]?.id
+    if (!depId) { const dep = departments.add({ name: t('myTeam') }); depId = dep.id }
+    setAddMemberDept(depId)
+  }
   // Up to 3 alert times for this task, kept as datetime-local input strings.
   const [alertTimes, setAlertTimes] = useState(() => (Array.isArray(initial?.alertTimes) ? initial.alertTimes : []).map(isoToInput).filter(Boolean))
   const addAlert = () => setAlertTimes(a => a.length < MAX_TIMES ? [...a, defaultAlert()] : a)
@@ -825,6 +842,7 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
     ? (f.boss === 'down' ? t('assignedByBoss') : t('toDiscussWithBoss'))
     : (initial.id ? t('editTask') : t('newTask'))
   return (
+    <>
     <Sheet title={title} onClose={onClose}
       footer={<div className="stack">
         <Button variant="primary" block onClick={submit}>{t('save')}</Button>
@@ -851,8 +869,10 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
         </Field>
       )}
 
-      {/* Boss tasks: delegate to a single team member picked from the org chart. */}
-      {mode === 'boss' && allMembers.items.length > 0 && (
+      {/* Boss tasks: delegate to a single team member picked from the org chart.
+          Always available — you can add a team member on the spot if you have
+          none yet. */}
+      {mode === 'boss' && (
         <div style={{ marginBottom: 4 }}>
           <label style={secStyle}>{t('delegateTo')}</label>
           <OrgMemberPicker
@@ -860,6 +880,7 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
             members={allMembers.items}
             value={memberIds[0] || ''}
             onSelect={(id) => setMemberIds(id ? [id] : [])}
+            onAddMember={startAddMember}
             t={t}
           />
         </div>
@@ -1000,5 +1021,15 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
         </>
       )}
     </Sheet>
+    {addMemberDept && (
+      <MemberEditor
+        departmentId={addMemberDept}
+        team={allMembers.items.filter(m => m.departmentId === addMemberDept)}
+        initial={{}}
+        onClose={() => setAddMemberDept(null)}
+        onSaved={(m) => { if (m && m.id) setMemberIds([m.id]) }}
+      />
+    )}
+    </>
   )
 }
