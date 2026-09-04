@@ -46,10 +46,15 @@ export function parseAmount(input, defaultCurrency = 'SAR') {
 // date-only → 09:00; time-only → today (or tomorrow if already past); neither →
 // one hour from now.
 function combineISO(date, time, now) {
-  if (!date && !time) { const d = new Date(now.getTime() + 3600000); d.setSeconds(0, 0); return d.toISOString() }
+  const soon = () => { const d = new Date(now.getTime() + 3600000); d.setSeconds(0, 0); return d.toISOString() }
+  if (!date && !time) return soon()
   const d = date ? new Date(`${date}T00:00:00`) : new Date(now)
   if (time) { const [h, m] = time.split(':'); d.setHours(+h, +m, 0, 0) } else { d.setHours(9, 0, 0, 0) }
-  if (!date && d.getTime() <= now.getTime()) d.setDate(d.getDate() + 1)
+  // A bare clock time with no day that's already passed today → tomorrow.
+  if (!date && time && d.getTime() <= now.getTime()) d.setDate(d.getDate() + 1)
+  // A default 9:00 slot (no explicit time) that's already passed → an hour from
+  // now, so a "today" reminder captured in the afternoon never lands in the past.
+  if (!time && d.getTime() <= now.getTime()) return soon()
   return d.toISOString()
 }
 

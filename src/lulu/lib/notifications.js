@@ -38,6 +38,9 @@ function sumMonth(expenses, ref, rates) {
 
 export function buildNotificationFeed({ tasks = [], vehicles = [], services = [], docs = [], subs = [], people = [], expenses = [], valuables = [], appointments = [], reminders = [], t, lang = 'en', settings = {} }) {
   const out = []
+  // Index by id once so the appointment/service loops below don't re-scan.
+  const peopleById = new Map(people.map(p => [p.id, p]))
+  const vehById = new Map(vehicles.map(v => [v.id, v]))
   // Reminders: anything due now (past & not done) or coming up within 7 days.
   const nowMs = Date.now()
   reminders.forEach(r => {
@@ -50,7 +53,7 @@ export function buildNotificationFeed({ tasks = [], vehicles = [], services = []
     out.push({ id: 'rem' + r.id, tint: due ? 't-danger' : diffDays <= 1 ? 't-warn' : 't-info', icon: 'bell', title: r.text, meta: due ? t('reminderDue') : `${relativeDay(r.remindAt, lang)} · ${fmtTime(r.remindAt, lang)}`, go: 'reminders', sort: due ? -2 : diffDays - 0.1, now: diffDays <= 1 })
   })
   // Upcoming appointments within the next 7 days.
-  appointments.forEach(a => { const dd = daysUntil(a.date); if (dd != null && dd >= 0 && dd <= 7) { const who = (people.find(p => p.id === a.personId) || {}).name; out.push({ id: 'appt' + a.id, tint: dd <= 1 ? 't-warn' : 't-info', icon: 'calendar', title: a.title + (who ? ` · ${who}` : ''), meta: `${relativeDay(a.date, lang)}${a.time ? ' · ' + a.time : ''}`, go: 'appointments', sort: dd - 0.15, soon: dd <= 0, now: dd <= 1 }) } })
+  appointments.forEach(a => { const dd = daysUntil(a.date); if (dd != null && dd >= 0 && dd <= 7) { const who = (peopleById.get(a.personId) || {}).name; out.push({ id: 'appt' + a.id, tint: dd <= 1 ? 't-warn' : 't-info', icon: 'calendar', title: a.title + (who ? ` · ${who}` : ''), meta: `${relativeDay(a.date, lang)}${a.time ? ' · ' + a.time : ''}`, go: 'appointments', sort: dd - 0.15, soon: dd <= 0, now: dd <= 1 }) } })
   const open = tasks.filter(x => x.status !== 'completed' && x.status !== 'cancelled')
   open.filter(x => isOverdue(x.dueDate)).forEach(x => out.push({ id: 't' + x.id, tint: 't-danger', icon: 'clock', title: x.title, meta: t('overdue'), go: 'tasks/overdue', sort: -1, soon: true, now: true }))
   open.filter(x => isToday(x.dueDate)).forEach(x => out.push({ id: 'd' + x.id, tint: 't-info', icon: 'today', title: x.title, meta: t('todaysTasks'), go: 'tasks/today', sort: 0, soon: true, now: true }))
@@ -58,7 +61,7 @@ export function buildNotificationFeed({ tasks = [], vehicles = [], services = []
   open.filter(x => (x.assigneeId || x.assignedTo) && (isOverdue(x.dueDate) || isToday(x.dueDate) || x.status === 'waiting_someone'))
     .forEach(x => out.push({ id: 'a' + x.id, tint: isOverdue(x.dueDate) ? 't-danger' : 't-warn', icon: 'people', title: x.title, meta: `${t('waitingOn')} ${x.assignedTo || ''}`.trim(), go: 'tasks/delegated', sort: isOverdue(x.dueDate) ? -0.5 : 1.5, soon: isOverdue(x.dueDate) || isToday(x.dueDate), now: isOverdue(x.dueDate) || isToday(x.dueDate) }))
   vehicles.forEach(v => { const dd = daysUntil(v.policyExpiry); if (dd != null && dd <= 45) out.push({ id: 'v' + v.id, tint: dd <= 14 ? 't-danger' : 't-warn', icon: 'shield', title: `${v.nickname || v.name} — ${t('insurance')}`, meta: `${t('policyExpiry')}: ${fmtDate(v.policyExpiry, lang, settings.dateFormat)}`, go: `garage/${v.id}`, sort: dd, soon: dd <= 0 }) })
-  services.forEach(s => { const dd = daysUntil(s.nextDate); if (dd != null && dd <= 30) { const v = vehicles.find(x => x.id === s.vehicleId); out.push({ id: 'svc' + s.id, tint: dd <= 7 ? 't-danger' : 't-warn', icon: 'wrench', title: `${v ? (v.nickname || v.name) : ''} — ${t('serviceDue')}`, meta: `${s.work} · ${fmtDate(s.nextDate, lang, settings.dateFormat)}`, go: v ? `garage/${v.id}` : 'garage', sort: dd, soon: dd <= 0, now: dd <= 0 }) } })
+  services.forEach(s => { const dd = daysUntil(s.nextDate); if (dd != null && dd <= 30) { const v = vehById.get(s.vehicleId); out.push({ id: 'svc' + s.id, tint: dd <= 7 ? 't-danger' : 't-warn', icon: 'wrench', title: `${v ? (v.nickname || v.name) : ''} — ${t('serviceDue')}`, meta: `${s.work} · ${fmtDate(s.nextDate, lang, settings.dateFormat)}`, go: v ? `garage/${v.id}` : 'garage', sort: dd, soon: dd <= 0, now: dd <= 0 }) } })
   docs.forEach(d => { const dd = daysUntil(d.expiry); if (dd != null && dd <= 30) out.push({ id: 'doc' + d.id, tint: dd <= 7 ? 't-danger' : 't-warn', icon: 'doc', title: d.title, meta: `${t('policyExpiry')}: ${relativeDay(d.expiry, lang)}`, go: 'documents', sort: dd, soon: dd <= 0 }) })
   subs.filter(s => s.active !== false).forEach(s => { const dd = daysUntil(s.nextDue); if (dd != null && dd <= 5) out.push({ id: 'sub' + s.id, tint: dd <= 1 ? 't-danger' : 't-warn', icon: 'wallet', title: s.name, meta: `${t('nextDue')}: ${relativeDay(s.nextDue, lang)}`, go: 'subscriptions', sort: dd, soon: dd <= 0, now: dd <= 0 }) })
   // Upcoming installment payments (next monthly instalment within a week).
