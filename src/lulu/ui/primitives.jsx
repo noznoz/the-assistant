@@ -148,13 +148,24 @@ export function Sheet({ title, onClose, children, footer }) {
 
 // ---------- Toast (imperative-ish via hook) ----------
 export function useToast() {
-  const [msg, setMsg] = useState(null)
-  const show = useCallback((m) => {
-    setMsg(m)
+  const [state, setState] = useState(null)   // { m, actions } | null
+  const show = useCallback((m, actions) => {
+    setState({ m, actions: actions || null })
     window.clearTimeout(show._t)
-    show._t = window.setTimeout(() => setMsg(null), 2200)
+    // Leave actionable toasts up longer so there's time to tap Undo / Edit.
+    show._t = window.setTimeout(() => setState(null), actions ? 5000 : 2200)
   }, [])
-  const node = msg ? <div className="toast">{msg}</div> : null
+  const node = state ? (
+    <div className="toast" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+      <span>{state.m}</span>
+      {state.actions && state.actions.map((a, i) => (
+        <button key={i} onClick={() => { setState(null); a.onClick && a.onClick() }}
+          style={{ marginInlineStart: 8, background: 'transparent', border: 0, color: '#e9c07a', fontWeight: 750, fontSize: 13, padding: '2px 4px' }}>
+          {a.label}
+        </button>
+      ))}
+    </div>
+  ) : null
   return { show, node }
 }
 

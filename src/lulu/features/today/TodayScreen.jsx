@@ -311,7 +311,7 @@ export default function TodayScreen({ go }) {
           <h1>{settings.name || 'The Assistant'}</h1>
         </div>
 
-        <QuickCapture toast={toast} />
+        <QuickCapture toast={toast} go={go} />
 
         {focus ? (
           <>

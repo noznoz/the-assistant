@@ -54,7 +54,7 @@ export const STRINGS = {
     addPerson: 'Add person', jobTitle: 'Job title', company: 'Company / Dept.', mobile: 'Mobile',
     email: 'Email', whatsapp: 'WhatsApp', relationship: 'Relationship',
     // generic
-    save: 'Save', cancel: 'Cancel', delete: 'Delete', edit: 'Edit', done: 'Done', add: 'Add', added: 'Added',
+    save: 'Save', cancel: 'Cancel', delete: 'Delete', edit: 'Edit', done: 'Done', add: 'Add', added: 'Added', undo: 'Undo',
     addAnything: 'Add anything — “lunch 45 sar”, “call Ali 5pm”…',
     cap_expense: 'Expense', cap_appointment: 'Appointment', cap_reminder: 'Reminder', cap_task: 'Task',
     search: 'Search', filter: 'Filter', all: 'All', none: 'None', optional: 'optional',
@@ -503,7 +503,7 @@ export const STRINGS = {
     thisWeek: 'هذا الأسبوع', thisYear: 'هذه السنة', largest: 'أكبر المصروفات', recent: 'الأحدث',
     addPerson: 'إضافة شخص', jobTitle: 'المسمّى الوظيفي', company: 'الشركة / القسم', mobile: 'الجوال',
     email: 'البريد', whatsapp: 'واتساب', relationship: 'العلاقة',
-    save: 'حفظ', cancel: 'إلغاء', delete: 'حذف', edit: 'تعديل', done: 'تم', add: 'إضافة', added: 'أُضيف',
+    save: 'حفظ', cancel: 'إلغاء', delete: 'حذف', edit: 'تعديل', done: 'تم', add: 'إضافة', added: 'أُضيف', undo: 'تراجع',
     addAnything: 'أضف أي شيء — «غداء ٤٥ ريال»، «اتصل بعلي ٥م»…',
     cap_expense: 'مصروف', cap_appointment: 'موعد', cap_reminder: 'تذكير', cap_task: 'مهمة',
     search: 'بحث', filter: 'تصفية', all: 'الكل', none: 'لا شيء', optional: 'اختياري',
