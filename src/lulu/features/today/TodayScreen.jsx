@@ -10,7 +10,8 @@ import { hijriDate } from '../../lib/prayer.js'
 import { buildBrief } from '../../lib/brief.js'
 import { buildRenewals } from '../../lib/renewals.js'
 import { runRenewalReminders } from '../../lib/notify.js'
-import { buildNotificationFeed, unreadCount } from '../../lib/notifications.js'
+import { unreadCount } from '../../lib/notifications.js'
+import { useNotificationFeed } from '../../store/useNotificationFeed.js'
 import { normalizeDashboard } from '../../lib/dashboard.js'
 import PrayerCard from './PrayerCard.jsx'
 import { share, formatAgenda } from '../../lib/share.js'
@@ -42,10 +43,7 @@ export default function TodayScreen({ go }) {
   const [editor, setEditor] = useState(null)
   const toast = useToast()
 
-  const notifFeed = useMemo(() => buildNotificationFeed({
-    tasks: tasks.items, vehicles: vehicles.items, services: services.items,
-    docs: documents.items, subs: subscriptions.items, people: people.items, expenses: expenses.items, valuables: valuables.items, appointments: appointments.items, reminders: reminders.items, t, lang, settings,
-  }), [tasks.items, vehicles.items, services.items, documents.items, subscriptions.items, people.items, expenses.items, valuables.items, appointments.items, reminders.items, lang])
+  const notifFeed = useNotificationFeed()
 
   const upcomingReminders = useMemo(() => splitReminders(reminders.items).upcoming, [reminders.items])
   const unread = unreadCount(notifFeed, settings.notificationsSeen)

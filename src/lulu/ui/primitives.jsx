@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useId, isValidElement, cloneElement, Children } from 'react'
 import Icon from './Icon.jsx'
 import { useT } from '../i18n/I18nProvider.jsx'
 
@@ -41,10 +41,18 @@ export function Chip({ on, selectable, tint = '', dot, onClick, children }) {
 
 // ---------- Field wrapper ----------
 export function Field({ label, required, hint, error, children }) {
+  const id = useId()
+  // Associate the label with its control when the field wraps a single, un-ided
+  // Input/Select/TextArea — so screen readers announce it and tapping the label
+  // focuses the input. Complex fields (e.g. an input beside a button) are left
+  // untouched, so this can't mis-target the wrong element.
+  const kids = Children.toArray(children)
+  const only = kids.length === 1 && isValidElement(kids[0]) ? kids[0] : null
+  const bindable = !!only && !only.props.id && (only.type === Input || only.type === Select || only.type === TextArea)
   return (
     <div className="field">
-      {label && <label>{label}{required && <span className="req"> *</span>}</label>}
-      {children}
+      {label && <label htmlFor={bindable ? id : undefined}>{label}{required && <span className="req"> *</span>}</label>}
+      {bindable ? cloneElement(only, { id }) : children}
       {error ? <div className="err">{error}</div> : hint && <div className="hint">{hint}</div>}
     </div>
   )
