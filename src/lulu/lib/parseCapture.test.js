@@ -66,6 +66,23 @@ describe('classifyCapture', () => {
     expect(r.fields.title).toBe('renew gym membership')
   })
 
+  test('a "today" reminder captured after 9am is scheduled in the future, not the past', () => {
+    const r = c('remind me to water the plants today') // NOW is 10:00
+    expect(r.type).toBe('reminder')
+    expect(new Date(r.fields.times[0]).getTime()).toBeGreaterThan(NOW.getTime())
+  })
+
+  test('a spend word without a number is a task, not an expense', () => {
+    const r = c('pay the electricity bill')
+    expect(r.type).toBe('task')
+    expect(r.fields.title).toBe('pay the electricity bill')
+  })
+
+  test('currency word after the number is recognised', () => {
+    const r = c('hotel 90 dollars')
+    expect(r.type).toBe('expense'); expect(r.fields.amount).toBe('90'); expect(r.fields.currency).toBe('USD')
+  })
+
   test('empty input returns null', () => {
     expect(c('   ')).toBeNull()
   })
