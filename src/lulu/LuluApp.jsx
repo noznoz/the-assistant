@@ -14,7 +14,8 @@ import { setBadge, maybeDailyBrief, runDueAlerts } from './lib/notify.js'
 import { fireDueReminders } from './lib/reminders.js'
 import { refreshPush } from './lib/push.js'
 import { buildBrief } from './lib/brief.js'
-import { buildNotificationFeed, unreadCount } from './lib/notifications.js'
+import { unreadCount } from './lib/notifications.js'
+import { useNotificationFeed } from './store/useNotificationFeed.js'
 
 import TodayScreen from './features/today/TodayScreen.jsx'
 import TasksScreen from './features/tasks/TasksScreen.jsx'
@@ -134,20 +135,15 @@ function Router() {
   // Keep the home-screen icon badge in sync with the notification centre (the
   // same unread count as the in-app bell — tasks, renewals, reminders, etc.),
   // and fire the daily brief once per day. Only when notifications are enabled.
+  const feed = useNotificationFeed()
   useEffect(() => {
     if (!settings.notifications) { setBadge(0); return }
-    const feed = buildNotificationFeed({
-      tasks: data.tasks, vehicles: data.vehicles, services: data.services,
-      docs: data.documents, subs: data.subscriptions, people: data.people,
-      expenses: data.expenses, valuables: data.valuables, appointments: data.appointments,
-      reminders: data.reminders, t, lang, settings,
-    })
     setBadge(unreadCount(feed, settings.notificationsSeen))
     // Sound alert for anything dated that's due today or overdue (deduped).
     runDueAlerts(feed, { enabled: settings.notifications, heading: t('dueToday') })
     const brief = buildBrief({ tasks: data.tasks || [], expenses: data.expenses || [], vehicles: data.vehicles || [], settings, lang })
     maybeDailyBrief(settings.name ? `Good morning, ${settings.name}` : 'Your morning brief', brief)
-  }, [data.tasks, data.vehicles, data.services, data.documents, data.subscriptions, data.people, data.expenses, data.valuables, data.appointments, data.reminders, settings.notifications, settings.notificationsSeen, lang])
+  }, [feed, settings.notifications, settings.notificationsSeen, lang])
 
   // Pull-to-refresh: re-read local data and check for a new app version.
   const onRefresh = useCallback(async () => {
