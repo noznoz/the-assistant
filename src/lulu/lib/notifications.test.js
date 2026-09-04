@@ -38,3 +38,25 @@ describe('notification feed "soon" (due today / overdue) flags', () => {
     expect(find(feed, 'remr1').soon).toBeUndefined()
   })
 })
+
+describe('notification feed "now" flag (Focus "Right now" list)', () => {
+  test('actionable-today items are now; renewal/expiry items are not (they keep their own card)', () => {
+    const feed = buildNotificationFeed({
+      tasks: [{ id: 't', title: 'call bank', status: 'todo', dueDate: iso(0) }],
+      reminders: [{ id: 'r', text: 'pay rent', remindAt: new Date(Date.now() - 1000).toISOString() }],
+      appointments: [{ id: 'a', title: 'dentist', date: iso(0) }],
+      subs: [{ id: 's', name: 'Netflix', nextDue: iso(0) }],
+      docs: [{ id: 'd', title: 'passport', expiry: iso(0) }],       // expiring TODAY, but lives in Expiring soon
+      vehicles: [{ id: 'v', name: 'Car', policyExpiry: iso(0) }],   // insurance today → Expiring soon card
+      t,
+    })
+    // In the "Right now" list:
+    expect(find(feed, 'dt').now).toBe(true)     // today task
+    expect(find(feed, 'remr').now).toBe(true)   // due reminder
+    expect(find(feed, 'appta').now).toBe(true)  // appointment today
+    expect(find(feed, 'subs').now).toBe(true)   // payment due
+    // Not in "Right now" (shown once, in Expiring soon):
+    expect(find(feed, 'docd').now).toBeFalsy()
+    expect(find(feed, 'vv').now).toBeFalsy()
+  })
+})
