@@ -2,31 +2,49 @@ import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
-import { classifyCapture } from '../../lib/parseCapture.js'
+import { classifyCapture, aiClassifyCapture } from '../../lib/parseCapture.js'
 
 // One box that turns a plain sentence into the right record. It shows a live
-// preview of what it will create; tapping the preview (or Enter / the + button)
-// files it. Fully on-device — no network, no AI key required.
+// (rule-based, instant) preview; on submit, if the user's Claude key is set it
+// refines with AI and falls back to the rules on any failure. The "Added" toast
+// offers Undo and Edit.
 const COLLECTION = { expense: 'expenses', appointment: 'appointments', reminder: 'reminders', task: 'tasks' }
+const SCREEN = { expense: 'expenses', appointment: 'appointments', reminder: 'reminders', task: 'tasks' }
 const ICON = { expense: 'wallet', appointment: 'calendar', reminder: 'bell', task: 'check' }
 
-export default function QuickCapture({ toast }) {
+export default function QuickCapture({ toast, go }) {
   const { t } = useT()
   const { settings } = useSettings()
   const [text, setText] = useState('')
+  const [busy, setBusy] = useState(false)
   const cols = {
     expenses: useCollection('expenses'),
     appointments: useCollection('appointments'),
     reminders: useCollection('reminders'),
     tasks: useCollection('tasks'),
   }
-  const plan = text.trim() ? classifyCapture(text, { currency: settings.currency }) : null
+  const preview = text.trim() ? classifyCapture(text, { currency: settings.currency }) : null
+  const aiOn = settings.aiProvider === 'claude' && !!settings.anthropicKey
 
-  const submit = () => {
+  const submit = async () => {
+    const raw = text.trim()
+    if (!raw || busy) return
+    let plan = classifyCapture(raw, { currency: settings.currency })
     if (!plan) return
-    cols[COLLECTION[plan.type]].add(plan.fields)
-    toast.show(`${t('cap_' + plan.type)} ${t('added').toLowerCase()}`)
+    if (aiOn) {
+      setBusy(true)
+      try {
+        const ai = await aiClassifyCapture(raw, { apiKey: settings.anthropicKey, model: settings.aiModel, currency: settings.currency })
+        if (ai) plan = ai
+      } finally { setBusy(false) }
+    }
+    const col = cols[COLLECTION[plan.type]]
+    const rec = col.add(plan.fields)
     setText('')
+    toast.show(`${t('cap_' + plan.type)} ${t('added').toLowerCase()}`, [
+      { label: t('undo'), onClick: () => rec && rec.id && col.remove(rec.id) },
+      { label: t('edit'), onClick: () => go && go(SCREEN[plan.type]) },
+    ])
   }
 
   return (
@@ -41,20 +59,21 @@ export default function QuickCapture({ toast }) {
           aria-label={t('addAnything')}
           style={{ flex: 1, border: 0, background: 'transparent', padding: '12px 0', fontSize: 15, color: 'var(--ink-1)', outline: 'none', minWidth: 0 }}
         />
-        {plan && (
-          <button aria-label={t('add')} onClick={submit}
-            style={{ flexShrink: 0, width: 32, height: 32, borderRadius: 10, border: 0, background: 'var(--brand-600)', color: '#fff', display: 'grid', placeItems: 'center' }}>
-            <Icon name="plus" size={18} />
+        {preview && (
+          <button aria-label={t('add')} onClick={submit} disabled={busy}
+            style={{ flexShrink: 0, width: 32, height: 32, borderRadius: 10, border: 0, background: 'var(--brand-600)', color: '#fff', display: 'grid', placeItems: 'center', opacity: busy ? 0.6 : 1 }}>
+            <Icon name={busy ? 'sparkle' : 'plus'} size={18} />
           </button>
         )}
       </div>
-      {plan && (
-        <button onClick={submit}
+      {preview && (
+        <button onClick={submit} disabled={busy}
           style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'start', marginTop: 6, padding: '8px 11px', background: 'var(--brand-tint)', color: 'var(--brand-600)', border: 0, borderRadius: 'var(--r-md)', fontSize: 13, fontWeight: 600 }}>
-          <Icon name={ICON[plan.type]} size={15} style={{ flexShrink: 0 }} />
+          <Icon name={ICON[preview.type]} size={15} style={{ flexShrink: 0 }} />
           <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            <b>{t('cap_' + plan.type)}</b> · {plan.label}
+            <b>{t('cap_' + preview.type)}</b> · {preview.label}
           </span>
+          {aiOn && <span style={{ fontSize: 11, opacity: 0.75 }}>{busy ? t('thinking') : '✦ AI'}</span>}
         </button>
       )}
     </div>
