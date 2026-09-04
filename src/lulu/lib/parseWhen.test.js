@@ -53,6 +53,30 @@ describe('parseWhen', () => {
     expect(d.getDate()).toBe(14); expect(d.getHours()).toBe(20)
   })
 
+  test('"in 30 minutes" adds minutes to now', () => {
+    const d = at('stretch in 30 minutes')
+    expect(Math.round((d.getTime() - NOW.getTime()) / 60000)).toBe(30)
+    expect(p('stretch in 30 minutes').text).toBe('stretch')
+  })
+
+  test('word times: noon and evening', () => {
+    expect(at('lunch noon').getHours()).toBe(12)
+    const e = at('walk this evening')
+    expect(e.getHours()).toBe(19); expect(e.getDate()).toBe(14)
+    expect(p('walk this evening').text).toBe('walk')
+  })
+
+  test('"next week" defaults to +7 days at 9:00', () => {
+    const d = at('review budget next week')
+    expect(d.getDate()).toBe(21); expect(d.getHours()).toBe(9)
+    expect(p('review budget next week').text).toBe('review budget')
+  })
+
+  test('numbers in the title alone do not trigger a date', () => {
+    const r = p('order 24 chairs')
+    expect(r.at).toBeNull(); expect(r.text).toBe('order 24 chairs')
+  })
+
   test('no date returns null and leaves text untouched', () => {
     const r = p('buy milk')
     expect(r.at).toBeNull(); expect(r.text).toBe('buy milk')
