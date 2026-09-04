@@ -238,10 +238,12 @@ export default function TodayScreen({ go }) {
     ) : null,
   }
 
-  // Focus style: one urgency-ranked list of everything that needs you now
-  // (overdue, due today, waiting, due reminders, imminent appointments/renewals).
+  // Focus style: one urgency-ranked list of everything that needs you now —
+  // overdue/today/waiting tasks, due reminders, imminent appointments, payments
+  // and birthdays. Expiry/renewal items are deliberately excluded (they keep
+  // their own "Expiring soon" card, so Focus doesn't show them twice).
   const focus = settings.homeStyle === 'focus'
-  const rightNow = notifFeed.filter(n => n.sort <= 2)
+  const rightNow = notifFeed.filter(n => n.now)
   const rightNowNode = (
     <>
       <Section title={t('rightNow')} count={rightNow.length || undefined}
