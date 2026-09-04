@@ -54,7 +54,7 @@ export function parseWhen(input, now = new Date()) {
     else if (/day/.test(u)) d.setDate(d.getDate() + n)
     else if (/week/.test(u)) d.setDate(d.getDate() + 7 * n)
     drop(inM[0])
-    if (/hour|min/.test(u)) return { at: d.toISOString(), text: tidy(text) } // time is inherent
+    if (/hour|min/.test(u)) return { at: d.toISOString(), text: tidy(text), hasTime: true } // time is inherent
     day = new Date(d); day.setHours(0, 0, 0, 0); hasDay = true
   }
 
@@ -105,12 +105,12 @@ export function parseWhen(input, now = new Date()) {
     }
   }
 
-  if (!hasDay && !hasTime) return { at: null, text: raw }
+  if (!hasDay && !hasTime) return { at: null, text: raw, hasTime: false }
 
   const at = hasDay ? new Date(day) : new Date(now)
   at.setHours(hasTime ? hour : (hasDay ? 9 : now.getHours()), hasTime ? min : (hasDay ? 0 : now.getMinutes()), 0, 0)
   // A bare time with no day that's already passed today → assume tomorrow.
   if (!hasDay && hasTime && at.getTime() <= now.getTime()) at.setDate(at.getDate() + 1)
 
-  return { at: at.toISOString(), text: tidy(text) }
+  return { at: at.toISOString(), text: tidy(text), hasTime }
 }
