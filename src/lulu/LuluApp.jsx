@@ -78,6 +78,9 @@ import KeepInTouchScreen from './features/people/KeepInTouchScreen.jsx'
 import NavTabsScreen from './features/settings/NavTabsScreen.jsx'
 import AssistantScreen from './features/assistant/AssistantScreen.jsx'
 import CloudScreen from './features/cloud/CloudScreen.jsx'
+import AuthScreen from './features/auth/AuthScreen.jsx'
+import MemberShell from './features/member/MemberShell.jsx'
+import * as cloud from './lib/cloud.js'
 import RemindersScreen from './features/reminders/RemindersScreen.jsx'
 
 const MAIN_TABS = ['today', 'tasks', 'garage', 'expenses', 'more']
@@ -263,13 +266,35 @@ function Router() {
   )
 }
 
+// Decides what the app is right now: the login/join page for an invited member,
+// the stripped-down member shell once they're signed in as a member, or the full
+// app for the admin (or anyone using it locally).
+function AppGate() {
+  const [, force] = React.useState(0)
+  useEffect(() => cloud.onStatus(() => force(n => n + 1)), [])
+  const [hash, setHash] = useState(() => (typeof window !== 'undefined' ? window.location.hash : ''))
+  useEffect(() => {
+    const on = () => setHash(window.location.hash)
+    window.addEventListener('hashchange', on)
+    return () => window.removeEventListener('hashchange', on)
+  }, [])
+
+  if (!cloud.isSignedIn()) {
+    const join = hash.match(/^#\/join\/(.+)$/)
+    if (join) return <AuthScreen key={`join-${join[1]}`} code={decodeURIComponent(join[1])} />
+    if (hash.replace(/^#\/?/, '') === 'login') return <AuthScreen key="login" />
+  }
+  if (cloud.isMember()) return <MemberShell />
+  return <Router />
+}
+
 export default function LuluApp() {
   return (
     <StoreProvider>
       <I18nProvider>
         <ThemeProvider>
           <LockGate>
-            <Router />
+            <AppGate />
           </LockGate>
         </ThemeProvider>
       </I18nProvider>

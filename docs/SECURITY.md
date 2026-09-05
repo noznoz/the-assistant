@@ -41,6 +41,22 @@ first‑class requirement, phased alongside features.
 - [ ] **Audit log** table for important changes (create/update/delete of key
       entities).
 
+## Family accounts (Phase 1 shipped)
+- [x] **Roles** — the household creator is the `owner` (admin); invited people are
+      `member` (`lib/cloud.js` tracks the role on the session). A member gets a
+      restricted app shell (profile + assigned tasks only).
+- [x] **Invites carry no secrets** — the WhatsApp invite link contains only the
+      household code; the Supabase connection comes from build-time env, so the
+      anon key never travels through chat. See `docs/FAMILY.md`.
+- [x] **Member data minimisation (app-enforced)** — a member's device only
+      requests their own profile record and the tasks assigned to them
+      (`pullAll` scopes the queries; `pushRecord`/`pushAll` restrict members to
+      the `people`/`tasks` collections). Finance, documents, garage, etc. never
+      reach a member.
+- [ ] **Member data minimisation (DB-enforced)** — Phase 2: row-level security so
+      the same boundary holds even if a member calls the API directly, plus an
+      admin UI to explicitly share chosen areas.
+
 ## Phase 3–4
 - [ ] **Role‑based access** for family/assistant (least privilege, per‑module scopes).
 - [ ] Per‑document access control; shareable links revocable.

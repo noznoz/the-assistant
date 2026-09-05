@@ -22,7 +22,20 @@ function read(key, fb) { try { const r = localStorage.getItem(key); return r ? J
 function write(key, v) { localStorage.setItem(key, JSON.stringify(v)) }
 
 // ---- Config + session ----
-export function getConfig() { return read(CFG_KEY, null) }
+// Connection comes from what the admin saved on this device, or — for family
+// members who just install the app — from build-time env (VITE_SUPABASE_URL /
+// VITE_SUPABASE_ANON_KEY). The anon key is public by design, so baking it into
+// the deployed app lets an invited member connect by tapping the link, with no
+// setup and without the key ever travelling through the invite message.
+function envConfig() {
+  try {
+    const e = import.meta.env || {}
+    const url = (e.VITE_SUPABASE_URL || '').trim().replace(/\/+$/, '')
+    const key = (e.VITE_SUPABASE_ANON_KEY || '').trim()
+    return url && key ? { url, anonKey: key } : null
+  } catch { return null }
+}
+export function getConfig() { return read(CFG_KEY, null) || envConfig() }
 export function setConfig(url, anonKey) {
   const clean = (url || '').trim().replace(/\/+$/, '')
   if (!clean || !anonKey) { localStorage.removeItem(CFG_KEY); emit(); return }
@@ -50,6 +63,27 @@ export function setConsent(v) {
 }
 export function currentUser() { const s = getSession(); return s && s.user }
 export function householdId() { const s = getSession(); return s && s.householdId }
+
+// ---- Roles (admin vs family member) ----
+// The household creator is the 'owner' (admin); invited people are 'member'.
+export function role() { const s = getSession(); return (s && s.role) || null }
+export function isOwner() { return isSignedIn() && role() === 'owner' }
+export function isMember() { return isSignedIn() && role() === 'member' }
+
+// Collections a member's device is allowed to see/sync. Members get only their
+// own profile (people) and their tasks; sensitive areas (finance, documents,
+// garage…) never leave the admin's device in Phase 1.
+export const MEMBER_COLLECTIONS = ['people', 'tasks']
+function allowed(collection) { return !isMember() || MEMBER_COLLECTIONS.includes(collection) }
+
+// The invite carries only the household code (a link the member taps). The
+// project connection comes from build-time env, so no key is shared in chat.
+export function inviteCode() { return householdId() }
+export function inviteLink() {
+  if (typeof window === 'undefined') return ''
+  const { origin, pathname } = window.location
+  return `${origin}${pathname}#/join/${householdId() || ''}`
+}
 
 // ---- Status pub/sub (so the settings screen can reflect connection state) ----
 const listeners = new Set()
@@ -96,13 +130,15 @@ async function authRequest(kind, email, password) {
   return data // { access_token, refresh_token, user, ... }
 }
 
-export async function signIn(email, password) {
+// `joinCode` (optional) makes this a family-member sign-in: instead of creating
+// their own household, they join the admin's by its code.
+export async function signIn(email, password, joinCode) {
   const data = await authRequest('signin', email, password)
-  await establishSession(data)
+  await establishSession(data, joinCode)
 }
-export async function signUp(email, password) {
+export async function signUp(email, password, joinCode) {
   const data = await authRequest('signup', email, password)
-  await establishSession(data)
+  await establishSession(data, joinCode)
 }
 export function signOut() { setSession(null) }
 
@@ -122,12 +158,27 @@ async function refresh() {
   } catch { return false }
 }
 
-// After a fresh sign-in, persist the session then ensure a household exists.
-async function establishSession(data) {
-  setSession({ access_token: data.access_token, refresh_token: data.refresh_token, user: data.user, householdId: null })
+// After a fresh sign-in, persist the session then settle into a household:
+// join the admin's by code (family member) or ensure the user's own (admin).
+async function establishSession(data, joinCode) {
+  setSession({ access_token: data.access_token, refresh_token: data.refresh_token, user: data.user, householdId: null, role: null })
+  if (joinCode && String(joinCode).trim()) {
+    await joinHousehold(joinCode)  // sets householdId + role 'member'
+    return
+  }
   const hid = await ensureHousehold(data.user)
+  const r = await fetchRole(data.user.id, hid)
   const ses = getSession()
-  setSession({ ...ses, householdId: hid })
+  setSession({ ...ses, householdId: hid, role: r })
+}
+
+// Read the signed-in user's role within a household ('owner' | 'member').
+async function fetchRole(userId, hid) {
+  try {
+    const res = await authFetch(`/rest/v1/household_members?select=role&household_id=eq.${hid}&user_id=eq.${userId}`, { method: 'GET' })
+    const rows = await res.json().catch(() => [])
+    return (Array.isArray(rows) && rows[0] && rows[0].role) || 'member'
+  } catch { return 'member' }
 }
 
 // ---- Households / family ----
@@ -174,7 +225,7 @@ export async function joinHousehold(code) {
     body: JSON.stringify({ household_id: hid, user_id: ses.user.id, email: ses.user.email, role: 'member' }),
   })
   if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || 'Could not join — check the code.') }
-  setSession({ ...ses, householdId: hid })
+  setSession({ ...ses, householdId: hid, role: 'member' })
 }
 
 export async function listMembers() {
@@ -189,6 +240,7 @@ export async function listMembers() {
 // records whose data carries deletedAt, so this covers deletes too.
 export async function pushRecord(collection, record) {
   if (!isReady() || !hasConsent() || !record || !record.id) return
+  if (!allowed(collection)) return   // members only sync their scoped collections
   if (record.seed === true) return  // sample data stays local-only
   try {
     await authFetch('/rest/v1/records?on_conflict=household_id,id', {
@@ -204,7 +256,7 @@ export async function pushRecord(collection, record) {
 // Push every local record (first sync after signing in on a device with data).
 export async function pushAll() {
   if (!isReady() || !hasConsent()) return
-  const all = db.allRecords().filter(({ record }) => record.seed !== true)
+  const all = db.allRecords().filter(({ collection, record }) => record.seed !== true && allowed(collection))
   for (let i = 0; i < all.length; i += 200) {
     const batch = all.slice(i, i + 200).map(({ collection, record }) => ({
       household_id: householdId(), id: record.id, collection,
@@ -222,9 +274,26 @@ export async function pushAll() {
 export async function pullAll() {
   if (!isReady()) return null
   try {
-    const res = await authFetch(`/rest/v1/records?select=collection,data&household_id=eq.${householdId()}`, { method: 'GET' })
-    if (!res.ok) return null
-    const rows = await res.json().catch(() => [])
+    let rows
+    const hid = householdId()
+    const q = (path) => authFetch(`/rest/v1/records?select=collection,data&household_id=eq.${hid}${path}`, { method: 'GET' })
+    if (isMember()) {
+      // A member's device only ever fetches their OWN profile record and the
+      // tasks assigned to them — the rest of the family's data (other people,
+      // other tasks) is never even sent. (The Phase 2 RLS rules make this
+      // enforced server-side; today the app simply never asks for more.)
+      const uid = (currentUser() || {}).id
+      const [pr, tr] = await Promise.all([
+        q(`&collection=eq.people&data->>userId=eq.${uid}`),
+        q(`&collection=eq.tasks&data->>assigneeUserId=eq.${uid}`),
+      ])
+      if (!pr.ok || !tr.ok) return null
+      rows = [...(await pr.json().catch(() => [])), ...(await tr.json().catch(() => []))]
+    } else {
+      const res = await q('')
+      if (!res.ok) return null
+      rows = await res.json().catch(() => [])
+    }
     const byCollection = {}
     for (const r of rows) {
       if (!r || !r.collection) continue

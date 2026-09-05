@@ -61,3 +61,49 @@ describe('attachment storage — transport', () => {
     expect(cloud.isUploaded('x')).toBe(false)
   })
 })
+
+describe('family roles + member data scoping', () => {
+  const connectAs = (role, householdId = 'hid-1') => {
+    localStorage.setItem(CFG, JSON.stringify({ url: 'https://proj.supabase.co', anonKey: 'anon' }))
+    localStorage.setItem(SES, JSON.stringify({ access_token: 'tok', refresh_token: 'r', user: { id: 'u1', email: 'a@b.c' }, householdId, role }))
+    localStorage.setItem(CONSENT, '1')
+  }
+
+  test('isOwner / isMember reflect the session role', () => {
+    connectAs('owner'); expect(cloud.isOwner()).toBe(true); expect(cloud.isMember()).toBe(false)
+    connectAs('member'); expect(cloud.isMember()).toBe(true); expect(cloud.isOwner()).toBe(false)
+  })
+
+  test('a member never pushes collections outside their scope', async () => {
+    connectAs('member')
+    global.fetch = vi.fn(async () => ({ ok: true }))
+    await cloud.pushRecord('expenses', { id: 'e1', updatedAt: '2020-01-01' })
+    expect(global.fetch).not.toHaveBeenCalled()          // finance stays off the member's device
+    await cloud.pushRecord('tasks', { id: 't1', updatedAt: '2020-01-01' })
+    expect(global.fetch).toHaveBeenCalledTimes(1)         // their tasks do sync
+  })
+
+  test('a member only pulls their own profile + assigned tasks', async () => {
+    connectAs('member')
+    const calls = []
+    global.fetch = vi.fn(async (url) => { calls.push(url); return { ok: true, json: async () => [] } })
+    await cloud.pullAll()
+    const urls = calls.join(' | ')
+    expect(urls).toContain('collection=eq.people')
+    expect(urls).toContain('data->>userId=eq.u1')          // only their own profile record
+    expect(urls).toContain('collection=eq.tasks')
+    expect(urls).toContain('data->>assigneeUserId=eq.u1')  // only tasks assigned to them
+  })
+
+  test('the owner pulls everything (no scope filter)', async () => {
+    connectAs('owner')
+    global.fetch = vi.fn(async () => ({ ok: true, json: async () => [] }))
+    await cloud.pullAll()
+    expect(global.fetch.mock.calls[0][0]).not.toContain('collection=eq')
+  })
+
+  test('inviteLink targets the join route with the household id', () => {
+    connectAs('owner')
+    expect(cloud.inviteLink()).toContain('#/join/hid-1')
+  })
+})
