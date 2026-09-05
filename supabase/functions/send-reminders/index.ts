@@ -256,6 +256,65 @@ function briefBody(recs: any[], today: string) {
   return parts.length ? parts.join(' · ') : 'Your day is clear.'
 }
 
+const esc = (s: unknown) => String(s ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c] as string))
+const riyadhTime = (iso: string) => { try { return new Date(new Date(iso).getTime() + 3 * 3600 * 1000).toISOString().slice(11, 16) } catch { return '' } }
+
+// Fuller brief for the email body (the push stays concise). Returns text + HTML.
+function emailBrief(list: any[], date: string) {
+  const of = (col: string) => list.filter(r => r.collection === col && r.data && !r.data.deletedAt).map(r => r.data)
+  const open = of('tasks').filter((t: any) => t.status !== 'completed' && t.status !== 'cancelled')
+  const dueToday = open.filter((t: any) => dateOnly(t.dueDate) === date)
+  const overdue = open.filter((t: any) => { const d = dateOnly(t.dueDate); return d && d < date })
+  const waiting = open.filter((t: any) => t.status === 'waiting_me')
+  const appts = of('appointments').filter((a: any) => dateOnly(a.date) === date).sort((a: any, b: any) => (a.time || '').localeCompare(b.time || ''))
+  const rem = of('reminders').filter((r: any) => !r.done && r.remindAt && dateOnly(r.remindAt) <= date).sort((a: any, b: any) => String(a.remindAt).localeCompare(String(b.remindAt)))
+
+  const L: string[] = ['Good morning.', '', 'AGENDA']
+  appts.forEach((a: any) => L.push(`  ${a.time || '—'}  ${a.title || 'Appointment'}`))
+  rem.forEach((r: any) => L.push(`  ${riyadhTime(r.remindAt)}  (reminder) ${r.text || ''}`))
+  if (dueToday.length) L.push(`  Due today: ${dueToday.map((t: any) => t.title).filter(Boolean).join(', ')}`)
+  if (!appts.length && !rem.length && !dueToday.length) L.push('  Nothing scheduled today.')
+  if (overdue.length || waiting.length) {
+    L.push('', 'NEEDS ATTENTION')
+    if (overdue.length) L.push(`  ${overdue.length} overdue: ${overdue.slice(0, 5).map((t: any) => t.title).join(', ')}`)
+    if (waiting.length) L.push(`  ${waiting.length} waiting on you`)
+  }
+  L.push('', '— The Assistant')
+  const text = L.join('\n')
+
+  const rows: string[] = []
+  appts.forEach((a: any) => rows.push(`<tr><td style="padding:3px 12px 3px 0;color:#9a7b3a;white-space:nowrap">${esc(a.time || '—')}</td><td style="padding:3px 0">${esc(a.title || 'Appointment')}</td></tr>`))
+  rem.forEach((r: any) => rows.push(`<tr><td style="padding:3px 12px 3px 0;color:#9a7b3a;white-space:nowrap">${esc(riyadhTime(r.remindAt))}</td><td style="padding:3px 0">🔔 ${esc(r.text || '')}</td></tr>`))
+  const dueRow = dueToday.length ? `<p style="margin:6px 0;color:#333"><b>Due today:</b> ${esc(dueToday.map((t: any) => t.title).filter(Boolean).join(', '))}</p>` : ''
+  const emptyRow = (!appts.length && !rem.length && !dueToday.length) ? '<p style="color:#777;margin:6px 0">Nothing scheduled today.</p>' : ''
+  const attention = (overdue.length || waiting.length)
+    ? `<h3 style="margin:18px 0 6px;font-size:14px;letter-spacing:.04em;color:#b4462f;text-transform:uppercase">Needs attention</h3>` +
+      (overdue.length ? `<p style="margin:4px 0;color:#333">🔴 ${overdue.length} overdue: ${esc(overdue.slice(0, 5).map((t: any) => t.title).join(', '))}</p>` : '') +
+      (waiting.length ? `<p style="margin:4px 0;color:#333">🟠 ${waiting.length} waiting on you</p>` : '')
+    : ''
+  const html = `<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:520px;margin:0 auto;color:#222">` +
+    `<h2 style="font-size:20px;margin:0 0 4px">☀️ Good morning</h2>` +
+    `<h3 style="margin:16px 0 6px;font-size:14px;letter-spacing:.04em;color:#6b6a60;text-transform:uppercase">Agenda</h3>` +
+    (rows.length ? `<table style="border-collapse:collapse;font-size:14px">${rows.join('')}</table>` : '') + dueRow + emptyRow +
+    attention +
+    `<p style="margin-top:22px;color:#999;font-size:12px">— The Assistant</p></div>`
+  return { text, html }
+}
+
+async function sendBriefEmail(to: string[], subject: string, text: string, html: string) {
+  const key = Deno.env.get('RESEND_API_KEY')
+  if (!key || !to.length) return false
+  const from = Deno.env.get('BRIEF_FROM') || 'The Assistant <onboarding@resend.dev>'
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ from, to, subject, text, html }),
+    })
+    return res.ok
+  } catch { return false }
+}
+
 async function runDailyBrief(supabase: any) {
   const { date, mins } = riyadhParts()
   if (mins < 7 * 60 + 30 || mins >= 10 * 60) return 0 // only the 07:30–10:00 window
@@ -272,14 +331,26 @@ async function runDailyBrief(supabase: any) {
   for (const [hid, list] of byHouse) {
     const { data: seen } = await supabase.from('push_alerts').select('alert_key').eq('household_id', hid).eq('alert_key', key)
     if (seen && seen.length) continue // already sent today
-    const { data: subs } = await supabase.from('push_subscriptions').select('endpoint,subscription').eq('household_id', hid)
-    if (!subs || !subs.length) continue
-    const payload = JSON.stringify({ title: '☀️ Good morning', body: briefBody(list, date), tag: 'daily-brief' })
     let delivered = false
-    for (const s of subs) {
-      try { await webpush.sendNotification((s as any).subscription, payload); delivered = true }
-      catch (e: any) { if (e && (e.statusCode === 404 || e.statusCode === 410)) await supabase.from('push_subscriptions').delete().eq('endpoint', (s as any).endpoint) }
+
+    // Push to every device in the household.
+    const { data: subs } = await supabase.from('push_subscriptions').select('endpoint,subscription').eq('household_id', hid)
+    if (subs && subs.length) {
+      const payload = JSON.stringify({ title: '☀️ Good morning', body: briefBody(list, date), tag: 'daily-brief' })
+      for (const s of subs) {
+        try { await webpush.sendNotification((s as any).subscription, payload); delivered = true }
+        catch (e: any) { if (e && (e.statusCode === 404 || e.statusCode === 410)) await supabase.from('push_subscriptions').delete().eq('endpoint', (s as any).endpoint) }
+      }
     }
+
+    // Email the fuller brief to the household's members (needs RESEND_API_KEY).
+    const { data: members } = await supabase.from('household_members').select('email').eq('household_id', hid)
+    const emails = [...new Set((members ?? []).map((m: any) => m.email).filter(Boolean))] as string[]
+    if (emails.length) {
+      const { text, html } = emailBrief(list, date)
+      if (await sendBriefEmail(emails, '☀️ Your day', text, html)) delivered = true
+    }
+
     if (delivered) { sent++; await supabase.from('push_alerts').insert({ household_id: hid, alert_key: key }) }
   }
   return sent
