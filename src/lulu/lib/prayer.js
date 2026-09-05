@@ -154,3 +154,11 @@ export function hijriDate(date = new Date(), lang = 'en') {
     return new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'long', year: 'numeric' }).format(date)
   } catch { return '' }
 }
+
+// Compact Hijri (day + abbreviated month) for the Today calendar tile.
+export function hijriShort(date = new Date(), lang = 'en') {
+  try {
+    const loc = (lang === 'ar' ? 'ar-SA' : 'en-US') + '-u-ca-islamic-umalqura'
+    return new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'short' }).format(date)
+  } catch { return '' }
+}

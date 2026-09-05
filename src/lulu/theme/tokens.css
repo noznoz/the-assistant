@@ -66,26 +66,38 @@
   --line: rgba(27, 26, 23, 0.09);
   --line-2: rgba(27, 26, 23, 0.14);
   --scrim: rgba(20, 18, 14, 0.36);
+  /* Refinement tokens — light theme keeps a flat, paper-like surface. */
+  --card-edge: 0 0;
+  --ambient: none;
 }
 
 /* ---- Dark theme ---- */
 [data-theme="dark"] {
-  --bg: #0E0F12;
-  --bg-2: #14161A;
-  --surface: #191B20;
-  --surface-2: #1F2229;
-  --elevated: #21242C;
-  --ink: #F3F1EC;
-  --ink-2: #B9B6AE;
-  --ink-3: #7E7C75;
-  --line: rgba(255, 255, 255, 0.08);
+  /* Deeper, warmer canvas — reads as lit, not flat black. */
+  --bg: #0A0B0E;
+  --bg-2: #111318;
+  --surface: #17191F;
+  --surface-2: #1E212A;
+  --elevated: #232732;
+  --ink: #F6F3ED;
+  --ink-2: #C2BEB4;
+  --ink-3: #948E81;          /* brighter tertiary — legible meta text */
+  --line: rgba(255, 255, 255, 0.07);
   --line-2: rgba(255, 255, 255, 0.14);
-  --scrim: rgba(0, 0, 0, 0.55);
+  --scrim: rgba(0, 0, 0, 0.6);
   --brand-tint: rgba(216, 172, 85, 0.16);
-  --shadow-0: 0 1px 2px rgba(0,0,0,0.4);
-  --shadow-1: 0 1px 2px rgba(0,0,0,0.4), 0 6px 20px rgba(0,0,0,0.35);
-  --shadow-2: 0 12px 44px rgba(0,0,0,0.55);
+  /* Semantic colors lifted so glyphs read cleanly on the deep ground. */
+  --ok: #43B588;    --ok-tint: rgba(67, 181, 136, 0.13);
+  --warn: #E6A24E;  --warn-tint: rgba(230, 162, 78, 0.13);
+  --danger: #EE7B73; --danger-tint: rgba(238, 123, 115, 0.13);
+  --shadow-0: 0 1px 2px rgba(0,0,0,0.45);
+  --shadow-1: 0 1px 1px rgba(0,0,0,0.5), 0 12px 36px rgba(0,0,0,0.5);
+  --shadow-2: 0 16px 50px rgba(0,0,0,0.6);
   --shadow-brand: 0 8px 24px rgba(0,0,0,0.5);
+  /* Hairline top-edge highlight — lifts surfaces off the ground. */
+  --card-edge: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  /* Ambient amber warmth behind the top of the screen. */
+  --ambient: radial-gradient(120% 60% at 50% -6%, rgba(200,150,62,0.15), rgba(200,150,62,0.04) 44%, transparent 72%);
 }
 
 /* ============================================================================
