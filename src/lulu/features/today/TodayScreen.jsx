@@ -6,7 +6,7 @@ import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { greetingKey, fmtLongDate, fmtTime, relativeDay, isToday, isOverdue, daysUntil, money, expenseSar } from '../../lib/format.js'
 import { splitReminders } from '../../lib/reminders.js'
 import { normalizeQuickActions, quickActionDef } from '../../lib/quickActions.js'
-import { hijriDate } from '../../lib/prayer.js'
+import { hijriDate, hijriShort } from '../../lib/prayer.js'
 import { buildBrief } from '../../lib/brief.js'
 import { buildDayBrief } from '../../lib/dayBrief.js'
 import { nextPrayer, fmtPrayer, findCity } from '../../lib/prayer.js'
@@ -116,6 +116,7 @@ export default function TodayScreen({ go }) {
   const sectionNodes = {
     brief: (
       <div className="brief">
+        <span className="sheen" aria-hidden="true" />
         <div className="spark"><Icon name="sparkle" size={130} /></div>
         <h3><Icon name="sparkle" size={18} /> {t('morningBrief')}</h3>
         <p>{brief}</p>
@@ -327,8 +328,16 @@ export default function TodayScreen({ go }) {
 
       <div className="screen">
         <div className="hero">
-          <div className="greet">{t(greetingKey())}{settings.name ? ',' : ''}</div>
-          <h1>{settings.name || 'The Assistant'}</h1>
+          <div>
+            <div className="greet">{t(greetingKey())}{settings.name ? ',' : ''}</div>
+            <h1>{settings.name || 'The Assistant'}</h1>
+          </div>
+          <div className="caltile" aria-label={fmtLongDate(new Date(), lang)}>
+            <div className="chead">{new Date().toLocaleDateString(lang === 'ar' ? 'ar' : 'en-US', { weekday: 'short' })}</div>
+            <div className="cday">{new Date().toLocaleDateString(lang === 'ar' ? 'ar' : 'en-US', { day: 'numeric' })}</div>
+            <div className="cmon">{new Date().toLocaleDateString(lang === 'ar' ? 'ar' : 'en-US', { month: 'short' })}</div>
+            <div className="chij">{hijriShort(new Date(), lang)}</div>
+          </div>
         </div>
 
         <QuickCapture toast={toast} go={go} />
