@@ -73,6 +73,26 @@ export function buildDayBrief({ tasks = [], expenses = [], appointments = [], re
   return out.join('\n')
 }
 
+// A one-line summary for a notification (the app icon / a push body has little
+// room). Mirrored server-side by the send-reminders Edge Function so the 7:30
+// daily push reads the same. Kept deliberately short.
+export function briefSummary({ tasks = [], appointments = [], reminders = [], now = new Date(), lang = 'en' } = {}) {
+  const today = now.toISOString().slice(0, 10)
+  const dOnly = (d) => (typeof d === 'string' ? d.slice(0, 10) : '')
+  const open = tasks.filter(t => t.status !== 'completed' && t.status !== 'cancelled')
+  const dueToday = open.filter(t => dOnly(t.dueDate) === today)
+  const overdue = open.filter(t => { const d = dOnly(t.dueDate); return d && d < today })
+  const appts = appointments.filter(a => dOnly(a.date) === today).sort((a, b) => (a.time || '').localeCompare(b.time || ''))
+  const rem = reminders.filter(r => !r.done && r.remindAt && dOnly(r.remindAt) <= today)
+  const L = lang === 'ar'
+  const parts = []
+  if (dueToday.length) parts.push(L ? `${dueToday.length} مستحقة اليوم` : `${dueToday.length} due today`)
+  if (overdue.length) parts.push(L ? `${overdue.length} متأخرة` : `${overdue.length} overdue`)
+  if (appts.length) parts.push(`${appts[0].time ? appts[0].time + ' ' : ''}${appts[0].title}${appts.length > 1 ? ` +${appts.length - 1}` : ''}`)
+  if (rem.length) parts.push(L ? `${rem.length} تذكير` : `${rem.length} reminder${rem.length > 1 ? 's' : ''}`)
+  return parts.length ? parts.join(' · ') : (L ? 'يومك صافٍ.' : 'Your day is clear.')
+}
+
 // Optional: rewrite the deterministic brief warmly via Claude. Returns null on
 // any failure so the caller keeps the rule-based text.
 export async function aiDayBrief(brief, { apiKey, model, lang = 'en' } = {}) {
