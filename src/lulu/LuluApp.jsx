@@ -10,9 +10,12 @@ import ErrorBoundary from './ui/ErrorBoundary.jsx'
 import Icon from './ui/Icon.jsx'
 import { usePullToRefresh } from './ui/usePullToRefresh.js'
 import LockGate from './ui/LockGate.jsx'
-import { setBadge, maybeDailyBrief } from './lib/notify.js'
-import { buildBrief } from './lib/brief.js'
-import { isToday, isOverdue } from './lib/format.js'
+import { setBadge, maybeDailyBrief, runDueAlerts } from './lib/notify.js'
+import { fireDueReminders } from './lib/reminders.js'
+import { refreshPush } from './lib/push.js'
+import { briefSummary } from './lib/dayBrief.js'
+import { unreadCount } from './lib/notifications.js'
+import { useNotificationFeed } from './store/useNotificationFeed.js'
 
 import TodayScreen from './features/today/TodayScreen.jsx'
 import TasksScreen from './features/tasks/TasksScreen.jsx'
@@ -78,6 +81,7 @@ import CloudScreen from './features/cloud/CloudScreen.jsx'
 import AuthScreen from './features/auth/AuthScreen.jsx'
 import MemberShell from './features/member/MemberShell.jsx'
 import * as cloud from './lib/cloud.js'
+import RemindersScreen from './features/reminders/RemindersScreen.jsx'
 
 const MAIN_TABS = ['today', 'tasks', 'garage', 'expenses', 'more']
 
@@ -107,20 +111,48 @@ function StorageAlert() {
 
 function Router() {
   const { route, tab, param, go } = useRouter('today')
-  const { data, reloadAll } = useStore()
+  const { data, reloadAll, patch } = useStore()
   const { settings } = useSettings()
-  const { lang } = useT()
+  const { t, lang } = useT()
 
-  // Keep the home-screen badge in sync with what needs attention, and fire the
-  // daily brief once per day — only when the user has enabled notifications.
+  // Fire any due personal reminders (while the app is open or freshly reopened).
+  useEffect(() => {
+    const check = () => fireDueReminders(data.reminders || [], { patch: (id, p) => patch('reminders', id, p) })
+    check()
+    const t = setInterval(check, 30000)
+    const onVis = () => { if (document.visibilityState === 'visible') check() }
+    document.addEventListener('visibilitychange', onVis)
+    return () => { clearInterval(t); document.removeEventListener('visibilitychange', onVis) }
+  }, [data.reminders, patch])
+
+  // Keep this device's push subscription alive so background reminders keep
+  // arriving while the app is closed. iOS can silently drop the subscription;
+  // re-registering it on open (and on return to foreground) self-heals it.
+  useEffect(() => {
+    refreshPush()
+    const onVis = () => { if (document.visibilityState === 'visible') refreshPush() }
+    document.addEventListener('visibilitychange', onVis)
+    return () => document.removeEventListener('visibilitychange', onVis)
+  }, [])
+
+  // Keep the home-screen icon badge in sync with the notification centre (the
+  // same unread count as the in-app bell — tasks, renewals, reminders, etc.),
+  // and fire the daily brief once per day. Only when notifications are enabled.
+  const feed = useNotificationFeed()
   useEffect(() => {
     if (!settings.notifications) { setBadge(0); return }
-    const open = (data.tasks || []).filter(x => x.status !== 'completed' && x.status !== 'cancelled')
-    const attention = open.filter(x => isOverdue(x.dueDate) || isToday(x.dueDate) || x.status === 'waiting_me').length
-    setBadge(attention)
-    const brief = buildBrief({ tasks: data.tasks || [], expenses: data.expenses || [], vehicles: data.vehicles || [], settings, lang })
-    maybeDailyBrief(settings.name ? `Good morning, ${settings.name}` : 'Your morning brief', brief)
-  }, [data.tasks, data.expenses, data.vehicles, settings.notifications, lang])
+    setBadge(unreadCount(feed, settings.notificationsSeen))
+    // Sound alert for anything dated that's due today or overdue (deduped).
+    runDueAlerts(feed, { enabled: settings.notifications, heading: t('dueToday') })
+    // Morning brief: fire once per day, the first time the app is open at/after
+    // 7:30am. (While the app is closed, the send-reminders Edge Function pushes
+    // the same brief at 7:30 — see docs/PUSH.md.)
+    const mins = new Date().getHours() * 60 + new Date().getMinutes()
+    if (mins >= 7 * 60 + 30) {
+      const summary = briefSummary({ tasks: data.tasks || [], appointments: data.appointments || [], reminders: data.reminders || [], lang })
+      maybeDailyBrief(settings.name ? `☀️ ${t('goodMorning')}, ${settings.name}` : `☀️ ${t('goodMorning')}`, summary)
+    }
+  }, [feed, settings.notifications, settings.notificationsSeen, lang])
 
   // Pull-to-refresh: re-read local data and check for a new app version.
   const onRefresh = useCallback(async () => {
@@ -148,6 +180,7 @@ function Router() {
       case 'trips': return <TripsScreen go={go} />
       case 'reports': return <ReportsScreen go={go} />
       case 'notifications': return <NotificationsScreen go={go} />
+      case 'reminders': return <RemindersScreen go={go} />
       case 'calendar': return <CalendarScreen go={go} />
       case 'settings': return <SettingsScreen go={go} />
       case 'profile': return <ProfileScreen go={go} />

@@ -4,7 +4,7 @@ import { Sheet, Field, Input, TextArea, Select, Button, Chip } from '../../ui/pr
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { VEHICLE_TYPES, OWNERSHIP_STATUSES, label } from '../../lib/domain.js'
-import { imageToDataURL } from '../../lib/files.js'
+import { saveCloudPhoto } from '../../lib/files.js'
 import { usePhotoEditor } from '../../ui/PhotoEditor.jsx'
 
 export default function VehicleEditor({ initial, onClose, onSaved, onDeleted }) {
@@ -34,7 +34,7 @@ export default function VehicleEditor({ initial, onClose, onSaved, onDeleted }) 
     if (!file) return
     photo.open(file, async (edited) => {
       setBusy(true)
-      try { const url = await imageToDataURL(edited); if (url) setF(prev => ({ ...prev, photo: url, photoPos: '50% 50%' })) }
+      try { const out = await saveCloudPhoto(edited, { thumbMax: 640, fullMax: 2000 }); if (out.photo) setF(prev => ({ ...prev, ...out, photoPos: '50% 50%' })) }
       finally { setBusy(false) }
     }, { aspect: 16 / 9, size: 1400 })
   }

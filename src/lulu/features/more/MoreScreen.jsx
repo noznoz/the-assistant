@@ -21,6 +21,7 @@ const GROUPS = [
   },
   {
     key: 'grpPlan', tint: 't-info', items: [
+      { id: 'reminders', icon: 'bell' },
       { id: 'week', icon: 'calendar' },
       { id: 'calendar', icon: 'calendar' },
       { id: 'appointments', icon: 'clock', collection: 'appointments' },

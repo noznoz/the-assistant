@@ -352,8 +352,19 @@ export const ACCESSORY_GROUPS = [
   { id: 'protection', en: 'Protection', ar: 'حماية', icon: 'shield' },
 ]
 export const accessoryGroup = (a) => { const g = a && a.group; return ACCESSORY_GROUPS.some(x => x.id === g) ? g : 'accessory' }
+
+// Top-level type: a bike 'accessory' or personal 'gear' (helmet, gloves,
+// camera…). Records saved before types existed derive it from the legacy group.
+export const ACCESSORY_TYPES = [
+  { id: 'accessory', en: 'Accessory', ar: 'إكسسوار', icon: 'wrench' },
+  { id: 'gear', en: 'Gears', ar: 'معدات', icon: 'shield' },
+]
+export const accessoryType = (a) => {
+  if (a && (a.type === 'accessory' || a.type === 'gear')) return a.type
+  return (a && accessoryGroup(a) === 'gears') ? 'gear' : 'accessory'
+}
 // Full cost of an accessory: item + shipping + installation.
-export const accessoryTotal = (a) => (Number(a.cost) || 0) + (Number(a.shipping) || 0) + (Number(a.install) || 0)
+export const accessoryTotal = (a) => (Number(a.cost) || 0) * (Number(a.quantity) || 1) + (Number(a.shipping) || 0) + (Number(a.install) || 0)
 export const findDocCategory = byId(DOC_CATEGORIES)
 
 export function label(item, lang) {

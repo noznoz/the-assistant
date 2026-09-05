@@ -15,7 +15,7 @@ export const COLLECTIONS = [
   'properties', 'valuables', 'memberships', 'projects', 'subscriptions', 'rewards',
   'people', 'groups', 'documents', 'trips', 'notes', 'notifications', 'wishlist', 'goals', 'appointments',
   'staff', 'propertylog', 'itinerary', 'departments', 'members', 'meetings', 'spiritual', 'giving',
-  'vaults',
+  'vaults', 'reminders',
 ]
 
 function keyFor(name) { return `${NS}:${name}` }
@@ -158,6 +158,7 @@ export const DEFAULT_SETTINGS = {
   notificationsSeen: [], // ids of notification-feed items already viewed
   accounts: ['Salary account', 'Other account'], // funding accounts an expense can be paid from
   dashboard: null,       // Today-screen card order/visibility (null = default)
+  homeStyle: 'classic',  // Today-screen layout: 'classic' | 'focus'
   targetAllocation: {},  // desired investment mix by type { [typeId]: percent }
   favorites: [],         // pinned section ids shown at the top of More
   navTabs: null,         // user-chosen middle bottom-bar tabs (null = default)

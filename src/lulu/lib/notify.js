@@ -61,6 +61,34 @@ export async function runRenewalReminders(items = [], { enabled, heading } = {})
   if (changed) { try { localStorage.setItem(RENEWAL_KEY, JSON.stringify(sent)) } catch { /* ignore */ } }
 }
 
+// Fire a sound alert for any dated item that is due today or overdue — tasks,
+// appointments, subscriptions, birthdays, installments, renewals on their day,
+// etc. Driven by the notification feed's `soon` flag so there's a single source
+// of truth. De-duplicated per feed-item id (one ping each), and self-pruning:
+// ids that leave the "soon" set are forgotten so a recurring item (e.g. next
+// year's birthday) can alert again. Reminders fire via their own path.
+const DUE_ALERT_KEY = 'lulu:dueAlerts'
+
+export async function runDueAlerts(feed = [], { enabled, heading } = {}) {
+  if (!enabled) return
+  if (!notificationsSupported() || Notification.permission !== 'granted') return
+  let sent
+  try { sent = JSON.parse(localStorage.getItem(DUE_ALERT_KEY) || '{}') } catch { sent = {} }
+  if (!sent || typeof sent !== 'object') sent = {}
+  const soon = (feed || []).filter(it => it && it.soon)
+  const soonIds = new Set(soon.map(it => it.id))
+  let changed = false
+  for (const it of soon) {
+    if (sent[it.id]) continue
+    // eslint-disable-next-line no-await-in-loop
+    await showNotification(heading || 'Due today', it.meta ? `${it.title} · ${it.meta}` : it.title, 'due-' + it.id)
+    sent[it.id] = new Date().toISOString().slice(0, 10)
+    changed = true
+  }
+  for (const k of Object.keys(sent)) { if (!soonIds.has(k)) { delete sent[k]; changed = true } }
+  if (changed) { try { localStorage.setItem(DUE_ALERT_KEY, JSON.stringify(sent)) } catch { /* ignore */ } }
+}
+
 // Fire the daily brief at most once per calendar day.
 const BRIEF_KEY = 'lulu:lastBrief'
 export async function maybeDailyBrief(title, body) {

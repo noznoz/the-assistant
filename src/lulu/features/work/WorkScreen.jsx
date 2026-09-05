@@ -7,6 +7,7 @@ import { PRIORITIES, findPriority, findStatus, ROLE_LEVELS, roleLabel, label } f
 import { fmtDate, relativeDay, isOverdue, todayISO } from '../../lib/format.js'
 import { whatsappToPerson, formatAssignment, formatTaskDetail, emailShare, share } from '../../lib/share.js'
 import { teamSize, taskMemberIds, assigneeSummary } from '../../lib/org.js'
+import { buildReminderFields, reminderTimes, MAX_TIMES } from '../../lib/reminders.js'
 import { uid } from '../../store/db.js'
 import { pickContacts, contactPickerSupported } from '../../lib/contacts.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
@@ -519,7 +520,7 @@ function MemberEditor({ departmentId, team = [], initial, onClose, onSaved }) {
     const saved = initial.id ? members.save({ ...rec, id: initial.id }) : members.add(rec)
     // Choosing the "Head" level (or being the first member) sets the department head.
     if (f.role === 'head' || (!initial.id && !f.reportsToId && team.length === 0)) departments.patch(departmentId, { headId: saved.id })
-    onSaved && onSaved(); onClose()
+    onSaved && onSaved(saved); onClose()
   }
   return (
     <Sheet title={initial.id ? t('editMember') : t('addMember')} onClose={onClose}
@@ -652,9 +653,126 @@ const WORK_STATUSES = ['new', 'in_progress', 'waiting_someone', 'waiting_me', 'c
 
 const initialsOf = (name) => (name || '?').split(' ').filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase()
 
+// Local datetime-local <-> ISO helpers for the task alert pickers.
+const pad2 = (n) => String(n).padStart(2, '0')
+const dtToInput = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`
+const isoToInput = (iso) => { const d = new Date(iso); return isNaN(d) ? '' : dtToInput(d) }
+const inputToIso = (s) => { const d = new Date(s); return isNaN(d) ? null : d.toISOString() }
+const defaultAlert = () => { const d = new Date(Date.now() + 60 * 60 * 1000); d.setSeconds(0, 0); return dtToInput(d) }
+
+// Task alerts reuse the reminders pipeline (on-device + background push): each
+// task with alert times has one linked reminder (keyed by taskId) whose text
+// tracks the task title. This keeps the whole notification machinery in one
+// place instead of duplicating firing logic for tasks.
+function syncTaskAlert(reminders, task, alertIso) {
+  if (!task || !task.id) return
+  const existing = reminders.items.find(r => r.taskId === task.id)
+  if (!alertIso.length) { if (existing) reminders.remove(existing.id); return }
+  const fields = buildReminderFields(task.title, alertIso)
+  if (existing) reminders.patch(existing.id, { ...fields, taskId: task.id, done: false })
+  else reminders.add({ ...fields, taskId: task.id, done: false })
+}
+
+// Order a department's members as they sit in the org chart: each manager
+// followed by their reports, indented by reporting depth (head first).
+function flattenDeptTree(dep, team) {
+  const rows = []
+  const childrenOf = (pid) => team.filter(m => (m.reportsToId || '') === pid)
+  const roots = team.filter(m => !m.reportsToId || !team.some(x => x.id === m.reportsToId))
+  roots.sort((a, b) => (b.id === dep.headId ? 1 : 0) - (a.id === dep.headId ? 1 : 0))
+  const visit = (m, depth) => { rows.push({ member: m, depth }); childrenOf(m.id).forEach(c => visit(c, depth + 1)) }
+  roots.forEach(r => visit(r, 0))
+  team.forEach(m => { if (!rows.some(r => r.member.id === m.id)) rows.push({ member: m, depth: 0 }) }) // safety (cycles)
+  return rows
+}
+
+// Single-select team-member picker. Type a name to filter (dropdown-style), or
+// browse the whole org chart (departments → people, indented by who reports to
+// whom). Once someone is chosen it shows them with a "change" control.
+function OrgMemberPicker({ departments, members, value, onSelect, onAddMember, t }) {
+  const [query, setQuery] = useState('')
+  const box = { border: '1px solid var(--line-2)', borderRadius: 'var(--r-md)', overflow: 'hidden' }
+  const deptName = (id) => (departments.find(d => d.id === id) || {}).name || t('other')
+  const Avatar = ({ name, on }) => (
+    <span style={{ width: 28, height: 28, borderRadius: '50%', background: on ? 'var(--brand-600)' : 'var(--surface-2)', color: on ? '#fff' : 'var(--ink-2)', fontSize: 10.5, fontWeight: 750, display: 'grid', placeItems: 'center', flexShrink: 0 }}>{initialsOf(name)}</span>
+  )
+
+  // Chosen state: show the selected member with a clear/change button.
+  const selected = members.find(m => m.id === value)
+  if (selected) {
+    return (
+      <div style={{ ...box, display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px' }}>
+        <Avatar name={selected.name} on />
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span style={{ display: 'block', fontSize: 14.5, fontWeight: 700, color: 'var(--ink-1)' }}>{selected.name}</span>
+          <span style={{ display: 'block', fontSize: 12, color: 'var(--ink-3)' }}>{[selected.title, deptName(selected.departmentId)].filter(Boolean).join(' · ')}</span>
+        </span>
+        <button type="button" className="link-btn" style={{ fontSize: 13, fontWeight: 600, color: 'var(--brand-600)' }} onClick={() => onSelect('')}>{t('change')}</button>
+      </div>
+    )
+  }
+
+  const Row = ({ member, depth = 0, subtitle }) => (
+    <button type="button" onClick={() => { onSelect(member.id); setQuery('') }}
+      style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'start', padding: '10px 12px', paddingInlineStart: 12 + depth * 18, background: 'transparent', border: 0 }}>
+      <Avatar name={member.name} />
+      <span style={{ flex: 1, minWidth: 0 }}>
+        <span style={{ display: 'block', fontSize: 14.5, fontWeight: 550, color: 'var(--ink-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member.name}</span>
+        {(subtitle || member.title) && <span style={{ display: 'block', fontSize: 12, color: 'var(--ink-3)' }}>{subtitle || member.title}</span>}
+      </span>
+    </button>
+  )
+
+  const ql = query.trim().toLowerCase()
+  const matches = ql ? members.filter(m => (m.name || '').toLowerCase().includes(ql)) : []
+  const withDept = new Set(departments.map(d => d.id))
+  const orphans = members.filter(m => !m.departmentId || !withDept.has(m.departmentId))
+  const groups = [
+    ...departments.map(d => ({ dep: d, team: members.filter(m => m.departmentId === d.id) })),
+    ...(orphans.length ? [{ dep: { id: '__none', name: t('other'), headId: '' }, team: orphans }] : []),
+  ].filter(g => g.team.length)
+
+  return (
+    <div style={box}>
+      {/* Type-to-find */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 12px', borderBottom: '1px solid var(--line)' }}>
+        <Icon name="search" size={16} style={{ color: 'var(--ink-3)', flexShrink: 0 }} />
+        <input className="input" style={{ border: 0, background: 'transparent', padding: '11px 0', flex: 1 }} value={query} onChange={e => setQuery(e.target.value)} placeholder={t('searchTeamMember')} />
+        {query && <button type="button" className="iconbtn" aria-label={t('clear')} onClick={() => setQuery('')}><Icon name="x" size={15} /></button>}
+      </div>
+
+      <div style={{ maxHeight: 260, overflowY: 'auto' }}>
+        {ql ? (
+          matches.length
+            ? matches.map(m => <Row key={m.id} member={m} subtitle={[m.title, deptName(m.departmentId)].filter(Boolean).join(' · ')} />)
+            : <div style={{ padding: '12px', fontSize: 13, color: 'var(--ink-3)' }}>{t('nothingHere')}</div>
+        ) : groups.length === 0 ? (
+          <div style={{ padding: '12px', fontSize: 13, color: 'var(--ink-3)' }}>{t('noTeamMembers')}</div>
+        ) : (
+          groups.map(({ dep, team }) => (
+            <div key={dep.id}>
+              <div style={{ fontSize: 11.5, fontWeight: 750, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.04em', padding: '8px 12px 4px', background: 'var(--surface-2)' }}>{dep.name}</div>
+              {flattenDeptTree(dep, team).map(({ member, depth }) => <Row key={member.id} member={member} depth={depth} />)}
+            </div>
+          ))
+        )}
+      </div>
+
+      {onAddMember && (
+        <button type="button" onClick={onAddMember}
+          style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'start', padding: '11px 12px', background: 'transparent', border: 0, borderTop: '1px solid var(--line)', color: 'var(--brand-600)', fontSize: 14, fontWeight: 600 }}>
+          <Icon name="plus" size={16} /> {t('addTeamMember')}
+        </button>
+      )}
+    </div>
+  )
+}
+
 function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, onSaved }) {
   const { t, lang } = useT()
+  const { settings } = useSettings()
   const tasks = useCollection('tasks')
+  const reminders = useCollection('reminders')
   const allMembers = useCollection('members')
   const departments = useCollection('departments')
   const [f, setF] = useState({
@@ -662,6 +780,19 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
     memberId: '', boss: '', classification: 'work', subtasks: [], repeat: '', ...initial,
   })
   const [memberIds, setMemberIds] = useState(() => taskMemberIds(initial))
+  // Quick-add a team member from the delegate picker (boss tasks) when there's
+  // no org chart yet. Ensures a department exists, then opens the member editor.
+  const [addMemberDept, setAddMemberDept] = useState(null)
+  const startAddMember = () => {
+    let depId = departments.items[0]?.id
+    if (!depId) { const dep = departments.add({ name: t('myTeam') }); depId = dep.id }
+    setAddMemberDept(depId)
+  }
+  // Up to 3 alert times for this task, kept as datetime-local input strings.
+  const [alertTimes, setAlertTimes] = useState(() => (Array.isArray(initial?.alertTimes) ? initial.alertTimes : []).map(isoToInput).filter(Boolean))
+  const addAlert = () => setAlertTimes(a => a.length < MAX_TIMES ? [...a, defaultAlert()] : a)
+  const setAlertAt = (i, v) => setAlertTimes(a => a.map((x, j) => j === i ? v : x))
+  const removeAlert = (i) => setAlertTimes(a => a.filter((_, j) => j !== i))
   const [deptIds, setDeptIds] = useState(() => {
     if (Array.isArray(initial?.departmentIds) && initial.departmentIds.length) return initial.departmentIds
     if (mode === 'dept' && departmentId) return [departmentId]
@@ -712,34 +843,55 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
   const secStyle = { display: 'block', fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '12px 2px 7px' }
   const q = memberQuery.trim().toLowerCase()
 
-  const submit = () => {
-    if (!f.title.trim()) { setErr(t('required')); return }
+  const chosenMember = allMembers.items.find(m => m.id === memberIds[0])
+  const notifyMember = mode === 'boss' && chosenMember && (chosenMember.whatsapp || chosenMember.mobile) ? chosenMember : null
+
+  // Persist the task; returns the saved record, or null if validation failed.
+  const persist = () => {
+    if (!f.title.trim()) { setErr(t('required')); return null }
+    // Assignment summary. Boss tasks delegate to a single member — show their
+    // name directly; other modes summarise the multi-select (collapsing whole
+    // departments). Falls back to any free-text assignee.
     const summary = mode === 'boss'
-      ? (f.assignedTo || '')
-      : assigneeSummary({ memberIds }, allMembers.items, departments.items)
+      ? (chosenMember ? chosenMember.name : (f.assignedTo || ''))
+      : (memberIds.length ? assigneeSummary({ memberIds }, allMembers.items, departments.items) : (f.assignedTo || ''))
     // Departments: the chosen set (falling back to the editor's dept or the
     // first assignee's). The first one is kept as the primary for legacy use.
     const firstMember = allMembers.items.find(m => m.id === memberIds[0])
     let dIds = deptIds.slice()
     if (!dIds.length) { const fb = mode === 'dept' ? departmentId : (f.departmentId || (firstMember ? firstMember.departmentId : '')); if (fb) dIds = [fb] }
+    const alertIso = alertTimes.map(inputToIso).filter(Boolean)
     const rec = {
       ...f, title: f.title.trim(), classification: 'work',
       memberIds, memberId: memberIds[0] || '',
       departmentIds: dIds, departmentId: dIds[0] || '',
-      assignedTo: summary,
-      status: mode !== 'boss' && memberIds.length && f.status === 'new' ? 'waiting_someone' : f.status,
+      assignedTo: summary, alertTimes: alertIso,
+      status: memberIds.length && f.status === 'new' ? 'waiting_someone' : f.status,
     }
-    initial.id ? tasks.save({ ...rec, id: initial.id }) : tasks.add(rec)
+    const saved = initial.id ? tasks.save({ ...rec, id: initial.id }) : tasks.add(rec)
+    syncTaskAlert(reminders, saved, alertIso)
+    return saved
+  }
+  const submit = () => { const s = persist(); if (s) { onSaved && onSaved(); onClose() } }
+  // Save, then hand the task off to the assignee over WhatsApp.
+  const submitAndNotify = () => {
+    const s = persist(); if (!s) return
+    if (notifyMember) {
+      const detail = formatTaskDetail(s, lang, settings, { recipient: (notifyMember.name || '').split(' ')[0] })
+      whatsappToPerson(notifyMember, detail)
+    }
     onSaved && onSaved(); onClose()
   }
   const title = mode === 'boss'
     ? (f.boss === 'down' ? t('assignedByBoss') : t('toDiscussWithBoss'))
     : (initial.id ? t('editTask') : t('newTask'))
   return (
+    <>
     <Sheet title={title} onClose={onClose}
       footer={<div className="stack">
+        {notifyMember && <Button block icon="whatsapp" onClick={submitAndNotify} style={{ background: 'var(--ok)', color: '#fff', border: 0 }}>{t('saveAndNotify')}</Button>}
         <Button variant="primary" block onClick={submit}>{t('save')}</Button>
-        {initial.id && <Button block variant="danger" icon="trash" onClick={() => { tasks.remove(initial.id); onClose() }}>{t('delete')}</Button>}
+        {initial.id && <Button block variant="danger" icon="trash" onClick={() => { syncTaskAlert(reminders, { id: initial.id }, []); tasks.remove(initial.id); onClose() }}>{t('delete')}</Button>}
       </div>}>
       <Field label={t('appointmentTitle')} required error={err}><Input value={f.title} onChange={set('title')} placeholder={t('taskPlaceholder')} autoFocus /></Field>
       <Field label={t('description')} hint={t('optional')}><TextArea value={f.description} onChange={set('description')} placeholder={t('descriptionPlaceholder')} rows={3} /></Field>
@@ -762,7 +914,24 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
         </Field>
       )}
 
-      {/* Assignees — collapsed to a summary by default; expand to pick */}
+      {/* Boss tasks: delegate to a single team member picked from the org chart.
+          Always available — you can add a team member on the spot if you have
+          none yet. */}
+      {mode === 'boss' && (
+        <div style={{ marginBottom: 4 }}>
+          <label style={secStyle}>{t('delegateTo')}</label>
+          <OrgMemberPicker
+            departments={orderedDepts}
+            members={allMembers.items}
+            value={memberIds[0] || ''}
+            onSelect={(id) => setMemberIds(id ? [id] : [])}
+            onAddMember={startAddMember}
+            t={t}
+          />
+        </div>
+      )}
+
+      {/* Other work tasks: multi-select assignees across departments. */}
       {mode !== 'boss' && (
         <div style={{ marginBottom: 4 }}>
           <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', ...secStyle }}>
@@ -834,6 +1003,21 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
       </div>
       <Input type="date" value={f.dueDate} onChange={set('dueDate')} />
 
+      {/* Alerts — up to 3 timed notifications for this task (on-device + push) */}
+      <label style={secStyle}>{t('taskAlerts')}{alertTimes.length ? ` · ${alertTimes.length}/${MAX_TIMES}` : ''}</label>
+      {alertTimes.map((v, i) => (
+        <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+          <Input type="datetime-local" value={v} onChange={e => setAlertAt(i, e.target.value)} style={{ flex: 1 }} />
+          <button className="iconbtn" aria-label={t('delete')} onClick={() => removeAlert(i)}><Icon name="x" size={16} /></button>
+        </div>
+      ))}
+      {alertTimes.length < MAX_TIMES && (
+        <button type="button" className="link-btn" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--brand-600)', fontSize: 13.5, marginBottom: 4 }} onClick={addAlert}>
+          <Icon name="plus" size={15} /> {alertTimes.length ? t('addAnotherTime') : t('addAlert')}
+        </button>
+      )}
+      {alertTimes.length > 0 && <p className="hint" style={{ margin: '2px 2px 0' }}>{t('taskAlertsHint')}</p>}
+
       {/* Advanced options collapsed by default to keep the form light */}
       <button type="button" className="link-btn" style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '16px 2px 4px', fontSize: 13, fontWeight: 600, color: 'var(--ink-2)' }} onClick={() => setShowMore(o => !o)}>
         <Icon name="chevron" size={14} style={{ transform: showMore ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }} /> {showMore ? t('fewerOptions') : t('moreOptions')}
@@ -882,5 +1066,15 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
         </>
       )}
     </Sheet>
+    {addMemberDept && (
+      <MemberEditor
+        departmentId={addMemberDept}
+        team={allMembers.items.filter(m => m.departmentId === addMemberDept)}
+        initial={{}}
+        onClose={() => setAddMemberDept(null)}
+        onSaved={(m) => { if (m && m.id) setMemberIds([m.id]) }}
+      />
+    )}
+    </>
   )
 }

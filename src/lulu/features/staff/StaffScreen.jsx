@@ -5,7 +5,7 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { STAFF_ROLES, findStaffRole, label } from '../../lib/domain.js'
 import { money, toSar, fmtDate, daysUntil, relativeDay } from '../../lib/format.js'
-import { makeThumb } from '../../lib/files.js'
+import { saveCloudPhoto } from '../../lib/files.js'
 import { whatsappToPerson } from '../../lib/share.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
 
@@ -82,7 +82,7 @@ function StaffEditor({ initial, onClose, onSaved }) {
   const [err, setErr] = useState('')
   const photoRef = useRef()
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
-  const pickPhoto = async (fl) => { const file = fl && fl[0]; if (!file) return; const thumb = await makeThumb(file, 320); if (thumb) setF(prev => ({ ...prev, photo: thumb })) }
+  const pickPhoto = async (fl) => { const file = fl && fl[0]; if (!file) return; const out = await saveCloudPhoto(file, { thumbMax: 320 }); if (out.photo) setF(prev => ({ ...prev, ...out })) }
   const submit = () => {
     if (!f.name.trim()) { setErr(t('required')); return }
     const rec = { ...f, name: f.name.trim(), salary: parseFloat(f.salary) || 0 }

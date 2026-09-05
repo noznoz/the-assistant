@@ -1,9 +1,12 @@
-import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react'
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import * as db from './db.js'
 import * as cloud from '../lib/cloud.js'
 import { syncAttachments } from '../lib/files.js'
+import { migrateCardPhotos } from '../lib/photoMigrate.js'
 import { maybeSeed } from './seed.js'
 import { collectSampleRemovals } from '../lib/sampleData.js'
+
+const PHOTO_MIG_KEY = 'lulu:v1:photosMigratedToCloud'
 
 const StoreCtx = createContext(null)
 const SettingsCtx = createContext(null)
@@ -86,6 +89,23 @@ export function StoreProvider({ children }) {
     }, 20000)
     return () => { alive = false; clearInterval(t) }
   }, [cloudSync, reloadAll])
+
+  // One-time move of legacy on-record photos (accessory / vehicle cover /
+  // avatars) into the cloud bucket, freeing the localStorage budget. Runs only
+  // when cloud is ready + consented; the ref guards against concurrent passes,
+  // the flag against repeats. Safe/idempotent (see lib/photoMigrate.js).
+  const migratingPhotos = useRef(false)
+  const migratePhotos = useCallback(async () => {
+    if (migratingPhotos.current || !cloud.storageReady()) return
+    try { if (localStorage.getItem(PHOTO_MIG_KEY) === '1') return } catch { return }
+    migratingPhotos.current = true
+    try {
+      const n = await migrateCardPhotos({ data, patch, settings, updateSettings })
+      try { localStorage.setItem(PHOTO_MIG_KEY, '1') } catch { /* ignore */ }
+      if (n) reloadAll()
+    } finally { migratingPhotos.current = false }
+  }, [data, patch, settings, updateSettings, reloadAll])
+  useEffect(() => { migratePhotos() }, [migratePhotos])
 
   // Remove the built-in sample/seed records (soft-delete, which also clears
   // them from the cloud for connected users). Returns how many were removed.

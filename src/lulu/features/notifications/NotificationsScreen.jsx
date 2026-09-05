@@ -1,28 +1,15 @@
-import React, { useMemo, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Empty } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
-import { buildNotificationFeed } from '../../lib/notifications.js'
+import { useSettings } from '../../store/StoreProvider.jsx'
+import { useNotificationFeed } from '../../store/useNotificationFeed.js'
 
-// A live notification feed derived from tasks, renewals and documents.
+// A live notification feed derived from tasks, renewals, reminders and more.
 export default function NotificationsScreen({ go }) {
-  const { t, lang } = useT()
+  const { t } = useT()
   const { settings, updateSettings } = useSettings()
-  const tasks = useCollection('tasks')
-  const vehicles = useCollection('vehicles')
-  const services = useCollection('services')
-  const docs = useCollection('documents')
-  const subs = useCollection('subscriptions')
-  const people = useCollection('people')
-  const expensesCol = useCollection('expenses')
-  const valuablesCol = useCollection('valuables')
-  const appointmentsCol = useCollection('appointments')
-
-  const feed = useMemo(() => buildNotificationFeed({
-    tasks: tasks.items, vehicles: vehicles.items, services: services.items,
-    docs: docs.items, subs: subs.items, people: people.items, expenses: expensesCol.items, valuables: valuablesCol.items, appointments: appointmentsCol.items, t, lang, settings,
-  }), [tasks.items, vehicles.items, services.items, docs.items, subs.items, people.items, expensesCol.items, valuablesCol.items, appointmentsCol.items, lang])
+  const feed = useNotificationFeed()
 
   const seen = new Set(settings.notificationsSeen || [])
 
