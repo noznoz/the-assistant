@@ -141,7 +141,10 @@ Deno.serve(async (req) => {
   let alerts = 0
   try { alerts = await runDatedAlerts(supabase) } catch (_e) { alerts = -1 /* push_alerts not set up */ }
 
-  return json({ due: due.length, sent, alerts })
+  let brief = 0
+  try { brief = await runDailyBrief(supabase) } catch (_e) { brief = -1 }
+
+  return json({ due: due.length, sent, alerts, brief })
 })
 
 // ---- Dated-item background alerts --------------------------------------------
@@ -227,4 +230,57 @@ async function runDatedAlerts(supabase: any) {
     }
   }
   return alerts
+}
+
+// ---- Daily "start my day" brief -------------------------------------------
+// Once per household per morning, at/after 07:30 Asia/Riyadh (a fixed +3h, no
+// DST in Saudi), push a concise brief. Windowed to 07:30–10:00 so a late cron
+// run doesn't deliver it mid-day; de-duplicated per day via push_alerts.
+function riyadhParts() {
+  const l = new Date(Date.now() + 3 * 3600 * 1000)
+  return { date: l.toISOString().slice(0, 10), mins: l.getUTCHours() * 60 + l.getUTCMinutes() }
+}
+
+function briefBody(recs: any[], today: string) {
+  const of = (col: string) => recs.filter(r => r.collection === col && r.data && !r.data.deletedAt).map(r => r.data)
+  const open = of('tasks').filter((t: any) => t.status !== 'completed' && t.status !== 'cancelled')
+  const dueToday = open.filter((t: any) => dateOnly(t.dueDate) === today)
+  const overdue = open.filter((t: any) => { const d = dateOnly(t.dueDate); return d && d < today })
+  const appts = of('appointments').filter((a: any) => dateOnly(a.date) === today).sort((a: any, b: any) => (a.time || '').localeCompare(b.time || ''))
+  const rem = of('reminders').filter((r: any) => !r.done && r.remindAt && dateOnly(r.remindAt) <= today)
+  const parts: string[] = []
+  if (dueToday.length) parts.push(`${dueToday.length} due today`)
+  if (overdue.length) parts.push(`${overdue.length} overdue`)
+  if (appts.length) parts.push(`${appts[0].time ? appts[0].time + ' ' : ''}${appts[0].title}${appts.length > 1 ? ` +${appts.length - 1}` : ''}`)
+  if (rem.length) parts.push(`${rem.length} reminder${rem.length > 1 ? 's' : ''}`)
+  return parts.length ? parts.join(' · ') : 'Your day is clear.'
+}
+
+async function runDailyBrief(supabase: any) {
+  const { date, mins } = riyadhParts()
+  if (mins < 7 * 60 + 30 || mins >= 10 * 60) return 0 // only the 07:30–10:00 window
+  const key = `brief:${date}`
+  const { data: recs } = await supabase.from('records')
+    .select('household_id,collection,data')
+    .in('collection', ['tasks', 'appointments', 'reminders'])
+  const byHouse = new Map<string, any[]>()
+  for (const r of recs ?? []) {
+    if (!byHouse.has(r.household_id)) byHouse.set(r.household_id, [])
+    byHouse.get(r.household_id)!.push(r)
+  }
+  let sent = 0
+  for (const [hid, list] of byHouse) {
+    const { data: seen } = await supabase.from('push_alerts').select('alert_key').eq('household_id', hid).eq('alert_key', key)
+    if (seen && seen.length) continue // already sent today
+    const { data: subs } = await supabase.from('push_subscriptions').select('endpoint,subscription').eq('household_id', hid)
+    if (!subs || !subs.length) continue
+    const payload = JSON.stringify({ title: '☀️ Good morning', body: briefBody(list, date), tag: 'daily-brief' })
+    let delivered = false
+    for (const s of subs) {
+      try { await webpush.sendNotification((s as any).subscription, payload); delivered = true }
+      catch (e: any) { if (e && (e.statusCode === 404 || e.statusCode === 410)) await supabase.from('push_subscriptions').delete().eq('endpoint', (s as any).endpoint) }
+    }
+    if (delivered) { sent++; await supabase.from('push_alerts').insert({ household_id: hid, alert_key: key }) }
+  }
+  return sent
 }

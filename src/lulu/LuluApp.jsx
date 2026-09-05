@@ -13,7 +13,7 @@ import LockGate from './ui/LockGate.jsx'
 import { setBadge, maybeDailyBrief, runDueAlerts } from './lib/notify.js'
 import { fireDueReminders } from './lib/reminders.js'
 import { refreshPush } from './lib/push.js'
-import { buildBrief } from './lib/brief.js'
+import { briefSummary } from './lib/dayBrief.js'
 import { unreadCount } from './lib/notifications.js'
 import { useNotificationFeed } from './store/useNotificationFeed.js'
 
@@ -141,8 +141,14 @@ function Router() {
     setBadge(unreadCount(feed, settings.notificationsSeen))
     // Sound alert for anything dated that's due today or overdue (deduped).
     runDueAlerts(feed, { enabled: settings.notifications, heading: t('dueToday') })
-    const brief = buildBrief({ tasks: data.tasks || [], expenses: data.expenses || [], vehicles: data.vehicles || [], settings, lang })
-    maybeDailyBrief(settings.name ? `Good morning, ${settings.name}` : 'Your morning brief', brief)
+    // Morning brief: fire once per day, the first time the app is open at/after
+    // 7:30am. (While the app is closed, the send-reminders Edge Function pushes
+    // the same brief at 7:30 — see docs/PUSH.md.)
+    const mins = new Date().getHours() * 60 + new Date().getMinutes()
+    if (mins >= 7 * 60 + 30) {
+      const summary = briefSummary({ tasks: data.tasks || [], appointments: data.appointments || [], reminders: data.reminders || [], lang })
+      maybeDailyBrief(settings.name ? `☀️ ${t('goodMorning')}, ${settings.name}` : `☀️ ${t('goodMorning')}`, summary)
+    }
   }, [feed, settings.notifications, settings.notificationsSeen, lang])
 
   // Pull-to-refresh: re-read local data and check for a new app version.
