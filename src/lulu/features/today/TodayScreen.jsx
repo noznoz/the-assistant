@@ -8,6 +8,9 @@ import { splitReminders } from '../../lib/reminders.js'
 import { normalizeQuickActions, quickActionDef } from '../../lib/quickActions.js'
 import { hijriDate } from '../../lib/prayer.js'
 import { buildBrief } from '../../lib/brief.js'
+import { buildDayBrief } from '../../lib/dayBrief.js'
+import { nextPrayer, fmtPrayer, findCity } from '../../lib/prayer.js'
+import DayBriefSheet from './DayBriefSheet.jsx'
 import { buildRenewals } from '../../lib/renewals.js'
 import { runRenewalReminders } from '../../lib/notify.js'
 import { unreadCount } from '../../lib/notifications.js'
@@ -34,11 +37,13 @@ export default function TodayScreen({ go }) {
   const documents = useCollection('documents')
   const people = useCollection('people')
   const valuables = useCollection('valuables')
+  const appointments = useCollection('appointments')
   const reminders = useCollection('reminders')
   const staff = useCollection('staff')
   const memberships = useCollection('memberships')
   const properties = useCollection('properties')
   const [editor, setEditor] = useState(null)
+  const [dayBrief, setDayBrief] = useState(null)
   const toast = useToast()
 
   const notifFeed = useNotificationFeed()
@@ -89,6 +94,18 @@ export default function TodayScreen({ go }) {
 
   const closeEditor = (msg) => { setEditor(null); if (msg) toast.show(msg) }
 
+  // Build the full "Start my day" brief on demand (agenda, priorities, money,
+  // renewals, next prayer) and open the send/share sheet.
+  const openDayBrief = () => {
+    const city = findCity(settings.prayerCity)
+    const np = nextPrayer(new Date(), city)
+    const prayer = { name: t(np.name), time: fmtPrayer(np.date, lang, city.tz) }
+    setDayBrief(buildDayBrief({
+      tasks: tasks.items, expenses: expenses.items, appointments: appointments.items,
+      reminders: reminders.items, renewals: radarSoon, settings, lang, name: settings.name, prayer,
+    }))
+  }
+
   const dash = normalizeDashboard(settings.dashboard)
   const quickActionsOn = dash.some(s => s.key === 'quickActions' && s.on)
   const quickActions = normalizeQuickActions(settings.quickActions)
@@ -102,7 +119,10 @@ export default function TodayScreen({ go }) {
         <div className="spark"><Icon name="sparkle" size={130} /></div>
         <h3><Icon name="sparkle" size={18} /> {t('morningBrief')}</h3>
         <p>{brief}</p>
-        <div style={{ marginTop: 14 }}>
+        <div style={{ marginTop: 14, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button className="btn sm" style={{ background: '#fff', color: 'var(--brand-700, #6b4e12)', border: 0, fontWeight: 700 }} onClick={openDayBrief}>
+            <Icon name="sparkle" size={16} /> {t('startMyDay')}
+          </button>
           <button className="btn sm" style={{ background: 'rgba(255,255,255,0.18)', color: '#fff', border: 0 }} onClick={shareAgenda}>
             <Icon name="whatsapp" size={16} /> {t('shareAgenda')}
           </button>
@@ -346,6 +366,7 @@ export default function TodayScreen({ go }) {
       {editor === 'vehicle' && <VehicleEditor onClose={closeEditor} onSaved={() => toast.show(t('savedToast'))} />}
       {editor === 'note' && <NoteEditor onClose={closeEditor} onSaved={() => toast.show(t('savedToast'))} />}
       {editor === 'snap' && <SnapFile onClose={closeEditor} onSaved={() => toast.show(t('savedToast'))} />}
+      {dayBrief != null && <DayBriefSheet brief={dayBrief} onClose={() => setDayBrief(null)} />}
       {toast.node}
     </>
   )

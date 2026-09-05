@@ -11,6 +11,7 @@ export const STRINGS = {
     goodMorning: 'Good morning', goodAfternoon: 'Good afternoon', goodEvening: 'Good evening',
     // today
     morningBrief: 'Morning Brief', dailyProgress: 'Daily progress', quickActions: 'Quick actions',
+    startMyDay: 'Start my day', yourDayBrief: 'Your day', whatsappMe: 'WhatsApp me', emailMe: 'Email me', rewriteAI: '✦ Rewrite with AI',
     todaysTasks: "Today's tasks", dueToday: 'Due today', highPriority: 'High priority', overdue: 'Overdue',
     waitingForMe: 'Waiting for me', delegated: 'Delegated', followUpsToday: 'Follow-ups today',
     upcomingMaintenance: 'Upcoming maintenance', renewals: 'Renewals due',
@@ -469,6 +470,7 @@ export const STRINGS = {
     trips: 'الرحلات', reports: 'التقارير', notifications: 'الإشعارات', settings: 'الإعدادات',
     goodMorning: 'صباح الخير', goodAfternoon: 'مساء الخير', goodEvening: 'مساء الخير',
     morningBrief: 'ملخص الصباح', dailyProgress: 'إنجاز اليوم', quickActions: 'إجراءات سريعة',
+    startMyDay: 'ابدأ يومي', yourDayBrief: 'ملخص يومك', whatsappMe: 'واتساب لي', emailMe: 'أرسل بريدًا لي', rewriteAI: '✦ إعادة صياغة بالذكاء',
     todaysTasks: 'مهام اليوم', dueToday: 'مستحق اليوم', highPriority: 'أولوية عالية', overdue: 'متأخرة',
     waitingForMe: 'بانتظار ردّي', delegated: 'مُفوَّضة', followUpsToday: 'متابعات اليوم',
     upcomingMaintenance: 'صيانة قادمة', renewals: 'تجديدات مستحقة',
