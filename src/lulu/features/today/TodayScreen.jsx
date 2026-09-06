@@ -108,6 +108,10 @@ export default function TodayScreen({ go }) {
 
   const dash = normalizeDashboard(settings.dashboard)
   const quickActionsOn = dash.some(s => s.key === 'quickActions' && s.on)
+  // The smart "Needs attention" summary already covers overdue / waiting / due
+  // tasks, so when it is shown we suppress the separate task-list block below to
+  // avoid a duplicate attention zone. Turn that card off to get the breakdown.
+  const assistantOn = dash.some(s => s.key === 'assistant' && s.on)
   const quickActions = normalizeQuickActions(settings.quickActions)
     .filter(q => q.on)
     .map(q => quickActionDef(q.id))
@@ -292,11 +296,11 @@ export default function TodayScreen({ go }) {
 
   const attentionBlock = (
     <>
-      {overdue.length > 0 && <AttentionCard tint="t-danger" icon="clock" title={t('overdue')} items={overdue} go={go} lang={lang} />}
-      {waitingMe.length > 0 && <AttentionCard tint="t-warn" icon="flag" title={t('waitingForMe')} items={waitingMe} go={go} lang={lang} />}
-      {dueToday.length > 0 && <AttentionCard tint="t-info" icon="today" title={t('todaysTasks')} items={dueToday} go={go} lang={lang} />}
+      {overdue.length > 0 && <AttentionCard tint="t-danger" icon="clock" title={t('overdue')} items={overdue} go={go} lang={lang} t={t} />}
+      {waitingMe.length > 0 && <AttentionCard tint="t-warn" icon="flag" title={t('waitingForMe')} items={waitingMe} go={go} lang={lang} t={t} />}
+      {dueToday.length > 0 && <AttentionCard tint="t-info" icon="today" title={t('todaysTasks')} items={dueToday} go={go} lang={lang} t={t} />}
       {highPri.length > 0 && dueToday.length === 0 && overdue.length === 0 &&
-        <AttentionCard tint="t-brand" icon="flag" title={t('highPriority')} items={highPri} go={go} lang={lang} />}
+        <AttentionCard tint="t-brand" icon="flag" title={t('highPriority')} items={highPri} go={go} lang={lang} t={t} />}
       {delegated.length > 0 && (
         <>
           <Section title={t('delegated')} count={delegated.length} action={t('view')} onAction={() => go('tasks/delegated')} />
@@ -351,8 +355,8 @@ export default function TodayScreen({ go }) {
           </>
         ) : (
           <>
-            {dash.map(({ key, on }) => on && sectionNodes[key] ? <React.Fragment key={key}>{sectionNodes[key]}{key === 'quickActions' ? attentionBlock : null}</React.Fragment> : null)}
-            {!quickActionsOn && attentionBlock}
+            {dash.map(({ key, on }) => on && sectionNodes[key] ? <React.Fragment key={key}>{sectionNodes[key]}{key === 'quickActions' && !assistantOn ? attentionBlock : null}</React.Fragment> : null)}
+            {!quickActionsOn && !assistantOn && attentionBlock}
             {open.length === 0 && overdue.length === 0 && (
               <Card style={{ marginTop: 20, textAlign: 'center' }}>
                 <p className="muted">{t('noThingsToday')}</p>
@@ -381,12 +385,13 @@ export default function TodayScreen({ go }) {
   )
 }
 
-function AttentionCard({ tint, icon, title, items, go, lang }) {
+function AttentionCard({ tint, icon, title, items, go, lang, t }) {
   return (
     <>
-      <Section title={title} count={items.length} />
+      <Section title={title} count={items.length}
+        action={items.length > 3 ? t('viewAll') : undefined} onAction={() => go('tasks')} />
       <div>
-        {items.slice(0, 5).map(x => <MiniRow key={x.id} task={x} lang={lang} icon={icon} tint={tint} onClick={() => go('tasks')} />)}
+        {items.slice(0, 3).map(x => <MiniRow key={x.id} task={x} lang={lang} icon={icon} tint={tint} onClick={() => go('tasks')} />)}
       </div>
     </>
   )

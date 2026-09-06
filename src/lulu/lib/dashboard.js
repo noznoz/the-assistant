@@ -1,16 +1,20 @@
 // The customizable cards on the Today (home) screen. Order + visibility live in
 // settings.dashboard as an array of { key, on }. Attention lists (overdue, due
 // today, waiting) are core and always shown after these.
+// `defaultOn` decides what a brand-new / never-customized home shows. We keep
+// the front page calm by default — essentials on, the rest one tap away (they
+// stay reachable from their own screens and can be switched back on in
+// Customize home). Anyone who has saved their own layout keeps it untouched.
 export const DASHBOARD_SECTIONS = [
-  { key: 'brief', label: 'dashBrief' },
-  { key: 'assistant', label: 'dashAssistant' },
-  { key: 'reminders', label: 'dashReminders' },
-  { key: 'prayer', label: 'dashPrayer' },
-  { key: 'stats', label: 'dashStats' },
-  { key: 'quickActions', label: 'dashQuick' },
-  { key: 'work', label: 'dashWork' },
-  { key: 'renewals', label: 'dashRenewals' },
-  { key: 'notes', label: 'dashNotes' },
+  { key: 'brief', label: 'dashBrief', defaultOn: true },
+  { key: 'assistant', label: 'dashAssistant', defaultOn: true },
+  { key: 'reminders', label: 'dashReminders', defaultOn: false },
+  { key: 'prayer', label: 'dashPrayer', defaultOn: true },
+  { key: 'stats', label: 'dashStats', defaultOn: false },
+  { key: 'quickActions', label: 'dashQuick', defaultOn: true },
+  { key: 'work', label: 'dashWork', defaultOn: false },
+  { key: 'renewals', label: 'dashRenewals', defaultOn: false },
+  { key: 'notes', label: 'dashNotes', defaultOn: false },
 ]
 
 const DEFAULT_KEYS = DASHBOARD_SECTIONS.map(s => s.key)
@@ -27,7 +31,7 @@ export function normalizeDashboard(saved) {
       seen.add(item.key)
     }
   })
-  DEFAULT_KEYS.forEach(k => { if (!seen.has(k)) out.push({ key: k, on: true }) })
+  DASHBOARD_SECTIONS.forEach(s => { if (!seen.has(s.key)) out.push({ key: s.key, on: s.defaultOn !== false }) })
   return out
 }
 
