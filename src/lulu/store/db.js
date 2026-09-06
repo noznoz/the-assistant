@@ -158,7 +158,8 @@ export const DEFAULT_SETTINGS = {
   notificationsSeen: [], // ids of notification-feed items already viewed
   accounts: ['Salary account', 'Other account'], // funding accounts an expense can be paid from
   dashboard: null,       // Today-screen card order/visibility (null = default)
-  homeStyle: 'classic',  // Today-screen layout: 'classic' | 'focus'
+  homeStyle: 'classic',  // Today-screen layout: 'classic' | 'focus' | 'cover' | 'timeline' | 'bento'
+  accent: 'amber',       // color scheme: amber | emerald | sapphire | rose | violet | graphite
   targetAllocation: {},  // desired investment mix by type { [typeId]: percent }
   favorites: [],         // pinned section ids shown at the top of More
   navTabs: null,         // user-chosen middle bottom-bar tabs (null = default)

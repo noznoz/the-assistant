@@ -69,6 +69,7 @@
   /* Refinement tokens — light theme keeps a flat, paper-like surface. */
   --card-edge: 0 0;
   --ambient: none;
+  --glow-rgb: 200, 150, 62;   /* accent rgb for the dark ambient glow */
 }
 
 /* ---- Dark theme ---- */
@@ -96,8 +97,34 @@
   --shadow-brand: 0 8px 24px rgba(0,0,0,0.5);
   /* Hairline top-edge highlight — lifts surfaces off the ground. */
   --card-edge: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  /* Ambient amber warmth behind the top of the screen. */
-  --ambient: radial-gradient(120% 60% at 50% -6%, rgba(200,150,62,0.15), rgba(200,150,62,0.04) 44%, transparent 72%);
+  /* Ambient accent warmth behind the top of the screen (follows the scheme). */
+  --ambient: radial-gradient(120% 60% at 50% -6%, rgba(var(--glow-rgb),0.15), rgba(var(--glow-rgb),0.04) 44%, transparent 72%);
+}
+
+/* ============================================================================
+   Color schemes — pick from Settings (data-accent on <html>). Amber is the
+   default (no block needed). Each swaps the brand ramp + ambient glow only;
+   surfaces, ink and semantic colors are untouched, so both themes stay legible.
+   ========================================================================== */
+[data-accent="emerald"] {
+  --brand-500: #2E9E6B; --brand-400: #43B585; --brand-600: #217A50;
+  --brand-tint: rgba(67, 181, 133, 0.15); --glow-rgb: 67, 181, 133;
+}
+[data-accent="sapphire"] {
+  --brand-500: #3E7BC8; --brand-400: #5B9BD8; --brand-600: #2E5E9E;
+  --brand-tint: rgba(91, 155, 216, 0.15); --glow-rgb: 91, 155, 216;
+}
+[data-accent="rose"] {
+  --brand-500: #D45D79; --brand-400: #E37E95; --brand-600: #A9425C;
+  --brand-tint: rgba(227, 126, 149, 0.15); --glow-rgb: 227, 126, 149;
+}
+[data-accent="violet"] {
+  --brand-500: #8B6DD8; --brand-400: #A48BE3; --brand-600: #6A4EB0;
+  --brand-tint: rgba(164, 139, 227, 0.15); --glow-rgb: 164, 139, 227;
+}
+[data-accent="graphite"] {
+  --brand-500: #9A968C; --brand-400: #C2BEB4; --brand-600: #6F6B62;
+  --brand-tint: rgba(255, 255, 255, 0.08); --glow-rgb: 150, 150, 150;
 }
 
 /* ============================================================================
