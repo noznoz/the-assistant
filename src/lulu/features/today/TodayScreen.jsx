@@ -18,6 +18,7 @@ import { useNotificationFeed } from '../../store/useNotificationFeed.js'
 import { normalizeDashboard } from '../../lib/dashboard.js'
 import PrayerCard from './PrayerCard.jsx'
 import QuickCapture from './QuickCapture.jsx'
+import HomeLayout from './HomeLayouts.jsx'
 import { share, formatAgenda } from '../../lib/share.js'
 import { findPriority } from '../../lib/domain.js'
 import { taskMemberIds } from '../../lib/org.js'
@@ -310,6 +311,35 @@ export default function TodayScreen({ go }) {
     </>
   )
 
+  // Alternative full-screen layouts (Cover / Timeline / Bento) share the same
+  // computed data, shaped here and handed to HomeLayout.
+  const homeVariant = settings.homeStyle || 'classic'
+  const isCustomLayout = homeVariant === 'cover' || homeVariant === 'timeline' || homeVariant === 'bento'
+  const homeData = (() => {
+    const now = new Date()
+    const loc = lang === 'ar' ? 'ar' : 'en-US'
+    const city = findCity(settings.prayerCity)
+    const np = nextPrayer(now, city)
+    const prayer = { name: t(np.name), time: fmtPrayer(np.date, lang, city.tz), date: np.date }
+    const todaysAppts = appointments.items.filter(a => isToday(a.date)).sort((a, b) => (a.time || '').localeCompare(b.time || ''))
+    const todaysRems = upcomingReminders.filter(r => isToday(r.remindAt))
+    const priorityTask = overdue[0] || highPri.find(x => isToday(x.dueDate)) || highPri[0] || dueToday[0] || null
+    return {
+      greet: t(greetingKey()), name: settings.name,
+      day: now.toLocaleDateString(loc, { day: 'numeric' }),
+      mon: now.toLocaleDateString(loc, { month: 'short' }),
+      weekday: now.toLocaleDateString(loc, { weekday: 'short' }),
+      year: now.getFullYear(),
+      hijri: hijriShort(now, lang),
+      prayer, priorityTask,
+      counts: { due: dueToday.length, overdue: overdue.length, waiting: waitingMe.length, needsYou: notifFeed.filter(n => n.now).length },
+      appts: todaysAppts, rems: todaysRems,
+      spentToday, spentMonth, budget: settings.monthlyBudget, cur,
+      remindersCount: upcomingReminders.length,
+      openDayBrief,
+    }
+  })()
+
   return (
     <>
       <div className="topbar">
@@ -331,6 +361,10 @@ export default function TodayScreen({ go }) {
       </div>
 
       <div className="screen">
+        {isCustomLayout ? (
+          <HomeLayout variant={homeVariant} data={homeData} go={go} t={t} lang={lang} toast={toast} />
+        ) : (
+        <>
         <div className="hero">
           <div>
             <div className="greet">{t(greetingKey())}{settings.name ? ',' : ''}</div>
@@ -363,6 +397,8 @@ export default function TodayScreen({ go }) {
               </Card>
             )}
           </>
+        )}
+        </>
         )}
 
         <button className="link-btn" onClick={() => go('dashboard')}

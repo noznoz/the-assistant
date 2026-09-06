@@ -478,3 +478,89 @@
 .pe-tool.on { border-color: var(--brand-600); color: var(--brand-600); background: var(--brand-50, var(--surface-2)); }
 .pe-tool:active { background: var(--surface-2); }
 .pe-actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: 8px; }
+
+/* ============================================================================
+   Color-scheme swatches (Customize home)
+   ========================================================================== */
+.accent-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.accent-sw { border: 0; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; padding: 0; }
+.accent-sw .sw { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; color: #fff; border: 2px solid transparent; box-shadow: var(--shadow-1); transition: transform 0.12s var(--ease); }
+.accent-sw.on .sw { border-color: var(--ink); transform: scale(1.06); }
+.accent-sw .nm { font-size: 11px; color: var(--ink-3); font-weight: 600; }
+.accent-sw.on .nm { color: var(--ink); }
+
+/* ============================================================================
+   Home layout — Cover (editorial front page)
+   ========================================================================== */
+.cover { padding: 8px 2px 0; }
+.cover-kicker { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); font-weight: 700; }
+.cover-date { display: flex; align-items: baseline; gap: 12px; margin: 8px 0 4px; }
+.cover-date .cd-day { font-size: 64px; font-weight: 300; line-height: 0.85; letter-spacing: -0.03em; }
+.cover-date .cd-mo { font-size: 15px; color: var(--ink-2); font-weight: 600; }
+.cover-date .cd-hj { font-size: 13px; color: var(--brand-600); font-weight: 600; margin-top: 3px; }
+[data-theme="dark"] .cover-date .cd-hj { color: var(--brand-400); }
+.cover-rule { height: 1px; background: var(--line); margin: 16px 0; }
+.cover-headline { font-size: 24px; font-weight: 600; line-height: 1.28; letter-spacing: -0.01em; color: var(--ink); margin: 0; }
+.cover-headline b { color: var(--brand-600); }
+[data-theme="dark"] .cover-headline b { color: var(--brand-400); }
+.cover-stat { display: flex; gap: 16px; margin-top: 16px; font-size: 13px; color: var(--ink-2); flex-wrap: wrap; }
+.cover-stat b { color: var(--ink); font-weight: 750; }
+.cover-pray { color: var(--brand-600); font-weight: 600; }
+[data-theme="dark"] .cover-pray { color: var(--brand-400); }
+.cover-agenda { margin-top: 24px; display: flex; flex-direction: column; gap: 13px; }
+.cover-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; color: var(--ink-3); }
+.cover-arow { display: flex; align-items: center; gap: 12px; font-size: 15px; cursor: pointer; }
+.cover-arow .tm { width: 48px; color: var(--ink-3); font-weight: 600; font-variant-numeric: tabular-nums; display: flex; align-items: center; }
+.cover-arow .ti { color: var(--ink); }
+.cover-actions { margin-top: 20px; }
+
+/* ============================================================================
+   Home layout — Timeline (the day as a spine)
+   ========================================================================== */
+.tl { padding-top: 6px; }
+.tl-now { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 12.5px; color: var(--brand-600); }
+[data-theme="dark"] .tl-now { color: var(--brand-400); }
+.tl-now .tl-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; }
+.tl-rail { position: relative; margin-top: 16px; padding-left: 22px; }
+.tl-rail::before { content: ''; position: absolute; inset-inline-start: 6px; top: 6px; bottom: 10px; width: 2px; background: linear-gradient(var(--brand-500), var(--line)); }
+.tl-ev { position: relative; padding: 0 0 20px 6px; cursor: pointer; }
+.tl-ev::before { content: ''; position: absolute; inset-inline-start: -19px; top: 3px; width: 11px; height: 11px; border-radius: 50%; background: var(--surface); border: 2px solid var(--ink-3); }
+.tl-ev.on::before { background: var(--brand-500); border-color: var(--brand-500); box-shadow: 0 0 0 4px var(--brand-tint); }
+.tl-ev.past { opacity: 0.5; }
+.tl-ev .tm { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: var(--ink-3); font-variant-numeric: tabular-nums; text-transform: uppercase; }
+.tl-ev .ti { font-size: 15px; font-weight: 600; color: var(--ink); margin-top: 2px; }
+.tl-ev .sb { font-size: 12px; color: var(--ink-3); margin-top: 1px; }
+.tl-ev.on .ti { color: var(--brand-600); }
+[data-theme="dark"] .tl-ev.on .ti { color: var(--brand-400); }
+.tl-empty { color: var(--ink-3); font-size: 14px; padding: 6px 0 16px; }
+.tl-card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--card-edge); padding: 11px 13px; margin-top: 3px; }
+.tl-card-t { font-weight: 650; font-size: 14px; }
+.tl-card-s { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+.tl-foot { margin-top: 12px; }
+
+/* ============================================================================
+   Home layout — Bento (glanceable grid)
+   ========================================================================== */
+.bento-wrap { padding-top: 6px; }
+.bento-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+.bento-hd .bg { font-size: 12px; color: var(--ink-3); font-weight: 600; }
+.bento-hd .bnm { font-size: 22px; font-weight: 750; letter-spacing: -0.02em; }
+.bento-date { text-align: end; }
+.bento-date .bd { font-size: 13px; font-weight: 700; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.bento-date .bh { font-size: 12px; color: var(--brand-600); font-weight: 600; }
+[data-theme="dark"] .bento-date .bh { color: var(--brand-400); }
+.bento { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; margin-top: 8px; }
+.bt { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--card-edge); padding: 14px; min-height: 100px; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; cursor: pointer; transition: transform 0.12s var(--ease); overflow: hidden; }
+.bt:active { transform: scale(0.98); }
+.bt .lbl { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-3); font-weight: 700; }
+.bt .big { font-size: 20px; font-weight: 750; letter-spacing: -0.02em; color: var(--ink); }
+.bt .sm { font-size: 12px; color: var(--ink-2); }
+.bt .num { font-size: 34px; font-weight: 780; line-height: 1; letter-spacing: -0.03em; color: var(--brand-600); }
+[data-theme="dark"] .bt .num { color: var(--brand-400); }
+.bt.wide { grid-column: 1 / -1; }
+.bt.next { background: linear-gradient(150deg, var(--brand-600), var(--brand-500)); border: 0; color: #FFF7E9; }
+.bt.next .lbl { color: rgba(255,247,233,0.85); }
+.bt.next .big { color: #fff; }
+.bt.next .sm { color: rgba(255,247,233,0.9); }
+.bt.brand { background: var(--brand-tint); border: 1px solid var(--line); color: var(--brand-600); flex-direction: row; align-items: center; justify-content: center; gap: 8px; font-weight: 750; font-size: 15px; min-height: 54px; }
+[data-theme="dark"] .bt.brand { color: var(--brand-400); }

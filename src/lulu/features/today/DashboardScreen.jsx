@@ -43,11 +43,30 @@ export default function DashboardScreen({ go }) {
       <div className="screen">
         <h2 className="member-h2" style={{ marginTop: 14 }}>{t('homeStyle')}</h2>
         <div className="chip-row" style={{ margin: '2px 0 6px' }}>
-          {[{ id: 'classic', label: t('homeClassic') }, { id: 'focus', label: t('homeFocus') }].map(o => (
+          {[
+            { id: 'classic', label: t('homeClassic') }, { id: 'focus', label: t('homeFocus') },
+            { id: 'cover', label: t('homeCover') }, { id: 'timeline', label: t('homeTimeline') },
+            { id: 'bento', label: t('homeBento') },
+          ].map(o => (
             <Chip key={o.id} selectable on={(settings.homeStyle || 'classic') === o.id} onClick={() => updateSettings({ homeStyle: o.id })}>{o.label}</Chip>
           ))}
         </div>
-        <p className="hint" style={{ margin: '0 2px 16px' }}>{t('homeStyleHint')}</p>
+        <p className="hint" style={{ margin: '0 2px 18px' }}>{t('homeStyleHint')}</p>
+
+        <h2 className="member-h2">{t('colorScheme')}</h2>
+        <div className="accent-row">
+          {[
+            { id: 'amber', c: '#C8963E' }, { id: 'emerald', c: '#2E9E6B' }, { id: 'sapphire', c: '#3E7BC8' },
+            { id: 'rose', c: '#D45D79' }, { id: 'violet', c: '#8B6DD8' }, { id: 'graphite', c: '#9A968C' },
+          ].map(a => (
+            <button key={a.id} className={`accent-sw ${(settings.accent || 'amber') === a.id ? 'on' : ''}`}
+              onClick={() => updateSettings({ accent: a.id })} aria-label={t('accent_' + a.id)}>
+              <span className="sw" style={{ background: a.c }}>{(settings.accent || 'amber') === a.id ? <Icon name="check" size={16} /> : null}</span>
+              <span className="nm">{t('accent_' + a.id)}</span>
+            </button>
+          ))}
+        </div>
+        <p className="hint" style={{ margin: '10px 2px 16px' }}>{t('colorSchemeHint')}</p>
 
         <h2 className="member-h2">{t('cards')}</h2>
         <p className="hint" style={{ margin: '2px 2px 10px' }}>{t('customizeHint')}</p>
