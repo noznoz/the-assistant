@@ -10,6 +10,7 @@
 // (true once every time has fired), so older records and the old Edge Function
 // keep working.
 import { showNotification, notificationsSupported } from './notify.js'
+import { playAlarm } from './alarm.js'
 
 export const MAX_TIMES = 3
 
@@ -94,10 +95,15 @@ export function dueReminders(items = []) {
   })
 }
 
-// Fire any newly-due reminders (one catch-up notification each) and advance
-// their fired count. No-op without notification permission.
-export async function fireDueReminders(items, { patch, heading = 'Reminder' } = {}) {
-  if (!notificationsSupported() || Notification.permission !== 'granted') return 0
+// Fire any newly-due reminders and advance their fired count. Two independent
+// channels: a system notification (`notify`, needs the app's notifications
+// toggle + OS permission) and an audible alarm (`sound`, plays while the app is
+// visible). A reminder only advances when it was actually alerted through at
+// least one channel, so nothing is silently swallowed when both are off.
+export async function fireDueReminders(items, { patch, heading = 'Reminder', notify = true, sound = false } = {}) {
+  const canNotify = !!notify && notificationsSupported() && Notification.permission === 'granted'
+  const canSound = !!sound && typeof document !== 'undefined' && document.visibilityState === 'visible'
+  if (!canNotify && !canSound) return 0
   const now = Date.now()
   const due = dueReminders(items)
   const nowIso = new Date().toISOString()
@@ -105,15 +111,17 @@ export async function fireDueReminders(items, { patch, heading = 'Reminder' } = 
     const times = reminderTimes(r)
     const passed = times.filter(t => new Date(t).getTime() <= now).length
     // eslint-disable-next-line no-await-in-loop
-    await showNotification(heading, r.text || '', 'reminder-' + r.id)
-    if (!patch) continue
-    // Fully fired + repeating → roll forward to the next occurrence.
-    if (passed >= times.length && r.repeat && r.repeat !== 'none') {
-      const nt = nextRepeatTimes(times, r.repeat, now)
-      if (nt) { patch(r.id, { times: nt, firedCount: 0, ...mirror(nt, 0), firedAt: nowIso }); continue }
+    if (canNotify) await showNotification(heading, r.text || '', 'reminder-' + r.id)
+    if (patch) {
+      // Fully fired + repeating → roll forward to the next occurrence.
+      if (passed >= times.length && r.repeat && r.repeat !== 'none') {
+        const nt = nextRepeatTimes(times, r.repeat, now)
+        if (nt) { patch(r.id, { times: nt, firedCount: 0, ...mirror(nt, 0), firedAt: nowIso }); continue }
+      }
+      patch(r.id, { firedCount: passed, ...mirror(times, passed), firedAt: nowIso })
     }
-    patch(r.id, { firedCount: passed, ...mirror(times, passed), firedAt: nowIso })
   }
+  if (canSound && due.length) playAlarm()
   return due.length
 }
 

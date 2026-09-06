@@ -1,6 +1,7 @@
 // On-device notifications + app icon badge. These fire when the app is opened
 // or brought to the foreground (a PWA can't run background timers on iOS —
 // scheduled push while the app is closed arrives with the cloud step later).
+import { playAlarm } from './alarm.js'
 
 export function notificationsSupported() {
   return typeof window !== 'undefined' && 'Notification' in window
@@ -69,7 +70,7 @@ export async function runRenewalReminders(items = [], { enabled, heading } = {})
 // year's birthday) can alert again. Reminders fire via their own path.
 const DUE_ALERT_KEY = 'lulu:dueAlerts'
 
-export async function runDueAlerts(feed = [], { enabled, heading } = {}) {
+export async function runDueAlerts(feed = [], { enabled, heading, sound } = {}) {
   if (!enabled) return
   if (!notificationsSupported() || Notification.permission !== 'granted') return
   let sent
@@ -78,15 +79,18 @@ export async function runDueAlerts(feed = [], { enabled, heading } = {}) {
   const soon = (feed || []).filter(it => it && it.soon)
   const soonIds = new Set(soon.map(it => it.id))
   let changed = false
+  let fired = 0
   for (const it of soon) {
     if (sent[it.id]) continue
     // eslint-disable-next-line no-await-in-loop
     await showNotification(heading || 'Due today', it.meta ? `${it.title} · ${it.meta}` : it.title, 'due-' + it.id)
     sent[it.id] = new Date().toISOString().slice(0, 10)
     changed = true
+    fired++
   }
   for (const k of Object.keys(sent)) { if (!soonIds.has(k)) { delete sent[k]; changed = true } }
   if (changed) { try { localStorage.setItem(DUE_ALERT_KEY, JSON.stringify(sent)) } catch { /* ignore */ } }
+  if (fired && sound && typeof document !== 'undefined' && document.visibilityState === 'visible') playAlarm()
 }
 
 // Fire the daily brief at most once per calendar day.
