@@ -13,6 +13,7 @@ import LockGate from './ui/LockGate.jsx'
 import { setBadge, maybeDailyBrief, runDueAlerts } from './lib/notify.js'
 import { fireDueReminders } from './lib/reminders.js'
 import { refreshPush } from './lib/push.js'
+import { unlockAudio } from './lib/alarm.js'
 import { briefSummary } from './lib/dayBrief.js'
 import { unreadCount } from './lib/notifications.js'
 import { useNotificationFeed } from './store/useNotificationFeed.js'
@@ -113,14 +114,30 @@ function Router() {
   const { t, lang } = useT()
 
   // Fire any due personal reminders (while the app is open or freshly reopened).
+  // Shows a notification (if notifications are on) and/or sounds the alarm (if
+  // sound alerts are on and the app is visible).
   useEffect(() => {
-    const check = () => fireDueReminders(data.reminders || [], { patch: (id, p) => patch('reminders', id, p) })
+    const check = () => fireDueReminders(data.reminders || [], {
+      patch: (id, p) => patch('reminders', id, p),
+      notify: settings.notifications,
+      sound: settings.soundAlerts !== false,
+      heading: t('reminders'),
+    })
     check()
-    const t = setInterval(check, 30000)
+    const timer = setInterval(check, 30000)
     const onVis = () => { if (document.visibilityState === 'visible') check() }
     document.addEventListener('visibilitychange', onVis)
-    return () => { clearInterval(t); document.removeEventListener('visibilitychange', onVis) }
-  }, [data.reminders, patch])
+    return () => { clearInterval(timer); document.removeEventListener('visibilitychange', onVis) }
+  }, [data.reminders, patch, settings.notifications, settings.soundAlerts, t])
+
+  // Warm up the audio context on the first tap so timer-fired alarms are
+  // allowed to sound (browsers block audio until a user gesture).
+  useEffect(() => {
+    const onGesture = () => unlockAudio()
+    window.addEventListener('pointerdown', onGesture, { once: true })
+    window.addEventListener('touchstart', onGesture, { once: true })
+    return () => { window.removeEventListener('pointerdown', onGesture); window.removeEventListener('touchstart', onGesture) }
+  }, [])
 
   // Keep this device's push subscription alive so background reminders keep
   // arriving while the app is closed. iOS can silently drop the subscription;
@@ -139,8 +156,8 @@ function Router() {
   useEffect(() => {
     if (!settings.notifications) { setBadge(0); return }
     setBadge(unreadCount(feed, settings.notificationsSeen))
-    // Sound alert for anything dated that's due today or overdue (deduped).
-    runDueAlerts(feed, { enabled: settings.notifications, heading: t('dueToday') })
+    // Alarm + notification for anything dated that's due today or overdue (deduped).
+    runDueAlerts(feed, { enabled: settings.notifications, heading: t('dueToday'), sound: settings.soundAlerts !== false })
     // Morning brief: fire once per day, the first time the app is open at/after
     // 7:30am. (While the app is closed, the send-reminders Edge Function pushes
     // the same brief at 7:30 — see docs/PUSH.md.)
@@ -149,7 +166,7 @@ function Router() {
       const summary = briefSummary({ tasks: data.tasks || [], appointments: data.appointments || [], reminders: data.reminders || [], lang })
       maybeDailyBrief(settings.name ? `☀️ ${t('goodMorning')}, ${settings.name}` : `☀️ ${t('goodMorning')}`, summary)
     }
-  }, [feed, settings.notifications, settings.notificationsSeen, lang])
+  }, [feed, settings.notifications, settings.notificationsSeen, settings.soundAlerts, lang])
 
   // Pull-to-refresh: re-read local data and check for a new app version.
   const onRefresh = useCallback(async () => {

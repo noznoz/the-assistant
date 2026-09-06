@@ -10,6 +10,7 @@ import { DEFAULT_RATES } from '../../lib/format.js'
 import * as db from '../../store/db.js'
 import { hashPin, biometricSupported, enrollBiometric } from '../../lib/lock.js'
 import { requestNotificationPermission, notificationPermission, setBadge } from '../../lib/notify.js'
+import { playAlarm, unlockAudio } from '../../lib/alarm.js'
 import { AI_MODELS } from '../../lib/ai.js'
 import { APP_VERSION, BUILD_STAMP } from '../../lib/appInfo.js'
 
@@ -167,6 +168,10 @@ export default function SettingsScreen({ go }) {
             on={settings.notifications} onToggle={toggleNotifications} />
           <p className="hint" style={{ margin: '0 2px' }}>{t('notifHint')}</p>
           {notificationPermission() === 'denied' && <p className="err" style={{ margin: '0 2px' }}>{t('notifDenied')}</p>}
+          <Row icon="bell" label={t('soundAlerts')} value={settings.soundAlerts !== false ? t('notifOn') : t('notifOff')}
+            on={settings.soundAlerts !== false} onToggle={() => updateSettings({ soundAlerts: !(settings.soundAlerts !== false) })} />
+          <p className="hint" style={{ margin: '0 2px' }}>{t('soundAlertsHint')}</p>
+          <Button block icon="bell" onClick={() => { unlockAudio(); playAlarm() }}>{t('testSound')}</Button>
         </Card>
 
         {/* App lock */}

@@ -152,6 +152,7 @@ export const STRINGS = {
     testPushFailed: "Couldn't deliver — the subscription may have expired. Toggle it off/on and retry.",
     testPushError: "Couldn't reach the server. Check cloud sync and that the function is deployed.",
     notifHint: 'A daily brief plus alerts for due tasks and renewals when you open the app.',
+    soundAlerts: 'Alarm sound', soundAlertsHint: 'Play an alarm when a reminder or dated item comes due while the app is open. On iPhone a sound can’t play while the app is fully closed — the reminder still arrives silently.', testSound: 'Test sound',
     notifDenied: 'Blocked in your browser settings — enable notifications for this site.',
     notifOn: 'On', notifOff: 'Off',
     // app lock
@@ -606,6 +607,7 @@ export const STRINGS = {
     testPushFailed: 'تعذّر التسليم — ربما انتهت صلاحية الاشتراك. أوقفه ثم فعّله وأعد المحاولة.',
     testPushError: 'تعذّر الوصول إلى الخادم. تحقّق من المزامنة السحابية ومن نشر الدالة.',
     notifHint: 'ملخص يومي وتنبيهات للمهام المستحقة والتجديدات عند فتح التطبيق.',
+    soundAlerts: 'صوت المنبّه', soundAlertsHint: 'تشغيل منبّه عند استحقاق تذكير أو عنصر مؤرَّخ أثناء فتح التطبيق. على الآيفون لا يمكن تشغيل الصوت والتطبيق مغلق تمامًا — يصل التذكير بصمت.', testSound: 'اختبار الصوت',
     notifDenied: 'محظورة في إعدادات المتصفح — فعّل الإشعارات لهذا الموقع.',
     notifOn: 'مُفعّل', notifOff: 'متوقف',
     // app lock
