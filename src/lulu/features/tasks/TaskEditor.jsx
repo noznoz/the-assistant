@@ -4,6 +4,7 @@ import { Sheet, Field, Input, TextArea, Select, Button, Chip } from '../../ui/pr
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { uid } from '../../store/db.js'
+import AttachmentField from '../../ui/AttachmentField.jsx'
 import { TASK_TYPES, STATUSES, PRIORITIES } from '../../lib/domain.js'
 import { RECURRENCE } from '../../lib/recurrence.js'
 import { todayISO } from '../../lib/format.js'
@@ -159,6 +160,8 @@ export default function TaskEditor({ initial, onClose, onSaved }) {
           <Input value={subText} onChange={e => setSubText(e.target.value)} placeholder={t('addSubtask')} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSub() } }} style={{ flex: 1 }} />
           <Button icon="plus" onClick={addSub}>{t('add')}</Button>
         </div>
+
+        <AttachmentField value={f.attachments || []} onChange={(v) => setF({ ...f, attachments: v })} />
 
         <Field label={t('tags')} hint="comma,separated">
           <Input value={f.tags} onChange={set('tags')} />

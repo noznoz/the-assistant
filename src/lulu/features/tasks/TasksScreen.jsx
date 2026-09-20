@@ -177,7 +177,7 @@ function TaskActionSheet({ task, lang, settings, people = [], onClose, onEdit, o
           <Button block icon="sparkle" onClick={onCopyFollowUp}>Draft follow-up message</Button>}
         <div className="row2">
           <Button icon="edit" onClick={onEdit}>{t('edit')}</Button>
-          <Button icon="duplicate" onClick={onDuplicate}>{t('add')}</Button>
+          <Button icon="duplicate" onClick={onDuplicate}>{t('duplicate')}</Button>
         </div>
         <Button block variant="danger" icon="trash" onClick={onDelete}>{t('delete')}</Button>
       </div>
