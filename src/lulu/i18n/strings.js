@@ -57,6 +57,7 @@ export const STRINGS = {
     // generic
     save: 'Save', cancel: 'Cancel', delete: 'Delete', edit: 'Edit', done: 'Done', add: 'Add', added: 'Added', undo: 'Undo',
     addAnything: 'Add anything — “lunch 45 sar”, “call Ali 5pm”…',
+    voiceInput: 'Speak', voiceUnavailable: 'Voice input isn’t available on this device — please type.',
     cap_expense: 'Expense', cap_appointment: 'Appointment', cap_reminder: 'Reminder', cap_task: 'Task',
     search: 'Search', filter: 'Filter', all: 'All', none: 'None', optional: 'optional',
     required: 'Required', close: 'Close', share: 'Share', view: 'View', back: 'Back',
@@ -516,6 +517,7 @@ export const STRINGS = {
     email: 'البريد', whatsapp: 'واتساب', relationship: 'العلاقة',
     save: 'حفظ', cancel: 'إلغاء', delete: 'حذف', edit: 'تعديل', done: 'تم', add: 'إضافة', added: 'أُضيف', undo: 'تراجع',
     addAnything: 'أضف أي شيء — «غداء ٤٥ ريال»، «اتصل بعلي ٥م»…',
+    voiceInput: 'تحدّث', voiceUnavailable: 'الإدخال الصوتي غير متاح على هذا الجهاز — يُرجى الكتابة.',
     cap_expense: 'مصروف', cap_appointment: 'موعد', cap_reminder: 'تذكير', cap_task: 'مهمة',
     search: 'بحث', filter: 'تصفية', all: 'الكل', none: 'لا شيء', optional: 'اختياري',
     required: 'مطلوب', close: 'إغلاق', share: 'مشاركة', view: 'عرض', back: 'رجوع',
