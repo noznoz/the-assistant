@@ -84,6 +84,14 @@ export default function WeekScreen({ go }) {
 
   const nameFor = (id) => (people.items.find(p => p.id === id) || {}).name
   const empty = !d.weekTasks.length && !d.bills.length && !d.birthdays.length && !d.upTrips.length && !d.weekAppts.length
+  const overdueCount = d.weekTasks.filter(x => isOverdue(x.dueDate)).length
+  const renewalsCount = d.bills.filter(b => b.kind === 'renewal').length + (d.weekDocs?.length || 0)
+  const planParts = [
+    d.weekTasks.length ? `${d.weekTasks.length} ${t('due')}` : '',
+    overdueCount ? `${overdueCount} ${t('overdue')}` : '',
+    d.weekAppts.length ? `${d.weekAppts.length} ${t('appointments')}` : '',
+    renewalsCount ? `${renewalsCount} ${t('renewals')}` : '',
+  ].filter(Boolean).join(' · ')
 
   return (
     <>
@@ -97,7 +105,20 @@ export default function WeekScreen({ go }) {
           <Empty icon="sparkle" title={t('allClear')} text={t('weekEmptyHint')} />
         ) : (
           <>
-            <div className="chip-row" style={{ margin: '6px 0 10px' }}>
+            <Card style={{ marginTop: 8 }}>
+              <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 3, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Icon name="sparkle" size={16} style={{ color: 'var(--brand-600)' }} /> {t('planWeekTitle')}
+              </div>
+              <div className="muted" style={{ fontSize: 13 }}>{planParts || t('allClear')}</div>
+              {(d.dueOut > 0 || d.expectIn > 0) && (
+                <div style={{ fontSize: 12.5, marginTop: 6, fontWeight: 600 }}>
+                  {d.dueOut > 0 && <span style={{ color: 'var(--danger)' }}>−{money(d.dueOut, cur, lang)}</span>}
+                  {d.dueOut > 0 && d.expectIn > 0 && ' · '}
+                  {d.expectIn > 0 && <span style={{ color: 'var(--ok)' }}>+{money(d.expectIn, cur, lang)}</span>}
+                </div>
+              )}
+            </Card>
+            <div className="chip-row" style={{ margin: '10px 0 10px' }}>
               <Chip selectable on={view === 'timeline'} onClick={() => setView('timeline')}><Icon name="today" size={13} /> {t('timeline')}</Chip>
               <Chip selectable on={view === 'grouped'} onClick={() => setView('grouped')}><Icon name="grid" size={13} /> {t('byType')}</Chip>
             </div>

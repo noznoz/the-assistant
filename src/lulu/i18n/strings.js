@@ -303,7 +303,7 @@ export const STRINGS = {
     warrantyExpiry: 'Warranty expiry', warrantyExpired: 'Warranty expired', underWarranty: 'Under warranty',
     totalValue: 'Total value',
     // week ahead
-    weekAhead: 'Week ahead', week: 'Week ahead', allClear: 'All clear',
+    weekAhead: 'Week ahead', week: 'Week ahead', planWeekTitle: 'Plan your week', allClear: 'All clear',
     weekEmptyHint: 'Nothing due in the next 7 days.', tasksThisWeek: 'Tasks this week', timeline: 'Timeline', byType: 'By type',
     tomorrow: 'Tomorrow', nextWeek: 'Next week', inThreeDays: 'In 3 days', searchPeople: 'Search people…',
     assignPeople: 'Assign people', moreOptions: 'More options', fewerOptions: 'Fewer options',
@@ -762,7 +762,7 @@ export const STRINGS = {
     warrantyExpiry: 'انتهاء الضمان', warrantyExpired: 'انتهى الضمان', underWarranty: 'ضمن الضمان',
     totalValue: 'القيمة الإجمالية',
     // week ahead
-    weekAhead: 'الأسبوع القادم', week: 'الأسبوع القادم', allClear: 'كل شيء تمام',
+    weekAhead: 'الأسبوع القادم', week: 'الأسبوع القادم', planWeekTitle: 'خطّط أسبوعك', allClear: 'كل شيء تمام',
     weekEmptyHint: 'لا شيء مستحق خلال 7 أيام.', tasksThisWeek: 'مهام هذا الأسبوع', timeline: 'الجدول الزمني', byType: 'حسب النوع',
     tomorrow: 'غداً', nextWeek: 'الأسبوع القادم', inThreeDays: 'خلال 3 أيام', searchPeople: 'ابحث عن أشخاص…',
     assignPeople: 'إسناد لأشخاص', moreOptions: 'خيارات إضافية', fewerOptions: 'خيارات أقل',
