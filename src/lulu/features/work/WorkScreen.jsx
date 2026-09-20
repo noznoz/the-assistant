@@ -818,6 +818,7 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
   const subs = f.subtasks || []
   const addSub = () => { const v = subText.trim(); if (!v) return; setF({ ...f, subtasks: [...subs, { id: uid(), text: v, done: false }] }); setSubText('') }
   const toggleSub = (id) => setF({ ...f, subtasks: subs.map(s => s.id === id ? { ...s, done: !s.done } : s) })
+  const editSub = (id, text) => setF({ ...f, subtasks: subs.map(s => s.id === id ? { ...s, text } : s) })
   const removeSub = (id) => setF({ ...f, subtasks: subs.filter(s => s.id !== id) })
 
   // Assignment: pick any number of members across any department. Tapping a
@@ -1055,7 +1056,10 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
               <button className={`check ${s.done ? 'on' : ''}`} onClick={() => toggleSub(s.id)} aria-label={t('markComplete')}>
                 {s.done && <Icon name="check" size={14} stroke={3} />}
               </button>
-              <div className="body"><div className="title" style={{ fontSize: 14, textDecoration: s.done ? 'line-through' : 'none', opacity: s.done ? 0.6 : 1 }}>{s.text}</div></div>
+              <div className="body">
+                <input value={s.text} onChange={e => editSub(s.id, e.target.value)} aria-label={t('editSubtask')}
+                  style={{ width: '100%', border: 0, background: 'transparent', color: 'var(--ink)', fontSize: 14, padding: '2px 0', outline: 'none', textDecoration: s.done ? 'line-through' : 'none', opacity: s.done ? 0.6 : 1 }} />
+              </div>
               <button className="iconbtn" aria-label={t('delete')} onClick={() => removeSub(s.id)}><Icon name="x" size={15} /></button>
             </div>
           ))}
