@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { classifyCapture, aiClassifyCapture } from '../../lib/parseCapture.js'
+import { speechSupported, listen } from '../../lib/voice.js'
 
 // One box that turns a plain sentence into the right record. It shows a live
 // (rule-based, instant) preview; on submit, if the user's Claude key is set it
@@ -13,10 +14,27 @@ const SCREEN = { expense: 'expenses', appointment: 'appointments', reminder: 're
 const ICON = { expense: 'wallet', appointment: 'calendar', reminder: 'bell', task: 'check' }
 
 export default function QuickCapture({ toast, go }) {
-  const { t } = useT()
+  const { t, lang } = useT()
   const { settings } = useSettings()
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
+  const [listening, setListening] = useState(false)
+  const recRef = useRef(null)
+  const voiceOn = speechSupported()
+
+  useEffect(() => () => { try { recRef.current && recRef.current.stop() } catch { /* ignore */ } }, [])
+
+  const toggleVoice = () => {
+    if (listening) { try { recRef.current && recRef.current.stop() } catch { /* ignore */ } return }
+    setListening(true)
+    recRef.current = listen({
+      lang: lang === 'ar' ? 'ar-SA' : 'en-US',
+      onResult: (txt) => setText(txt),
+      onEnd: () => { setListening(false); recRef.current = null },
+      onError: () => { setListening(false); recRef.current = null; toast && toast.show(t('voiceUnavailable')) },
+    })
+    if (!recRef.current) setListening(false)
+  }
   const cols = {
     expenses: useCollection('expenses'),
     appointments: useCollection('appointments'),
@@ -59,6 +77,12 @@ export default function QuickCapture({ toast, go }) {
           aria-label={t('addAnything')}
           style={{ flex: 1, border: 0, background: 'transparent', padding: '12px 0', fontSize: 15, color: 'var(--ink-1)', outline: 'none', minWidth: 0 }}
         />
+        {voiceOn && (
+          <button aria-label={t('voiceInput')} onClick={toggleVoice}
+            style={{ flexShrink: 0, width: 32, height: 32, borderRadius: 10, border: 0, background: listening ? 'var(--danger)' : 'transparent', color: listening ? '#fff' : 'var(--ink-3)', display: 'grid', placeItems: 'center' }}>
+            <Icon name="mic" size={18} className={listening ? 'dots' : ''} />
+          </button>
+        )}
         {preview && (
           <button aria-label={t('add')} onClick={submit} disabled={busy}
             style={{ flexShrink: 0, width: 32, height: 32, borderRadius: 10, border: 0, background: 'var(--brand-600)', color: '#fff', display: 'grid', placeItems: 'center', opacity: busy ? 0.6 : 1 }}>
