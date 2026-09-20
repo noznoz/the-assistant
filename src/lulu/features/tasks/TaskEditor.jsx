@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
+import Icon from '../../ui/Icon.jsx'
 import { Sheet, Field, Input, TextArea, Select, Button, Chip } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
+import { uid } from '../../store/db.js'
 import { TASK_TYPES, STATUSES, PRIORITIES } from '../../lib/domain.js'
 import { RECURRENCE } from '../../lib/recurrence.js'
 import { todayISO } from '../../lib/format.js'
@@ -22,7 +24,16 @@ export default function TaskEditor({ initial, onClose, onSaved }) {
   const [f, setF] = useState({ ...empty, ...initial })
   const [err, setErr] = useState('')
   const [addingPerson, setAddingPerson] = useState(false)
+  const [subText, setSubText] = useState('')
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
+
+  // Checklist / sub-tasks — same { id, text, done } model as Work tasks, so a
+  // task's sub-tasks show and stay editable wherever it's opened.
+  const subs = f.subtasks || []
+  const addSub = () => { const v = subText.trim(); if (!v) return; setF({ ...f, subtasks: [...subs, { id: uid(), text: v, done: false }] }); setSubText('') }
+  const toggleSub = (id) => setF({ ...f, subtasks: subs.map(s => s.id === id ? { ...s, done: !s.done } : s) })
+  const editSub = (id, text) => setF({ ...f, subtasks: subs.map(s => s.id === id ? { ...s, text } : s) })
+  const removeSub = (id) => setF({ ...f, subtasks: subs.filter(s => s.id !== id) })
 
   const onAssignee = (e) => {
     const v = e.target.value
@@ -130,6 +141,26 @@ export default function TaskEditor({ initial, onClose, onSaved }) {
             </Select>
           </Field>
         )}
+
+        <label style={{ display: 'block', fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '8px 2px 7px' }}>
+          {t('checklist')}{subs.length ? ` · ${subs.filter(s => s.done).length}/${subs.length}` : ''}
+        </label>
+        {subs.map(s => (
+          <div key={s.id} className="li" style={{ margin: '0 0 8px' }}>
+            <button className={`check ${s.done ? 'on' : ''}`} onClick={() => toggleSub(s.id)} aria-label={t('markComplete')}>
+              {s.done && <Icon name="check" size={14} stroke={3} />}
+            </button>
+            <div className="body">
+              <input value={s.text} onChange={e => editSub(s.id, e.target.value)} aria-label={t('editSubtask')}
+                style={{ width: '100%', border: 0, background: 'transparent', color: 'var(--ink)', fontSize: 14, padding: '2px 0', outline: 'none', textDecoration: s.done ? 'line-through' : 'none', opacity: s.done ? 0.6 : 1 }} />
+            </div>
+            <button className="iconbtn" aria-label={t('delete')} onClick={() => removeSub(s.id)}><Icon name="x" size={15} /></button>
+          </div>
+        ))}
+        <div style={{ display: 'flex', gap: 8, margin: '6px 0 16px' }}>
+          <Input value={subText} onChange={e => setSubText(e.target.value)} placeholder={t('addSubtask')} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSub() } }} style={{ flex: 1 }} />
+          <Button icon="plus" onClick={addSub}>{t('add')}</Button>
+        </div>
 
         <Field label={t('tags')} hint="comma,separated">
           <Input value={f.tags} onChange={set('tags')} />
