@@ -11,6 +11,7 @@ import * as db from '../../store/db.js'
 import { hashPin, biometricSupported, enrollBiometric } from '../../lib/lock.js'
 import { requestNotificationPermission, notificationPermission, setBadge } from '../../lib/notify.js'
 import { playAlarm, unlockAudio } from '../../lib/alarm.js'
+import { checkForUpdateNow, applyUpdate } from '../../lib/appUpdate.js'
 import { AI_MODELS } from '../../lib/ai.js'
 import { APP_VERSION, BUILD_STAMP } from '../../lib/appInfo.js'
 
@@ -21,6 +22,7 @@ export default function SettingsScreen({ go }) {
   const toast = useToast()
   const fileRef = useRef()
   const [setup, setSetup] = useState(false)   // passcode setup overlay
+  const [checking, setChecking] = useState(false)   // "check for updates" in-flight
 
   const doExport = async () => {
     const json = JSON.stringify(db.exportAll(), null, 2)
@@ -233,7 +235,16 @@ export default function SettingsScreen({ go }) {
           <Button block variant="danger" icon="trash" onClick={doWipe}>{t('deleteAll')}</Button>
         </Card>
 
-        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>
+        <div style={{ marginTop: 20 }}>
+          <Button block icon="refresh" disabled={checking} onClick={async () => {
+            setChecking(true)
+            const r = await checkForUpdateNow()
+            if (r === 'updating' || r === 'reloaded') { toast.show(t('updating')); applyUpdate() }
+            else { setChecking(false); toast.show(t('upToDate')) }
+          }}>{checking ? t('checking') : t('checkUpdates')}</Button>
+        </div>
+
+        <p className="center muted" style={{ marginTop: 16, fontSize: 12 }}>
           {t('about')} · v{APP_VERSION} · <span>Offline-first</span>
         </p>
         <p className="center muted" style={{ marginTop: 2, fontSize: 11 }}>

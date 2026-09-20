@@ -14,6 +14,7 @@ import { setBadge, maybeDailyBrief, runDueAlerts } from './lib/notify.js'
 import { fireDueReminders } from './lib/reminders.js'
 import { refreshPush } from './lib/push.js'
 import { unlockAudio } from './lib/alarm.js'
+import { onUpdateReady, applyUpdate } from './lib/appUpdate.js'
 import { briefSummary } from './lib/dayBrief.js'
 import { unreadCount } from './lib/notifications.js'
 import { useNotificationFeed } from './store/useNotificationFeed.js'
@@ -87,6 +88,22 @@ const MAIN_TABS = ['today', 'tasks', 'garage', 'expenses', 'more']
 // refused (device storage full). Without this the write fails silently and the
 // user's change is lost on reload with no explanation. The banner points them at
 // the fix (free space / remove large photos / back up & wipe).
+// Shows when a new app version has been downloaded and is waiting. Tapping
+// activates it and reloads — so the user is never stuck on an old build.
+function UpdateBanner() {
+  const { t } = useT()
+  const [ready, setReady] = useState(false)
+  useEffect(() => onUpdateReady(() => setReady(true)), [])
+  if (!ready) return null
+  return (
+    <div role="status" className="update-banner">
+      <Icon name="sparkle" size={18} />
+      <span style={{ flex: 1 }}>{t('updateReady')}</span>
+      <button className="btn brand sm" onClick={applyUpdate}>{t('updateNow')}</button>
+    </div>
+  )
+}
+
 function StorageAlert() {
   const { t } = useT()
   const [shown, setShown] = useState(false)
@@ -275,6 +292,7 @@ function Router() {
       )}
       <ErrorBoundary key={route}>{screen}</ErrorBoundary>
       <StorageAlert />
+      <UpdateBanner />
       <BottomNav tab={activeTab} go={go} />
     </div>
   )
