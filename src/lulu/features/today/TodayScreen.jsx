@@ -133,6 +133,9 @@ export default function TodayScreen({ go }) {
           <button className="btn sm" style={{ background: 'rgba(255,255,255,0.18)', color: '#fff', border: 0 }} onClick={shareAgenda}>
             <Icon name="whatsapp" size={16} /> {t('shareAgenda')}
           </button>
+          <button className="btn sm" style={{ background: 'rgba(255,255,255,0.18)', color: '#fff', border: 0 }} onClick={() => go('week')}>
+            <Icon name="calendar" size={16} /> {t('planWeekTitle')}
+          </button>
         </div>
       </div>
     ),
