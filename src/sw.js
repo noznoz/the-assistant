@@ -9,7 +9,8 @@ const CACHE = 'assistant-v2'
 const PRECACHE = self.__WB_MANIFEST || []
 
 self.addEventListener('install', (e) => {
-  self.skipWaiting()
+  // Note: no auto-skipWaiting — a new version waits until the user taps
+  // "Update" (which posts SKIP_WAITING) or fully restarts the app.
   e.waitUntil(
     caches.open(CACHE).then((c) =>
       // Resilient: don't let one failed asset abort the whole install.

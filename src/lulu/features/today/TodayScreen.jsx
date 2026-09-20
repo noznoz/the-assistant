@@ -19,6 +19,7 @@ import { normalizeDashboard } from '../../lib/dashboard.js'
 import PrayerCard from './PrayerCard.jsx'
 import QuickCapture from './QuickCapture.jsx'
 import HomeLayout from './HomeLayouts.jsx'
+import WelcomeCard from './WelcomeCard.jsx'
 import { share, formatAgenda } from '../../lib/share.js'
 import { findPriority } from '../../lib/domain.js'
 import { taskMemberIds } from '../../lib/org.js'
@@ -361,6 +362,7 @@ export default function TodayScreen({ go }) {
       </div>
 
       <div className="screen">
+        <WelcomeCard go={go} />
         {isCustomLayout ? (
           <HomeLayout variant={homeVariant} data={homeData} go={go} t={t} lang={lang} toast={toast} />
         ) : (

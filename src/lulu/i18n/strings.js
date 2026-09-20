@@ -153,6 +153,8 @@ export const STRINGS = {
     testPushError: "Couldn't reach the server. Check cloud sync and that the function is deployed.",
     notifHint: 'A daily brief plus alerts for due tasks and renewals when you open the app.',
     soundAlerts: 'Alarm sound', soundAlertsHint: 'Play an alarm when a reminder or dated item comes due while the app is open. On iPhone a sound can’t play while the app is fully closed — the reminder still arrives silently.', testSound: 'Test sound',
+    updateReady: 'A new version is ready', updateNow: 'Update', checkUpdates: 'Check for updates', checking: 'Checking…', updating: 'Updating…', upToDate: 'You’re on the latest version',
+    welcomeTitle: 'Welcome — let’s get set up', welcomeSub: 'A couple of quick things', welcomeName: 'Add your name', welcomeCity: 'Set your prayer city', welcomeAlerts: 'Turn on alerts & sound', welcomePersonalize: 'Make it yours — layout & colors', welcomeBackup: 'Back up your data', welcomeDone: 'All set 🎉', hide: 'Hide',
     notifDenied: 'Blocked in your browser settings — enable notifications for this site.',
     notifOn: 'On', notifOff: 'Off',
     // app lock
@@ -608,6 +610,8 @@ export const STRINGS = {
     testPushError: 'تعذّر الوصول إلى الخادم. تحقّق من المزامنة السحابية ومن نشر الدالة.',
     notifHint: 'ملخص يومي وتنبيهات للمهام المستحقة والتجديدات عند فتح التطبيق.',
     soundAlerts: 'صوت المنبّه', soundAlertsHint: 'تشغيل منبّه عند استحقاق تذكير أو عنصر مؤرَّخ أثناء فتح التطبيق. على الآيفون لا يمكن تشغيل الصوت والتطبيق مغلق تمامًا — يصل التذكير بصمت.', testSound: 'اختبار الصوت',
+    updateReady: 'يتوفّر إصدار جديد', updateNow: 'تحديث', checkUpdates: 'التحقق من التحديثات', checking: 'جارٍ التحقق…', updating: 'جارٍ التحديث…', upToDate: 'أنت على أحدث إصدار',
+    welcomeTitle: 'أهلاً — لنُجهّز التطبيق', welcomeSub: 'أمور سريعة', welcomeName: 'أضف اسمك', welcomeCity: 'حدّد مدينة الصلاة', welcomeAlerts: 'فعّل التنبيهات والصوت', welcomePersonalize: 'خصّصه — التخطيط والألوان', welcomeBackup: 'انسخ بياناتك احتياطيًا', welcomeDone: 'تم الإعداد 🎉', hide: 'إخفاء',
     notifDenied: 'محظورة في إعدادات المتصفح — فعّل الإشعارات لهذا الموقع.',
     notifOn: 'مُفعّل', notifOff: 'متوقف',
     // app lock
