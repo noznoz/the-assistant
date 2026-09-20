@@ -146,14 +146,12 @@ export default function TaskEditor({ initial, onClose, onSaved }) {
           {t('checklist')}{subs.length ? ` · ${subs.filter(s => s.done).length}/${subs.length}` : ''}
         </label>
         {subs.map(s => (
-          <div key={s.id} className="li" style={{ margin: '0 0 8px' }}>
+          <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
             <button className={`check ${s.done ? 'on' : ''}`} onClick={() => toggleSub(s.id)} aria-label={t('markComplete')}>
               {s.done && <Icon name="check" size={14} stroke={3} />}
             </button>
-            <div className="body">
-              <input value={s.text} onChange={e => editSub(s.id, e.target.value)} aria-label={t('editSubtask')}
-                style={{ width: '100%', border: 0, background: 'transparent', color: 'var(--ink)', fontSize: 14, padding: '2px 0', outline: 'none', textDecoration: s.done ? 'line-through' : 'none', opacity: s.done ? 0.6 : 1 }} />
-            </div>
+            <Input value={s.text} onChange={e => editSub(s.id, e.target.value)} aria-label={t('editSubtask')}
+              style={{ flex: 1, textDecoration: s.done ? 'line-through' : 'none', opacity: s.done ? 0.6 : 1 }} />
             <button className="iconbtn" aria-label={t('delete')} onClick={() => removeSub(s.id)}><Icon name="x" size={15} /></button>
           </div>
         ))}
