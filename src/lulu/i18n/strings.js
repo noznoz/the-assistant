@@ -330,7 +330,8 @@ export const STRINGS = {
     monthlyReport: 'Monthly report', monthlyreport: 'Monthly report', netCashflow: 'Net cashflow', summary: 'Summary',
     boardPack: 'Board pack', boardPackSub: 'Finance, work & household in one summary', cashflow: 'Cashflow', net: 'Net', spending: 'Spending', print: 'Print', completedThisMonth: 'Completed this month', householdHorizon: 'Household horizon',
     totalAssets: 'Total assets', shareAsPdf: 'Share as PDF', reportShareHint: 'Opens your print sheet — choose “Save to Files” or share as PDF.',
-    preparingReport: 'Preparing report…', backupHint: 'Save a copy of everything to a file — keep it safe or move to a new phone.',
+    preparingReport: 'Preparing report…', backupHint: 'Or save a copy to a file — keep it safe or move to a new phone.',
+    backupNow: 'Back up now', lastBackup: 'Last backup', noBackupYet: 'Backs up automatically once a day. No backup yet — tap to make one.', restoreBackup: 'Restore last backup', restoreConfirm: 'Restore the most recent backup? This replaces the data on this device.',
     removeSamples: 'Remove sample data', removeSamplesHint: 'Deletes the built-in demo records (sample cars, contacts, expenses…) and keeps everything you added. Also clears them from the cloud.',
     removeSamplesConfirm: 'Remove all the built-in sample data? Your own records are kept.', removed: 'Removed', noSamplesFound: 'No sample data found',
     // receipt scan + forecast + emergency
@@ -788,7 +789,8 @@ export const STRINGS = {
     monthlyReport: 'التقرير الشهري', monthlyreport: 'التقرير الشهري', netCashflow: 'صافي التدفق النقدي', summary: 'ملخص',
     boardPack: 'الحزمة التنفيذية', boardPackSub: 'المالية والعمل والمنزل في ملخص واحد', cashflow: 'التدفق النقدي', net: 'الصافي', spending: 'الإنفاق', print: 'طباعة', completedThisMonth: 'أُنجز هذا الشهر', householdHorizon: 'أفق المنزل',
     totalAssets: 'إجمالي الأصول', shareAsPdf: 'مشاركة كـ PDF', reportShareHint: 'يفتح صفحة الطباعة — اختر "حفظ في الملفات" أو المشاركة كـ PDF.',
-    preparingReport: 'جارٍ تجهيز التقرير…', backupHint: 'احفظ نسخة من كل شيء في ملف — للأمان أو للنقل إلى هاتف جديد.',
+    preparingReport: 'جارٍ تجهيز التقرير…', backupHint: 'أو احفظ نسخة في ملف — للأمان أو للنقل إلى هاتف جديد.',
+    backupNow: 'انسخ الآن', lastBackup: 'آخر نسخة', noBackupYet: 'يُنسخ تلقائيًا مرة يوميًا. لا توجد نسخة بعد — اضغط لإنشائها.', restoreBackup: 'استعادة آخر نسخة', restoreConfirm: 'استعادة أحدث نسخة؟ سيحلّ ذلك محل البيانات على هذا الجهاز.',
     removeSamples: 'إزالة البيانات التجريبية', removeSamplesHint: 'يحذف السجلات التجريبية المدمجة (سيارات وجهات اتصال ومصاريف تجريبية…) ويُبقي كل ما أضفته أنت. ويزيلها من السحابة أيضًا.',
     removeSamplesConfirm: 'إزالة جميع البيانات التجريبية المدمجة؟ ستبقى سجلاتك أنت.', removed: 'تمت الإزالة', noSamplesFound: 'لا توجد بيانات تجريبية',
     // receipt scan + forecast + emergency

@@ -15,6 +15,7 @@ import { fireDueReminders } from './lib/reminders.js'
 import { refreshPush } from './lib/push.js'
 import { unlockAudio } from './lib/alarm.js'
 import { onUpdateReady, applyUpdate } from './lib/appUpdate.js'
+import { runAutoBackupIfDue } from './lib/backup.js'
 import { briefSummary } from './lib/dayBrief.js'
 import { unreadCount } from './lib/notifications.js'
 import { useNotificationFeed } from './store/useNotificationFeed.js'
@@ -146,6 +147,10 @@ function Router() {
     document.addEventListener('visibilitychange', onVis)
     return () => { clearInterval(timer); document.removeEventListener('visibilitychange', onVis) }
   }, [data.reminders, patch, settings.notifications, settings.soundAlerts, t])
+
+  // Take an automatic on-device backup once a day so a lost phone or a bad
+  // change can be recovered (Settings → Restore).
+  useEffect(() => { runAutoBackupIfDue() }, [])
 
   // Warm up the audio context on the first tap so timer-fired alarms are
   // allowed to sound (browsers block audio until a user gesture).

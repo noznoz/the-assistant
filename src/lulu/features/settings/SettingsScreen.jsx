@@ -12,17 +12,29 @@ import { hashPin, biometricSupported, enrollBiometric } from '../../lib/lock.js'
 import { requestNotificationPermission, notificationPermission, setBadge } from '../../lib/notify.js'
 import { playAlarm, unlockAudio } from '../../lib/alarm.js'
 import { checkForUpdateNow, applyUpdate } from '../../lib/appUpdate.js'
+import { backupNow, restoreSnapshot, lastBackupAt } from '../../lib/backup.js'
 import { AI_MODELS } from '../../lib/ai.js'
 import { APP_VERSION, BUILD_STAMP } from '../../lib/appInfo.js'
 
 export default function SettingsScreen({ go }) {
-  const { t } = useT()
+  const { t, lang } = useT()
   const { settings, updateSettings } = useSettings()
   const { reloadAll, removeSampleData } = useStore()
   const toast = useToast()
   const fileRef = useRef()
   const [setup, setSetup] = useState(false)   // passcode setup overlay
   const [checking, setChecking] = useState(false)   // "check for updates" in-flight
+  const [bkAt, setBkAt] = useState(lastBackupAt())  // most recent on-device backup
+
+  const doBackupNow = async () => {
+    const at = await backupNow()
+    if (at) { setBkAt(at); toast.show(t('savedToast')) } else { toast.show(t('importInvalid')) }
+  }
+  const doRestore = async () => {
+    if (!window.confirm(t('restoreConfirm'))) return
+    const ok = await restoreSnapshot()
+    if (ok) { reloadAll(); toast.show(t('importDone')) } else { toast.show(t('importInvalid')) }
+  }
 
   const doExport = async () => {
     const json = JSON.stringify(db.exportAll(), null, 2)
@@ -226,7 +238,12 @@ export default function SettingsScreen({ go }) {
 
         <Section title={t('backup')} />
         <Card className="stack">
-          <p className="hint" style={{ margin: '0 2px' }}>{t('backupHint')}</p>
+          <Button block icon="shield" onClick={doBackupNow}>{t('backupNow')}</Button>
+          <p className="hint" style={{ margin: '0 2px' }}>
+            {bkAt ? `${t('lastBackup')}: ${new Date(bkAt).toLocaleString(lang === 'ar' ? 'ar' : 'en')}` : t('noBackupYet')}
+          </p>
+          {bkAt > 0 && <Button block icon="refresh" onClick={doRestore}>{t('restoreBackup')}</Button>}
+          <p className="hint" style={{ margin: '6px 2px 0' }}>{t('backupHint')}</p>
           <Button block icon="download" onClick={doExport}>{t('exportData')}</Button>
           <Button block icon="upload" onClick={() => fileRef.current?.click()}>{t('importData')}</Button>
           <input ref={fileRef} type="file" accept="application/json" hidden onChange={doImport} />
