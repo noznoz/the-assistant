@@ -138,6 +138,11 @@ function TaskRow({ task, lang, dateFormat, onToggle, onOpen }) {
           {task.dueDate && <span className={overdue ? 't-danger' : ''} style={overdue ? { padding: '1px 6px', borderRadius: 6 } : undefined}>
             {relativeDay(task.dueDate, lang)}{task.dueTime ? ` · ${fmtTime(task.dueTime, lang)}` : ''}
           </span>}
+          {!done && task.remind && task.remind !== 'none' && (
+            <span aria-label={t('remindMe')} title={t('remindMe')} style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--brand-500)' }}>
+              <Icon name="bell" size={12} />
+            </span>
+          )}
           {task.assignedTo && <span>· {task.assignedTo}</span>}
           {!done && st && task.status !== 'new' && <span>· {t(st.key)}</span>}
         </div>
