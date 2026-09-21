@@ -5,6 +5,18 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { uid } from '../../store/db.js'
 import AttachmentField from '../../ui/AttachmentField.jsx'
+import { buildReminderFields } from '../../lib/reminders.js'
+
+// The alert time for a task's "Remind me" choice, derived from its due date/time.
+function taskReminderISO(dueDate, dueTime, remind) {
+  if (!dueDate || !remind || remind === 'none') return null
+  const [h, m] = (dueTime || '09:00').split(':').map(Number)
+  if (remind === 'morning') { const d = new Date(dueDate + 'T00:00:00'); d.setHours(9, 0, 0, 0); return d.toISOString() }
+  const due = new Date(dueDate + 'T00:00:00'); due.setHours(h || 9, m || 0, 0, 0)
+  if (remind === 'dayBefore') { due.setDate(due.getDate() - 1); return due.toISOString() }
+  if (remind === 'hourBefore') { due.setHours(due.getHours() - 1); return due.toISOString() }
+  return null
+}
 import { TASK_TYPES, STATUSES, PRIORITIES } from '../../lib/domain.js'
 import { RECURRENCE } from '../../lib/recurrence.js'
 import { todayISO } from '../../lib/format.js'
@@ -14,7 +26,7 @@ const empty = {
   title: '', description: '', type: 'task', classification: 'work',
   priority: 'medium', status: 'new', dueDate: '', dueTime: '',
   project: '', requestedBy: '', assignedTo: '', assigneeId: '', tags: '',
-  followUp: '', recurrence: 'none', relatedVehicle: '',
+  followUp: '', recurrence: 'none', relatedVehicle: '', remind: 'none',
 }
 
 export default function TaskEditor({ initial, onClose, onSaved }) {
@@ -22,6 +34,7 @@ export default function TaskEditor({ initial, onClose, onSaved }) {
   const tasks = useCollection('tasks')
   const vehicles = useCollection('vehicles')
   const people = useCollection('people')
+  const reminders = useCollection('reminders')
   const [f, setF] = useState({ ...empty, ...initial })
   const [err, setErr] = useState('')
   const [addingPerson, setAddingPerson] = useState(false)
@@ -47,11 +60,23 @@ export default function TaskEditor({ initial, onClose, onSaved }) {
   const legacyName = !f.assigneeId && f.assignedTo ? f.assignedTo : ''
   const assigneeValue = f.assigneeId || (legacyName ? '__legacy' : '')
 
+  // Keep a task's due-date reminder in sync (its own record, flagged so it never
+  // clashes with a Work task's separate alert times).
+  const syncTaskReminder = (taskId, title, dueDate, dueTime, remind) => {
+    const existing = reminders.items.find(r => r.taskId === taskId && r.dueReminder)
+    const iso = taskReminderISO(dueDate, dueTime, remind)
+    if (!iso) { if (existing) reminders.remove(existing.id); return }
+    const fields = { ...buildReminderFields(title, [iso]), taskId, dueReminder: true, repeat: 'none', done: false }
+    if (existing) reminders.save({ ...existing, ...fields }); else reminders.add(fields)
+  }
+
   const submit = () => {
     if (!f.title.trim()) { setErr(t('required')); return }
     const rec = { ...f, title: f.title.trim() }
-    if (initial?.id) tasks.save({ ...rec, id: initial.id })
-    else tasks.add(rec)
+    let id = initial?.id
+    if (id) tasks.save({ ...rec, id })
+    else { const created = tasks.add(rec); id = created && created.id }
+    if (id) syncTaskReminder(id, rec.title, rec.dueDate, rec.dueTime, rec.remind)
     onSaved && onSaved()
     onClose()
   }
@@ -113,6 +138,17 @@ export default function TaskEditor({ initial, onClose, onSaved }) {
             <Input type="time" value={f.dueTime} onChange={set('dueTime')} />
           </Field>
         </div>
+
+        {f.dueDate && (
+          <Field label={t('remindMe')} hint={t('remindMeHint')}>
+            <Select value={f.remind || 'none'} onChange={set('remind')} options={[
+              { value: 'none', label: t('off') },
+              { value: 'morning', label: t('remindMorning') },
+              { value: 'dayBefore', label: t('remindDayBefore') },
+              ...(f.dueTime ? [{ value: 'hourBefore', label: t('remindHourBefore') }] : []),
+            ]} />
+          </Field>
+        )}
 
         <div style={{ marginBottom: 16 }}>
           <label style={{ display: 'block', fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '0 2px 7px' }}>{t('workOrPersonal')}</label>

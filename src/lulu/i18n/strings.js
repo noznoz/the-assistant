@@ -24,6 +24,7 @@ export const STRINGS = {
     allTasks: 'All', upcoming: 'Upcoming', completed: 'Completed', delegatedTasks: 'Delegated',
     newTask: 'New task', editTask: 'Edit task', deleteTaskQ: 'Delete this task?', title: 'Title', description: 'Description',
     type: 'Type', priority: 'Priority', status: 'Status', dueDate: 'Due date', dueTime: 'Time',
+    remindMe: 'Remind me', remindMeHint: 'Get an alarm before it’s due.', remindMorning: 'Morning of (9am)', remindDayBefore: 'The day before', remindHourBefore: '1 hour before',
     project: 'Project', requestedBy: 'Requested by', assignedTo: 'Assigned to', tags: 'Tags',
     followUp: 'Follow-up date', reminder: 'Reminder', classification: 'Category', notesField: 'Notes',
     workOrPersonal: 'Work / Personal', work: 'Work', personal: 'Personal',
@@ -49,7 +50,7 @@ export const STRINGS = {
     // expenses
     newExpense: 'New expense', editExpense: 'Edit expense', deleteExpenseQ: 'Delete this expense?', amount: 'Amount', merchant: 'Merchant', category: 'Category',
     paymentMethod: 'Payment method', date: 'Date', reimbursable: 'Reimbursable',
-    relatedVehicle: 'Related vehicle', spendingByCategory: 'Spending by category',
+    relatedVehicle: 'Related vehicle', spendingByCategory: 'Spending by category', topMerchants: 'Top merchants',
     thisWeek: 'This week', thisYear: 'This year', largest: 'Largest expenses', recent: 'Recent',
     // people
     addPerson: 'Add person', jobTitle: 'Job title', company: 'Company / Dept.', mobile: 'Mobile',
@@ -492,6 +493,7 @@ export const STRINGS = {
     allTasks: 'الكل', upcoming: 'القادمة', completed: 'مكتملة', delegatedTasks: 'مُفوَّضة',
     newTask: 'مهمة جديدة', editTask: 'تعديل المهمة', deleteTaskQ: 'حذف هذه المهمة؟', title: 'العنوان', description: 'الوصف',
     type: 'النوع', priority: 'الأولوية', status: 'الحالة', dueDate: 'تاريخ الاستحقاق', dueTime: 'الوقت',
+    remindMe: 'ذكّرني', remindMeHint: 'احصل على منبّه قبل موعد الاستحقاق.', remindMorning: 'صباح اليوم (٩ص)', remindDayBefore: 'اليوم السابق', remindHourBefore: 'قبل ساعة',
     project: 'المشروع', requestedBy: 'مقدّم الطلب', assignedTo: 'المسؤول', tags: 'الوسوم',
     followUp: 'تاريخ المتابعة', reminder: 'تذكير', classification: 'التصنيف', notesField: 'ملاحظات',
     workOrPersonal: 'عمل / شخصي', work: 'عمل', personal: 'شخصي',
@@ -512,7 +514,7 @@ export const STRINGS = {
     insurance: 'التأمين', policyExpiry: 'انتهاء الوثيقة', totalCost: 'التكلفة الإجمالية',
     newExpense: 'مصروف جديد', editExpense: 'تعديل المصروف', deleteExpenseQ: 'حذف هذا المصروف؟', amount: 'المبلغ', merchant: 'المتجر', category: 'الفئة',
     paymentMethod: 'طريقة الدفع', date: 'التاريخ', reimbursable: 'قابل للاسترداد',
-    relatedVehicle: 'المركبة المرتبطة', spendingByCategory: 'الإنفاق حسب الفئة',
+    relatedVehicle: 'المركبة المرتبطة', spendingByCategory: 'الإنفاق حسب الفئة', topMerchants: 'أبرز المتاجر',
     thisWeek: 'هذا الأسبوع', thisYear: 'هذه السنة', largest: 'أكبر المصروفات', recent: 'الأحدث',
     addPerson: 'إضافة شخص', jobTitle: 'المسمّى الوظيفي', company: 'الشركة / القسم', mobile: 'الجوال',
     email: 'البريد', whatsapp: 'واتساب', relationship: 'العلاقة',
