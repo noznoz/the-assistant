@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Section, Field, Input, Select, Segmented, Button, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Section, Field, Input, Select, Segmented, Button, Sheet, useToast } from '../../ui/primitives.jsx'
 import PinPad from '../../ui/PinPad.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useSettings, useStore } from '../../store/StoreProvider.jsx'
@@ -12,7 +12,7 @@ import { hashPin, biometricSupported, enrollBiometric } from '../../lib/lock.js'
 import { requestNotificationPermission, notificationPermission, setBadge } from '../../lib/notify.js'
 import { playAlarm, unlockAudio } from '../../lib/alarm.js'
 import { checkForUpdateNow, applyUpdate } from '../../lib/appUpdate.js'
-import { backupNow, restoreSnapshot, lastBackupAt } from '../../lib/backup.js'
+import { backupNow, restoreSnapshot, lastBackupAt, listSnapshots } from '../../lib/backup.js'
 import { AI_MODELS } from '../../lib/ai.js'
 import { APP_VERSION, BUILD_STAMP } from '../../lib/appInfo.js'
 
@@ -25,15 +25,17 @@ export default function SettingsScreen({ go }) {
   const [setup, setSetup] = useState(false)   // passcode setup overlay
   const [checking, setChecking] = useState(false)   // "check for updates" in-flight
   const [bkAt, setBkAt] = useState(lastBackupAt())  // most recent on-device backup
+  const [snaps, setSnaps] = useState(null)          // restore picker: null=closed, array=open
 
   const doBackupNow = async () => {
     const at = await backupNow()
     if (at) { setBkAt(at); toast.show(t('savedToast')) } else { toast.show(t('importInvalid')) }
   }
-  const doRestore = async () => {
+  const openRestore = async () => { setSnaps(await listSnapshots()) }
+  const doRestore = async (at) => {
     if (!window.confirm(t('restoreConfirm'))) return
-    const ok = await restoreSnapshot()
-    if (ok) { reloadAll(); toast.show(t('importDone')) } else { toast.show(t('importInvalid')) }
+    const ok = await restoreSnapshot(at)
+    if (ok) { setSnaps(null); reloadAll(); toast.show(t('importDone')) } else { toast.show(t('importInvalid')) }
   }
 
   const doExport = async () => {
@@ -242,7 +244,7 @@ export default function SettingsScreen({ go }) {
           <p className="hint" style={{ margin: '0 2px' }}>
             {bkAt ? `${t('lastBackup')}: ${new Date(bkAt).toLocaleString(lang === 'ar' ? 'ar' : 'en')}` : t('noBackupYet')}
           </p>
-          {bkAt > 0 && <Button block icon="refresh" onClick={doRestore}>{t('restoreBackup')}</Button>}
+          {bkAt > 0 && <Button block icon="refresh" onClick={openRestore}>{t('restoreBackup')}</Button>}
           <p className="hint" style={{ margin: '6px 2px 0' }}>{t('backupHint')}</p>
           <Button block icon="download" onClick={doExport}>{t('exportData')}</Button>
           <Button block icon="upload" onClick={() => fileRef.current?.click()}>{t('importData')}</Button>
@@ -270,6 +272,27 @@ export default function SettingsScreen({ go }) {
       </div>
 
       {setup && <PasscodeSetup onCancel={() => setSetup(false)} onSet={savePasscode} />}
+      {snaps && (
+        <Sheet title={t('restoreBackup')} onClose={() => setSnaps(null)}>
+          {snaps.length === 0 ? (
+            <p className="muted" style={{ padding: '8px 2px' }}>{t('noBackupYet')}</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {snaps.map((at, i) => (
+                <button key={at} className="li" style={{ width: '100%', textAlign: 'start', margin: 0 }} onClick={() => doRestore(at)}>
+                  <div className="lead t-brand"><Icon name="shield" size={18} /></div>
+                  <div className="body">
+                    <div className="title">{new Date(at).toLocaleString(lang === 'ar' ? 'ar' : 'en')}</div>
+                    {i === 0 && <div className="meta">{t('lastBackup')}</div>}
+                  </div>
+                  <Icon name="chevron" size={15} style={{ color: 'var(--ink-3)' }} />
+                </button>
+              ))}
+            </div>
+          )}
+          <p className="hint" style={{ marginTop: 10 }}>{t('restoreConfirm')}</p>
+        </Sheet>
+      )}
       {toast.node}
     </>
   )

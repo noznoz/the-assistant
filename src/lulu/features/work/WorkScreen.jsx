@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Section, Sheet, Field, Input, TextArea, Select, Chip, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
+import AttachmentField from '../../ui/AttachmentField.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { PRIORITIES, findPriority, findStatus, ROLE_LEVELS, roleLabel, label } from '../../lib/domain.js'
@@ -1064,6 +1065,9 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
           <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
             <Input value={subText} onChange={e => setSubText(e.target.value)} placeholder={t('addSubtask')} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSub() } }} style={{ flex: 1 }} />
             <Button icon="plus" onClick={addSub}>{t('add')}</Button>
+          </div>
+          <div style={{ marginTop: 14 }}>
+            <AttachmentField value={f.attachments || []} onChange={(v) => setF({ ...f, attachments: v })} />
           </div>
         </>
       )}
