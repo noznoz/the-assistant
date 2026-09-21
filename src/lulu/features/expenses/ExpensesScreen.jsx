@@ -60,6 +60,10 @@ export default function ExpensesScreen({ go }) {
   inRange.forEach(e => { const a = e.account || t('unassignedAccount'); byAccount[a] = (byAccount[a] || 0) + expenseSar(e, rates) })
   const acctBars = Object.entries(byAccount).sort((a, b) => b[1] - a[1]).map(([lbl, v]) => ({ label: lbl, value: v }))
 
+  const byMerchant = {}
+  inRange.forEach(e => { const m = (e.merchant || '').trim(); if (m) byMerchant[m] = (byMerchant[m] || 0) + expenseSar(e, rates) })
+  const merchantBars = Object.entries(byMerchant).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([lbl, v]) => ({ label: lbl, value: v }))
+
   const budget = Number(settings.monthlyBudget) || 0
   const budgetPct = budget ? Math.min(1, total / budget) : 0
   const recent = [...expenses.items].sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 30)
@@ -177,6 +181,13 @@ export default function ExpensesScreen({ go }) {
           <>
             <Section title={t('spendingByCategory')} />
             <Card><Bars data={catBars} format={(v) => money(v, cur, lang)} /></Card>
+          </>
+        )}
+
+        {merchantBars.length > 0 && (
+          <>
+            <Section title={t('topMerchants')} />
+            <Card><Bars data={merchantBars} format={(v) => money(v, cur, lang)} /></Card>
           </>
         )}
 
