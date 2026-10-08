@@ -28,7 +28,7 @@ export const STRINGS = {
     project: 'Project', requestedBy: 'Requested by', assignedTo: 'Assigned to', tags: 'Tags',
     followUp: 'Follow-up date', reminder: 'Reminder', classification: 'Category', notesField: 'Notes',
     workOrPersonal: 'Work / Personal', work: 'Work', personal: 'Personal',
-    markComplete: 'Mark complete', shareWhatsApp: 'Share to WhatsApp',
+    markComplete: 'Mark complete', viewDetails: 'View details', shareWhatsApp: 'Share to WhatsApp',
     // statuses
     st_inbox: 'Inbox', st_new: 'New', st_planned: 'Planned', st_in_progress: 'In progress',
     st_waiting_someone: 'Waiting for someone', st_waiting_me: 'Waiting for my response',
@@ -497,7 +497,7 @@ export const STRINGS = {
     project: 'المشروع', requestedBy: 'مقدّم الطلب', assignedTo: 'المسؤول', tags: 'الوسوم',
     followUp: 'تاريخ المتابعة', reminder: 'تذكير', classification: 'التصنيف', notesField: 'ملاحظات',
     workOrPersonal: 'عمل / شخصي', work: 'عمل', personal: 'شخصي',
-    markComplete: 'إكمال المهمة', shareWhatsApp: 'مشاركة عبر واتساب',
+    markComplete: 'إكمال المهمة', viewDetails: 'عرض التفاصيل', shareWhatsApp: 'مشاركة عبر واتساب',
     st_inbox: 'الوارد', st_new: 'جديدة', st_planned: 'مخططة', st_in_progress: 'قيد التنفيذ',
     st_waiting_someone: 'بانتظار شخص', st_waiting_me: 'بانتظار ردّي',
     st_on_hold: 'معلّقة', st_completed: 'مكتملة', st_cancelled: 'ملغاة', st_overdue: 'متأخرة',
