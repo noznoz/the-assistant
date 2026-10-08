@@ -10,6 +10,7 @@ import { share, formatTask, formatFollowUp, copyText, whatsappToPerson, formatAs
 import { completeTask } from '../../lib/recurrence.js'
 import { pointsFor, awardPoints } from '../../lib/points.js'
 import TaskEditor from './TaskEditor.jsx'
+import TaskDetail from './TaskDetail.jsx'
 import SwipeRow from '../../ui/SwipeRow.jsx'
 
 const VIEWS = [
@@ -31,6 +32,7 @@ export default function TasksScreen({ param, go }) {
   const [q, setQ] = useState('')
   const [editor, setEditor] = useState(null)   // {} for new, task for edit
   const [sheet, setSheet] = useState(null)      // task action sheet
+  const [detail, setDetail] = useState(null)    // read-only task details
   const toast = useToast()
 
   const filtered = useMemo(() => {
@@ -102,11 +104,19 @@ export default function TasksScreen({ param, go }) {
       {sheet?.task && (
         <TaskActionSheet task={sheet.task} lang={lang} settings={settings} people={people.items}
           onClose={() => setSheet(null)}
+          onDetails={() => { setDetail(sheet.task); setSheet(null) }}
           onEdit={() => { setEditor(sheet.task); setSheet(null) }}
           onComplete={() => { toggleComplete(sheet.task); setSheet(null) }}
           onDuplicate={() => { const { id, createdAt, updatedAt, ...rest } = sheet.task; tasks.add({ ...rest, title: rest.title + ' (copy)' }); setSheet(null); toast.show(t('savedToast')) }}
           onDelete={() => { tasks.remove(sheet.task.id); setSheet(null); toast.show(t('deletedToast')) }}
           onCopyFollowUp={async () => { const ok = await copyText(formatFollowUp(sheet.task, lang, settings)); toast.show(ok ? t('copiedToast') : '...'); }}
+        />
+      )}
+
+      {detail && (
+        <TaskDetail task={detail} people={people.items} lang={lang}
+          onClose={() => setDetail(null)}
+          onEdit={() => { setEditor(detail); setDetail(null) }}
         />
       )}
       {toast.node}
@@ -151,7 +161,7 @@ function TaskRow({ task, lang, dateFormat, onToggle, onOpen }) {
   )
 }
 
-function TaskActionSheet({ task, lang, settings, people = [], onClose, onEdit, onComplete, onDuplicate, onDelete, onCopyFollowUp }) {
+function TaskActionSheet({ task, lang, settings, people = [], onClose, onDetails, onEdit, onComplete, onDuplicate, onDelete, onCopyFollowUp }) {
   const { t } = useT()
   const type = findType(task.type)
   const assignee = people.find(p => p.id === task.assigneeId) || people.find(p => p.name === task.assignedTo)
@@ -163,6 +173,7 @@ function TaskActionSheet({ task, lang, settings, people = [], onClose, onEdit, o
       </div>
       {task.description && <p style={{ marginBottom: 16 }}>{task.description}</p>}
       <div className="stack">
+        <Button block icon="chevron" onClick={onDetails}>{t('viewDetails')}</Button>
         <Button block icon="check" onClick={onComplete}>{task.status === 'completed' ? t('st_new') : t('markComplete')}</Button>
         {canSend && (
           <>
