@@ -14,6 +14,15 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(pkg.version),
   },
   server: { port: process.env.PORT ? Number(process.env.PORT) : 5173 },
+  build: {
+    rollupOptions: {
+      output: {
+        // Keep React in its own chunk: it rarely changes, so it stays cached
+        // across app updates (only the app code re-downloads).
+        manualChunks: { vendor: ['react', 'react-dom', 'react-dom/client'] },
+      },
+    },
+  },
   plugins: [
     react(),
     VitePWA({

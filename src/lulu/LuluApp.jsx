@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState, Suspense, lazy } from 'react'
 import './theme/tokens.css'
 import './theme/components.css'
 import { StoreProvider, useStore, useSettings } from './store/StoreProvider.jsx'
@@ -20,68 +20,71 @@ import { briefSummary } from './lib/dayBrief.js'
 import { unreadCount } from './lib/notifications.js'
 import { useNotificationFeed } from './store/useNotificationFeed.js'
 
+// Core tabs load eagerly (instant tab switching + first paint); every other
+// screen is code-split and loaded on demand to keep the initial bundle small.
 import TodayScreen from './features/today/TodayScreen.jsx'
 import TasksScreen from './features/tasks/TasksScreen.jsx'
 import GarageScreen from './features/garage/GarageScreen.jsx'
 import ExpensesScreen from './features/expenses/ExpensesScreen.jsx'
 import MoreScreen from './features/more/MoreScreen.jsx'
-import InboxScreen from './features/inbox/InboxScreen.jsx'
-import PeopleScreen from './features/people/PeopleScreen.jsx'
-import DocumentsScreen from './features/documents/DocumentsScreen.jsx'
-import TripsScreen from './features/trips/TripsScreen.jsx'
-import ReportsScreen from './features/reports/ReportsScreen.jsx'
-import NotificationsScreen from './features/notifications/NotificationsScreen.jsx'
-import CalendarScreen from './features/calendar/CalendarScreen.jsx'
-import SettingsScreen from './features/settings/SettingsScreen.jsx'
-import ProfileScreen from './features/profile/ProfileScreen.jsx'
-import MessageScreen from './features/message/MessageScreen.jsx'
-import SearchScreen from './features/search/SearchScreen.jsx'
-import NotesScreen from './features/notes/NotesScreen.jsx'
-import ProjectsScreen from './features/projects/ProjectsScreen.jsx'
-import ExpenseReportScreen from './features/expenses/ExpenseReportScreen.jsx'
-import BudgetsScreen from './features/expenses/BudgetsScreen.jsx'
-import SubscriptionsScreen from './features/expenses/SubscriptionsScreen.jsx'
-import RewardsScreen from './features/people/RewardsScreen.jsx'
-import GroupsScreen from './features/people/GroupsScreen.jsx'
-import IncomeScreen from './features/finance/IncomeScreen.jsx'
-import InvestmentsScreen from './features/finance/InvestmentsScreen.jsx'
-import AccountsScreen from './features/finance/AccountsScreen.jsx'
-import NetWorthScreen from './features/finance/NetWorthScreen.jsx'
-import ZakatScreen from './features/finance/ZakatScreen.jsx'
-import TrendsScreen from './features/finance/TrendsScreen.jsx'
-import LiabilitiesScreen from './features/finance/LiabilitiesScreen.jsx'
-import MoneyCalendarScreen from './features/finance/MoneyCalendarScreen.jsx'
-import StatementScreen from './features/finance/StatementScreen.jsx'
-import PropertiesScreen from './features/properties/PropertiesScreen.jsx'
-import ValuablesScreen from './features/valuables/ValuablesScreen.jsx'
-import WeekScreen from './features/week/WeekScreen.jsx'
-import MembershipsScreen from './features/memberships/MembershipsScreen.jsx'
-import RenewalsScreen from './features/renewals/RenewalsScreen.jsx'
-import MonthlyReportScreen from './features/reports/MonthlyReportScreen.jsx'
-import BoardPackScreen from './features/reports/BoardPackScreen.jsx'
-import ForecastScreen from './features/finance/ForecastScreen.jsx'
-import EmergencyScreen from './features/emergency/EmergencyScreen.jsx'
-import WishlistScreen from './features/wishlist/WishlistScreen.jsx'
-import GoalsScreen from './features/finance/GoalsScreen.jsx'
-import DashboardScreen from './features/today/DashboardScreen.jsx'
-import AppointmentsScreen from './features/appointments/AppointmentsScreen.jsx'
-import OccasionsScreen from './features/occasions/OccasionsScreen.jsx'
-import StaffScreen from './features/staff/StaffScreen.jsx'
-import DebtPayoffScreen from './features/finance/DebtPayoffScreen.jsx'
-import HijriScreen from './features/hijri/HijriScreen.jsx'
-import AllocationScreen from './features/finance/AllocationScreen.jsx'
-import WorkScreen from './features/work/WorkScreen.jsx'
-import WorkDashboardScreen from './features/work/WorkDashboardScreen.jsx'
-import MeetingsScreen from './features/work/MeetingsScreen.jsx'
-import OrgChartScreen from './features/work/OrgChartScreen.jsx'
-import FollowUpScreen from './features/work/FollowUpScreen.jsx'
-import SpiritualScreen from './features/spiritual/SpiritualScreen.jsx'
-import GivingScreen from './features/giving/GivingScreen.jsx'
-import KeepInTouchScreen from './features/people/KeepInTouchScreen.jsx'
-import NavTabsScreen from './features/settings/NavTabsScreen.jsx'
-import AssistantScreen from './features/assistant/AssistantScreen.jsx'
-import CloudScreen from './features/cloud/CloudScreen.jsx'
-import RemindersScreen from './features/reminders/RemindersScreen.jsx'
+
+const InboxScreen = lazy(() => import('./features/inbox/InboxScreen.jsx'))
+const PeopleScreen = lazy(() => import('./features/people/PeopleScreen.jsx'))
+const DocumentsScreen = lazy(() => import('./features/documents/DocumentsScreen.jsx'))
+const TripsScreen = lazy(() => import('./features/trips/TripsScreen.jsx'))
+const ReportsScreen = lazy(() => import('./features/reports/ReportsScreen.jsx'))
+const NotificationsScreen = lazy(() => import('./features/notifications/NotificationsScreen.jsx'))
+const CalendarScreen = lazy(() => import('./features/calendar/CalendarScreen.jsx'))
+const SettingsScreen = lazy(() => import('./features/settings/SettingsScreen.jsx'))
+const ProfileScreen = lazy(() => import('./features/profile/ProfileScreen.jsx'))
+const MessageScreen = lazy(() => import('./features/message/MessageScreen.jsx'))
+const SearchScreen = lazy(() => import('./features/search/SearchScreen.jsx'))
+const NotesScreen = lazy(() => import('./features/notes/NotesScreen.jsx'))
+const ProjectsScreen = lazy(() => import('./features/projects/ProjectsScreen.jsx'))
+const ExpenseReportScreen = lazy(() => import('./features/expenses/ExpenseReportScreen.jsx'))
+const BudgetsScreen = lazy(() => import('./features/expenses/BudgetsScreen.jsx'))
+const SubscriptionsScreen = lazy(() => import('./features/expenses/SubscriptionsScreen.jsx'))
+const RewardsScreen = lazy(() => import('./features/people/RewardsScreen.jsx'))
+const GroupsScreen = lazy(() => import('./features/people/GroupsScreen.jsx'))
+const IncomeScreen = lazy(() => import('./features/finance/IncomeScreen.jsx'))
+const InvestmentsScreen = lazy(() => import('./features/finance/InvestmentsScreen.jsx'))
+const AccountsScreen = lazy(() => import('./features/finance/AccountsScreen.jsx'))
+const NetWorthScreen = lazy(() => import('./features/finance/NetWorthScreen.jsx'))
+const ZakatScreen = lazy(() => import('./features/finance/ZakatScreen.jsx'))
+const TrendsScreen = lazy(() => import('./features/finance/TrendsScreen.jsx'))
+const LiabilitiesScreen = lazy(() => import('./features/finance/LiabilitiesScreen.jsx'))
+const MoneyCalendarScreen = lazy(() => import('./features/finance/MoneyCalendarScreen.jsx'))
+const StatementScreen = lazy(() => import('./features/finance/StatementScreen.jsx'))
+const PropertiesScreen = lazy(() => import('./features/properties/PropertiesScreen.jsx'))
+const ValuablesScreen = lazy(() => import('./features/valuables/ValuablesScreen.jsx'))
+const WeekScreen = lazy(() => import('./features/week/WeekScreen.jsx'))
+const MembershipsScreen = lazy(() => import('./features/memberships/MembershipsScreen.jsx'))
+const RenewalsScreen = lazy(() => import('./features/renewals/RenewalsScreen.jsx'))
+const MonthlyReportScreen = lazy(() => import('./features/reports/MonthlyReportScreen.jsx'))
+const BoardPackScreen = lazy(() => import('./features/reports/BoardPackScreen.jsx'))
+const ForecastScreen = lazy(() => import('./features/finance/ForecastScreen.jsx'))
+const EmergencyScreen = lazy(() => import('./features/emergency/EmergencyScreen.jsx'))
+const WishlistScreen = lazy(() => import('./features/wishlist/WishlistScreen.jsx'))
+const GoalsScreen = lazy(() => import('./features/finance/GoalsScreen.jsx'))
+const DashboardScreen = lazy(() => import('./features/today/DashboardScreen.jsx'))
+const AppointmentsScreen = lazy(() => import('./features/appointments/AppointmentsScreen.jsx'))
+const OccasionsScreen = lazy(() => import('./features/occasions/OccasionsScreen.jsx'))
+const StaffScreen = lazy(() => import('./features/staff/StaffScreen.jsx'))
+const DebtPayoffScreen = lazy(() => import('./features/finance/DebtPayoffScreen.jsx'))
+const HijriScreen = lazy(() => import('./features/hijri/HijriScreen.jsx'))
+const AllocationScreen = lazy(() => import('./features/finance/AllocationScreen.jsx'))
+const WorkScreen = lazy(() => import('./features/work/WorkScreen.jsx'))
+const WorkDashboardScreen = lazy(() => import('./features/work/WorkDashboardScreen.jsx'))
+const MeetingsScreen = lazy(() => import('./features/work/MeetingsScreen.jsx'))
+const OrgChartScreen = lazy(() => import('./features/work/OrgChartScreen.jsx'))
+const FollowUpScreen = lazy(() => import('./features/work/FollowUpScreen.jsx'))
+const SpiritualScreen = lazy(() => import('./features/spiritual/SpiritualScreen.jsx'))
+const GivingScreen = lazy(() => import('./features/giving/GivingScreen.jsx'))
+const KeepInTouchScreen = lazy(() => import('./features/people/KeepInTouchScreen.jsx'))
+const NavTabsScreen = lazy(() => import('./features/settings/NavTabsScreen.jsx'))
+const AssistantScreen = lazy(() => import('./features/assistant/AssistantScreen.jsx'))
+const CloudScreen = lazy(() => import('./features/cloud/CloudScreen.jsx'))
+const RemindersScreen = lazy(() => import('./features/reminders/RemindersScreen.jsx'))
 
 const MAIN_TABS = ['today', 'tasks', 'garage', 'expenses', 'more']
 
@@ -295,7 +298,9 @@ function Router() {
           </span>
         </div>
       )}
-      <ErrorBoundary key={route}>{screen}</ErrorBoundary>
+      <ErrorBoundary key={route}>
+        <Suspense fallback={<div className="loading-full"><span className="spinner" /></div>}>{screen}</Suspense>
+      </ErrorBoundary>
       <StorageAlert />
       <UpdateBanner />
       <BottomNav tab={activeTab} go={go} />
