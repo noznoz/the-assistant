@@ -9,6 +9,8 @@ import { money, fmtDate, isToday, isSameMonth, expenseSar, toSar } from '../../l
 import { isIncluded } from '../../lib/accounts.js'
 import { share, formatExpenseSummary } from '../../lib/share.js'
 import ExpenseEditor from './ExpenseEditor.jsx'
+import MoneyReviewSheet from './MoneyReviewSheet.jsx'
+import { buildMoneyReview } from '../../lib/moneyReview.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
 
 export default function ExpensesScreen({ go }) {
@@ -22,7 +24,9 @@ export default function ExpensesScreen({ go }) {
   const accounts = useCollection('accounts')
   const [range, setRange] = useState('month')
   const [editor, setEditor] = useState(null)
+  const [review, setReview] = useState(null)
   const toast = useToast()
+  const openReview = () => setReview(buildMoneyReview({ expenses: expenses.items, settings, lang }).text)
 
   const now = new Date()
   const inRange = useMemo(() => {
@@ -78,6 +82,7 @@ export default function ExpensesScreen({ go }) {
     <>
       <TopBar title={t('myFinance')} right={
         <>
+          <button className="iconbtn" onClick={openReview} aria-label={t('monthlyReview')}><Icon name="sparkle" size={18} /></button>
           <button className="iconbtn" onClick={() => go('expensereport')} aria-label={t('expenseReport')}><Icon name="chart" size={18} /></button>
           <button className="iconbtn" onClick={() => share(formatExpenseSummary(inRange, lang, settings))} aria-label={t('share')}><Icon name="share" size={18} /></button>
         </>
@@ -104,6 +109,8 @@ export default function ExpensesScreen({ go }) {
             <span className="chip" style={{ flex: 1, justifyContent: 'space-between' }}>{t('expSpecial')} <b className="tnum">{money(specialExp, cur, lang)}</b></span>
           </div>
         </Card>
+
+        <Button block icon="sparkle" onClick={openReview} style={{ marginTop: 12 }}>{t('monthlyReview')}</Button>
 
         <div style={{ margin: '14px 0' }}>
           <Segmented value={range} onChange={setRange} options={[
@@ -233,6 +240,7 @@ export default function ExpensesScreen({ go }) {
 
       <Fab onClick={() => setEditor({})} />
       {editor && <ExpenseEditor initial={editor.id ? editor : {}} onClose={() => setEditor(null)} onSaved={() => toast.show(t('savedToast'))} />}
+      {review && <MoneyReviewSheet review={review} onClose={() => setReview(null)} />}
       {toast.node}
     </>
   )
