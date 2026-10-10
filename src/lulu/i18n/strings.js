@@ -457,8 +457,8 @@ export const STRINGS = {
     keepInTouchFooter: 'Tapping WhatsApp also marks them as contacted today.',
     fromContacts: 'Import from phone contacts', importContacts: 'Import contacts', contactsImported: 'contacts added', contactsNotSupported: 'Phone contact import needs Chrome on Android. On iPhone, add contacts manually.', selectContacts: 'Select contacts',
     // navigation groups
-    grpWork: 'Work & organisation', grpPlan: 'Plan & alerts', grpPeople: 'People & network', grpHome: 'Home & assets', grpFaith: 'Faith', grpReports: 'Reports & settings',
-    favorites: 'Favorites', searchSections: 'Search sections…', pin: 'Pin',
+    grpWork: 'Work & organisation', grpPlan: 'Planner', grpPeople: 'People & network', grpHome: 'Belongings', grpFaith: 'Faith', grpReports: 'Reports & settings',
+    favorites: 'Favorites', searchSections: 'Search sections…', pin: 'Pin', allSections: 'All sections',
     finOverview: 'Overview', finPlan: 'Plan & save', finGrow: 'Wealth & debt', finTrack: 'Track',
     navigation: 'Navigation', bottomTabs: 'Bottom tabs', bottomTabsHint: 'Choose which sections sit in the bottom bar. Today and More are always shown.',
     inYourBar: 'In your bottom bar', alwaysShown: 'Always shown', availableSections: 'Available sections', maxTabs: 'Up to 4 middle tabs.',
@@ -919,8 +919,8 @@ export const STRINGS = {
     keepInTouchFooter: 'الضغط على واتساب يضعه أيضاً كمتواصَل اليوم.',
     fromContacts: 'استيراد من جهات اتصال الهاتف', importContacts: 'استيراد جهات الاتصال', contactsImported: 'جهة اتصال أُضيفت', contactsNotSupported: 'استيراد جهات الاتصال يتطلب متصفح كروم على أندرويد. على آيفون أضِف جهات الاتصال يدوياً.', selectContacts: 'اختر جهات الاتصال',
     // navigation groups
-    grpWork: 'العمل والتنظيم', grpPlan: 'التخطيط والتنبيهات', grpPeople: 'الأشخاص والشبكة', grpHome: 'المنزل والأصول', grpFaith: 'الروحانيات', grpReports: 'التقارير والإعدادات',
-    favorites: 'المفضلة', searchSections: 'ابحث في الأقسام…', pin: 'تثبيت',
+    grpWork: 'العمل والتنظيم', grpPlan: 'المخطِّط', grpPeople: 'الأشخاص والشبكة', grpHome: 'المقتنيات', grpFaith: 'الروحانيات', grpReports: 'التقارير والإعدادات',
+    favorites: 'المفضلة', searchSections: 'ابحث في الأقسام…', pin: 'تثبيت', allSections: 'كل الأقسام',
     finOverview: 'نظرة عامة', finPlan: 'التخطيط والادخار', finGrow: 'الثروة والديون', finTrack: 'المتابعة',
     navigation: 'التنقّل', bottomTabs: 'أشرطة الأسفل', bottomTabsHint: 'اختر الأقسام التي تظهر في الشريط السفلي. الرئيسية والمزيد تظهران دائماً.',
     inYourBar: 'في شريطك السفلي', alwaysShown: 'تظهر دائماً', availableSections: 'الأقسام المتاحة', maxTabs: 'حتى ٤ أشرطة وسطى.',
