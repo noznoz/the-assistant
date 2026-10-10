@@ -18,7 +18,7 @@ export const NAV_SECTIONS = {
   spiritual: { icon: 'sparkle' },
   giving: { icon: 'gift' },
 }
-export const DEFAULT_NAV = ['tasks', 'work', 'expenses']
+export const DEFAULT_NAV = ['tasks', 'work', 'expenses', 'documents']
 
 export function navMiddle(settings) {
   const chosen = (settings?.navTabs && settings.navTabs.length ? settings.navTabs : DEFAULT_NAV)
@@ -32,7 +32,7 @@ export function BottomNav({ tab, go }) {
   const tabs = ['today', ...navMiddle(settings), 'more']
   const metaFor = (id) => id === 'today' ? { icon: 'today' } : id === 'more' ? { icon: 'grid' } : NAV_SECTIONS[id]
   return (
-    <nav className="bottomnav">
+    <nav className="bottomnav" style={{ gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }}>
       {tabs.map(id => {
         const meta = metaFor(id)
         return (
