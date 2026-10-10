@@ -6,11 +6,13 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useStore, useSettings } from '../../store/StoreProvider.jsx'
 import { APP_VERSION, BUILD_STAMP } from '../../lib/appInfo.js'
 
-// Grouped, colour-coded navigation. Each group has an accent tint so the long
-// list scans as a map rather than one flat column.
+// Grouped, colour-coded navigation. The hub opens calm: Search, your Favorites
+// and a Recent row sit on top, and the six groups are collapsible accordions so
+// the long list stays folded away until you reach for it. Each group has an
+// accent tint + icon so the map scans at a glance.
 const GROUPS = [
   {
-    key: 'grpWork', tint: 't-brand', items: [
+    key: 'grpWork', tint: 't-brand', icon: 'report', items: [
       { id: 'assistant', icon: 'sparkle' },
       { id: 'work', icon: 'report' },
       { id: 'followup', icon: 'bell', label: 'followUps' },
@@ -20,7 +22,7 @@ const GROUPS = [
     ],
   },
   {
-    key: 'grpPlan', tint: 't-info', items: [
+    key: 'grpPlan', tint: 't-info', icon: 'calendar', items: [
       { id: 'reminders', icon: 'bell' },
       { id: 'week', icon: 'calendar' },
       { id: 'calendar', icon: 'calendar' },
@@ -33,7 +35,7 @@ const GROUPS = [
     ],
   },
   {
-    key: 'grpPeople', tint: 't-brand', items: [
+    key: 'grpPeople', tint: 't-brand', icon: 'people', items: [
       { id: 'people', icon: 'people', collection: 'people' },
       { id: 'keepintouch', icon: 'bell', label: 'keepInTouch' },
       { id: 'occasions', icon: 'cake' },
@@ -41,7 +43,7 @@ const GROUPS = [
     ],
   },
   {
-    key: 'grpHome', tint: 't-ok', items: [
+    key: 'grpHome', tint: 't-ok', icon: 'gift', items: [
       { id: 'garage', icon: 'car', collection: 'vehicles' },
       { id: 'properties', icon: 'doc', collection: 'properties' },
       { id: 'valuables', icon: 'gift', collection: 'valuables' },
@@ -52,14 +54,14 @@ const GROUPS = [
     ],
   },
   {
-    key: 'grpFaith', tint: 't-warn', items: [
+    key: 'grpFaith', tint: 't-warn', icon: 'sparkle', items: [
       { id: 'spiritual', icon: 'sparkle' },
       { id: 'hijri', icon: 'calendar', label: 'hijriCalendar' },
       { id: 'giving', icon: 'gift' },
     ],
   },
   {
-    key: 'grpReports', tint: 't-brand', items: [
+    key: 'grpReports', tint: 't-brand', icon: 'chart', items: [
       { id: 'boardpack', icon: 'report', label: 'boardPack' },
       { id: 'monthlyreport', icon: 'report', label: 'monthlyReport' },
       { id: 'reports', icon: 'chart' },
@@ -77,6 +79,8 @@ export default function MoreScreen({ go }) {
   const [q, setQ] = useState('')
   const p = settings.profile || {}
   const favorites = settings.favorites || []
+  const open = settings.moreOpen || []
+  const recent = settings.recentSections || []
 
   const initials = (p.fullName || settings.name || '')
     .split(' ').filter(Boolean).slice(0, 2).map(s => s[0]).join('').toUpperCase() || 'NB'
@@ -87,14 +91,30 @@ export default function MoreScreen({ go }) {
     updateSettings({ favorites: next })
   }
 
+  // Remember the last few sections opened from here, so the Recent row can
+  // surface them without hunting through the groups.
+  const openSection = (id) => {
+    const next = [id, ...recent.filter(x => x !== id)].slice(0, 4)
+    updateSettings({ recentSections: next })
+    go(id)
+  }
+
+  const toggleGroup = (key) => {
+    updateSettings({ moreOpen: open.includes(key) ? open.filter(x => x !== key) : [...open, key] })
+  }
+
   const lbl = (it) => t(it.label || it.id)
   const s = q.trim().toLowerCase()
   const matches = useMemo(() => s ? ALL_ITEMS.filter(it => lbl(it).toLowerCase().includes(s)) : [], [s])
   const favItems = favorites.map(id => ALL_ITEMS.find(it => it.id === id)).filter(Boolean)
+  // Recent, minus anything already pinned to Favorites (no need to show it twice).
+  const recentItems = recent
+    .filter(id => !favorites.includes(id))
+    .map(id => ALL_ITEMS.find(it => it.id === id)).filter(Boolean)
 
   const Row = ({ it, i, first }) => (
     <div style={{ display: 'flex', alignItems: 'center', borderTop: !first && i ? '1px solid var(--line)' : 0 }}>
-      <button onClick={() => go(it.id)} style={{
+      <button onClick={() => openSection(it.id)} style={{
         flex: 1, display: 'flex', alignItems: 'center', gap: 14, padding: '13px 4px 13px 12px',
         background: 'transparent', border: 0, color: 'var(--ink)', minWidth: 0,
       }}>
@@ -158,14 +178,41 @@ export default function MoreScreen({ go }) {
                 </Card>
               </>
             )}
-            {GROUPS.map(g => (
-              <React.Fragment key={g.key}>
-                <Section title={t(g.key)} />
+            {recentItems.length > 0 && (
+              <>
+                <Section title={t('recent')} />
                 <Card tight flat style={{ padding: 6 }}>
-                  {g.items.map((it, i) => <Row key={it.id} it={{ ...it, tint: g.tint }} i={i} first />)}
+                  {recentItems.map((it, i) => <Row key={it.id} it={it} i={i} />)}
                 </Card>
-              </React.Fragment>
-            ))}
+              </>
+            )}
+
+            <Section title={t('allSections')} />
+            <Card tight flat style={{ padding: 6 }}>
+              {GROUPS.map((g, gi) => {
+                const isOpen = open.includes(g.key)
+                return (
+                  <React.Fragment key={g.key}>
+                    <button onClick={() => toggleGroup(g.key)} aria-expanded={isOpen} style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '13px 10px 13px 12px',
+                      background: 'transparent', border: 0, borderTop: gi ? '1px solid var(--line)' : 0, color: 'var(--ink)',
+                    }}>
+                      <span className={`lead ${g.tint}`} style={{ width: 38, height: 38, borderRadius: 11, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                        <Icon name={g.icon} size={20} />
+                      </span>
+                      <span style={{ flex: 1, textAlign: 'start', fontWeight: 700, fontSize: 15 }}>{t(g.key)}</span>
+                      <span className="muted" style={{ fontSize: 12.5, marginInlineEnd: 4 }}>{g.items.length}</span>
+                      <Icon name="chevron" size={18} style={{ color: 'var(--ink-3)', transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform .18s ease' }} />
+                    </button>
+                    {isOpen && (
+                      <div style={{ padding: '2px 0 8px 0' }}>
+                        {g.items.map((it) => <Row key={it.id} it={{ ...it, tint: g.tint }} i={0} first />)}
+                      </div>
+                    )}
+                  </React.Fragment>
+                )
+              })}
+            </Card>
           </>
         )}
         <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v{APP_VERSION} · {BUILD_STAMP}</p>
