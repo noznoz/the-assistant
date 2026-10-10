@@ -6,6 +6,8 @@ export const STRINGS = {
     // nav
     today: 'Today', tasks: 'Tasks', garage: 'Garage', expenses: 'Expenses', more: 'More',
     inbox: 'Inbox', calendar: 'Calendar', people: 'People', documents: 'Documents',
+    addToCalendar: 'Add to Calendar', calendarSyncHint: 'Opens your phone’s Calendar app with your appointments, tasks, reminders and renewals — so you get alerts even when this app is closed. Re-open to refresh after changes.',
+    includePrayers: 'Include prayer times (next 30 days)', calendarExported: 'Opening your Calendar…', atTime: 'At time', min5: '5 min before', min10: '10 min before', min15: '15 min before',
     trips: 'Trips', reports: 'Reports', notifications: 'Notifications', settings: 'Settings',
     // greetings
     goodMorning: 'Good morning', goodAfternoon: 'Good afternoon', goodEvening: 'Good evening',
@@ -479,6 +481,8 @@ export const STRINGS = {
   ar: {
     today: 'اليوم', tasks: 'المهام', garage: 'المرآب', expenses: 'المصروفات', more: 'المزيد',
     inbox: 'الوارد', calendar: 'التقويم', people: 'الأشخاص', documents: 'المستندات',
+    addToCalendar: 'أضف إلى التقويم', calendarSyncHint: 'يفتح تطبيق التقويم في هاتفك مع مواعيدك ومهامك وتذكيراتك وتجديداتك — لتصلك تنبيهات حتى والتطبيق مغلق. أعد الفتح للتحديث بعد أي تغيير.',
+    includePrayers: 'تضمين أوقات الصلاة (٣٠ يومًا)', calendarExported: 'جارٍ فتح التقويم…', atTime: 'في الوقت', min5: 'قبل ٥ د', min10: 'قبل ١٠ د', min15: 'قبل ١٥ د',
     trips: 'الرحلات', reports: 'التقارير', notifications: 'الإشعارات', settings: 'الإعدادات',
     goodMorning: 'صباح الخير', goodAfternoon: 'مساء الخير', goodEvening: 'مساء الخير',
     morningBrief: 'ملخص الصباح', dailyProgress: 'إنجاز اليوم', quickActions: 'إجراءات سريعة',
