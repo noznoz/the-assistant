@@ -20,20 +20,31 @@ export default function QuickCapture({ toast, go }) {
   const [busy, setBusy] = useState(false)
   const [listening, setListening] = useState(false)
   const recRef = useRef(null)
+  const timerRef = useRef(null)
   const voiceOn = speechSupported()
 
-  useEffect(() => () => { try { recRef.current && recRef.current.stop() } catch { /* ignore */ } }, [])
+  // Reset state immediately on stop — iOS often never fires onend, which left
+  // the mic stuck "listening" with no way out.
+  const stopVoice = () => {
+    if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null }
+    try { recRef.current && recRef.current.stop() } catch { /* ignore */ }
+    recRef.current = null
+    setListening(false)
+  }
+
+  useEffect(() => () => stopVoice(), [])
 
   const toggleVoice = () => {
-    if (listening) { try { recRef.current && recRef.current.stop() } catch { /* ignore */ } return }
+    if (listening) { stopVoice(); return }
     setListening(true)
     recRef.current = listen({
       lang: lang === 'ar' ? 'ar-SA' : 'en-US',
       onResult: (txt) => setText(txt),
-      onEnd: () => { setListening(false); recRef.current = null },
-      onError: () => { setListening(false); recRef.current = null; toast && toast.show(t('voiceUnavailable')) },
+      onEnd: () => stopVoice(),
+      onError: () => { stopVoice(); toast && toast.show(t('voiceUnavailable')) },
     })
-    if (!recRef.current) setListening(false)
+    if (!recRef.current) { setListening(false); return }
+    timerRef.current = setTimeout(stopVoice, 20000) // safety auto-stop
   }
   const cols = {
     expenses: useCollection('expenses'),
@@ -78,9 +89,9 @@ export default function QuickCapture({ toast, go }) {
           style={{ flex: 1, border: 0, background: 'transparent', padding: '12px 0', fontSize: 15, color: 'var(--ink-1)', outline: 'none', minWidth: 0 }}
         />
         {voiceOn && (
-          <button aria-label={t('voiceInput')} onClick={toggleVoice}
+          <button aria-label={listening ? t('listeningTapStop') : t('voiceInput')} onClick={toggleVoice}
             style={{ flexShrink: 0, width: 32, height: 32, borderRadius: 10, border: 0, background: listening ? 'var(--danger)' : 'transparent', color: listening ? '#fff' : 'var(--ink-3)', display: 'grid', placeItems: 'center' }}>
-            <Icon name="mic" size={18} className={listening ? 'dots' : ''} />
+            <Icon name={listening ? 'x' : 'mic'} size={18} className={listening ? 'dots' : ''} />
           </button>
         )}
         {preview && (
@@ -90,6 +101,11 @@ export default function QuickCapture({ toast, go }) {
           </button>
         )}
       </div>
+      {listening && (
+        <div onClick={stopVoice} role="button" style={{ display: 'flex', alignItems: 'center', gap: 7, margin: '7px 2px 0', fontSize: 12.5, fontWeight: 600, color: 'var(--danger)', cursor: 'pointer' }}>
+          <span className="dots">●</span> {t('listeningTapStop')}
+        </div>
+      )}
       {preview && (
         <button onClick={submit} disabled={busy}
           style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'start', marginTop: 6, padding: '8px 11px', background: 'var(--brand-tint)', color: 'var(--brand-600)', border: 0, borderRadius: 'var(--r-md)', fontSize: 13, fontWeight: 600 }}>
