@@ -72,6 +72,10 @@ const GROUPS = [
 
 const ALL_ITEMS = GROUPS.flatMap(g => g.items.map(it => ({ ...it, tint: g.tint })))
 
+// Shown as quick tiles on first use, before you've pinned Favorites or built up
+// any Recent history — so the hub is useful the very first time you open it.
+const SUGGESTED = ['reminders', 'week', 'people', 'documents', 'settings']
+
 export default function MoreScreen({ go }) {
   const { t } = useT()
   const { data } = useStore()
@@ -111,6 +115,21 @@ export default function MoreScreen({ go }) {
   const recentItems = recent
     .filter(id => !favorites.includes(id))
     .map(id => ALL_ITEMS.find(it => it.id === id)).filter(Boolean)
+  // First-use: nothing pinned and nothing opened yet → offer a curated head start.
+  const showSuggested = favItems.length === 0 && recentItems.length === 0
+  const suggestedItems = SUGGESTED.map(id => ALL_ITEMS.find(it => it.id === id)).filter(Boolean)
+
+  const QuickTile = ({ it }) => (
+    <button onClick={() => openSection(it.id)} style={{
+      flexShrink: 0, width: 86, display: 'grid', gap: 8, justifyItems: 'center', padding: '14px 8px',
+      background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--r-lg)', color: 'var(--ink)',
+    }}>
+      <span className={`lead ${it.tint}`} style={{ width: 44, height: 44, borderRadius: 13, display: 'grid', placeItems: 'center' }}>
+        <Icon name={it.icon} size={22} />
+      </span>
+      <span style={{ fontSize: 12, fontWeight: 600, textAlign: 'center', lineHeight: 1.15 }}>{lbl(it)}</span>
+    </button>
+  )
 
   const Row = ({ it, i, first }) => (
     <div style={{ display: 'flex', alignItems: 'center', borderTop: !first && i ? '1px solid var(--line)' : 0 }}>
@@ -170,6 +189,14 @@ export default function MoreScreen({ go }) {
           </Card>
         ) : (
           <>
+            {showSuggested && (
+              <>
+                <Section title={t('suggested')} />
+                <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 4, margin: '0 -2px', scrollbarWidth: 'none' }}>
+                  {suggestedItems.map(it => <QuickTile key={it.id} it={it} />)}
+                </div>
+              </>
+            )}
             {favItems.length > 0 && (
               <>
                 <Section title={t('favorites')} />
@@ -201,7 +228,7 @@ export default function MoreScreen({ go }) {
                         <Icon name={g.icon} size={20} />
                       </span>
                       <span style={{ flex: 1, textAlign: 'start', fontWeight: 700, fontSize: 15 }}>{t(g.key)}</span>
-                      <span className="muted" style={{ fontSize: 12.5, marginInlineEnd: 4 }}>{g.items.length}</span>
+                      <span className="chip" style={{ marginInlineEnd: 4 }}>{g.items.length}</span>
                       <Icon name="chevron" size={18} style={{ color: 'var(--ink-3)', transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform .18s ease' }} />
                     </button>
                     {isOpen && (
