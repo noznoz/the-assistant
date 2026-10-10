@@ -148,6 +148,8 @@ export const DEFAULT_SETTINGS = {
   biometricId: '',       // WebAuthn credential id (base64) for Face ID unlock
   notifications: false,  // on-device notifications + badge
   soundAlerts: true,     // audible alarm for reminders/alerts due while app is open
+  prayerReminders: false, // include prayer times in the Calendar (.ics) export
+  prayerReminderMins: 0,  // minutes before each prayer to alert (0 = at time)
   welcomeDismissed: false, // first-run setup checklist hidden by the user
   aiProvider: 'none',    // none | claude | openai
   anthropicKey: '',      // Anthropic API key for the in-app assistant (on-device only)
