@@ -189,7 +189,7 @@ export const STRINGS = {
     addExpenseTo: 'Add expense', projectTotal: 'Total', overBudget: 'Over budget',
     customCategoryName: 'Category name',
     // expense report
-    expenseReport: 'Expense report', reportHint2: 'Totals by period or project — with or without projects.',
+    expenseReport: 'Expense report', monthlyReview: 'Review this month', reportHint2: 'Totals by period or project — with or without projects.',
     byPeriod: 'By period', byProject: 'By project', includeProjects: 'Include projects',
     allTime: 'All time', customRange: 'Custom', fromDate: 'From', toDate: 'To',
     byPayment: 'By payment', byProjectTitle: 'By project', workVsPersonal: 'Work / Personal',
@@ -651,7 +651,7 @@ export const STRINGS = {
     addExpenseTo: 'إضافة مصروف', projectTotal: 'الإجمالي', overBudget: 'تجاوز الميزانية',
     customCategoryName: 'اسم الفئة',
     // expense report
-    expenseReport: 'تقرير المصروفات', reportHint2: 'الإجماليات حسب الفترة أو المشروع — مع أو بدون المشاريع.',
+    expenseReport: 'تقرير المصروفات', monthlyReview: 'مراجعة هذا الشهر', reportHint2: 'الإجماليات حسب الفترة أو المشروع — مع أو بدون المشاريع.',
     byPeriod: 'حسب الفترة', byProject: 'حسب المشروع', includeProjects: 'تضمين المشاريع',
     allTime: 'كل الفترات', customRange: 'مخصص', fromDate: 'من', toDate: 'إلى',
     byPayment: 'حسب الدفع', byProjectTitle: 'حسب المشروع', workVsPersonal: 'عمل / شخصي',
