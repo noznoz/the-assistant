@@ -153,7 +153,7 @@ export const DEFAULT_SETTINGS = {
   welcomeDismissed: false, // first-run setup checklist hidden by the user
   aiProvider: 'none',    // none | claude | openai
   anthropicKey: '',      // Anthropic API key for the in-app assistant (on-device only)
-  aiModel: 'claude-sonnet-5', // model id used by the assistant
+  aiModel: 'claude-sonnet-5-5', // model id used by the assistant
   monthlyBudget: 0,
   customCategories: [],  // user-added expense categories (labels)
   categoryBudgets: {},   // { [categoryId]: monthly amount }
@@ -169,8 +169,18 @@ export const DEFAULT_SETTINGS = {
   navTabs: null,         // user-chosen middle bottom-bar tabs (null = default)
 }
 
+// Retired assistant model ids remapped forward, so a preference saved by an
+// older install lands on the current generation instead of a stale model.
+const MODEL_ALIASES = {
+  'claude-sonnet-5': 'claude-sonnet-5-5',
+  'claude-opus-5': 'claude-opus-5-5',
+  'claude-haiku-4-5': 'claude-haiku-5-5',
+}
+
 export function readSettings() {
-  return { ...DEFAULT_SETTINGS, ...safeParse(localStorage.getItem(keyFor('settings')), {}) }
+  const s = { ...DEFAULT_SETTINGS, ...safeParse(localStorage.getItem(keyFor('settings')), {}) }
+  if (MODEL_ALIASES[s.aiModel]) s.aiModel = MODEL_ALIASES[s.aiModel]
+  return s
 }
 export function writeSettings(s) {
   return persist(keyFor('settings'), JSON.stringify(s))
