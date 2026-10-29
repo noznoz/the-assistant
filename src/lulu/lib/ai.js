@@ -8,12 +8,20 @@
 // ============================================================================
 
 export const AI_MODELS = [
-  { id: 'claude-sonnet-5', label: 'Sonnet 5 — balanced (recommended)' },
-  { id: 'claude-opus-5', label: 'Opus 5 — smartest' },
-  { id: 'claude-haiku-4-5', label: 'Haiku 4.5 — fastest & cheapest' },
+  { id: 'claude-sonnet-5-5', label: 'Sonnet 5.5 — balanced (recommended)' },
+  { id: 'claude-opus-5-5', label: 'Opus 5.5 — smartest' },
+  { id: 'claude-haiku-5-5', label: 'Haiku 5.5 — fastest & cheapest' },
 ]
 
-export const DEFAULT_MODEL = 'claude-sonnet-5'
+export const DEFAULT_MODEL = 'claude-sonnet-5-5'
+
+// Retired model ids remapped forward, so a saved preference from an older
+// install moves to the current generation instead of pinning a stale model.
+export const MODEL_ALIASES = {
+  'claude-sonnet-5': 'claude-sonnet-5-5',
+  'claude-opus-5': 'claude-opus-5-5',
+  'claude-haiku-4-5': 'claude-haiku-5-5',
+}
 
 // One round-trip to the Messages API. Returns the full parsed result:
 //   { text, content, stopReason, toolUses, raw }
