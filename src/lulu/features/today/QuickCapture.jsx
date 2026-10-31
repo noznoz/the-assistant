@@ -90,13 +90,13 @@ export default function QuickCapture({ toast, go }) {
         />
         {voiceOn && (
           <button aria-label={listening ? t('listeningTapStop') : t('voiceInput')} onClick={toggleVoice}
-            style={{ flexShrink: 0, width: 32, height: 32, borderRadius: 10, border: 0, background: listening ? 'var(--danger)' : 'transparent', color: listening ? '#fff' : 'var(--ink-3)', display: 'grid', placeItems: 'center' }}>
+            style={{ flexShrink: 0, width: 40, height: 40, borderRadius: 11, border: 0, background: listening ? 'var(--danger)' : 'transparent', color: listening ? '#fff' : 'var(--ink-3)', display: 'grid', placeItems: 'center' }}>
             <Icon name={listening ? 'x' : 'mic'} size={18} className={listening ? 'dots' : ''} />
           </button>
         )}
         {preview && (
           <button aria-label={t('add')} onClick={submit} disabled={busy}
-            style={{ flexShrink: 0, width: 32, height: 32, borderRadius: 10, border: 0, background: 'var(--brand-600)', color: '#fff', display: 'grid', placeItems: 'center', opacity: busy ? 0.6 : 1 }}>
+            style={{ flexShrink: 0, width: 40, height: 40, borderRadius: 11, border: 0, background: 'var(--brand-600)', color: '#fff', display: 'grid', placeItems: 'center', opacity: busy ? 0.6 : 1 }}>
             <Icon name={busy ? 'sparkle' : 'plus'} size={18} />
           </button>
         )}

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { Card, Section, Ring, Stat, Chip, Button, useToast } from '../../ui/primitives.jsx'
+import { Card, Section, Ring, Stat, Chip, Button, Pressable, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { greetingKey, fmtLongDate, fmtTime, relativeDay, isToday, isOverdue, daysUntil, money, expenseSar } from '../../lib/format.js'
@@ -145,14 +145,14 @@ export default function TodayScreen({ go }) {
           action={notifFeed.length > 3 ? t('viewAll') : undefined} onAction={() => go('notifications')} />
         <Card tight>
           {notifFeed.slice(0, 4).map(n => (
-            <div className="li" key={n.id} onClick={() => go(n.go)}>
+            <Pressable className="li" key={n.id} onClick={() => go(n.go)}>
               <div className={`lead ${n.tint}`}><Icon name={n.icon} size={18} /></div>
               <div className="body">
                 <div className="title">{n.title}</div>
                 <div className="meta">{n.meta}</div>
               </div>
               <Icon name="chevron" size={15} style={{ color: 'var(--ink-3)' }} />
-            </div>
+            </Pressable>
           ))}
         </Card>
       </>
@@ -162,14 +162,14 @@ export default function TodayScreen({ go }) {
         <Section title={t('reminders')} count={upcomingReminders.length} action={t('view')} onAction={() => go('reminders')} />
         <Card tight>
           {upcomingReminders.slice(0, 4).map(r => (
-            <div className="li" key={r.id} onClick={() => go('reminders')}>
+            <Pressable className="li" key={r.id} onClick={() => go('reminders')}>
               <div className="lead t-brand"><Icon name="bell" size={18} /></div>
               <div className="body">
                 <div className="title">{r.text}</div>
                 <div className="meta">{relativeDay(r.remindAt, lang)} · {fmtTime(r.remindAt, lang)}</div>
               </div>
               <Icon name="chevron" size={15} style={{ color: 'var(--ink-3)' }} />
-            </div>
+            </Pressable>
           ))}
         </Card>
       </>
@@ -195,7 +195,6 @@ export default function TodayScreen({ go }) {
             <button key={q.id} className="qa" onClick={() => {
               if (q.id === 'message') { go('message'); return }
               if (q.id === 'reminder') { go('reminders'); return }
-              if (q.id === 'voice') { toast.show(t('comingSoon')); return }
               setEditor(q.id)
             }}>
               <span className="ic"><Icon name={q.icon} size={22} /></span>
@@ -216,7 +215,7 @@ export default function TodayScreen({ go }) {
         <>
           <Section title={t('work')} count={workOpen.length} action={t('view')} onAction={() => go('work')} />
           <Card tight>
-            <div className="li" onClick={() => go('followup')}>
+            <Pressable className="li" onClick={() => go('followup')}>
               <div className={`lead ${overdueW.length ? 't-danger' : 't-warn'}`}><Icon name="bell" size={18} /></div>
               <div className="body">
                 <div className="title">{awaiting.length} {t('awaitingOthers')}</div>
@@ -227,7 +226,7 @@ export default function TodayScreen({ go }) {
                 </div>
               </div>
               <Icon name="chevron" size={15} style={{ color: 'var(--ink-3)' }} />
-            </div>
+            </Pressable>
           </Card>
         </>
       )
@@ -237,14 +236,14 @@ export default function TodayScreen({ go }) {
         <Section title={t('expiringSoon')} count={radarSoon.length} action={t('viewAll')} onAction={() => go('renewals')} />
         <Card tight>
           {radarSoon.slice(0, 4).map(it => (
-            <div className="li" key={it.id} onClick={() => go(it.go)}>
+            <Pressable className="li" key={it.id} onClick={() => go(it.go)}>
               <div className={`lead ${radarTint(it.days)}`}><Icon name={it.icon} size={18} /></div>
               <div className="body">
                 <div className="title">{it.title}</div>
                 <div className="meta">{it.sub}</div>
               </div>
               <Chip tint={radarTint(it.days)}>{it.days < 0 ? t('overdue') : `${it.days}d`}</Chip>
-            </div>
+            </Pressable>
           ))}
         </Card>
       </>
@@ -285,14 +284,14 @@ export default function TodayScreen({ go }) {
       ) : (
         <Card tight>
           {rightNow.map(n => (
-            <div className="li" key={n.id} onClick={() => go(n.go)}>
+            <Pressable className="li" key={n.id} onClick={() => go(n.go)}>
               <div className={`lead ${n.tint}`}><Icon name={n.icon} size={18} /></div>
               <div className="body">
                 <div className="title">{n.title}</div>
                 <div className="meta">{n.meta}</div>
               </div>
               <Icon name="chevron" size={15} style={{ color: 'var(--ink-3)' }} />
-            </div>
+            </Pressable>
           ))}
         </Card>
       )}
@@ -440,14 +439,15 @@ function AttentionCard({ tint, icon, title, items, go, lang, t }) {
 
 function MiniRow({ task, lang, icon = 'check', tint = 't-info', onClick }) {
   const pr = findPriority(task.priority)
+  const Row = onClick ? Pressable : 'div'
   return (
-    <div className="li" onClick={onClick}>
+    <Row className="li" onClick={onClick}>
       <div className={`lead ${tint}`}><Icon name={icon} size={18} /></div>
       <div className="body">
         <div className="title">{task.title}</div>
         {(task.assignedTo || task.project) && <div className="meta">{task.assignedTo || task.project}</div>}
       </div>
       {pr && <span className="dot" style={{ width: 9, height: 9, borderRadius: 5, background: pr.color }} />}
-    </div>
+    </Row>
   )
 }

@@ -18,7 +18,9 @@ export const NAV_SECTIONS = {
   spiritual: { icon: 'sparkle' },
   giving: { icon: 'gift' },
 }
-export const DEFAULT_NAV = ['tasks', 'work', 'expenses', 'documents']
+// Three middle tabs → five total with Today and More, the comfortable thumb
+// limit on a narrow phone. Users can still add a fourth in Customize.
+export const DEFAULT_NAV = ['tasks', 'expenses', 'documents']
 
 export function navMiddle(settings) {
   const chosen = (settings?.navTabs && settings.navTabs.length ? settings.navTabs : DEFAULT_NAV)

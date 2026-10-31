@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Empty } from '../../ui/primitives.jsx'
+import { DetailHeader, Empty, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useSettings } from '../../store/StoreProvider.jsx'
 import { useNotificationFeed } from '../../store/useNotificationFeed.js'
@@ -34,14 +34,14 @@ export default function NotificationsScreen({ go }) {
             {feed.map(n => {
               const isNew = !seen.has(n.id)
               return (
-                <div className="li" key={n.id} onClick={() => go(n.go)}>
+                <Pressable className="li" key={n.id} onClick={() => go(n.go)}>
                   <div className={`lead ${n.tint}`}><Icon name={n.icon} size={18} /></div>
                   <div className="body">
                     <div className="title">{n.title}{isNew && <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: 'var(--brand-600)', marginInlineStart: 8, verticalAlign: 'middle' }} />}</div>
                     <div className="meta">{n.meta}</div>
                   </div>
                   <Icon name="chevron" size={16} style={{ color: 'var(--ink-3)' }} />
-                </div>
+                </Pressable>
               )
             })}
           </div>
