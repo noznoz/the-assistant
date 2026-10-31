@@ -265,7 +265,7 @@
 .sheet .grabber { width: 40px; height: 5px; border-radius: 3px; background: var(--line-2); margin: 6px auto 14px; }
 .sheet-h { display: flex; align-items: center; gap: 10px; margin-bottom: var(--s4); }
 .sheet-h h3 { font-size: var(--fs-title); flex: 1; }
-.iconbtn { width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--surface-2); color: var(--ink-2); display: grid; place-items: center; transition: transform 0.12s var(--ease), background 0.15s; }
+.iconbtn { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--surface-2); color: var(--ink-2); display: grid; place-items: center; transition: transform 0.12s var(--ease), background 0.15s; }
 .iconbtn:active { transform: scale(0.9); background: var(--line); }
 .iconbtn svg { width: 18px; height: 18px; }
 
@@ -583,3 +583,25 @@
 .update-banner > svg { color: var(--brand-500); flex-shrink: 0; }
 [data-theme="dark"] .update-banner > svg { color: var(--brand-400); }
 .update-banner .btn.sm { flex-shrink: 0; }
+
+/* ---- Accessibility ----------------------------------------------------------
+   A visible focus ring for keyboard / switch users (mouse & touch never see
+   :focus-visible, so pointer users are unaffected), and a motion-reduced mode
+   that quiets ambient animation for users who ask the OS for less movement. */
+:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+/* An interactive row (Pressable / role="button") gets the same affordances as a
+   real button: pointer cursor and the tap-scale feedback the rest of the UI uses. */
+[role="button"] { cursor: pointer; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

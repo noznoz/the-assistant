@@ -17,6 +17,25 @@ export function Card({ tight, flat, className = '', children, ...rest }) {
   return <div className={`card ${tight ? 'tight' : ''} ${flat ? 'flat' : ''} ${className}`} {...rest}>{children}</div>
 }
 
+// ---------- Pressable ----------
+// A div that behaves like a button for keyboard and screen-reader users:
+// focusable, announced as a button, and activated with Enter or Space. Keeps
+// the same class/markup so existing row and card styles are unchanged — a
+// drop-in for the `<div className="li" onClick>` rows across the app.
+export function Pressable({ onClick, className = '', children, disabled, role = 'button', ...rest }) {
+  const onKeyDown = (e) => {
+    if (disabled || !onClick) return
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(e) }
+  }
+  return (
+    <div className={className} role={role} tabIndex={disabled ? -1 : 0}
+      aria-disabled={disabled || undefined}
+      onClick={disabled ? undefined : onClick} onKeyDown={onKeyDown} {...rest}>
+      {children}
+    </div>
+  )
+}
+
 // ---------- Section heading ----------
 export function Section({ title, count, action, onAction }) {
   return (
@@ -114,13 +133,19 @@ export function Ring({ value = 0, size = 64, stroke = 7, children }) {
 }
 
 // ---------- Stat tile ----------
+// When it has an onClick it is a real button (focusable, Enter/Space); otherwise
+// a plain, non-interactive tile.
 export function Stat({ label, value, sub, onClick }) {
-  return (
-    <div className="stat" onClick={onClick} style={onClick ? { cursor: 'pointer' } : undefined}>
-      <div className="k">{label}</div>
-      <div className="v tnum">{value}{sub && <small> {sub}</small>}</div>
-    </div>
-  )
+  const body = (<>
+    <div className="k">{label}</div>
+    <div className="v tnum">{value}{sub && <small> {sub}</small>}</div>
+  </>)
+  if (onClick) {
+    return (
+      <Pressable className="stat" onClick={onClick} style={{ cursor: 'pointer' }}>{body}</Pressable>
+    )
+  }
+  return <div className="stat">{body}</div>
 }
 
 // ---------- Bottom sheet / modal ----------
