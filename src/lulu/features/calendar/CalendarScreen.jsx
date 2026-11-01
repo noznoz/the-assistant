@@ -89,9 +89,9 @@ export default function CalendarScreen({ go }) {
         <Card style={{ marginTop: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
             <Icon name="calendar" size={18} style={{ color: 'var(--brand-600)' }} />
-            <h3 style={{ flex: 1, fontSize: 16 }}>{t('addToCalendar')}</h3>
+            <h3 style={{ flex: 1, fontSize: 18 }}>{t('addToCalendar')}</h3>
           </div>
-          <p className="muted" style={{ fontSize: 12.5, margin: '0 0 12px' }}>{t('calendarSyncHint')}</p>
+          <p className="muted" style={{ fontSize: 14.5, margin: '0 0 12px' }}>{t('calendarSyncHint')}</p>
 
           <label className="consent-row" style={{ marginBottom: prayersOn ? 10 : 0 }}>
             <input type="checkbox" checked={prayersOn} onChange={e => updateSettings({ prayerReminders: e.target.checked })} />
@@ -112,7 +112,7 @@ export default function CalendarScreen({ go }) {
         ) : groups.map(([date, evs]) => (
           <div key={date}>
             <div className="section-h" style={{ marginBottom: 8 }}>
-              <h2 style={{ fontSize: 15 }}>{fmtLongDate(date, lang)}</h2>
+              <h2 style={{ fontSize: 17 }}>{fmtLongDate(date, lang)}</h2>
               <span className="spacer" />
               <span className="count">{relativeDay(date, lang)}</span>
             </div>

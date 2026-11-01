@@ -164,7 +164,7 @@ export default function ExpenseReportScreen({ go }) {
 
         {/* Result */}
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{scopeLabel}</div>
+          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{scopeLabel}</div>
           <div style={{ fontSize: 38, fontWeight: 780, marginTop: 6, letterSpacing: '-0.03em' }} className="tnum">{money(total, cur, lang)}</div>
         </Card>
 
@@ -227,7 +227,7 @@ function Toggle({ label, on, onChange }) {
   return (
     <button onClick={() => onChange(!on)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, background: 'transparent', border: 0, color: 'var(--ink)', padding: 0 }}>
       <Icon name="report" size={18} style={{ color: 'var(--ink-3)' }} />
-      <span style={{ flex: 1, textAlign: 'start', fontWeight: 600, fontSize: 14 }}>{label}</span>
+      <span style={{ flex: 1, textAlign: 'start', fontWeight: 600, fontSize: 16 }}>{label}</span>
       <span style={{ width: 46, height: 28, borderRadius: 14, background: on ? 'var(--ok)' : 'var(--line-2)', position: 'relative', transition: 'background .2s', flexShrink: 0 }}>
         <span style={{ position: 'absolute', top: 3, insetInlineStart: on ? 21 : 3, width: 22, height: 22, borderRadius: '50%', background: '#fff', transition: 'inset-inline-start .2s' }} />
       </span>

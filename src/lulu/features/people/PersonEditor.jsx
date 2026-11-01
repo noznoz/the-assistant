@@ -108,7 +108,7 @@ export default function PersonEditor({ initial = {}, onClose, onSaved }) {
       </div>
       <Field label={t('notesField')}><Input value={f.notes} onChange={set('notes')} /></Field>
 
-      <div style={{ margin: '4px 2px 8px', fontSize: 13, fontWeight: 700, color: 'var(--ink-2)' }}>{t('healthMedical')}</div>
+      <div style={{ margin: '4px 2px 8px', fontSize: 15, fontWeight: 700, color: 'var(--ink-2)' }}>{t('healthMedical')}</div>
       <div className="row2">
         <Field label={t('bloodType')}>
           <Select value={f.bloodType} onChange={set('bloodType')} options={[''].concat(['A+','A-','B+','B-','AB+','AB-','O+','O-']).map(v => ({ value: v, label: v || '—' }))} />
@@ -123,7 +123,7 @@ export default function PersonEditor({ initial = {}, onClose, onSaved }) {
         <Field label={t('healthPolicy')}><Input value={f.healthPolicy} onChange={set('healthPolicy')} /></Field>
       </div>
 
-      <div style={{ margin: '10px 2px 8px', fontSize: 13, fontWeight: 700, color: 'var(--ink-2)' }}>{t('keepInTouch')}</div>
+      <div style={{ margin: '10px 2px 8px', fontSize: 15, fontWeight: 700, color: 'var(--ink-2)' }}>{t('keepInTouch')}</div>
       <div className="row2">
         <Field label={t('reachOutEvery')}>
           <Select value={String(f.keepInTouchDays || 0)} onChange={e => setF(prev => ({ ...prev, keepInTouchDays: Number(e.target.value) }))} options={[
@@ -134,7 +134,7 @@ export default function PersonEditor({ initial = {}, onClose, onSaved }) {
         <Field label={t('lastContacted')} hint={t('optional')}><Input type="date" value={f.lastContacted} onChange={set('lastContacted')} /></Field>
       </div>
 
-      <div style={{ margin: '10px 2px 8px', fontSize: 13, fontWeight: 700, color: 'var(--ink-2)' }}>{t('identityDocs')}</div>
+      <div style={{ margin: '10px 2px 8px', fontSize: 15, fontWeight: 700, color: 'var(--ink-2)' }}>{t('identityDocs')}</div>
       <p className="hint" style={{ margin: '0 2px 8px' }}>{t('identityDocsHint')}</p>
       <div className="row2">
         <Field label={t('iqama') + ' — ' + t('number')}><Input value={f.iqamaNumber} onChange={set('iqamaNumber')} inputMode="numeric" /></Field>
@@ -149,7 +149,7 @@ export default function PersonEditor({ initial = {}, onClose, onSaved }) {
         <Field label={t('drivingLicense') + ' — ' + t('expiry')}><Input type="date" value={f.licenseExpiry} onChange={set('licenseExpiry')} /></Field>
       </div>
 
-      <p className="muted" style={{ fontSize: 12, marginTop: 10 }}>
+      <p className="muted" style={{ fontSize: 14, marginTop: 10 }}>
         <Icon name="whatsapp" size={12} /> {t('sendTaskHint')}
       </p>
       {photo.node}

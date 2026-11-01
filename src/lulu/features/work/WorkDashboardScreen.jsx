@@ -88,8 +88,8 @@ export default function WorkDashboardScreen({ go }) {
                       <div className="meta">{done} {t('doneLabel')} · {open} {t('openLabel').toLowerCase()}{overdue > 0 && <span className="t-danger"> · {overdue} {t('overdue').toLowerCase()}</span>}</div>
                     </div>
                     <div style={{ textAlign: 'end' }}>
-                      <b className={`tnum ${tint}`} style={{ fontSize: 16 }}>{pct == null ? '—' : `${pct}%`}</b>
-                      <div className="muted" style={{ fontSize: 10.5 }}>{t('onTime')}</div>
+                      <b className={`tnum ${tint}`} style={{ fontSize: 18 }}>{pct == null ? '—' : `${pct}%`}</b>
+                      <div className="muted" style={{ fontSize: 12 }}>{t('onTime')}</div>
                     </div>
                   </div>
                 )
@@ -105,7 +105,7 @@ export default function WorkDashboardScreen({ go }) {
           <Card className="stack">
             {d.byMember.map(({ m, open, overdue }) => (
               <div key={m.id}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13.5, marginBottom: 4 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15.5, marginBottom: 4 }}>
                   <span style={{ fontWeight: 600 }}>{m.name}</span>
                   <span className="muted">{open} {t('tasksLower')}{overdue > 0 ? ` · ` : ''}{overdue > 0 && <span className="t-danger">{overdue} {t('overdue').toLowerCase()}</span>}</span>
                 </div>

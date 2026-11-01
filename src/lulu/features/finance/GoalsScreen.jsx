@@ -50,7 +50,7 @@ export default function GoalsScreen({ go }) {
                         </span>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontWeight: 700 }}>{g.name}</div>
-                          <div className="muted" style={{ fontSize: 12.5 }}>
+                          <div className="muted" style={{ fontSize: 14.5 }}>
                             {money(s.saved, g.currency || cur, lang)} / {money(s.target, g.currency || cur, lang)}
                             {g.targetDate && !s.done && <span> · {relativeDay(g.targetDate, lang)}</span>}
                           </div>
@@ -65,8 +65,8 @@ export default function GoalsScreen({ go }) {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
                         {s.done ? <Chip tint="t-ok">{t('goalReached')}</Chip>
                           : s.monthlyNeeded > 0
-                            ? <span className="muted" style={{ fontSize: 12.5 }}>{money(s.monthlyNeeded, g.currency || cur, lang)} / {t('perMonth')}</span>
-                            : <span className="muted" style={{ fontSize: 12.5 }}>{money(s.remaining, g.currency || cur, lang)} {t('toGo')}</span>}
+                            ? <span className="muted" style={{ fontSize: 14.5 }}>{money(s.monthlyNeeded, g.currency || cur, lang)} / {t('perMonth')}</span>
+                            : <span className="muted" style={{ fontSize: 14.5 }}>{money(s.remaining, g.currency || cur, lang)} {t('toGo')}</span>}
                         {!s.done && <button className="btn sm" onClick={(e) => { e.stopPropagation(); setFunds(g) }}><Icon name="plus" size={14} /> {t('addFunds')}</button>}
                       </div>
                     </Card>
@@ -164,7 +164,7 @@ function FundsSheet({ goal, onClose, onSaved }) {
   return (
     <Sheet title={`${t('addFunds')} · ${goal.name}`} onClose={onClose}
       footer={<Button variant="primary" block onClick={submit}>{t('save')}</Button>}>
-      <p className="muted" style={{ margin: '0 2px 10px', fontSize: 13 }}>
+      <p className="muted" style={{ margin: '0 2px 10px', fontSize: 15 }}>
         {money(s.saved, cur, lang)} / {money(s.target, cur, lang)} · {money(s.remaining, cur, lang)} {t('toGo')}
       </p>
       <div className="chip-row" style={{ marginBottom: 12 }}>

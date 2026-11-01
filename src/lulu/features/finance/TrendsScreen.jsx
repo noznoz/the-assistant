@@ -73,7 +73,7 @@ export default function TrendsScreen({ go }) {
           <div className="stack" style={{ gap: 12 }}>
             {months.map(m => (
               <div key={m.key}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginBottom: 4 }}>
                   <b>{m.label}</b>
                   <span className={m.net >= 0 ? 't-ok' : 't-danger'}>{m.net >= 0 ? '+' : '−'}{money(Math.abs(m.net), cur, lang)}</span>
                 </div>
@@ -82,7 +82,7 @@ export default function TrendsScreen({ go }) {
               </div>
             ))}
           </div>
-          <div style={{ display: 'flex', gap: 16, marginTop: 12, fontSize: 12 }}>
+          <div style={{ display: 'flex', gap: 16, marginTop: 12, fontSize: 14 }}>
             <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 3, background: 'var(--ok)', marginInlineEnd: 5 }} />{t('income')}</span>
             <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 3, background: 'var(--danger)', marginInlineEnd: 5 }} />{t('expenses')}</span>
           </div>

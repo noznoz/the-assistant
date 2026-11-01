@@ -59,11 +59,11 @@ export default function DebtPayoffScreen({ go }) {
             </div>
 
             <Card style={{ textAlign: 'center', marginTop: 16 }}>
-              <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('debtFreeBy')}</div>
+              <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('debtFreeBy')}</div>
               {plan.feasible ? (
                 <>
                   <div style={{ fontSize: 28, fontWeight: 780, marginTop: 4 }}>{fmtDate(date, lang, settings.dateFormat)}</div>
-                  <div className="muted" style={{ fontSize: 13, marginTop: 2 }}>{plan.months} {t('months')}{saved > 0 ? ` · ${saved} ${t('monthsSooner')}` : ''}</div>
+                  <div className="muted" style={{ fontSize: 15, marginTop: 2 }}>{plan.months} {t('months')}{saved > 0 ? ` · ${saved} ${t('monthsSooner')}` : ''}</div>
                 </>
               ) : (
                 <div className="t-danger" style={{ fontWeight: 700, marginTop: 6 }}>{t('debtNotFeasible')}</div>

@@ -55,16 +55,16 @@ export default function SubscriptionsScreen({ go }) {
       <DetailHeader title={t('subscriptions')} onBack={() => go('expenses')} />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('monthlyCommitment')}</div>
+          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('monthlyCommitment')}</div>
           <div style={{ fontSize: 34, fontWeight: 780, marginTop: 4 }} className="tnum">{money(monthly, cur, lang)}</div>
-          <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>{active.length} {t('active')}</div>
+          <div className="muted" style={{ fontSize: 14, marginTop: 4 }}>{active.length} {t('active')}</div>
         </Card>
 
         {detected.length > 0 && (
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '16px 2px 8px' }}>
               <Icon name="sparkle" size={15} style={{ color: 'var(--brand-600)' }} />
-              <span style={{ fontWeight: 700, fontSize: 13.5 }}>{t('detectedRecurring')}</span>
+              <span style={{ fontWeight: 700, fontSize: 15.5 }}>{t('detectedRecurring')}</span>
             </div>
             <Card tight>
               {detected.slice(0, 5).map((d, i) => (

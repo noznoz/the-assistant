@@ -102,7 +102,7 @@ export default function TaskEditor({ initial, onClose, onSaved }) {
         </Field>
 
         <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '0 2px 7px' }}>{t('priority')}</label>
+          <label style={{ display: 'block', fontSize: 15, fontWeight: 650, color: 'var(--ink-2)', margin: '0 2px 7px' }}>{t('priority')}</label>
           <div className="chip-row">
             {PRIORITIES.map(p => (
               <Chip key={p.id} selectable on={f.priority === p.id} tint={f.priority === p.id ? '' : p.tint}
@@ -151,7 +151,7 @@ export default function TaskEditor({ initial, onClose, onSaved }) {
         )}
 
         <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '0 2px 7px' }}>{t('workOrPersonal')}</label>
+          <label style={{ display: 'block', fontSize: 15, fontWeight: 650, color: 'var(--ink-2)', margin: '0 2px 7px' }}>{t('workOrPersonal')}</label>
           <div className="chip-row">
             <Chip selectable on={f.classification === 'work'} onClick={() => setF({ ...f, classification: 'work' })}>{t('work')}</Chip>
             <Chip selectable on={f.classification === 'personal'} onClick={() => setF({ ...f, classification: 'personal' })}>{t('personal')}</Chip>
@@ -179,7 +179,7 @@ export default function TaskEditor({ initial, onClose, onSaved }) {
           </Field>
         )}
 
-        <label style={{ display: 'block', fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '8px 2px 7px' }}>
+        <label style={{ display: 'block', fontSize: 15, fontWeight: 650, color: 'var(--ink-2)', margin: '8px 2px 7px' }}>
           {t('checklist')}{subs.length ? ` · ${subs.filter(s => s.done).length}/${subs.length}` : ''}
         </label>
         {subs.map(s => (

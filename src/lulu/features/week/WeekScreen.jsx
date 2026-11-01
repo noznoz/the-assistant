@@ -106,12 +106,12 @@ export default function WeekScreen({ go }) {
         ) : (
           <>
             <Card style={{ marginTop: 8 }}>
-              <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 3, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 3, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Icon name="sparkle" size={16} style={{ color: 'var(--brand-600)' }} /> {t('planWeekTitle')}
               </div>
-              <div className="muted" style={{ fontSize: 13 }}>{planParts || t('allClear')}</div>
+              <div className="muted" style={{ fontSize: 15 }}>{planParts || t('allClear')}</div>
               {(d.dueOut > 0 || d.expectIn > 0) && (
-                <div style={{ fontSize: 12.5, marginTop: 6, fontWeight: 600 }}>
+                <div style={{ fontSize: 14.5, marginTop: 6, fontWeight: 600 }}>
                   {d.dueOut > 0 && <span style={{ color: 'var(--danger)' }}>−{money(d.dueOut, cur, lang)}</span>}
                   {d.dueOut > 0 && d.expectIn > 0 && ' · '}
                   {d.expectIn > 0 && <span style={{ color: 'var(--ok)' }}>+{money(d.expectIn, cur, lang)}</span>}
@@ -128,11 +128,11 @@ export default function WeekScreen({ go }) {
             {view === 'grouped' && <>
             <div className="stat-grid" style={{ marginTop: 8 }}>
               <div className="card" style={{ textAlign: 'center', padding: 14 }}>
-                <div className="muted" style={{ fontSize: 11, fontWeight: 650, textTransform: 'uppercase' }}>{t('dueOut')}</div>
+                <div className="muted" style={{ fontSize: 13, fontWeight: 650, textTransform: 'uppercase' }}>{t('dueOut')}</div>
                 <b className="tnum t-danger" style={{ fontSize: 18 }}>{money(d.dueOut, cur, lang)}</b>
               </div>
               <div className="card" style={{ textAlign: 'center', padding: 14 }}>
-                <div className="muted" style={{ fontSize: 11, fontWeight: 650, textTransform: 'uppercase' }}>{t('expectedIn')}</div>
+                <div className="muted" style={{ fontSize: 13, fontWeight: 650, textTransform: 'uppercase' }}>{t('expectedIn')}</div>
                 <b className="tnum t-ok" style={{ fontSize: 18 }}>{money(d.expectIn, cur, lang)}</b>
               </div>
             </div>
@@ -147,7 +147,7 @@ export default function WeekScreen({ go }) {
                     return (
                       <div key={x.id} className="li" style={{ margin: 0, border: 0, borderRadius: 0 }} onClick={() => go('tasks')}>
                         <span style={{ width: 8, height: 8, borderRadius: 4, background: pr?.color || 'var(--ink-3)', flexShrink: 0 }} />
-                        <div className="body"><div className="title" style={{ fontSize: 14 }}>{x.title}</div></div>
+                        <div className="body"><div className="title" style={{ fontSize: 16 }}>{x.title}</div></div>
                         <span className={`meta ${over ? 't-danger' : ''}`}>{relativeDay(x.dueDate, lang)}</span>
                       </div>
                     )
@@ -223,15 +223,15 @@ function TimelineView({ agenda, upTrips, lang, cur, go, t }) {
   const Rows = ({ items }) => items.map(it => (
     <div key={it.key} className="li" onClick={() => go(it.go)}>
       <div className={`lead ${it.tint}`}>{it.pr ? <span style={{ width: 9, height: 9, borderRadius: 5, background: it.pr.color }} /> : <Icon name={it.icon} size={17} />}</div>
-      <div className="body"><div className="title" style={{ fontSize: 14 }}>{it.title}</div>{it.meta && <div className="meta">{it.meta}</div>}</div>
-      {it.amount > 0 && <b className={`tnum ${it.kind === 'income' ? 't-ok' : ''}`} style={{ fontSize: 13 }}>{it.kind === 'income' ? '+' : ''}{money(it.amount, cur, lang)}</b>}
+      <div className="body"><div className="title" style={{ fontSize: 16 }}>{it.title}</div>{it.meta && <div className="meta">{it.meta}</div>}</div>
+      {it.amount > 0 && <b className={`tnum ${it.kind === 'income' ? 't-ok' : ''}`} style={{ fontSize: 15 }}>{it.kind === 'income' ? '+' : ''}{money(it.amount, cur, lang)}</b>}
     </div>
   ))
 
   const DayBlock = ({ dt, label, danger }) => (
     <React.Fragment key={dt || label}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '14px 2px 6px' }}>
-        <span style={{ fontSize: 12.5, fontWeight: 750, color: danger ? 'var(--danger)' : 'var(--ink-2)', textTransform: 'capitalize' }}>{label}</span>
+        <span style={{ fontSize: 14.5, fontWeight: 750, color: danger ? 'var(--danger)' : 'var(--ink-2)', textTransform: 'capitalize' }}>{label}</span>
         <span style={{ flex: 1, height: 1, background: 'var(--line)' }} />
         <span className="chip">{groups[dt].length}</span>
       </div>
@@ -244,7 +244,7 @@ function TimelineView({ agenda, upTrips, lang, cur, go, t }) {
       {overdueDays.length > 0 && (
         <>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '10px 2px 6px' }}>
-            <span style={{ fontSize: 12.5, fontWeight: 750, color: 'var(--danger)' }}>{t('overdue')}</span>
+            <span style={{ fontSize: 14.5, fontWeight: 750, color: 'var(--danger)' }}>{t('overdue')}</span>
             <span style={{ flex: 1, height: 1, background: 'var(--line)' }} />
           </div>
           <Card tight>{<Rows items={overdueDays.flatMap(dt => groups[dt])} />}</Card>
@@ -254,13 +254,13 @@ function TimelineView({ agenda, upTrips, lang, cur, go, t }) {
       {laterTrips.length > 0 && (
         <>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '14px 2px 6px' }}>
-            <span style={{ fontSize: 12.5, fontWeight: 750, color: 'var(--ink-2)' }}>{t('upcoming')}</span>
+            <span style={{ fontSize: 14.5, fontWeight: 750, color: 'var(--ink-2)' }}>{t('upcoming')}</span>
             <span style={{ flex: 1, height: 1, background: 'var(--line)' }} />
           </div>
           <Card tight>{laterTrips.map(tr => (
             <div key={'lt' + tr.id} className="li" onClick={() => go('trips')}>
               <div className="lead t-info"><Icon name="trip" size={17} /></div>
-              <div className="body"><div className="title" style={{ fontSize: 14 }}>{tr.name}</div><div className="meta">{tr.destination}{tr.start ? ` · ${relativeDay(tr.start, lang)}` : ''}</div></div>
+              <div className="body"><div className="title" style={{ fontSize: 16 }}>{tr.name}</div><div className="meta">{tr.destination}{tr.start ? ` · ${relativeDay(tr.start, lang)}` : ''}</div></div>
             </div>
           ))}</Card>
         </>

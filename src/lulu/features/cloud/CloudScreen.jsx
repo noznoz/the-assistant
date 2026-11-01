@@ -121,7 +121,7 @@ export default function CloudScreen({ go }) {
             </span>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700 }}>{signedIn ? t('cloudOn') : configured ? t('cloudNotSignedIn') : t('cloudOff')}</div>
-              <div className="muted" style={{ fontSize: 12 }}>
+              <div className="muted" style={{ fontSize: 14 }}>
                 {signedIn ? (cloud.currentUser()?.email || '') : t('cloudOffHint')}
               </div>
             </div>
@@ -141,7 +141,7 @@ export default function CloudScreen({ go }) {
               {showSql && (
                 <>
                   <p className="hint" style={{ margin: '0 2px' }}>{t('cloudSqlHint')}</p>
-                  <pre style={{ maxHeight: 220, overflow: 'auto', background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: 10, padding: 10, fontSize: 11, lineHeight: 1.45 }}>{SETUP_SQL}</pre>
+                  <pre style={{ maxHeight: 220, overflow: 'auto', background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: 10, padding: 10, fontSize: 13, lineHeight: 1.45 }}>{SETUP_SQL}</pre>
                   <Button icon="copy" onClick={() => copy(SETUP_SQL)}>{t('cloudCopySql')}</Button>
                 </>
               )}
@@ -182,11 +182,11 @@ export default function CloudScreen({ go }) {
             <Card className="stack">
               <p className="hint" style={{ margin: '0 2px' }}>{t('cloudInviteHint')}</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'monospace', fontSize: 12, padding: '10px 12px', background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: 10 }}>{cloud.householdId()}</div>
+                <div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'monospace', fontSize: 14, padding: '10px 12px', background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: 10 }}>{cloud.householdId()}</div>
                 <Button icon="copy" onClick={() => copy(cloud.householdId())}>{t('copy')}</Button>
               </div>
               {members.length > 0 && members.map((m, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 16 }}>
                   <Icon name="people" size={15} style={{ color: 'var(--ink-3)' }} />
                   <span style={{ flex: 1 }}>{m.email}</span>
                   <span className="chip">{m.role}</span>
@@ -213,7 +213,7 @@ export default function CloudScreen({ go }) {
         {configured && (
           <Button block variant="danger" icon="trash" onClick={disconnect}>{t('cloudDisconnect')}</Button>
         )}
-        <p className="center muted" style={{ marginTop: 18, fontSize: 12 }}>{t('cloudPrivacy')}</p>
+        <p className="center muted" style={{ marginTop: 18, fontSize: 14 }}>{t('cloudPrivacy')}</p>
       </div>
       {toast.node}
     </>

@@ -78,7 +78,7 @@ export default function ProfileScreen({ go }) {
           </button>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 750, fontSize: 18 }}>{form.fullName || settings.name || t('yourName')}</div>
-            <div className="muted" style={{ fontSize: 13 }}>
+            <div className="muted" style={{ fontSize: 15 }}>
               {[form.jobTitle, form.nationalId && `${t('nationalId')} ${form.nationalId}`].filter(Boolean).join(' · ') || t('tapToComplete')}
             </div>
           </div>
@@ -169,7 +169,7 @@ export default function ProfileScreen({ go }) {
           <Field label={t('mobile')}><Input type="tel" value={form.emergencyPhone || ''} onChange={set('emergencyPhone')} /></Field>
         </Card>
 
-        <p className="center muted" style={{ marginTop: 20, fontSize: 12 }}>{t('profileStoredLocally')}</p>
+        <p className="center muted" style={{ marginTop: 20, fontSize: 14 }}>{t('profileStoredLocally')}</p>
       </div>
       {photo.node}
       {toast.node}

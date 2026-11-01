@@ -116,7 +116,7 @@ function StaffEditor({ initial, onClose, onSaved }) {
         <Field label={t('salary')}><Input type="number" inputMode="decimal" value={f.salary} onChange={set('salary')} placeholder="0" /></Field>
         <Field label={t('currency')}><Select value={f.currency} onChange={set('currency')} options={CUR.map(c => ({ value: c, label: c }))} /></Field>
       </div>
-      <div style={{ margin: '10px 2px 8px', fontSize: 13, fontWeight: 700, color: 'var(--ink-2)' }}>{t('identityDocs')}</div>
+      <div style={{ margin: '10px 2px 8px', fontSize: 15, fontWeight: 700, color: 'var(--ink-2)' }}>{t('identityDocs')}</div>
       <div className="row2">
         <Field label={t('iqama') + ' — ' + t('number')}><Input value={f.iqamaNumber} onChange={set('iqamaNumber')} inputMode="numeric" /></Field>
         <Field label={t('iqama') + ' — ' + t('expiry')}><Input type="date" value={f.iqamaExpiry} onChange={set('iqamaExpiry')} /></Field>

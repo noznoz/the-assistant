@@ -46,7 +46,7 @@ export default function AllocationScreen({ go }) {
         ) : (
           <>
             <Card style={{ textAlign: 'center', marginTop: 14 }}>
-              <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('portfolioValue')}</div>
+              <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('portfolioValue')}</div>
               <div style={{ fontSize: 30, fontWeight: 780, marginTop: 4 }} className="tnum">{money(total, cur, lang)}</div>
             </Card>
 
@@ -61,7 +61,7 @@ export default function AllocationScreen({ go }) {
             <Card className="stack">
               {rows.map(r => (
                 <div key={r.id}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13.5 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 15.5 }}>
                     <span style={{ width: 10, height: 10, borderRadius: 3, background: HUES[r.id] || '#8A8A8A', flexShrink: 0 }} />
                     <span style={{ fontWeight: 600, flex: 1 }}>{label(r.tp, lang)}</span>
                     <span className="tnum muted">{money(r.value, cur, lang)}</span>
@@ -69,13 +69,13 @@ export default function AllocationScreen({ go }) {
                   </div>
                   {editing ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '6px 0 2px 18px' }}>
-                      <span className="muted" style={{ fontSize: 12 }}>{t('target')}</span>
+                      <span className="muted" style={{ fontSize: 14 }}>{t('target')}</span>
                       <input type="number" inputMode="numeric" className="input" style={{ width: 70, padding: '6px 8px' }}
                         value={(settings.targetAllocation || {})[r.id] ?? ''} onChange={e => setTarget(r.id, e.target.value)} placeholder="0" />
-                      <span className="muted" style={{ fontSize: 12 }}>%</span>
+                      <span className="muted" style={{ fontSize: 14 }}>%</span>
                     </div>
                   ) : r.target > 0 && (
-                    <div style={{ display: 'flex', gap: 8, margin: '4px 0 2px 18px', fontSize: 12 }}>
+                    <div style={{ display: 'flex', gap: 8, margin: '4px 0 2px 18px', fontSize: 14 }}>
                       <span className="muted">{t('target')} {r.target}%</span>
                       <span className={Math.abs(r.drift) < 3 ? 't-ok' : r.drift > 0 ? 't-warn' : 't-info'} style={{ fontWeight: 650 }}>
                         {r.drift >= 0 ? '▲' : '▼'} {Math.abs(Math.round(r.drift))}% {r.drift >= 0 ? t('overweight') : t('underweight')}

@@ -77,7 +77,7 @@ export default function PersonProfile({ person, onBack, onDeleted }) {
             {person.photo ? <img src={person.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
           </div>
           <h1 style={{ fontSize: 22 }}>{person.name}</h1>
-          <div className="muted" style={{ fontSize: 13 }}>
+          <div className="muted" style={{ fontSize: 15 }}>
             {[rel ? label(rel, lang) : '', person.jobTitle, person.company].filter(Boolean).join(' · ')}
           </div>
           {points > 0 && <Chip tint="t-brand" style={{ marginTop: 6 }}><Icon name="sparkle" size={12} /> {points} {t('pts')}</Chip>}
@@ -103,7 +103,7 @@ export default function PersonProfile({ person, onBack, onDeleted }) {
             <Section title={t('healthMedical')} />
             <Card className="stack">
               {healthRows.map(([k, v]) => (
-                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 14 }}>
+                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 16 }}>
                   <span className="muted">{k}</span><span style={{ fontWeight: 600, textAlign: 'end' }}>{v}</span>
                 </div>
               ))}
@@ -151,7 +151,7 @@ export default function PersonProfile({ person, onBack, onDeleted }) {
         )}
 
         {open.length > 0 && (
-          <p className="center muted" style={{ fontSize: 12, marginTop: 16 }}>
+          <p className="center muted" style={{ fontSize: 14, marginTop: 16 }}>
             <Icon name="whatsapp" size={12} /> {t('sendTaskHint')}
           </p>
         )}
@@ -172,7 +172,7 @@ export default function PersonProfile({ person, onBack, onDeleted }) {
 
 function ContactBtn({ icon, label, onClick, tint }) {
   return (
-    <button onClick={onClick} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, background: 'transparent', border: 0, color: 'var(--ink-2)', fontSize: 11, fontWeight: 600 }}>
+    <button onClick={onClick} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, background: 'transparent', border: 0, color: 'var(--ink-2)', fontSize: 13, fontWeight: 600 }}>
       <span style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--surface-2)', border: '1px solid var(--line)', display: 'grid', placeItems: 'center', color: tint || 'var(--ink)' }}>
         <Icon name={icon} size={20} />
       </span>

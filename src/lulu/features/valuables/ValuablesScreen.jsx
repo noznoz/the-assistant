@@ -28,7 +28,7 @@ export default function ValuablesScreen({ go }) {
       <DetailHeader title={t('valuables')} onBack={() => go('more')} />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('totalValue')}</div>
+          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('totalValue')}</div>
           <div style={{ fontSize: 32, fontWeight: 780, marginTop: 4 }} className="tnum">{money(total, cur, lang)}</div>
         </Card>
         <div className="stat-grid" style={{ marginTop: 12 }}>
@@ -130,7 +130,7 @@ function ValuableEditor({ initial, onClose, onSaved }) {
         </div>
         <input ref={camRef} type="file" accept="image/*" capture="environment" hidden onChange={e => { addReceipts(e.target.files); e.target.value = '' }} />
         <input ref={fileRef} type="file" accept="image/*,application/pdf" multiple hidden onChange={e => { addReceipts(e.target.files); e.target.value = '' }} />
-        {busy && <p className="muted" style={{ fontSize: 12, margin: '4px 2px' }}><span className="spinner" style={{ width: 14, height: 14, display: 'inline-block', verticalAlign: 'middle' }} /> …</p>}
+        {busy && <p className="muted" style={{ fontSize: 14, margin: '4px 2px' }}><span className="spinner" style={{ width: 14, height: 14, display: 'inline-block', verticalAlign: 'middle' }} /> …</p>}
         {(f.receipts || []).length > 0 && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginTop: 8 }}>
             {f.receipts.map(a => (

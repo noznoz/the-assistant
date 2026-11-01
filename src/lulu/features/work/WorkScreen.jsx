@@ -89,7 +89,7 @@ function BossUpdateSheet({ onClose, toast }) {
         <Button block icon="doc" onClick={copy}>{t('copy')}</Button>
       </div>}>
       <p className="hint" style={{ margin: '0 2px 8px' }}>{t('statusUpdateHint')}</p>
-      <TextArea value={text} onChange={e => setText(e.target.value)} rows={12} style={{ minHeight: 240, fontSize: 14, lineHeight: 1.5 }} />
+      <TextArea value={text} onChange={e => setText(e.target.value)} rows={12} style={{ minHeight: 240, fontSize: 16, lineHeight: 1.5 }} />
     </Sheet>
   )
 }
@@ -156,7 +156,7 @@ function WorkHome({ go }) {
             <span className="lead t-brand" style={{ width: 42, height: 42, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="people" size={20} /></span>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 750 }}>{boss || t('setYourManager')}</div>
-              {settings.profile?.managerTitle && <div className="muted" style={{ fontSize: 12.5 }}>{settings.profile.managerTitle}</div>}
+              {settings.profile?.managerTitle && <div className="muted" style={{ fontSize: 14.5 }}>{settings.profile.managerTitle}</div>}
             </div>
             {(settings.profile?.managerWhatsapp || settings.profile?.managerMobile) && (
               <button className="iconbtn" aria-label="WhatsApp" onClick={() => whatsappToPerson({ whatsapp: settings.profile.managerWhatsapp, mobile: settings.profile.managerMobile }, '')}><Icon name="whatsapp" size={18} /></button>
@@ -174,7 +174,7 @@ function WorkHome({ go }) {
             <span className={`lead ${waitingOverdue ? 't-danger' : 't-warn'}`} style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="bell" size={18} /></span>
             <span style={{ flex: 1, textAlign: 'start' }}>
               <span style={{ display: 'block', fontWeight: 700 }}>{t('followUps')}</span>
-              <span className="muted" style={{ display: 'block', fontSize: 12.5 }}>{waitingOnOthers.length} {t('awaitingOthers')}{waitingOverdue > 0 ? ` · ${waitingOverdue} ${t('overdue')}` : ''}</span>
+              <span className="muted" style={{ display: 'block', fontSize: 14.5 }}>{waitingOnOthers.length} {t('awaitingOthers')}{waitingOverdue > 0 ? ` · ${waitingOverdue} ${t('overdue')}` : ''}</span>
             </span>
             <Icon name="chevron" size={16} style={{ color: 'var(--ink-3)' }} />
           </button>
@@ -307,7 +307,7 @@ function DepartmentDetail({ dep, go, onBack }) {
         {head && (
           <Card style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 12 }}>
             <span className="lead t-brand" style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="flag" size={18} /></span>
-            <div style={{ flex: 1 }}><div style={{ fontWeight: 700 }}>{head.name}</div><div className="muted" style={{ fontSize: 12.5 }}>{[head.title, t('departmentHead')].filter(Boolean).join(' · ')}</div></div>
+            <div style={{ flex: 1 }}><div style={{ fontWeight: 700 }}>{head.name}</div><div className="muted" style={{ fontSize: 14.5 }}>{[head.title, t('departmentHead')].filter(Boolean).join(' · ')}</div></div>
             {(head.whatsapp || head.mobile) && <button className="iconbtn" aria-label="WhatsApp" onClick={() => whatsappToPerson(head, '')}><Icon name="whatsapp" size={16} /></button>}
           </Card>
         )}
@@ -407,7 +407,7 @@ function WorkBoard({ tasks, lang, tasksCol, onOpen }) {
         const items = tasks.filter(x => (x.status || 'new') === s)
         return (
           <div key={s} style={{ minWidth: 176, flex: '0 0 176px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, fontWeight: 700, color: 'var(--ink-2)', margin: '0 2px 8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 14, fontWeight: 700, color: 'var(--ink-2)', margin: '0 2px 8px' }}>
               <span>{t('st_' + s)}</span><span className="chip">{items.length}</span>
             </div>
             <div className="stack" style={{ gap: 8 }}>
@@ -417,8 +417,8 @@ function WorkBoard({ tasks, lang, tasksCol, onOpen }) {
                 return (
                   <div key={x.id} className="card tight" style={{ padding: 10 }}>
                     <div onClick={() => onOpen(x)}>
-                      <div style={{ fontWeight: 650, fontSize: 14 }}>{x.title}</div>
-                      <div className="muted" style={{ fontSize: 12, marginTop: 3 }}>
+                      <div style={{ fontWeight: 650, fontSize: 16 }}>{x.title}</div>
+                      <div className="muted" style={{ fontSize: 14, marginTop: 3 }}>
                         {[x.assignedTo, x.dueDate && relativeDay(x.dueDate, lang)].filter(Boolean).join(' · ')}
                         {overdue && <span className="t-danger"> · {t('overdue')}</span>}
                         {x.repeat && <span> · ↻</span>}
@@ -432,7 +432,7 @@ function WorkBoard({ tasks, lang, tasksCol, onOpen }) {
                   </div>
                 )
               })}
-              {items.length === 0 && <div className="muted" style={{ fontSize: 12, textAlign: 'center', padding: '8px 0' }}>—</div>}
+              {items.length === 0 && <div className="muted" style={{ fontSize: 14, textAlign: 'center', padding: '8px 0' }}>—</div>}
             </div>
           </div>
         )
@@ -597,20 +597,20 @@ function WorkTaskSheet({ task, department, members = [], onClose, onEdit, onSave
 
   return (
     <Sheet title={live.title} onClose={onClose}>
-      <div className="muted" style={{ marginTop: -6, marginBottom: 12, fontSize: 13 }}>
+      <div className="muted" style={{ marginTop: -6, marginBottom: 12, fontSize: 15 }}>
         {[deptNames, live.assignedTo, pr && t(pr.key), st && t(st.key)].filter(Boolean).join(' · ')}
       </div>
       {live.description && <p style={{ marginBottom: 14 }}>{live.description}</p>}
-      {live.dueDate && <p className="muted" style={{ marginBottom: 14, fontSize: 13 }}><Icon name="calendar" size={13} /> {t('deadline')}: {fmtDate(live.dueDate, lang, settings.dateFormat)}</p>}
+      {live.dueDate && <p className="muted" style={{ marginBottom: 14, fontSize: 15 }}><Icon name="calendar" size={13} /> {t('deadline')}: {fmtDate(live.dueDate, lang, settings.dateFormat)}</p>}
 
       {subs.length > 0 && (
         <>
-          <div style={{ fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '2px 2px 6px' }}>{t('checklist')} · {subs.filter(s => s.done).length}/{subs.length}</div>
+          <div style={{ fontSize: 15, fontWeight: 650, color: 'var(--ink-2)', margin: '2px 2px 6px' }}>{t('checklist')} · {subs.filter(s => s.done).length}/{subs.length}</div>
           <div style={{ marginBottom: 14 }}>
             {subs.map(s => (
               <div key={s.id} className="li" style={{ margin: 0 }}>
                 <button className={`check ${s.done ? 'on' : ''}`} onClick={() => toggleSub(s.id)} aria-label={t('markComplete')}>{s.done && <Icon name="check" size={14} stroke={3} />}</button>
-                <div className="body"><div className="title" style={{ fontSize: 14, textDecoration: s.done ? 'line-through' : 'none', opacity: s.done ? 0.6 : 1 }}>{s.text}</div></div>
+                <div className="body"><div className="title" style={{ fontSize: 16, textDecoration: s.done ? 'line-through' : 'none', opacity: s.done ? 0.6 : 1 }}>{s.text}</div></div>
               </div>
             ))}
           </div>
@@ -623,7 +623,7 @@ function WorkTaskSheet({ task, department, members = [], onClose, onEdit, onSave
         {/* Notify assignees directly — one compact chip per person with a number */}
         {waAssignees.length > 0 && (
           <div>
-            <label style={{ display: 'block', fontSize: 12.5, fontWeight: 650, color: 'var(--ink-2)', margin: '4px 2px 7px' }}>{t('notifyOnWhatsApp')}</label>
+            <label style={{ display: 'block', fontSize: 14.5, fontWeight: 650, color: 'var(--ink-2)', margin: '4px 2px 7px' }}>{t('notifyOnWhatsApp')}</label>
             <div className="chip-row">
               {waAssignees.map(a => (
                 <Chip key={a.id} onClick={() => whatsappToPerson(a, detail((a.name || '').split(' ')[0]))} style={{ color: 'var(--ok)', borderColor: 'var(--ok)' }}>
@@ -635,7 +635,7 @@ function WorkTaskSheet({ task, department, members = [], onClose, onEdit, onSave
         )}
 
         {/* Share the task anywhere */}
-        <label style={{ display: 'block', fontSize: 12.5, fontWeight: 650, color: 'var(--ink-2)', margin: '8px 2px 4px' }}>{t('shareTask')}</label>
+        <label style={{ display: 'block', fontSize: 14.5, fontWeight: 650, color: 'var(--ink-2)', margin: '8px 2px 4px' }}>{t('shareTask')}</label>
         <div className="row2">
           <Button icon="whatsapp" onClick={() => share(detail())}>{t('shareWhatsApp')}</Button>
           <Button icon="mail" onClick={() => emailShare(live.title, detail())}>{t('email')}</Button>
@@ -695,7 +695,7 @@ function OrgMemberPicker({ departments, members, value, onSelect, onAddMember, t
   const box = { border: '1px solid var(--line-2)', borderRadius: 'var(--r-md)', overflow: 'hidden' }
   const deptName = (id) => (departments.find(d => d.id === id) || {}).name || t('other')
   const Avatar = ({ name, on }) => (
-    <span style={{ width: 28, height: 28, borderRadius: '50%', background: on ? 'var(--brand-600)' : 'var(--surface-2)', color: on ? '#fff' : 'var(--ink-2)', fontSize: 10.5, fontWeight: 750, display: 'grid', placeItems: 'center', flexShrink: 0 }}>{initialsOf(name)}</span>
+    <span style={{ width: 28, height: 28, borderRadius: '50%', background: on ? 'var(--brand-600)' : 'var(--surface-2)', color: on ? '#fff' : 'var(--ink-2)', fontSize: 12, fontWeight: 750, display: 'grid', placeItems: 'center', flexShrink: 0 }}>{initialsOf(name)}</span>
   )
 
   // Chosen state: show the selected member with a clear/change button.
@@ -705,10 +705,10 @@ function OrgMemberPicker({ departments, members, value, onSelect, onAddMember, t
       <div style={{ ...box, display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px' }}>
         <Avatar name={selected.name} on />
         <span style={{ flex: 1, minWidth: 0 }}>
-          <span style={{ display: 'block', fontSize: 14.5, fontWeight: 700, color: 'var(--ink-1)' }}>{selected.name}</span>
-          <span style={{ display: 'block', fontSize: 12, color: 'var(--ink-3)' }}>{[selected.title, deptName(selected.departmentId)].filter(Boolean).join(' · ')}</span>
+          <span style={{ display: 'block', fontSize: 16.5, fontWeight: 700, color: 'var(--ink-1)' }}>{selected.name}</span>
+          <span style={{ display: 'block', fontSize: 14, color: 'var(--ink-3)' }}>{[selected.title, deptName(selected.departmentId)].filter(Boolean).join(' · ')}</span>
         </span>
-        <button type="button" className="link-btn" style={{ fontSize: 13, fontWeight: 600, color: 'var(--brand-600)' }} onClick={() => onSelect('')}>{t('change')}</button>
+        <button type="button" className="link-btn" style={{ fontSize: 15, fontWeight: 600, color: 'var(--brand-600)' }} onClick={() => onSelect('')}>{t('change')}</button>
       </div>
     )
   }
@@ -718,8 +718,8 @@ function OrgMemberPicker({ departments, members, value, onSelect, onAddMember, t
       style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'start', padding: '10px 12px', paddingInlineStart: 12 + depth * 18, background: 'transparent', border: 0 }}>
       <Avatar name={member.name} />
       <span style={{ flex: 1, minWidth: 0 }}>
-        <span style={{ display: 'block', fontSize: 14.5, fontWeight: 550, color: 'var(--ink-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member.name}</span>
-        {(subtitle || member.title) && <span style={{ display: 'block', fontSize: 12, color: 'var(--ink-3)' }}>{subtitle || member.title}</span>}
+        <span style={{ display: 'block', fontSize: 16.5, fontWeight: 550, color: 'var(--ink-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member.name}</span>
+        {(subtitle || member.title) && <span style={{ display: 'block', fontSize: 14, color: 'var(--ink-3)' }}>{subtitle || member.title}</span>}
       </span>
     </button>
   )
@@ -746,13 +746,13 @@ function OrgMemberPicker({ departments, members, value, onSelect, onAddMember, t
         {ql ? (
           matches.length
             ? matches.map(m => <Row key={m.id} member={m} subtitle={[m.title, deptName(m.departmentId)].filter(Boolean).join(' · ')} />)
-            : <div style={{ padding: '12px', fontSize: 13, color: 'var(--ink-3)' }}>{t('nothingHere')}</div>
+            : <div style={{ padding: '12px', fontSize: 15, color: 'var(--ink-3)' }}>{t('nothingHere')}</div>
         ) : groups.length === 0 ? (
-          <div style={{ padding: '12px', fontSize: 13, color: 'var(--ink-3)' }}>{t('noTeamMembers')}</div>
+          <div style={{ padding: '12px', fontSize: 15, color: 'var(--ink-3)' }}>{t('noTeamMembers')}</div>
         ) : (
           groups.map(({ dep, team }) => (
             <div key={dep.id}>
-              <div style={{ fontSize: 11.5, fontWeight: 750, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.04em', padding: '8px 12px 4px', background: 'var(--surface-2)' }}>{dep.name}</div>
+              <div style={{ fontSize: 13.5, fontWeight: 750, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.04em', padding: '8px 12px 4px', background: 'var(--surface-2)' }}>{dep.name}</div>
               {flattenDeptTree(dep, team).map(({ member, depth }) => <Row key={member.id} member={member} depth={depth} />)}
             </div>
           ))
@@ -761,7 +761,7 @@ function OrgMemberPicker({ departments, members, value, onSelect, onAddMember, t
 
       {onAddMember && (
         <button type="button" onClick={onAddMember}
-          style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'start', padding: '11px 12px', background: 'transparent', border: 0, borderTop: '1px solid var(--line)', color: 'var(--brand-600)', fontSize: 14, fontWeight: 600 }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'start', padding: '11px 12px', background: 'transparent', border: 0, borderTop: '1px solid var(--line)', color: 'var(--brand-600)', fontSize: 16, fontWeight: 600 }}>
           <Icon name="plus" size={16} /> {t('addTeamMember')}
         </button>
       )}
@@ -838,11 +838,11 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
 
   const renderMember = (m) => (
     <Chip key={m.id} selectable on={memberIds.includes(m.id)} onClick={() => toggleMember(m.id)}>
-      <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'var(--brand-tint)', color: 'var(--brand-600)', fontSize: 9, fontWeight: 750, display: 'inline-grid', placeItems: 'center', marginInlineEnd: 5 }}>{initialsOf(m.name)}</span>
+      <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'var(--brand-tint)', color: 'var(--brand-600)', fontSize: 12, fontWeight: 750, display: 'inline-grid', placeItems: 'center', marginInlineEnd: 5 }}>{initialsOf(m.name)}</span>
       {m.name}{memberIds.includes(m.id) && <Icon name="check" size={12} stroke={3} style={{ marginInlineStart: 4 }} />}
     </Chip>
   )
-  const secStyle = { display: 'block', fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '12px 2px 7px' }
+  const secStyle = { display: 'block', fontSize: 15, fontWeight: 650, color: 'var(--ink-2)', margin: '12px 2px 7px' }
   const q = memberQuery.trim().toLowerCase()
 
   const chosenMember = allMembers.items.find(m => m.id === memberIds[0])
@@ -938,7 +938,7 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
         <div style={{ marginBottom: 4 }}>
           <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', ...secStyle }}>
             <span>{t('assignTo')}</span>
-            <button type="button" className="link-btn" style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--brand-600)' }} onClick={() => setAssignOpen(o => !o)}>
+            <button type="button" className="link-btn" style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--brand-600)' }} onClick={() => setAssignOpen(o => !o)}>
               {assignOpen ? t('done') : (memberIds.length ? t('edit') : t('assignPeople'))}
             </button>
           </label>
@@ -949,7 +949,7 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
               ) : null })}
             </div>
           ) : (!assignOpen && (
-            <button type="button" onClick={() => setAssignOpen(true)} style={{ width: '100%', textAlign: 'start', padding: '11px 12px', borderRadius: 'var(--r-md)', border: '1px dashed var(--line-2)', background: 'var(--surface-2)', color: 'var(--ink-3)', fontSize: 14 }}>
+            <button type="button" onClick={() => setAssignOpen(true)} style={{ width: '100%', textAlign: 'start', padding: '11px 12px', borderRadius: 'var(--r-md)', border: '1px dashed var(--line-2)', background: 'var(--surface-2)', color: 'var(--ink-3)', fontSize: 16 }}>
               <Icon name="people" size={14} /> {t('assignPeople')}
             </button>
           ))}
@@ -965,7 +965,7 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
               {q ? (
                 <div className="chip-row">
                   {allMembers.items.filter(m => (m.name || '').toLowerCase().includes(q)).map(renderMember)}
-                  {allMembers.items.filter(m => (m.name || '').toLowerCase().includes(q)).length === 0 && <span className="muted" style={{ fontSize: 13, padding: '4px 2px' }}>{t('nothingHere')}</span>}
+                  {allMembers.items.filter(m => (m.name || '').toLowerCase().includes(q)).length === 0 && <span className="muted" style={{ fontSize: 15, padding: '4px 2px' }}>{t('nothingHere')}</span>}
                 </div>
               ) : (
                 orderedDepts.map(dep => {
@@ -974,7 +974,7 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
                   return (
                     <div key={dep.id} style={{ marginBottom: 10 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '2px 2px 6px' }}>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-2)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>{dep.name}</span>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink-2)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>{dep.name}</span>
                         <Chip selectable on={deptAllOn(dep.id)} onClick={() => toggleDept(dep.id)}><Icon name="people" size={12} /> {t('everyone')}</Chip>
                       </div>
                       <div className="chip-row">{dm.map(renderMember)}</div>
@@ -1014,14 +1014,14 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
         </div>
       ))}
       {alertTimes.length < MAX_TIMES && (
-        <button type="button" className="link-btn" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--brand-600)', fontSize: 13.5, marginBottom: 4 }} onClick={addAlert}>
+        <button type="button" className="link-btn" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--brand-600)', fontSize: 15.5, marginBottom: 4 }} onClick={addAlert}>
           <Icon name="plus" size={15} /> {alertTimes.length ? t('addAnotherTime') : t('addAlert')}
         </button>
       )}
       {alertTimes.length > 0 && <p className="hint" style={{ margin: '2px 2px 0' }}>{t('taskAlertsHint')}</p>}
 
       {/* Advanced options collapsed by default to keep the form light */}
-      <button type="button" className="link-btn" style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '16px 2px 4px', fontSize: 13, fontWeight: 600, color: 'var(--ink-2)' }} onClick={() => setShowMore(o => !o)}>
+      <button type="button" className="link-btn" style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '16px 2px 4px', fontSize: 15, fontWeight: 600, color: 'var(--ink-2)' }} onClick={() => setShowMore(o => !o)}>
         <Icon name="chevron" size={14} style={{ transform: showMore ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }} /> {showMore ? t('fewerOptions') : t('moreOptions')}
       </button>
       {showMore && (
@@ -1049,7 +1049,7 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
               <Select value={f.repeat} onChange={set('repeat')} options={REPEAT_OPTIONS.map(r => ({ value: r, label: r ? t(r) : t('off') }))} />
             </Field>
           </div>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '8px 2px 7px' }}>
+          <label style={{ display: 'block', fontSize: 15, fontWeight: 650, color: 'var(--ink-2)', margin: '8px 2px 7px' }}>
             {t('checklist')}{subs.length ? ` · ${subs.filter(s => s.done).length}/${subs.length}` : ''}
           </label>
           {subs.map(s => (

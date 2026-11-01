@@ -60,7 +60,7 @@ export default function VehicleDocuments({ vehicle }) {
         <div style={{ marginTop: 12 }}>
           {groups.map(g => (
             <div key={g.key} style={{ marginBottom: 8 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '10px 2px 4px', fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '10px 2px 4px', fontSize: 14, fontWeight: 700, color: 'var(--ink-2)' }}>
                 <Icon name={g.key === '__none' ? 'inbox' : 'grid'} size={13} /> {g.path}
                 <span className="chip" style={{ marginInlineStart: 4 }}>{g.docs.length}</span>
               </div>

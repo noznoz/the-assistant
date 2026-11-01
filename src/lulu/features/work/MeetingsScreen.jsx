@@ -94,7 +94,7 @@ function MeetingDetail({ meeting, go, onBack }) {
       } />
       <div className="screen">
         <Card style={{ marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 13 }}>{meeting.date ? fmtLongDate(meeting.date, lang) : ''}{meeting.attendees ? ` · ${meeting.attendees}` : ''}</div>
+          <div className="muted" style={{ fontSize: 15 }}>{meeting.date ? fmtLongDate(meeting.date, lang) : ''}{meeting.attendees ? ` · ${meeting.attendees}` : ''}</div>
           {meeting.notes && <p style={{ marginTop: 10, whiteSpace: 'pre-wrap' }}>{meeting.notes}</p>}
         </Card>
 

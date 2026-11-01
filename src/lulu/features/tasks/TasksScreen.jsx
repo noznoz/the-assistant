@@ -168,7 +168,7 @@ function TaskActionSheet({ task, lang, settings, people = [], onClose, onDetails
   const canSend = assignee && personDigits(assignee)
   return (
     <Sheet title={task.title} onClose={onClose}>
-      <div className="muted" style={{ marginTop: -6, marginBottom: 12, fontSize: 13 }}>
+      <div className="muted" style={{ marginTop: -6, marginBottom: 12, fontSize: 15 }}>
         {type ? t(type.key) : ''}{task.assignedTo ? ` · ${task.assignedTo}` : ''}{task.project ? ` · ${task.project}` : ''}
       </div>
       {task.description && <p style={{ marginBottom: 16 }}>{task.description}</p>}

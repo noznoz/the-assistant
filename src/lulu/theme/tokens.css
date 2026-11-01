@@ -33,14 +33,17 @@
   --s5: 20px; --s6: 24px; --s7: 32px; --s8: 40px;
 
   /* ---- Typography ---- */
-  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
-          "Helvetica Neue", "Noto Sans Arabic", Arial, sans-serif;
-  --fs-display: 30px;
-  --fs-title: 22px;
-  --fs-h: 17px;
-  --fs-body: 15px;
-  --fs-sm: 13px;
-  --fs-xs: 11px;
+  /* One bilingual typeface (bundled) so English and Arabic share a rhythm;
+     the system stack is only a fallback while it loads. */
+  --font: "Readex Pro Variable", -apple-system, BlinkMacSystemFont, "SF Pro Display",
+          "Segoe UI", "Helvetica Neue", "Noto Sans Arabic", Arial, sans-serif;
+  /* Comfortable scale: 17px body, nothing reading-sized below 13px. */
+  --fs-display: 32px;
+  --fs-title: 24px;
+  --fs-h: 19px;
+  --fs-body: 17px;
+  --fs-sm: 15px;
+  --fs-xs: 13px;
 
   /* ---- Motion ---- */
   --ease: cubic-bezier(0.32, 0.72, 0, 1);
@@ -55,14 +58,14 @@
 
 /* ---- Light theme (default) ---- */
 :root, [data-theme="light"] {
-  --bg: #F4F1EC;          /* warm parchment */
-  --bg-2: #ECE7DF;
+  --bg: #F7F4EF;          /* soft warm paper */
+  --bg-2: #EFEAE2;
   --surface: #FFFFFF;
-  --surface-2: #FBFAF7;
+  --surface-2: #FBF9F5;
   --elevated: #FFFFFF;
-  --ink: #1B1A17;         /* near-black warm ink */
-  --ink-2: #4A4740;
-  --ink-3: #857F73;
+  --ink: #1F1B16;         /* warm near-black ink */
+  --ink-2: #4E483F;
+  --ink-3: #776E62;       /* meta text — 4.5:1 on the page background */
   --line: rgba(27, 26, 23, 0.09);
   --line-2: rgba(27, 26, 23, 0.14);
   --scrim: rgba(20, 18, 14, 0.36);
@@ -74,17 +77,18 @@
 
 /* ---- Dark theme ---- */
 [data-theme="dark"] {
-  /* Deeper, warmer canvas — reads as lit, not flat black. */
-  --bg: #0A0B0E;
-  --bg-2: #111318;
-  --surface: #17191F;
-  --surface-2: #1E212A;
-  --elevated: #232732;
-  --ink: #F6F3ED;
-  --ink-2: #C2BEB4;
-  --ink-3: #948E81;          /* brighter tertiary — legible meta text */
-  --line: rgba(255, 255, 255, 0.07);
-  --line-2: rgba(255, 255, 255, 0.14);
+  /* Warm charcoal instead of black, with soft off-white text — less glare at
+     night while keeping comfortable contrast. */
+  --bg: #15120E;
+  --bg-2: #1A1612;
+  --surface: #201C17;
+  --surface-2: #29241E;
+  --elevated: #2E2822;
+  --ink: #F0EAE1;
+  --ink-2: #C9BFB1;
+  --ink-3: #9C9283;          /* legible meta text on the warm ground */
+  --line: rgba(255, 240, 220, 0.08);
+  --line-2: rgba(255, 240, 220, 0.15);
   --scrim: rgba(0, 0, 0, 0.6);
   --brand-tint: rgba(216, 172, 85, 0.16);
   /* Semantic colors lifted so glyphs read cleanly on the deep ground. */
@@ -156,6 +160,12 @@ p { margin: 0; }
 
 /* Numbers align nicely for money */
 .tnum { font-variant-numeric: tabular-nums; }
+
+/* "Larger" text size (Settings → Appearance): the page content and sheets
+   scale up together — text, icons and spacing — like iOS Display Zoom. The
+   bars stay put so navigation never shifts. */
+[data-text="large"] .screen,
+[data-text="large"] .sheet { zoom: 1.12; }
 
 /* Scrollbars: subtle */
 ::-webkit-scrollbar { width: 0; height: 0; }

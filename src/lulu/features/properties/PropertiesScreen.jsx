@@ -39,9 +39,9 @@ export default function PropertiesScreen({ param, go }) {
         ) : (
           <>
             <Card style={{ textAlign: 'center', marginTop: 14 }}>
-              <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('portfolioValue')}</div>
+              <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('portfolioValue')}</div>
               <div style={{ fontSize: 32, fontWeight: 780, marginTop: 4 }} className="tnum">{money(totalValue, cur, lang)}</div>
-              {monthlyRent > 0 && <div className="muted t-ok" style={{ fontSize: 12, marginTop: 4, fontWeight: 650 }}>+{money(monthlyRent, cur, lang)} {t('rentPerMonth')}</div>}
+              {monthlyRent > 0 && <div className="muted t-ok" style={{ fontSize: 14, marginTop: 4, fontWeight: 650 }}>+{money(monthlyRent, cur, lang)} {t('rentPerMonth')}</div>}
             </Card>
             <div style={{ marginTop: 14 }}>
               {properties.items.map(p => {
@@ -130,9 +130,9 @@ function PropertyDetail({ property, go, onBack }) {
         {tab === 'overview' && (
           <>
             <Card style={{ textAlign: 'center', marginBottom: 12 }}>
-              <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase' }}>{t('currentValue')}</div>
+              <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase' }}>{t('currentValue')}</div>
               <div style={{ fontSize: 30, fontWeight: 780, marginTop: 4 }} className="tnum">{money(val, cur, lang)}</div>
-              {gain !== 0 && <div className={`muted ${gain >= 0 ? 't-ok' : 't-danger'}`} style={{ fontSize: 13, marginTop: 2, fontWeight: 650 }}>{gain >= 0 ? '▲' : '▼'} {money(Math.abs(gain), cur, lang)}</div>}
+              {gain !== 0 && <div className={`muted ${gain >= 0 ? 't-ok' : 't-danger'}`} style={{ fontSize: 15, marginTop: 2, fontWeight: 650 }}>{gain >= 0 ? '▲' : '▼'} {money(Math.abs(gain), cur, lang)}</div>}
             </Card>
             <Card className="stack">
               <Row k={t('type')} v={type ? label(type, lang) : ''} />
@@ -159,7 +159,7 @@ function PropertyDetail({ property, go, onBack }) {
 
 function Row({ k, v }) {
   if (!v) return null
-  return <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 14 }}><span className="muted">{k}</span><span style={{ fontWeight: 600, textAlign: 'end' }}>{v}</span></div>
+  return <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 16 }}><span className="muted">{k}</span><span style={{ fontWeight: 600, textAlign: 'end' }}>{v}</span></div>
 }
 
 const CUR = ['SAR', 'USD', 'EUR', 'AED', 'GBP', 'KWD', 'BHD', 'QAR', 'OMR']

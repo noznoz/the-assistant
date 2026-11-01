@@ -127,7 +127,7 @@ export default function MoreScreen({ go }) {
       <span className={`lead ${it.tint}`} style={{ width: 44, height: 44, borderRadius: 13, display: 'grid', placeItems: 'center' }}>
         <Icon name={it.icon} size={22} />
       </span>
-      <span style={{ fontSize: 12, fontWeight: 600, textAlign: 'center', lineHeight: 1.15 }}>{lbl(it)}</span>
+      <span style={{ fontSize: 14, fontWeight: 600, textAlign: 'center', lineHeight: 1.15 }}>{lbl(it)}</span>
     </button>
   )
 
@@ -140,7 +140,7 @@ export default function MoreScreen({ go }) {
         <span className={`lead ${it.tint}`} style={{ width: 38, height: 38, borderRadius: 11, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
           <Icon name={it.icon} size={20} />
         </span>
-        <span style={{ flex: 1, textAlign: 'start', fontWeight: 600, fontSize: 15 }}>{lbl(it)}</span>
+        <span style={{ flex: 1, textAlign: 'start', fontWeight: 600, fontSize: 17 }}>{lbl(it)}</span>
         {count(it) > 0 && <span className="chip">{count(it)}</span>}
       </button>
       <button onClick={() => toggleFav(it.id)} aria-label={t('pin')} className="iconbtn" style={{ marginInlineEnd: 6, opacity: favorites.includes(it.id) ? 1 : 0.4, color: favorites.includes(it.id) ? 'var(--brand-600)' : 'var(--ink-3)' }}>
@@ -167,8 +167,8 @@ export default function MoreScreen({ go }) {
               : <span style={{ fontWeight: 780, fontSize: 20 }}>{initials}</span>}
           </span>
           <span style={{ flex: 1, textAlign: 'start', minWidth: 0 }}>
-            <span style={{ display: 'block', fontWeight: 750, fontSize: 16 }}>{p.fullName || settings.name || t('yourName')}</span>
-            <span className="muted" style={{ display: 'block', fontSize: 13 }}>{p.jobTitle || t('viewProfile')}</span>
+            <span style={{ display: 'block', fontWeight: 750, fontSize: 18 }}>{p.fullName || settings.name || t('yourName')}</span>
+            <span className="muted" style={{ display: 'block', fontSize: 15 }}>{p.jobTitle || t('viewProfile')}</span>
           </span>
           <Icon name="chevron" size={18} style={{ color: 'var(--ink-3)' }} />
         </button>
@@ -227,7 +227,7 @@ export default function MoreScreen({ go }) {
                       <span className={`lead ${g.tint}`} style={{ width: 38, height: 38, borderRadius: 11, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
                         <Icon name={g.icon} size={20} />
                       </span>
-                      <span style={{ flex: 1, textAlign: 'start', fontWeight: 700, fontSize: 15 }}>{t(g.key)}</span>
+                      <span style={{ flex: 1, textAlign: 'start', fontWeight: 700, fontSize: 17 }}>{t(g.key)}</span>
                       <span className="chip" style={{ marginInlineEnd: 4 }}>{g.items.length}</span>
                       <Icon name="chevron" size={18} style={{ color: 'var(--ink-3)', transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform .18s ease' }} />
                     </button>
@@ -242,7 +242,7 @@ export default function MoreScreen({ go }) {
             </Card>
           </>
         )}
-        <p className="center muted" style={{ marginTop: 24, fontSize: 12 }}>The Assistant · v{APP_VERSION} · {BUILD_STAMP}</p>
+        <p className="center muted" style={{ marginTop: 24, fontSize: 14 }}>The Assistant · v{APP_VERSION} · {BUILD_STAMP}</p>
       </div>
     </>
   )

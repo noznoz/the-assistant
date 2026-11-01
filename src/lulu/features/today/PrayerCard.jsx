@@ -27,21 +27,21 @@ export default function PrayerCard() {
         </span>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ fontSize: 12, color: 'var(--ink-3)', fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('prayerTimes')} ·</span>
+            <span style={{ fontSize: 14, color: 'var(--ink-3)', fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('prayerTimes')} ·</span>
             {/* City picker — a compact inline select */}
             <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
               <select
                 aria-label={t('city')}
                 value={city.id}
                 onChange={e => updateSettings({ prayerCity: e.target.value })}
-                style={{ appearance: 'none', WebkitAppearance: 'none', border: 0, background: 'transparent', color: 'var(--brand-600)', fontSize: 12, fontWeight: 750, textTransform: 'uppercase', letterSpacing: '0.04em', padding: '0 14px 0 0', cursor: 'pointer' }}
+                style={{ appearance: 'none', WebkitAppearance: 'none', border: 0, background: 'transparent', color: 'var(--brand-600)', fontSize: 14, fontWeight: 750, textTransform: 'uppercase', letterSpacing: '0.04em', padding: '0 14px 0 0', cursor: 'pointer' }}
               >
                 {PRAYER_CITIES.map(c => <option key={c.id} value={c.id}>{cityName(c, lang)}</option>)}
               </select>
               <Icon name="chevron" size={12} style={{ position: 'absolute', insetInlineEnd: 0, color: 'var(--brand-600)', transform: 'rotate(90deg)', pointerEvents: 'none' }} />
             </span>
           </div>
-          <div style={{ fontWeight: 700, fontSize: 15 }}>
+          <div style={{ fontWeight: 700, fontSize: 17 }}>
             {t('nextPrayer')}: {t(next.name)} · {fmtPrayer(next.date, lang, city.tz)} <span className="muted" style={{ fontWeight: 600 }}>({t('inLabel')} {countdown(next.date, now, lang)})</span>
           </div>
         </div>
@@ -55,8 +55,8 @@ export default function PrayerCard() {
               background: isNext ? 'var(--ok-tint)' : 'transparent',
               color: isNext ? 'var(--ok)' : 'var(--ink-2)',
             }}>
-              <div style={{ fontSize: 11, fontWeight: 650 }}>{t(p.name)}</div>
-              <div className="tnum" style={{ fontSize: 12, marginTop: 2 }}>{fmtPrayer(p.date, lang, city.tz)}</div>
+              <div style={{ fontSize: 13, fontWeight: 650 }}>{t(p.name)}</div>
+              <div className="tnum" style={{ fontSize: 14, marginTop: 2 }}>{fmtPrayer(p.date, lang, city.tz)}</div>
             </div>
           )
         })}

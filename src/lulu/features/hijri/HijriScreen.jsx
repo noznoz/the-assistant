@@ -19,9 +19,9 @@ export default function HijriScreen({ go }) {
       <DetailHeader title={t('hijriCalendar')} onBack={() => go('more')} />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('todayHijri')}</div>
+          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('todayHijri')}</div>
           <div style={{ fontSize: 26, fontWeight: 780, marginTop: 6 }}>{hijriDate(new Date(), lang)}</div>
-          <div className="muted" style={{ fontSize: 13, marginTop: 2 }}>{fmtDate(new Date(), lang, settings.dateFormat)}</div>
+          <div className="muted" style={{ fontSize: 15, marginTop: 2 }}>{fmtDate(new Date(), lang, settings.dateFormat)}</div>
         </Card>
 
         <Section title={t('islamicOccasions')} />

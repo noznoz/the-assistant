@@ -71,7 +71,7 @@ export default function VehiclePhotos({ vehicle }) {
       <input ref={cameraRef} type="file" accept="image/*" capture="environment" hidden onChange={e => { addPhotos(e.target.files); e.target.value = '' }} />
       <input ref={fileRef} type="file" accept="image/*" multiple hidden onChange={e => { addPhotos(e.target.files); e.target.value = '' }} />
 
-      {busy && <p className="muted" style={{ fontSize: 12, margin: '4px 2px' }}><span className="spinner" style={{ width: 14, height: 14, display: 'inline-block', verticalAlign: 'middle' }} /> …</p>}
+      {busy && <p className="muted" style={{ fontSize: 14, margin: '4px 2px' }}><span className="spinner" style={{ width: 14, height: 14, display: 'inline-block', verticalAlign: 'middle' }} /> …</p>}
 
       {album.length === 0 ? (
         <Empty icon="camera" title={t('noPhotos')} text={t('photosHint')} />

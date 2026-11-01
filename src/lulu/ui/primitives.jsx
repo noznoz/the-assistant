@@ -125,7 +125,7 @@ export function Ring({ value = 0, size = 64, stroke = 7, children }) {
         <circle className="val" cx={size / 2} cy={size / 2} r={r} strokeWidth={stroke}
           strokeDasharray={c} strokeDashoffset={off} />
       </svg>
-      <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', fontWeight: 750, fontSize: 15 }}>
+      <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', fontWeight: 750, fontSize: 17 }}>
         {children}
       </div>
     </div>
@@ -136,9 +136,12 @@ export function Ring({ value = 0, size = 64, stroke = 7, children }) {
 // When it has an onClick it is a real button (focusable, Enter/Space); otherwise
 // a plain, non-interactive tile.
 export function Stat({ label, value, sub, onClick }) {
+  // Currency formatting joins the amount and currency with a no-break space;
+  // swap it for a normal space so a long amount can wrap inside a narrow tile.
+  const v = typeof value === 'string' ? value.replace(/[  ]/g, ' ') : value
   const body = (<>
     <div className="k">{label}</div>
-    <div className="v tnum">{value}{sub && <small> {sub}</small>}</div>
+    <div className="v tnum">{v}{sub && <small> {sub}</small>}</div>
   </>)
   if (onClick) {
     return (
@@ -185,7 +188,7 @@ export function useToast() {
       <span>{state.m}</span>
       {state.actions && state.actions.map((a, i) => (
         <button key={i} onClick={() => { setState(null); a.onClick && a.onClick() }}
-          style={{ marginInlineStart: 8, background: 'transparent', border: 0, color: '#e9c07a', fontWeight: 750, fontSize: 13, padding: '2px 4px' }}>
+          style={{ marginInlineStart: 8, background: 'transparent', border: 0, color: '#e9c07a', fontWeight: 750, fontSize: 15, padding: '2px 4px' }}>
           {a.label}
         </button>
       ))}
@@ -203,7 +206,7 @@ export function Bars({ data, format = (v) => v }) {
         <div className="bar-row" key={i}>
           <span className="muted" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.label}</span>
           <span className="bar-track"><span className="bar-fill" style={{ width: `${(d.value / max) * 100}%`, background: d.color || 'var(--brand-500)' }} /></span>
-          <b className="tnum" style={{ fontSize: 13 }}>{format(d.value)}</b>
+          <b className="tnum" style={{ fontSize: 15 }}>{format(d.value)}</b>
         </div>
       ))}
     </div>

@@ -88,12 +88,12 @@ export default function MonthlyReportScreen({ go }) {
         {/* Month switcher */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14 }}>
           <button className="iconbtn" onClick={() => step(-1)} aria-label="prev"><Icon name="chevron" size={18} style={{ transform: 'rotate(180deg)' }} /></button>
-          <div style={{ fontWeight: 750, fontSize: 16 }}>{monthLabel}</div>
+          <div style={{ fontWeight: 750, fontSize: 18 }}>{monthLabel}</div>
           <button className="iconbtn" onClick={() => step(1)} aria-label="next" disabled={isCurrent} style={{ opacity: isCurrent ? 0.3 : 1 }}><Icon name="chevron" size={18} /></button>
         </div>
 
         <Card style={{ textAlign: 'center', marginTop: 12 }}>
-          <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('netCashflow')}</div>
+          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('netCashflow')}</div>
           <div style={{ fontSize: 32, fontWeight: 780, marginTop: 4 }} className={`tnum ${report.net >= 0 ? 't-ok' : 't-danger'}`}>{money(report.net, cur, lang)}</div>
         </Card>
 
@@ -108,7 +108,7 @@ export default function MonthlyReportScreen({ go }) {
             <Card className="stack">
               {report.cats.slice(0, 10).map(c => (
                 <div key={c.id}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 4 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15, marginBottom: 4 }}>
                     <span style={{ fontWeight: 600 }}>{c.label}</span>
                     <span className="tnum muted">{money(c.value, cur, lang)}</span>
                   </div>

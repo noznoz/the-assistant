@@ -34,7 +34,7 @@ export default function AttachmentField({ value = [], onChange, label }) {
         onChange={(e) => { add(e.target.files); e.target.value = '' }} />
       <input ref={fileRef} type="file" accept="image/*,application/pdf" multiple hidden
         onChange={(e) => { add(e.target.files); e.target.value = '' }} />
-      {busy && <p className="muted" style={{ fontSize: 12, margin: '6px 2px' }}>
+      {busy && <p className="muted" style={{ fontSize: 14, margin: '6px 2px' }}>
         <span className="spinner" style={{ width: 14, height: 14, display: 'inline-block', verticalAlign: 'middle' }} /> …
       </p>}
       {(value || []).length > 0 && (

@@ -86,7 +86,7 @@ export default function QuickCapture({ toast, go }) {
           onKeyDown={e => { if (e.key === 'Enter') submit() }}
           placeholder={t('addAnything')}
           aria-label={t('addAnything')}
-          style={{ flex: 1, border: 0, background: 'transparent', padding: '12px 0', fontSize: 15, color: 'var(--ink-1)', outline: 'none', minWidth: 0 }}
+          style={{ flex: 1, border: 0, background: 'transparent', padding: '12px 0', fontSize: 17, color: 'var(--ink-1)', outline: 'none', minWidth: 0 }}
         />
         {voiceOn && (
           <button aria-label={listening ? t('listeningTapStop') : t('voiceInput')} onClick={toggleVoice}
@@ -102,18 +102,18 @@ export default function QuickCapture({ toast, go }) {
         )}
       </div>
       {listening && (
-        <div onClick={stopVoice} role="button" style={{ display: 'flex', alignItems: 'center', gap: 7, margin: '7px 2px 0', fontSize: 12.5, fontWeight: 600, color: 'var(--danger)', cursor: 'pointer' }}>
+        <div onClick={stopVoice} role="button" style={{ display: 'flex', alignItems: 'center', gap: 7, margin: '7px 2px 0', fontSize: 14.5, fontWeight: 600, color: 'var(--danger)', cursor: 'pointer' }}>
           <span className="dots">●</span> {t('listeningTapStop')}
         </div>
       )}
       {preview && (
         <button onClick={submit} disabled={busy}
-          style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'start', marginTop: 6, padding: '8px 11px', background: 'var(--brand-tint)', color: 'var(--brand-600)', border: 0, borderRadius: 'var(--r-md)', fontSize: 13, fontWeight: 600 }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'start', marginTop: 6, padding: '8px 11px', background: 'var(--brand-tint)', color: 'var(--brand-600)', border: 0, borderRadius: 'var(--r-md)', fontSize: 15, fontWeight: 600 }}>
           <Icon name={ICON[preview.type]} size={15} style={{ flexShrink: 0 }} />
           <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             <b>{t('cap_' + preview.type)}</b> · {preview.label}
           </span>
-          {aiOn && <span style={{ fontSize: 11, opacity: 0.75 }}>{busy ? t('thinking') : '✦ AI'}</span>}
+          {aiOn && <span style={{ fontSize: 13, opacity: 0.75 }}>{busy ? t('thinking') : '✦ AI'}</span>}
         </button>
       )}
     </div>

@@ -90,17 +90,17 @@ export default function ExpensesScreen({ go }) {
       <div className="screen">
         {/* Finance overview — this month */}
         <Card style={{ marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em', textAlign: 'center' }}>{t('netThisMonth')}</div>
+          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em', textAlign: 'center' }}>{t('netThisMonth')}</div>
           <div style={{ fontSize: 32, fontWeight: 780, marginTop: 4, textAlign: 'center' }} className={`tnum ${net >= 0 ? 't-ok' : 't-danger'}`}>
             {net >= 0 ? '' : '−'}{money(Math.abs(net), cur, lang)}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 14 }}>
             <button className="qa" style={{ alignItems: 'flex-start', textAlign: 'start' }} onClick={() => go('income')}>
-              <span className="muted" style={{ fontSize: 11, fontWeight: 650, textTransform: 'uppercase' }}>{t('income')}</span>
+              <span className="muted" style={{ fontSize: 13, fontWeight: 650, textTransform: 'uppercase' }}>{t('income')}</span>
               <b className="tnum t-ok" style={{ fontSize: 18 }}>{money(monthIncome, cur, lang)}</b>
             </button>
             <div className="qa" style={{ alignItems: 'flex-start', textAlign: 'start', cursor: 'default' }}>
-              <span className="muted" style={{ fontSize: 11, fontWeight: 650, textTransform: 'uppercase' }}>{t('expenses')}</span>
+              <span className="muted" style={{ fontSize: 13, fontWeight: 650, textTransform: 'uppercase' }}>{t('expenses')}</span>
               <b className="tnum" style={{ fontSize: 18 }}>{money(monthExpTotal, cur, lang)}</b>
             </div>
           </div>
@@ -122,7 +122,7 @@ export default function ExpensesScreen({ go }) {
         </div>
 
         <Card style={{ textAlign: 'center' }}>
-          <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             {range === 'month' ? t('monthlyTotal') : range === 'today' ? t('todaysSpending') : range === 'week' ? t('thisWeek') : t('thisYear')}
           </div>
           <div style={{ fontSize: 38, fontWeight: 780, marginTop: 6, letterSpacing: '-0.03em' }} className="tnum">{money(total, cur, lang)}</div>
@@ -131,7 +131,7 @@ export default function ExpensesScreen({ go }) {
               <div className="bar-track" style={{ height: 12 }}>
                 <div className="bar-fill" style={{ width: `${budgetPct * 100}%`, background: budgetPct >= 1 ? 'var(--danger)' : budgetPct > 0.8 ? 'var(--warn)' : 'var(--ok)' }} />
               </div>
-              <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+              <div className="muted" style={{ fontSize: 14, marginTop: 6 }}>
                 {money(total, cur, lang)} {t('spent')} · {t('budget')} {money(budget, cur, lang)}
               </div>
             </div>
@@ -178,7 +178,7 @@ export default function ExpensesScreen({ go }) {
             <span className="lead t-danger" style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="flag" size={18} /></span>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700 }}>{overBudgetCats.length} {t('overBudgetAlert')}</div>
-              <div className="muted" style={{ fontSize: 13 }}>{overBudgetCats.map(c => catLabel(c, lang)).slice(0, 3).join(' · ')}</div>
+              <div className="muted" style={{ fontSize: 15 }}>{overBudgetCats.map(c => catLabel(c, lang)).slice(0, 3).join(' · ')}</div>
             </div>
             <Icon name="chevron" size={18} style={{ color: 'var(--ink-3)' }} />
           </Card>
@@ -230,7 +230,7 @@ export default function ExpensesScreen({ go }) {
               </div>
               <div style={{ textAlign: 'end' }}>
                 <b className="tnum">{money(e.amount, e.currency || cur, lang)}</b>
-                {(e.currency && e.currency !== 'SAR') && <div className="muted tnum" style={{ fontSize: 11 }}>≈ {money(expenseSar(e, rates), 'SAR', lang)}</div>}
+                {(e.currency && e.currency !== 'SAR') && <div className="muted tnum" style={{ fontSize: 13 }}>≈ {money(expenseSar(e, rates), 'SAR', lang)}</div>}
               </div>
             </div>
             </SwipeRow>

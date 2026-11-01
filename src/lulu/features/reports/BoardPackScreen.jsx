@@ -90,7 +90,7 @@ export default function BoardPackScreen({ go }) {
       } />
       <div className="screen">
         <p className="muted" style={{ margin: '14px 2px 2px', fontWeight: 650 }}>{monthLabel}</p>
-        <p className="muted" style={{ margin: '0 2px 8px', fontSize: 12 }}>{fmtLongDate(now, lang)}</p>
+        <p className="muted" style={{ margin: '0 2px 8px', fontSize: 14 }}>{fmtLongDate(now, lang)}</p>
 
         {/* Cashflow */}
         <Section title={t('cashflow')} />
@@ -99,7 +99,7 @@ export default function BoardPackScreen({ go }) {
           <Stat label={t('spending')} value={money(r.spend, cur, lang)} onClick={() => go('expenses')} />
         </div>
         <Card style={{ marginTop: 12, textAlign: 'center' }}>
-          <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase' }}>{t('net')}</div>
+          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase' }}>{t('net')}</div>
           <div className={`tnum ${r.net >= 0 ? 't-ok' : 't-danger'}`} style={{ fontSize: 30, fontWeight: 780, marginTop: 4 }}>{money(r.net, cur, lang)}</div>
         </Card>
 

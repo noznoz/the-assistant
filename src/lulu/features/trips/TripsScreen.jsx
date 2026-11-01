@@ -49,11 +49,11 @@ export default function TripsScreen({ go }) {
                     <span className="lead t-brand" style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="trip" size={18} /></span>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 700 }}>{tr.name}</div>
-                      <div className="muted" style={{ fontSize: 13 }}>{tr.destination}{tr.start ? ` · ${fmtDate(tr.start, lang, settings.dateFormat)}` : ''}</div>
+                      <div className="muted" style={{ fontSize: 15 }}>{tr.destination}{tr.start ? ` · ${fmtDate(tr.start, lang, settings.dateFormat)}` : ''}</div>
                     </div>
                     <div style={{ textAlign: 'end' }}>
                       <b className="tnum">{money(spent, cur, lang)}</b>
-                      {budget > 0 && <div className="muted" style={{ fontSize: 11 }}>/ {money(budget, cur, lang)}</div>}
+                      {budget > 0 && <div className="muted" style={{ fontSize: 13 }}>/ {money(budget, cur, lang)}</div>}
                     </div>
                   </div>
                   {budget > 0 && (
@@ -133,12 +133,12 @@ function TripDetail({ trip, onBack }) {
         {tab === 'overview' && (
           <>
             <Card style={{ textAlign: 'center' }}>
-              <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase' }}>{[trip.destination, veh?.name].filter(Boolean).join(' · ') || t('tripExpenses')}</div>
+              <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase' }}>{[trip.destination, veh?.name].filter(Boolean).join(' · ') || t('tripExpenses')}</div>
               <div style={{ fontSize: 34, fontWeight: 780, marginTop: 4 }} className="tnum">{money(total, cur, lang)}</div>
               {budget > 0 && (
                 <div style={{ marginTop: 12 }}>
                   <div className="bar-track" style={{ height: 12 }}><div className="bar-fill" style={{ width: `${pct * 100}%`, background: pct >= 1 ? 'var(--danger)' : pct > 0.85 ? 'var(--warn)' : 'var(--ok)' }} /></div>
-                  <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>{money(total, cur, lang)} / {money(budget, cur, lang)}{pct >= 1 ? ` · ${t('overBudget')}` : ` · ${money(budget - total, cur, lang)} ${t('leftLabel')}`}</div>
+                  <div className="muted" style={{ fontSize: 14, marginTop: 6 }}>{money(total, cur, lang)} / {money(budget, cur, lang)}{pct >= 1 ? ` · ${t('overBudget')}` : ` · ${money(budget - total, cur, lang)} ${t('leftLabel')}`}</div>
                 </div>
               )}
             </Card>

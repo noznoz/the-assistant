@@ -49,11 +49,11 @@ export default function DayBriefSheet({ brief, onClose }) {
         {aiOn && <Button block icon="sparkle" onClick={rewrite} disabled={busy}>{busy ? t('thinking') : t('rewriteAI')}</Button>}
       </div>}>
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
-        <button className="link-btn" style={{ fontSize: 13, fontWeight: 600, color: 'var(--brand-600)', display: 'inline-flex', alignItems: 'center', gap: 5 }} onClick={copy}>
+        <button className="link-btn" style={{ fontSize: 15, fontWeight: 600, color: 'var(--brand-600)', display: 'inline-flex', alignItems: 'center', gap: 5 }} onClick={copy}>
           <Icon name="copy" size={14} /> {t('copy')}
         </button>
       </div>
-      <div style={{ whiteSpace: 'pre-wrap', fontSize: 14, lineHeight: 1.5, color: 'var(--ink-1)', fontFamily: 'inherit' }}>{text}</div>
+      <div style={{ whiteSpace: 'pre-wrap', fontSize: 16, lineHeight: 1.5, color: 'var(--ink-1)', fontFamily: 'inherit' }}>{text}</div>
       {toast.node}
     </Sheet>
   )

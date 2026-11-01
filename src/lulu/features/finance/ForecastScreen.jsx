@@ -33,11 +33,11 @@ export default function ForecastScreen({ go }) {
       <DetailHeader title={t('cashflowForecast')} onBack={() => go('expenses')} />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('netMonthly')}</div>
+          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('netMonthly')}</div>
           <div className={`tnum ${f.netMonthly >= 0 ? 't-ok' : 't-danger'}`} style={{ fontSize: 32, fontWeight: 780, marginTop: 4 }}>
             {f.netMonthly >= 0 ? '+' : ''}{money(f.netMonthly, cur, lang)}
           </div>
-          <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>{t('perMonthAfterBills')}</div>
+          <div className="muted" style={{ fontSize: 14, marginTop: 4 }}>{t('perMonthAfterBills')}</div>
         </Card>
 
         <Section title={t('projectedBalance')} />
@@ -51,7 +51,7 @@ export default function ForecastScreen({ go }) {
           <Card tight style={{ marginTop: 10, borderColor: 'var(--danger)' }}>
             <div style={{ display: 'flex', gap: 10, alignItems: 'center', padding: 4 }}>
               <span className="lead t-danger" style={{ width: 34, height: 34, display: 'grid', placeItems: 'center', borderRadius: 10 }}><Icon name="clock" size={18} /></span>
-              <span style={{ fontSize: 13.5, fontWeight: 600 }}>{t('forecastWarn')}</span>
+              <span style={{ fontSize: 15.5, fontWeight: 600 }}>{t('forecastWarn')}</span>
             </div>
           </Card>
         )}

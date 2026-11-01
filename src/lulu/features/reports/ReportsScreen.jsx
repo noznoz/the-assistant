@@ -54,7 +54,7 @@ export default function ReportsScreen({ go }) {
           <span className="lead t-brand" style={{ width: 42, height: 42, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="report" size={20} /></span>
           <span style={{ flex: 1, textAlign: 'start' }}>
             <span style={{ display: 'block', fontWeight: 750 }}>{t('boardPack')}</span>
-            <span className="muted" style={{ display: 'block', fontSize: 12.5 }}>{t('boardPackSub')}</span>
+            <span className="muted" style={{ display: 'block', fontSize: 14.5 }}>{t('boardPackSub')}</span>
           </span>
           <Icon name="chevron" size={16} style={{ color: 'var(--ink-3)' }} />
         </button>
@@ -90,7 +90,7 @@ export default function ReportsScreen({ go }) {
           <Stat label={t('delegated')} value={r.delegated.length} />
         </div>
         <Card style={{ marginTop: 14, textAlign: 'center' }}>
-          <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase' }}>{lang === 'ar' ? 'الإنفاق' : 'Spending'}</div>
+          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase' }}>{lang === 'ar' ? 'الإنفاق' : 'Spending'}</div>
           <div style={{ fontSize: 30, fontWeight: 780, marginTop: 4 }} className="tnum">{money(r.spend, cur, lang)}</div>
         </Card>
 

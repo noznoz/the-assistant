@@ -124,6 +124,12 @@ export default function SettingsScreen({ go }) {
               { value: 'dark', label: t('themeDark') },
             ]} />
           </Field>
+          <Field label={t('textSize')} hint={t('textSizeHint')}>
+            <Segmented value={settings.textSize || 'standard'} onChange={(v) => updateSettings({ textSize: v })} options={[
+              { value: 'standard', label: t('textStandard') },
+              { value: 'large', label: t('textLarge') },
+            ]} />
+          </Field>
         </Card>
 
         <Section title={t('currency')} />
@@ -160,7 +166,7 @@ export default function SettingsScreen({ go }) {
                   value={(settings.rates && settings.rates[c] != null ? settings.rates[c] : DEFAULT_RATES[c]) || ''}
                   onChange={e => updateSettings({ rates: { ...(settings.rates || {}), [c]: parseFloat(e.target.value) || 0 } })} />
               </div>
-              <span className="muted" style={{ fontSize: 12, width: 32 }}>SAR</span>
+              <span className="muted" style={{ fontSize: 14, width: 32 }}>SAR</span>
             </div>
           ))}
         </Card>
@@ -263,10 +269,10 @@ export default function SettingsScreen({ go }) {
           }}>{checking ? t('checking') : t('checkUpdates')}</Button>
         </div>
 
-        <p className="center muted" style={{ marginTop: 16, fontSize: 12 }}>
+        <p className="center muted" style={{ marginTop: 16, fontSize: 14 }}>
           {t('about')} · v{APP_VERSION} · <span>Offline-first</span>
         </p>
-        <p className="center muted" style={{ marginTop: 2, fontSize: 11 }}>
+        <p className="center muted" style={{ marginTop: 2, fontSize: 13 }}>
           {t('build')} {BUILD_STAMP}
         </p>
       </div>
@@ -304,8 +310,8 @@ function Row({ icon, label, value, on, onToggle }) {
       width: '100%', display: 'flex', alignItems: 'center', gap: 12, background: 'transparent', border: 0, color: 'var(--ink)', padding: 0,
     }}>
       <Icon name={icon} size={18} style={{ color: 'var(--ink-3)' }} />
-      <span style={{ flex: 1, textAlign: 'start', fontWeight: 600, fontSize: 14 }}>{label}</span>
-      <span style={{ fontSize: 12, color: 'var(--ink-3)', marginInlineEnd: 6 }}>{value}</span>
+      <span style={{ flex: 1, textAlign: 'start', fontWeight: 600, fontSize: 16 }}>{label}</span>
+      <span style={{ fontSize: 14, color: 'var(--ink-3)', marginInlineEnd: 6 }}>{value}</span>
       <span style={{ width: 46, height: 28, borderRadius: 14, background: on ? 'var(--ok)' : 'var(--line-2)', position: 'relative', transition: 'background .2s', flexShrink: 0 }}>
         <span style={{ position: 'absolute', top: 3, insetInlineStart: on ? 21 : 3, width: 22, height: 22, borderRadius: '50%', background: '#fff', transition: 'inset-inline-start .2s' }} />
       </span>
