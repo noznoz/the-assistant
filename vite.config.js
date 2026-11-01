@@ -30,12 +30,15 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'sw.js',
       registerType: 'autoUpdate',
+      // Precache the bundled font files too, so text renders in the app's
+      // typeface when offline.
+      injectManifest: { globPatterns: ['**/*.{js,css,html,woff2}'] },
       manifest: {
         name: 'The Assistant',
         short_name: 'The Assistant',
         description: 'Your premium personal operating system.',
-        theme_color: '#F4F1EC',
-        background_color: '#0E0F12',
+        theme_color: '#F7F4EF',
+        background_color: '#15120E',
         display: 'standalone',
         icons: [
           // Relative so they resolve correctly under any base path

@@ -33,7 +33,7 @@ export default function TripItinerary({ trip }) {
             {days[dk].map(x => (
               <SwipeRow key={x.id} onEdit={() => setEditor(x)} onDelete={() => { itinerary.remove(x.id); toast.show(t('deletedToast')) }}>
                 <div className="li" onClick={() => setEditor(x)}>
-                  <div className="lead t-brand" style={{ minWidth: 52, fontSize: 12, fontWeight: 700 }}>{x.time ? fmtTime(x.time, lang) : '—'}</div>
+                  <div className="lead t-brand" style={{ minWidth: 52, fontSize: 14, fontWeight: 700 }}>{x.time ? fmtTime(x.time, lang) : '—'}</div>
                   <div className="body">
                     <div className="title">{x.title}</div>
                     {x.note && <div className="meta">{x.note}</div>}

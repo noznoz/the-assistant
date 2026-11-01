@@ -124,7 +124,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
                 <div className="lead t-warn" style={{ width: 42, height: 42, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="wrench" size={20} /></div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700 }}>{t('serviceDue')}</div>
-                  <div className="muted" style={{ fontSize: 13 }}>
+                  <div className="muted" style={{ fontSize: 15 }}>
                     {serviceDue[0].s.work}
                     {serviceDue[0].dDate != null ? ` · ${fmtDate(serviceDue[0].s.nextDate, lang, settings.dateFormat)}` : ''}
                     {serviceDue[0].kmLeft != null ? ` · ${serviceDue[0].kmLeft <= 0 ? t('serviceDue') : `${Math.round(serviceDue[0].kmLeft)} km`}` : ''}
@@ -154,7 +154,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 650 }}>{t('insurance')} · {vehicle.insuranceCompany}</div>
-                  <div className="muted" style={{ fontSize: 13 }}>{t('policyExpiry')}: {fmtDate(vehicle.policyExpiry, lang, settings.dateFormat)}</div>
+                  <div className="muted" style={{ fontSize: 15 }}>{t('policyExpiry')}: {fmtDate(vehicle.policyExpiry, lang, settings.dateFormat)}</div>
                 </div>
                 {dd != null && <Chip tint={dd <= 14 ? 't-danger' : dd <= 45 ? 't-warn' : 't-ok'}>{dd}d</Chip>}
               </Card>
@@ -170,9 +170,9 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
         {tab === 'costs' && (
           <>
             <Card style={{ textAlign: 'center' }}>
-              <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('totalRunningCost')}</div>
+              <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('totalRunningCost')}</div>
               <div style={{ fontSize: 32, fontWeight: 780, marginTop: 4 }} className="tnum">{money(runningTotal, cur, lang)}</div>
-              {perMonthCost != null && <div className="muted" style={{ fontSize: 12.5, marginTop: 4 }}>≈ {money(perMonthCost, cur, lang)} / {t('perMonth')}{monthsOwned ? ` · ${monthsOwned} ${t('monthsOwned')}` : ''}</div>}
+              {perMonthCost != null && <div className="muted" style={{ fontSize: 14.5, marginTop: 4 }}>≈ {money(perMonthCost, cur, lang)} / {t('perMonth')}{monthsOwned ? ` · ${monthsOwned} ${t('monthsOwned')}` : ''}</div>}
             </Card>
             <div className="stat-grid" style={{ marginTop: 12 }}>
               <Stat label={t('costPerKm')} value={costPerKm != null ? money(costPerKm, cur, lang) : '—'} />
@@ -189,7 +189,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
                 <div className="lead t-warn" style={{ width: 42, height: 42, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="wrench" size={20} /></div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700 }}>{t('predictedService')}</div>
-                  <div className="muted" style={{ fontSize: 13 }}>{serviceDue[0].s.work}{serviceDue[0].dDate != null ? ` · ${fmtDate(serviceDue[0].s.nextDate, lang, settings.dateFormat)}` : ''}{serviceDue[0].kmLeft != null ? ` · ${Math.max(0, Math.round(serviceDue[0].kmLeft))} km` : ''}</div>
+                  <div className="muted" style={{ fontSize: 15 }}>{serviceDue[0].s.work}{serviceDue[0].dDate != null ? ` · ${fmtDate(serviceDue[0].s.nextDate, lang, settings.dateFormat)}` : ''}{serviceDue[0].kmLeft != null ? ` · ${Math.max(0, Math.round(serviceDue[0].kmLeft))} km` : ''}</div>
                 </div>
               </Card>
             )}
@@ -205,7 +205,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
             </div>
             {costPerKm != null && (
               <Card style={{ marginTop: 12, textAlign: 'center' }}>
-                <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase' }}>{t('costPerKm')}</div>
+                <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase' }}>{t('costPerKm')}</div>
                 <div style={{ fontSize: 26, fontWeight: 750, marginTop: 4 }} className="tnum">{money(costPerKm, cur, lang)}</div>
               </Card>
             )}
@@ -259,7 +259,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
         {tab === 'expenses' && (
           <>
             <Card style={{ textAlign: 'center', marginBottom: 14 }}>
-              <div className="k muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase' }}>{t('totalCost')}</div>
+              <div className="k muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase' }}>{t('totalCost')}</div>
               <div style={{ fontSize: 30, fontWeight: 750, marginTop: 4 }} className="tnum">{money(totalCost, cur, lang)}</div>
             </Card>
             <Section title={t('vehExpenses')} count={myExpenses.length} action={t('add')} onAction={addVehExpense} />
@@ -308,7 +308,7 @@ function EmRow({ k, v, big }) {
   if (!v) return null
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '9px 0', borderBottom: '1px solid var(--line)' }}>
-      <span className="muted" style={{ fontSize: 13, alignSelf: 'center' }}>{k}</span>
+      <span className="muted" style={{ fontSize: 15, alignSelf: 'center' }}>{k}</span>
       <span style={{ fontWeight: big ? 750 : 600, fontSize: big ? 18 : 14, textAlign: 'end' }}>{v}</span>
     </div>
   )
@@ -317,7 +317,7 @@ function EmRow({ k, v, big }) {
 function Row({ k, v }) {
   if (!v) return null
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 14 }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 16 }}>
       <span className="muted">{k}</span>
       <span style={{ fontWeight: 600, textAlign: 'end' }}>{v}</span>
     </div>

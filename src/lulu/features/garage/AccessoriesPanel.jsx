@@ -63,9 +63,9 @@ export default function AccessoriesPanel({ vehicle }) {
       </div>
 
       <Card style={{ textAlign: 'center', marginBottom: 12 }}>
-        <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase' }}>{sectionLabel}{section === 'wishlist' ? ` · ${t('total').toLowerCase()}` : ` · ${t('value') || 'value'}`}</div>
+        <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase' }}>{sectionLabel}{section === 'wishlist' ? ` · ${t('total').toLowerCase()}` : ` · ${t('value') || 'value'}`}</div>
         <div style={{ fontSize: 28, fontWeight: 750, marginTop: 4 }} className="tnum">{money(sectionTotal, cur, lang)}</div>
-        <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>{shown.length} {t('items').toLowerCase()}</div>
+        <div className="muted" style={{ fontSize: 14, marginTop: 2 }}>{shown.length} {t('items').toLowerCase()}</div>
       </Card>
 
       <div className="row2">
@@ -269,9 +269,9 @@ function ReportSheet({ vehicle, accessories, onClose, onToast }) {
 
       {/* Live dashboard preview */}
       <Card style={{ textAlign: 'center', marginBottom: 12 }}>
-        <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase' }}>{t('total')}</div>
+        <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase' }}>{t('total')}</div>
         <div style={{ fontSize: 28, fontWeight: 780, marginTop: 4 }} className="tnum">{money(grand, cur, lang)}</div>
-        <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>{rows.length} {t('items')}</div>
+        <div className="muted" style={{ fontSize: 14, marginTop: 2 }}>{rows.length} {t('items')}</div>
       </Card>
       <Card tight>
         {byGroup.map(b => (

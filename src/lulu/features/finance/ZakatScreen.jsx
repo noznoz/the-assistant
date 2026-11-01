@@ -70,12 +70,12 @@ export default function ZakatScreen({ go }) {
       } />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('zakatDue')} · 2.5%</div>
+          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('zakatDue')} · 2.5%</div>
           <div style={{ fontSize: 36, fontWeight: 780, marginTop: 4 }} className="tnum t-brand">{money(calc.due, cur, lang)}</div>
-          <div className={`muted ${calc.meetsNisab ? 't-ok' : ''}`} style={{ fontSize: 12, marginTop: 4 }}>
+          <div className={`muted ${calc.meetsNisab ? 't-ok' : ''}`} style={{ fontSize: 14, marginTop: 4 }}>
             {calc.meetsNisab ? t('meetsNisab') : t('belowNisab')} · {t('nisab')} {money(calc.nisab, cur, lang)}
           </div>
-          {hijriDate(new Date(), lang) && <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>{hijriDate(new Date(), lang)}</div>}
+          {hijriDate(new Date(), lang) && <div className="muted" style={{ fontSize: 14, marginTop: 2 }}>{hijriDate(new Date(), lang)}</div>}
         </Card>
 
         <Section title={t('zakatableWealth')} />
@@ -104,7 +104,7 @@ export default function ZakatScreen({ go }) {
         </Card>
 
         <Button block variant="brand" icon="whatsapp" style={{ marginTop: 16 }} onClick={shareStatement}>{t('shareStatement')}</Button>
-        <p className="center muted" style={{ marginTop: 12, fontSize: 11 }}>{t('zakatDisclaimer')}</p>
+        <p className="center muted" style={{ marginTop: 12, fontSize: 13 }}>{t('zakatDisclaimer')}</p>
       </div>
     </>
   )

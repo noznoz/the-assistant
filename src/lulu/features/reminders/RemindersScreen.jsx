@@ -124,7 +124,7 @@ export default function RemindersScreen({ go }) {
           <Card className="stack" style={{ marginTop: 12 }}>
             <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
               <span className="lead t-warn" style={{ flexShrink: 0 }}><Icon name="bell" size={16} /></span>
-              <div style={{ flex: 1, fontSize: 13 }}>{t('reminderPermHint')}</div>
+              <div style={{ flex: 1, fontSize: 15 }}>{t('reminderPermHint')}</div>
             </div>
             <Button variant="primary" icon="bell" onClick={askPermission}>{t('enableNotifications')}</Button>
           </Card>
@@ -136,8 +136,8 @@ export default function RemindersScreen({ go }) {
             <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
               <span className={`lead ${bg ? 't-ok' : 't-info'}`} style={{ flexShrink: 0 }}><Icon name="bell" size={16} /></span>
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, fontSize: 14 }}>{t('bgReminders')}</div>
-                <div className="muted" style={{ fontSize: 12 }}>{bg ? t('bgOnState') : t('bgRemindersHint')}</div>
+                <div style={{ fontWeight: 700, fontSize: 16 }}>{t('bgReminders')}</div>
+                <div className="muted" style={{ fontSize: 14 }}>{bg ? t('bgOnState') : t('bgRemindersHint')}</div>
               </div>
             </div>
             {!pushConfigured()
@@ -156,8 +156,8 @@ export default function RemindersScreen({ go }) {
         <Card className="stack" style={{ marginTop: 12 }}>
           {editingId && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontWeight: 700, fontSize: 14 }}>{t('editReminder')}</span>
-              <button className="link-btn" style={{ color: 'var(--ink-3)', fontSize: 13 }} onClick={resetForm}>{t('cancel')}</button>
+              <span style={{ fontWeight: 700, fontSize: 16 }}>{t('editReminder')}</span>
+              <button className="link-btn" style={{ color: 'var(--ink-3)', fontSize: 15 }} onClick={resetForm}>{t('cancel')}</button>
             </div>
           )}
           <Field label={t('reminderWhat')} required error={err}>
@@ -170,7 +170,7 @@ export default function RemindersScreen({ go }) {
             const apply = () => { setTimes([isoToInput(parsed.at)]); if (parsed.text) setText(parsed.text) }
             return (
               <button type="button" onClick={apply}
-                style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'start', padding: '9px 11px', marginTop: -4, background: 'var(--brand-tint)', color: 'var(--brand-600)', border: 0, borderRadius: 'var(--r-md)', fontSize: 13.5, fontWeight: 600 }}>
+                style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'start', padding: '9px 11px', marginTop: -4, background: 'var(--brand-tint)', color: 'var(--brand-600)', border: 0, borderRadius: 'var(--r-md)', fontSize: 15.5, fontWeight: 600 }}>
                 <Icon name="sparkle" size={15} />
                 <span style={{ flex: 1 }}>{t('setFor')} {relativeDay(parsed.at, lang)} · {fmtTime(parsed.at, lang)}{parsed.text && parsed.text !== text.trim() ? ` — “${parsed.text}”` : ''}</span>
               </button>
@@ -187,7 +187,7 @@ export default function RemindersScreen({ go }) {
             </Field>
           ))}
           {times.length < MAX_TIMES && (
-            <button className="link-btn" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--brand-600)', fontSize: 13.5 }} onClick={addTime}>
+            <button className="link-btn" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--brand-600)', fontSize: 15.5 }} onClick={addTime}>
               <Icon name="plus" size={15} /> {t('addAnotherTime')}
             </button>
           )}

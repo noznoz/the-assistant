@@ -37,11 +37,11 @@ export default class ErrorBoundary extends React.Component {
           <Icon name="shield" size={32} />
         </div>
         <h3 style={{ fontSize: 18 }}>Something went wrong</h3>
-        <p style={{ color: 'var(--ink-3)', fontSize: 14, maxWidth: 300 }}>
+        <p style={{ color: 'var(--ink-3)', fontSize: 16, maxWidth: 300 }}>
           This screen hit an error. You can go back to Today, or reload the app. Nothing was lost.
         </p>
         <code style={{
-          fontSize: 12, color: 'var(--ink-2)', background: 'var(--surface-2)', border: '1px solid var(--line)',
+          fontSize: 14, color: 'var(--ink-2)', background: 'var(--surface-2)', border: '1px solid var(--line)',
           borderRadius: 10, padding: '8px 12px', maxWidth: 320, overflowWrap: 'anywhere',
         }}>{msg}</code>
         <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>

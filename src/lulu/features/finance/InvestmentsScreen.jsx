@@ -43,10 +43,10 @@ export default function InvestmentsScreen({ go }) {
       } />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('portfolioValue')}</div>
+          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('portfolioValue')}</div>
           <div style={{ fontSize: 34, fontWeight: 780, marginTop: 4 }} className="tnum">{money(portfolio, cur, lang)}</div>
           {invested > 0 && (
-            <div className={`muted ${gain >= 0 ? 't-ok' : 't-danger'}`} style={{ fontSize: 13, marginTop: 4, fontWeight: 650 }}>
+            <div className={`muted ${gain >= 0 ? 't-ok' : 't-danger'}`} style={{ fontSize: 15, marginTop: 4, fontWeight: 650 }}>
               {gain >= 0 ? '▲' : '▼'} {money(Math.abs(gain), cur, lang)} ({invested ? Math.round(gain / invested * 100) : 0}%)
             </div>
           )}
@@ -147,7 +147,7 @@ function InvestmentEditor({ initial, onClose, onSaved }) {
 
       {usesLots ? (
         <>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '4px 2px 6px' }}>{t('buyLots')}</label>
+          <label style={{ display: 'block', fontSize: 15, fontWeight: 650, color: 'var(--ink-2)', margin: '4px 2px 6px' }}>{t('buyLots')}</label>
           {lots.map((l, i) => (
             <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
               <Input type="number" inputMode="decimal" value={l.qty} onChange={e => setLot(i, 'qty', e.target.value)} placeholder={t('quantity')} style={{ flex: 1 }} />

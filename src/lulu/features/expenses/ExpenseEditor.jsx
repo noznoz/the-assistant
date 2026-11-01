@@ -239,7 +239,7 @@ export default function ExpenseEditor({ initial, onClose, onSaved, autoScan = fa
       )}
 
       <div style={{ marginBottom: 12 }}>
-        <label style={{ display: 'block', fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '0 2px 7px' }}>{t('expenseKind')}</label>
+        <label style={{ display: 'block', fontSize: 15, fontWeight: 650, color: 'var(--ink-2)', margin: '0 2px 7px' }}>{t('expenseKind')}</label>
         <div className="chip-row">
           <Chip selectable on={(f.kind || 'monthly') !== 'special'} onClick={() => setF({ ...f, kind: 'monthly' })}>{t('expMonthly')}</Chip>
           <Chip selectable on={f.kind === 'special'} onClick={() => setF({ ...f, kind: 'special' })}>{t('expSpecial')}</Chip>
@@ -265,7 +265,7 @@ export default function ExpenseEditor({ initial, onClose, onSaved, autoScan = fa
         <input ref={scanCamRef} type="file" accept="image/*" capture="environment" hidden onChange={e => { addReceipts(e.target.files, { scan: true }); e.target.value = '' }} />
         <input ref={camRef} type="file" accept="image/*" capture="environment" hidden onChange={e => { addReceipts(e.target.files); e.target.value = '' }} />
         <input ref={recRef} type="file" accept="image/*,application/pdf" multiple hidden onChange={e => { addReceipts(e.target.files); e.target.value = '' }} />
-        {busy && <p className="muted" style={{ fontSize: 12, margin: '4px 2px' }}><span className="spinner" style={{ width: 14, height: 14, display: 'inline-block', verticalAlign: 'middle' }} /> …</p>}
+        {busy && <p className="muted" style={{ fontSize: 14, margin: '4px 2px' }}><span className="spinner" style={{ width: 14, height: 14, display: 'inline-block', verticalAlign: 'middle' }} /> …</p>}
         {(f.receipts || []).length > 0 && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginTop: 8 }}>
             {f.receipts.map(a => (

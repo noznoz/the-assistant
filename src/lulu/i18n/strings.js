@@ -459,6 +459,7 @@ export const STRINGS = {
     // navigation groups
     grpWork: 'Work & organisation', grpPlan: 'Planner', grpPeople: 'People & network', grpHome: 'Belongings', grpFaith: 'Faith', grpReports: 'Reports & settings',
     favorites: 'Favorites', searchSections: 'Search sections…', pin: 'Pin', allSections: 'All sections', suggested: 'Suggested',
+    textSize: 'Text size', textSizeHint: 'Larger makes text and buttons bigger on every screen.', textStandard: 'Standard', textLarge: 'Larger',
     finOverview: 'Overview', finPlan: 'Plan & save', finGrow: 'Wealth & debt', finTrack: 'Track',
     navigation: 'Navigation', bottomTabs: 'Bottom tabs', bottomTabsHint: 'Choose which sections sit in the bottom bar. Today and More are always shown.',
     inYourBar: 'In your bottom bar', alwaysShown: 'Always shown', availableSections: 'Available sections', maxTabs: 'Up to 4 middle tabs.',
@@ -921,6 +922,7 @@ export const STRINGS = {
     // navigation groups
     grpWork: 'العمل والتنظيم', grpPlan: 'المخطِّط', grpPeople: 'الأشخاص والشبكة', grpHome: 'المقتنيات', grpFaith: 'الروحانيات', grpReports: 'التقارير والإعدادات',
     favorites: 'المفضلة', searchSections: 'ابحث في الأقسام…', pin: 'تثبيت', allSections: 'كل الأقسام', suggested: 'مقترحات',
+    textSize: 'حجم الخط', textSizeHint: 'الخيار «أكبر» يكبّر النصوص والأزرار في كل الشاشات.', textStandard: 'عادي', textLarge: 'أكبر',
     finOverview: 'نظرة عامة', finPlan: 'التخطيط والادخار', finGrow: 'الثروة والديون', finTrack: 'المتابعة',
     navigation: 'التنقّل', bottomTabs: 'أشرطة الأسفل', bottomTabsHint: 'اختر الأقسام التي تظهر في الشريط السفلي. الرئيسية والمزيد تظهران دائماً.',
     inYourBar: 'في شريطك السفلي', alwaysShown: 'تظهر دائماً', availableSections: 'الأقسام المتاحة', maxTabs: 'حتى ٤ أشرطة وسطى.',

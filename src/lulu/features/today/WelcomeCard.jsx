@@ -26,12 +26,12 @@ export default function WelcomeCard({ go }) {
     <Card style={{ marginTop: 14, background: 'var(--brand-tint)', borderColor: 'var(--brand-500)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
         <Icon name="sparkle" size={18} style={{ color: 'var(--brand-600)' }} />
-        <h3 style={{ flex: 1, fontSize: 16 }}>{t('welcomeTitle')}</h3>
+        <h3 style={{ flex: 1, fontSize: 18 }}>{t('welcomeTitle')}</h3>
         <button className="iconbtn" aria-label={t('hide')} onClick={() => updateSettings({ welcomeDismissed: true })}>
           <Icon name="x" size={16} />
         </button>
       </div>
-      <p className="muted" style={{ fontSize: 12.5, margin: '0 0 10px' }}>
+      <p className="muted" style={{ fontSize: 14.5, margin: '0 0 10px' }}>
         {t('welcomeSub')} · {complete}/{trackable.length}
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -41,7 +41,7 @@ export default function WelcomeCard({ go }) {
             <span className={`check ${s.done ? 'on' : ''}`} style={{ width: 22, height: 22, pointerEvents: 'none' }}>
               {s.done ? <Icon name="check" size={13} stroke={3} /> : null}
             </span>
-            <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: s.done ? 'var(--ink-3)' : 'var(--ink)', textDecoration: s.done ? 'line-through' : 'none' }}>{s.label}</span>
+            <span style={{ flex: 1, fontSize: 16, fontWeight: 600, color: s.done ? 'var(--ink-3)' : 'var(--ink)', textDecoration: s.done ? 'line-through' : 'none' }}>{s.label}</span>
             <Icon name="chevron" size={15} style={{ color: 'var(--ink-3)' }} />
           </button>
         ))}

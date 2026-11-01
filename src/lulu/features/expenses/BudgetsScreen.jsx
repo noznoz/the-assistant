@@ -70,7 +70,7 @@ export default function BudgetsScreen({ go }) {
                   <div className="bar-track" style={{ height: 8, marginTop: 10 }}>
                     <div className="bar-fill" style={{ width: `${pct * 100}%`, background: over ? 'var(--danger)' : near ? 'var(--warn)' : 'var(--ok)' }} />
                   </div>
-                  <div className="muted" style={{ fontSize: 12, marginTop: 6, display: 'flex', justifyContent: 'space-between' }}>
+                  <div className="muted" style={{ fontSize: 14, marginTop: 6, display: 'flex', justifyContent: 'space-between' }}>
                     <span>{money(spend, cur, lang)} / {money(budget, cur, lang)}</span>
                     <span className={over ? 't-danger' : near ? 't-warn' : ''} style={over || near ? { padding: '1px 6px', borderRadius: 6, fontWeight: 700 } : undefined}>
                       {over ? t('overBudgetAlert') : near ? t('nearBudget') : `${money(budget - spend, cur, lang)} ${t('remaining')}`}

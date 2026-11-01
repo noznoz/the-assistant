@@ -58,20 +58,20 @@ export default function OccasionsScreen({ go }) {
                     </span>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 700 }}>{o.person.name} · {o.kind}</div>
-                      <div className="muted" style={{ fontSize: 12.5 }}>{fmtDate(o.date, lang, settings.dateFormat)}{o.age > 0 ? ` · ${t('turning')} ${o.age}` : ''}</div>
+                      <div className="muted" style={{ fontSize: 14.5 }}>{fmtDate(o.date, lang, settings.dateFormat)}{o.age > 0 ? ` · ${t('turning')} ${o.age}` : ''}</div>
                     </div>
                     <Chip tint={o.days <= 14 ? 't-brand' : 't-info'}>{o.days === 0 ? t('today') : `${o.days}${lang === 'ar' ? '' : 'd'}`}</Chip>
                   </div>
 
                   <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--line)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: gifts.length ? 6 : 0 }}>
-                      <span className="muted" style={{ fontSize: 12.5, fontWeight: 600 }}>{t('giftIdeas')}</span>
+                      <span className="muted" style={{ fontSize: 14.5, fontWeight: 600 }}>{t('giftIdeas')}</span>
                       <button className="btn sm" onClick={() => setGiftFor(o.person.name)}><Icon name="plus" size={13} /> {t('addIdea')}</button>
                     </div>
                     {gifts.length === 0 ? (
-                      <p className="muted" style={{ fontSize: 12.5, margin: '2px 0 0' }}>{t('noGiftIdeas')}</p>
+                      <p className="muted" style={{ fontSize: 14.5, margin: '2px 0 0' }}>{t('noGiftIdeas')}</p>
                     ) : gifts.map(g => (
-                      <div key={g.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: 13.5, padding: '3px 0' }}>
+                      <div key={g.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: 15.5, padding: '3px 0' }}>
                         <span>🎁 {g.name}</span>
                         {g.price > 0 && <span className="tnum muted">{money(g.price, g.currency || cur, lang)}</span>}
                       </div>

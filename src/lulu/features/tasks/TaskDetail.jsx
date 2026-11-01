@@ -24,8 +24,8 @@ export default function TaskDetail({ task, people = [], lang, onClose, onEdit })
 
   const Row = ({ label, children }) => (children || children === 0) ? (
     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 14, padding: '10px 0', borderTop: '1px solid var(--line)' }}>
-      <span className="muted" style={{ fontSize: 13, flexShrink: 0 }}>{label}</span>
-      <span style={{ fontSize: 14, fontWeight: 600, textAlign: 'end', minWidth: 0 }}>{children}</span>
+      <span className="muted" style={{ fontSize: 15, flexShrink: 0 }}>{label}</span>
+      <span style={{ fontSize: 16, fontWeight: 600, textAlign: 'end', minWidth: 0 }}>{children}</span>
     </div>
   ) : null
 
@@ -57,7 +57,7 @@ export default function TaskDetail({ task, people = [], lang, onClose, onEdit })
               <span className={`check ${s.done ? 'on' : ''}`} style={{ width: 22, height: 22, pointerEvents: 'none' }}>
                 {s.done ? <Icon name="check" size={13} stroke={3} /> : null}
               </span>
-              <div className="body"><div className="title" style={{ fontSize: 14, textDecoration: s.done ? 'line-through' : 'none', opacity: s.done ? 0.6 : 1 }}>{s.text}</div></div>
+              <div className="body"><div className="title" style={{ fontSize: 16, textDecoration: s.done ? 'line-through' : 'none', opacity: s.done ? 0.6 : 1 }}>{s.text}</div></div>
             </div>
           ))}
         </div>

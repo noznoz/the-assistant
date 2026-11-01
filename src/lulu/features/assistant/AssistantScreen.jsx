@@ -420,11 +420,11 @@ export default function AssistantScreen({ go }) {
                   </span>
                 </div>
                 <h2 className="center" style={{ margin: '4px 0 2px', fontSize: 19 }}>{t('assistantTitle')}</h2>
-                <p className="center muted" style={{ margin: '0 0 6px', fontSize: 13 }}>{t('assistantHint')}</p>
-                <p className="center muted" style={{ margin: '0 0 16px', fontSize: 12.5 }}>{t('aiActionsHint')}</p>
+                <p className="center muted" style={{ margin: '0 0 6px', fontSize: 15 }}>{t('assistantHint')}</p>
+                <p className="center muted" style={{ margin: '0 0 16px', fontSize: 14.5 }}>{t('aiActionsHint')}</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {suggestions.map((s, i) => (
-                    <button key={i} className="card tight" style={{ textAlign: 'start', padding: '12px 14px', fontSize: 14, fontWeight: 550, cursor: 'pointer' }}
+                    <button key={i} className="card tight" style={{ textAlign: 'start', padding: '12px 14px', fontSize: 16, fontWeight: 550, cursor: 'pointer' }}
                       onClick={() => { setInput(s); setTimeout(() => taRef.current?.focus(), 0) }}>
                       <Icon name="sparkle" size={13} style={{ color: 'var(--brand-600)', marginInlineEnd: 8 }} />{s}
                     </button>
@@ -439,7 +439,7 @@ export default function AssistantScreen({ go }) {
               return (
                 <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start', margin: '8px 0' }}>
                   <div style={{
-                    maxWidth: '86%', padding: '10px 13px', borderRadius: 16, fontSize: 14.5, lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                    maxWidth: '86%', padding: '10px 13px', borderRadius: 16, fontSize: 16.5, lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
                     background: m.role === 'user' ? 'var(--brand-600)' : 'var(--surface)',
                     color: m.role === 'user' ? '#fff' : 'var(--ink)',
                     border: m.role === 'user' ? 0 : '1px solid var(--line)',
@@ -452,12 +452,12 @@ export default function AssistantScreen({ go }) {
 
             {pending && pendingActions.length > 0 && !busy && (
               <div className="card" style={{ margin: '10px 0', padding: '12px 14px', border: '1px solid var(--brand-600)' }}>
-                <div style={{ fontSize: 12.5, fontWeight: 650, color: 'var(--brand-600)', marginBottom: 8 }}>
+                <div style={{ fontSize: 14.5, fontWeight: 650, color: 'var(--brand-600)', marginBottom: 8 }}>
                   <Icon name="sparkle" size={13} style={{ marginInlineEnd: 6 }} />{t('aiConfirmTitle')}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
                   {pendingActions.map((a, i) => (
-                    <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 14, fontWeight: 550 }}>
+                    <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 16, fontWeight: 550 }}>
                       <Icon name="check" size={15} style={{ color: 'var(--brand-600)', marginTop: 2, flexShrink: 0 }} />
                       <span>{a.label}</span>
                     </div>
@@ -472,7 +472,7 @@ export default function AssistantScreen({ go }) {
 
             {busy && (
               <div style={{ display: 'flex', justifyContent: 'flex-start', margin: '8px 0' }}>
-                <div className="card tight" style={{ padding: '10px 14px', color: 'var(--ink-3)', fontSize: 14 }}>
+                <div className="card tight" style={{ padding: '10px 14px', color: 'var(--ink-3)', fontSize: 16 }}>
                   <span className="dots">{t('thinking')}…</span>
                 </div>
               </div>

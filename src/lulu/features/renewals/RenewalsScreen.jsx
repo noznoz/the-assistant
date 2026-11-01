@@ -82,7 +82,7 @@ function SummaryTile({ n, label, tint }) {
   return (
     <Card tight style={{ textAlign: 'center', padding: '14px 8px' }}>
       <div className={tint} style={{ fontSize: 30, fontWeight: 780, lineHeight: 1 }}>{n}</div>
-      <div className="muted" style={{ fontSize: 11.5, fontWeight: 600, marginTop: 4 }}>{label}</div>
+      <div className="muted" style={{ fontSize: 13.5, fontWeight: 600, marginTop: 4 }}>{label}</div>
     </Card>
   )
 }

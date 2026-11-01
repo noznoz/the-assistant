@@ -87,12 +87,12 @@ export default function StatementScreen({ go }) {
         {/* Month navigator */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '14px 0' }}>
           <button className="iconbtn" onClick={() => setKey(shiftMonth(key, -1))} aria-label="prev"><Icon name="chevron" size={18} style={{ transform: 'rotate(180deg)' }} /></button>
-          <b style={{ fontSize: 16 }}>{monthLabel(key, lang)}</b>
+          <b style={{ fontSize: 18 }}>{monthLabel(key, lang)}</b>
           <button className="iconbtn" onClick={() => setKey(shiftMonth(key, 1))} aria-label="next" disabled={key >= `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`}><Icon name="chevron" size={18} /></button>
         </div>
 
         <Card style={{ textAlign: 'center' }}>
-          <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('netThisMonth')}</div>
+          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('netThisMonth')}</div>
           <div style={{ fontSize: 32, fontWeight: 780, marginTop: 4 }} className={`tnum ${S.net >= 0 ? 't-ok' : 't-danger'}`}>{S.net >= 0 ? '' : '−'}{money(Math.abs(S.net), cur, lang)}</div>
         </Card>
         <div className="stat-grid" style={{ marginTop: 12 }}>

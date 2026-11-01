@@ -143,6 +143,7 @@ export const DEFAULT_SETTINGS = {
   timezone: 'Asia/Riyadh',
   dateFormat: 'DD MMM YYYY',
   theme: 'system',       // system | light | dark
+  textSize: 'standard',  // standard | large — "Larger" scales page content up
   requireLock: false,    // app lock master toggle (with pinHash set)
   pinHash: '',           // SHA-256 of the passcode
   biometricId: '',       // WebAuthn credential id (base64) for Face ID unlock

@@ -74,7 +74,7 @@ export default function MessageScreen({ go }) {
             <span className="lead t-ok" style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="whatsapp" size={18} /></span>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 700 }}>{recipient.name}</div>
-              <div className="muted" style={{ fontSize: 12 }} dir="ltr">+{recipient.digits}</div>
+              <div className="muted" style={{ fontSize: 14 }} dir="ltr">+{recipient.digits}</div>
             </div>
             <button className="iconbtn" aria-label={t('clear')} onClick={() => { setPicked(null); setManual('') }}><Icon name="x" size={16} /></button>
           </Card>
@@ -116,12 +116,12 @@ export default function MessageScreen({ go }) {
                     background: on ? 'var(--brand-tint)' : 'transparent', border: 0, borderTop: i ? '1px solid var(--line)' : 0,
                     color: 'var(--ink)', borderRadius: on ? 10 : 0,
                   }}>
-                    <span style={{ width: 34, height: 34, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: 'var(--brand-tint)', color: 'var(--brand-600)', fontWeight: 700, display: 'grid', placeItems: 'center', fontSize: 13 }}>
+                    <span style={{ width: 34, height: 34, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: 'var(--brand-tint)', color: 'var(--brand-600)', fontWeight: 700, display: 'grid', placeItems: 'center', fontSize: 15 }}>
                       {p.photo ? <img src={p.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
                     </span>
                     <span style={{ flex: 1, textAlign: 'start', minWidth: 0 }}>
-                      <span style={{ display: 'block', fontWeight: 600, fontSize: 14 }}>{p.name}</span>
-                      <span className="muted" style={{ display: 'block', fontSize: 12 }}>{[rel ? label(rel, lang) : '', p.jobTitle].filter(Boolean).join(' · ')}</span>
+                      <span style={{ display: 'block', fontWeight: 600, fontSize: 16 }}>{p.name}</span>
+                      <span className="muted" style={{ display: 'block', fontSize: 14 }}>{[rel ? label(rel, lang) : '', p.jobTitle].filter(Boolean).join(' · ')}</span>
                     </span>
                     {on
                       ? <Icon name="check" size={18} style={{ color: 'var(--ok)' }} />

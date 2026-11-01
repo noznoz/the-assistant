@@ -71,11 +71,11 @@ export default function MoneyCalendarScreen({ go }) {
           <>
             <div className="stat-grid" style={{ marginTop: 14 }}>
               <div className="card" style={{ textAlign: 'center', padding: 14 }}>
-                <div className="muted" style={{ fontSize: 11, fontWeight: 650, textTransform: 'uppercase' }}>{t('dueOut')}</div>
+                <div className="muted" style={{ fontSize: 13, fontWeight: 650, textTransform: 'uppercase' }}>{t('dueOut')}</div>
                 <b className="tnum t-danger" style={{ fontSize: 18 }}>{money(totalOut, cur, lang)}</b>
               </div>
               <div className="card" style={{ textAlign: 'center', padding: 14 }}>
-                <div className="muted" style={{ fontSize: 11, fontWeight: 650, textTransform: 'uppercase' }}>{t('expectedIn')}</div>
+                <div className="muted" style={{ fontSize: 13, fontWeight: 650, textTransform: 'uppercase' }}>{t('expectedIn')}</div>
                 <b className="tnum t-ok" style={{ fontSize: 18 }}>{money(totalIn, cur, lang)}</b>
               </div>
             </div>
@@ -84,7 +84,7 @@ export default function MoneyCalendarScreen({ go }) {
             {events.map(([date, evs]) => (
               <div key={date}>
                 <div className="section-h" style={{ marginBottom: 8, marginTop: 10 }}>
-                  <h2 style={{ fontSize: 15 }}>{fmtDate(date, lang, settings.dateFormat)}</h2>
+                  <h2 style={{ fontSize: 17 }}>{fmtDate(date, lang, settings.dateFormat)}</h2>
                   <span className="spacer" />
                   <span className="count">{relativeDay(date, lang)}</span>
                 </div>

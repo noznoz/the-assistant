@@ -28,7 +28,7 @@ export default function IncomeScreen({ go }) {
       <DetailHeader title={t('income')} onBack={() => go('expenses')} />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('incomeThisMonth')}</div>
+          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('incomeThisMonth')}</div>
           <div style={{ fontSize: 34, fontWeight: 780, marginTop: 4 }} className="tnum t-ok">{money(monthTotal, cur, lang)}</div>
         </Card>
         <div className="stat-grid" style={{ marginTop: 12 }}>
@@ -56,7 +56,7 @@ export default function IncomeScreen({ go }) {
                   </div>
                   <div style={{ textAlign: 'end' }}>
                     <b className="tnum t-ok">+{money(i.amount, i.currency || cur, lang)}</b>
-                    {(i.currency && i.currency !== 'SAR') && <div className="muted tnum" style={{ fontSize: 11 }}>≈ {money(toSar(i.amount, i.currency, rates), 'SAR', lang)}</div>}
+                    {(i.currency && i.currency !== 'SAR') && <div className="muted tnum" style={{ fontSize: 13 }}>≈ {money(toSar(i.amount, i.currency, rates), 'SAR', lang)}</div>}
                   </div>
                 </div>
                 </SwipeRow>

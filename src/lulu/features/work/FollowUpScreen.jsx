@@ -71,7 +71,7 @@ export default function FollowUpScreen({ go }) {
               <span className="lead t-warn" style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="bell" size={18} /></span>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700 }}>{waitingOnOthers.length} {t('awaitingOthers')}</div>
-                <div className="muted" style={{ fontSize: 12.5 }}>{overdueCount > 0 ? `${overdueCount} ${t('overdue')}` : t('onTrack')}</div>
+                <div className="muted" style={{ fontSize: 14.5 }}>{overdueCount > 0 ? `${overdueCount} ${t('overdue')}` : t('onTrack')}</div>
               </div>
             </Card>
 

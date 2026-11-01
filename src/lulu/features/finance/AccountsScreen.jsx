@@ -28,9 +28,9 @@ export default function AccountsScreen({ go }) {
       <DetailHeader title={t('accounts')} onBack={() => go('expenses')} />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('totalBalance')}</div>
+          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('totalBalance')}</div>
           <div style={{ fontSize: 32, fontWeight: 780, marginTop: 4 }} className="tnum">{money(totalRemaining, cur, lang)}</div>
-          <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>{t('inNet')}: {money(netRemaining, cur, lang)}</div>
+          <div className="muted" style={{ fontSize: 14, marginTop: 4 }}>{t('inNet')}: {money(netRemaining, cur, lang)}</div>
         </Card>
 
         {accounts.items.length === 0 ? (
@@ -51,7 +51,7 @@ export default function AccountsScreen({ go }) {
                         {a.name}
                         {a.isDefault && <span className="chip t-ok" style={{ padding: '0 6px' }}>{t('defaultLabel')}</span>}
                       </div>
-                      <div className="muted" style={{ fontSize: 12 }}>{type ? label(type, lang) : ''}{a.includeInNet === false ? ` · ${t('excludedFromNet')}` : ''}</div>
+                      <div className="muted" style={{ fontSize: 14 }}>{type ? label(type, lang) : ''}{a.includeInNet === false ? ` · ${t('excludedFromNet')}` : ''}</div>
                     </div>
                     <b className="tnum">{money(s.remaining, cur, lang)}</b>
                   </div>

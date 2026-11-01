@@ -93,9 +93,9 @@ export default function VehicleEditor({ initial, onClose, onSaved, onDeleted }) 
               <span className="hint">{t('adjustPhoto')}</span>
               <button className="link-btn" type="button" onClick={() => setPos(50, 50)}>{t('reset')}</button>
             </div>
-            <label style={{ fontSize: 12, color: 'var(--ink-3)' }}>{t('horizontal')}</label>
+            <label style={{ fontSize: 14, color: 'var(--ink-3)' }}>{t('horizontal')}</label>
             <input type="range" min="0" max="100" value={posX} onChange={e => setPos(parseInt(e.target.value), posY)} style={{ width: '100%' }} />
-            <label style={{ fontSize: 12, color: 'var(--ink-3)' }}>{t('vertical')}</label>
+            <label style={{ fontSize: 14, color: 'var(--ink-3)' }}>{t('vertical')}</label>
             <input type="range" min="0" max="100" value={posY} onChange={e => setPos(posX, parseInt(e.target.value))} style={{ width: '100%' }} />
           </div>
         )}
@@ -110,7 +110,7 @@ export default function VehicleEditor({ initial, onClose, onSaved, onDeleted }) 
       </div>
 
       <div style={{ marginBottom: 16 }}>
-        <label style={{ display: 'block', fontSize: 13, fontWeight: 650, color: 'var(--ink-2)', margin: '0 2px 7px' }}>{t('ownership')}</label>
+        <label style={{ display: 'block', fontSize: 15, fontWeight: 650, color: 'var(--ink-2)', margin: '0 2px 7px' }}>{t('ownership')}</label>
         <div className="chip-row">
           {OWNERSHIP_STATUSES.map(o => (
             <Chip key={o.id} selectable on={f.ownership === o.id} onClick={() => setF({ ...f, ownership: o.id })}>{label(o, lang)}</Chip>

@@ -1,6 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import LuluApp from './lulu/LuluApp.jsx'
+// One typeface for English and Arabic, bundled with the app (and precached by
+// the service worker) so it works offline.
+import '@fontsource-variable/readex-pro'
 
 // A new service worker installs in the background but WAITS — we surface a
 // "new version" banner (see lib/appUpdate.js) and let the user apply it, so the

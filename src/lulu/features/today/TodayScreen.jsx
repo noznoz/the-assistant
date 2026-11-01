@@ -179,7 +179,7 @@ export default function TodayScreen({ go }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 12, marginTop: 14, alignItems: 'stretch' }}>
         <Card tight style={{ display: 'grid', placeItems: 'center', gap: 8 }}>
           <Ring value={progress.pct}>{Math.round(progress.pct * 100)}%</Ring>
-          <div className="muted" style={{ fontSize: 12, fontWeight: 600 }}>{t('dailyProgress')}</div>
+          <div className="muted" style={{ fontSize: 14, fontWeight: 600 }}>{t('dailyProgress')}</div>
         </Card>
         <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: 12 }}>
           <Stat label={t('todaysSpending')} value={money(spentToday, cur, lang)} onClick={() => go('expenses')} />
@@ -255,7 +255,7 @@ export default function TodayScreen({ go }) {
           {notes.items.slice(0, 3).map(n => (
             <div key={n.id} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
               <Icon name="note" size={16} style={{ marginTop: 2, color: 'var(--ink-3)' }} />
-              <span style={{ fontSize: 14 }}>{n.text}</span>
+              <span style={{ fontSize: 16 }}>{n.text}</span>
             </div>
           ))}
         </Card>
@@ -277,7 +277,7 @@ export default function TodayScreen({ go }) {
         <Card tight style={{ textAlign: 'center', padding: '22px 14px' }}>
           <div className="lead t-ok" style={{ display: 'inline-grid', placeItems: 'center', width: 44, height: 44, borderRadius: 14, marginBottom: 8 }}><Icon name="check" size={20} /></div>
           <div style={{ fontWeight: 750 }}>{t('allCaughtUp')}</div>
-          <div className="muted" style={{ fontSize: 12.5, marginTop: 2 }}>
+          <div className="muted" style={{ fontSize: 14.5, marginTop: 2 }}>
             {upcomingReminders.length ? `${t('next')}: ${upcomingReminders[0].text} · ${relativeDay(upcomingReminders[0].remindAt, lang)}` : t('allCaughtUpHint')}
           </div>
         </Card>
@@ -355,7 +355,7 @@ export default function TodayScreen({ go }) {
           {unread > 0 && (
             <span style={{
               position: 'absolute', top: 2, insetInlineEnd: 2, minWidth: 17, height: 17, padding: '0 4px',
-              borderRadius: 9, background: 'var(--danger)', color: '#fff', fontSize: 10.5, fontWeight: 750,
+              borderRadius: 9, background: 'var(--danger)', color: '#fff', fontSize: 12, fontWeight: 750,
               display: 'grid', placeItems: 'center', border: '2px solid var(--bg)', lineHeight: 1,
             }}>{unread > 99 ? '99+' : unread}</span>
           )}
@@ -406,7 +406,7 @@ export default function TodayScreen({ go }) {
         )}
 
         <button className="link-btn" onClick={() => go('dashboard')}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, margin: '20px auto 4px', color: 'var(--ink-3)', fontSize: 12.5 }}>
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, margin: '20px auto 4px', color: 'var(--ink-3)', fontSize: 14.5 }}>
           <Icon name="cog" size={14} /> {t('customizeHome')}
         </button>
       </div>

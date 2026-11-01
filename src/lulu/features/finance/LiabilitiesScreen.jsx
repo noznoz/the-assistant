@@ -26,7 +26,7 @@ export default function LiabilitiesScreen({ go }) {
       } />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('totalOwed')}</div>
+          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('totalOwed')}</div>
           <div style={{ fontSize: 34, fontWeight: 780, marginTop: 4 }} className="tnum t-danger">{money(totalOwed, cur, lang)}</div>
         </Card>
         <div className="stat-grid" style={{ marginTop: 12 }}>
@@ -51,11 +51,11 @@ export default function LiabilitiesScreen({ go }) {
                     <span className="lead t-danger" style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name={type?.icon || 'wallet'} size={18} /></span>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 700 }}>{l.name}</div>
-                      <div className="muted" style={{ fontSize: 12 }}>{[type ? label(type, lang) : '', l.lender].filter(Boolean).join(' · ')}</div>
+                      <div className="muted" style={{ fontSize: 14 }}>{[type ? label(type, lang) : '', l.lender].filter(Boolean).join(' · ')}</div>
                     </div>
                     <div style={{ textAlign: 'end' }}>
                       <b className="tnum">{money(balance, cur, lang)}</b>
-                      {Number(l.monthlyPayment) > 0 && <div className="muted" style={{ fontSize: 11 }}>{money(l.monthlyPayment, cur, lang)}/{t('perMonth')}</div>}
+                      {Number(l.monthlyPayment) > 0 && <div className="muted" style={{ fontSize: 13 }}>{money(l.monthlyPayment, cur, lang)}/{t('perMonth')}</div>}
                     </div>
                   </div>
                   {principal > 0 && (
@@ -63,7 +63,7 @@ export default function LiabilitiesScreen({ go }) {
                       <div className="bar-track" style={{ height: 8, marginTop: 10 }}>
                         <div className="bar-fill" style={{ width: `${paidPct * 100}%`, background: 'var(--ok)' }} />
                       </div>
-                      <div className="muted" style={{ fontSize: 11, marginTop: 5 }}>{Math.round(paidPct * 100)}% {t('paidOff')} · {money(principal - balance, cur, lang)} / {money(principal, cur, lang)}</div>
+                      <div className="muted" style={{ fontSize: 13, marginTop: 5 }}>{Math.round(paidPct * 100)}% {t('paidOff')} · {money(principal - balance, cur, lang)} / {money(principal, cur, lang)}</div>
                     </>
                   )}
                 </Card>

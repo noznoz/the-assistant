@@ -75,8 +75,8 @@ export default function DocumentsScreen({ go }) {
             <Icon name={icon} size={22} />
           </span>
           <span style={{ minWidth: 0 }}>
-            <span style={{ display: 'block', fontWeight: 700, fontSize: 14.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{name}</span>
-            {count != null && <span className="muted" style={{ fontSize: 12 }}>{count} {count === 1 ? t('documentTitle') : t('attachments')}</span>}
+            <span style={{ display: 'block', fontWeight: 700, fontSize: 16.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{name}</span>
+            {count != null && <span className="muted" style={{ fontSize: 14 }}>{count} {count === 1 ? t('documentTitle') : t('attachments')}</span>}
           </span>
         </button>
       )
@@ -129,8 +129,8 @@ export default function DocumentsScreen({ go }) {
               <button key={sv.id} onClick={() => setActiveVault(sv.id)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 12, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--r-lg)', color: 'var(--ink)', textAlign: 'start' }}>
                 <span className="lead t-brand" style={{ width: 36, height: 36, borderRadius: 11, display: 'grid', placeItems: 'center' }}><Icon name={sv.icon || 'doc'} size={18} /></span>
                 <span style={{ minWidth: 0 }}>
-                  <span style={{ display: 'block', fontWeight: 700, fontSize: 13.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{sv.name}</span>
-                  <span className="muted" style={{ fontSize: 11.5 }}>{vaultDocCount(sv.id)} {t('documentTitle')}</span>
+                  <span style={{ display: 'block', fontWeight: 700, fontSize: 15.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{sv.name}</span>
+                  <span className="muted" style={{ fontSize: 13.5 }}>{vaultDocCount(sv.id)} {t('documentTitle')}</span>
                 </span>
               </button>
             ))}
@@ -347,7 +347,7 @@ export function DocEditor({ initial, onClose, onSaved, onToast }) {
       <input ref={fileRef} type="file" accept="image/*,application/pdf" multiple hidden
         onChange={(e) => { addFiles(e.target.files); e.target.value = '' }} />
 
-      {busy && <p className="muted" style={{ fontSize: 12, margin: '4px 2px' }}><span className="spinner" style={{ width: 14, height: 14, display: 'inline-block', verticalAlign: 'middle' }} /> …</p>}
+      {busy && <p className="muted" style={{ fontSize: 14, margin: '4px 2px' }}><span className="spinner" style={{ width: 14, height: 14, display: 'inline-block', verticalAlign: 'middle' }} /> …</p>}
 
       {(f.attachments || []).length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, margin: '8px 0 16px' }}>
@@ -500,7 +500,7 @@ export function DocumentViewer({ doc, onBack, onEdit, onDelete, onToast }) {
                     <div className="lead t-danger" style={{ width: 44, height: 44, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="doc" size={22} /></div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 650 }}>{a.name}</div>
-                      <div className="muted" style={{ fontSize: 12 }}>PDF · {humanSize(a.size)}</div>
+                      <div className="muted" style={{ fontSize: 14 }}>PDF · {humanSize(a.size)}</div>
                     </div>
                     <Button size="sm" icon="upload" onClick={() => openOne(a)}>{t('openFile')}</Button>
                   </div>
@@ -508,7 +508,7 @@ export function DocumentViewer({ doc, onBack, onEdit, onDelete, onToast }) {
                   <div style={{ padding: 20 }} className="muted">{a.name}</div>
                 )}
                 <div style={{ display: 'flex', gap: 8, padding: 10, borderTop: '1px solid var(--line)' }}>
-                  <span className="muted" style={{ flex: 1, fontSize: 12, alignSelf: 'center' }}>{t('page')} {i + 1} · {humanSize(a.size)}</span>
+                  <span className="muted" style={{ flex: 1, fontSize: 14, alignSelf: 'center' }}>{t('page')} {i + 1} · {humanSize(a.size)}</span>
                   <button className="iconbtn" onClick={() => downloadOne(a)} aria-label={t('download')}><Icon name="download" size={16} /></button>
                   <button className="iconbtn" onClick={() => openOne(a)} aria-label={t('openFile')}><Icon name="upload" size={16} /></button>
                 </div>
@@ -519,7 +519,7 @@ export function DocumentViewer({ doc, onBack, onEdit, onDelete, onToast }) {
 
         <div className="stack" style={{ marginTop: 20 }}>
           <Button block variant="brand" icon="whatsapp" onClick={doShare} disabled={!attachments.length}>{t('shareViaWhatsApp')}</Button>
-          <p className="center muted" style={{ fontSize: 12 }}>{t('shareHint')}</p>
+          <p className="center muted" style={{ fontSize: 14 }}>{t('shareHint')}</p>
           <Button block variant="danger" icon="trash" onClick={onDelete}>{t('delete')}</Button>
         </div>
       </div>

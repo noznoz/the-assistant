@@ -46,8 +46,8 @@ export default function ProjectsScreen({ param, go }) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span className={`lead ${ended ? '' : 't-brand'}`} style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center', background: ended ? 'var(--surface-2)' : undefined }}><Icon name={ended ? 'check' : 'report'} size={18} /></span>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>{p.name}{ended && <span className="chip" style={{ fontSize: 10.5 }}>{t('ended')}</span>}</div>
-                      <div className="muted" style={{ fontSize: 13 }}>{money(total, cur, lang)}{budget ? ` / ${money(budget, cur, lang)}` : ''}</div>
+                      <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>{p.name}{ended && <span className="chip" style={{ fontSize: 12 }}>{t('ended')}</span>}</div>
+                      <div className="muted" style={{ fontSize: 15 }}>{money(total, cur, lang)}{budget ? ` / ${money(budget, cur, lang)}` : ''}</div>
                     </div>
                     <Icon name="chevron" size={18} style={{ color: 'var(--ink-3)' }} />
                   </div>
@@ -152,20 +152,20 @@ function ProjectDetail({ project, go, onBack }) {
       } />
       <div className="screen">
         {isEnded && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '14px 0 0', padding: '8px 12px', borderRadius: 'var(--r-md)', background: 'var(--surface-2)', color: 'var(--ink-2)', fontSize: 13, fontWeight: 600 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '14px 0 0', padding: '8px 12px', borderRadius: 'var(--r-md)', background: 'var(--surface-2)', color: 'var(--ink-2)', fontSize: 15, fontWeight: 600 }}>
             <Icon name="check" size={15} /> {t('projectEnded')}{project.endedAt ? ` · ${fmtDate(project.endedAt, lang, settings.dateFormat)}` : ''}
           </div>
         )}
 
         <Card style={{ marginTop: 14, textAlign: 'center' }}>
-          <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('projectTotal')}</div>
+          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('projectTotal')}</div>
           <div style={{ fontSize: 34, fontWeight: 780, marginTop: 4 }} className="tnum">{money(total, cur, lang)}</div>
           {budget > 0 && (
             <div style={{ marginTop: 14 }}>
               <div className="bar-track" style={{ height: 12 }}>
                 <div className="bar-fill" style={{ width: `${pct * 100}%`, background: pct >= 1 ? 'var(--danger)' : pct > 0.85 ? 'var(--warn)' : 'var(--ok)' }} />
               </div>
-              <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+              <div className="muted" style={{ fontSize: 14, marginTop: 6 }}>
                 {money(total, cur, lang)} / {money(budget, cur, lang)}{pct >= 1 ? ` · ${t('overBudget')}` : ''}
               </div>
             </div>

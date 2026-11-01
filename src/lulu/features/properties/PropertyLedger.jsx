@@ -34,7 +34,7 @@ export default function PropertyLedger({ property }) {
         <Stat label={t('runningCosts')} value={money(costOut, cur, lang)} />
       </div>
       <Card style={{ textAlign: 'center', marginTop: 12 }}>
-        <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('netIncome')}</div>
+        <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('netIncome')}</div>
         <div className={`tnum ${net >= 0 ? 't-ok' : 't-danger'}`} style={{ fontSize: 28, fontWeight: 780, marginTop: 4 }}>{net >= 0 ? '+' : ''}{money(net, cur, lang)}</div>
       </Card>
 

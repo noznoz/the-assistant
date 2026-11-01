@@ -55,9 +55,9 @@ export default function SpiritualScreen({ go }) {
       <DetailHeader title={t('spiritual')} onBack={() => go('more')} />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 12, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('prayerStreak')}</div>
+          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('prayerStreak')}</div>
           <div style={{ fontSize: 34, fontWeight: 780, marginTop: 4 }}>🔥 {streak}</div>
-          <div className="muted" style={{ fontSize: 12.5, marginTop: 2 }}>{hijriDate(new Date(), lang)}</div>
+          <div className="muted" style={{ fontSize: 14.5, marginTop: 2 }}>{hijriDate(new Date(), lang)}</div>
         </Card>
 
         <Section title={t('todaysPrayers')} count={`${doneToday}/5`} />
@@ -70,7 +70,7 @@ export default function SpiritualScreen({ go }) {
                 background: 'transparent', border: 0, color: 'var(--ink)',
               }}>
                 <span className={`check ${on ? 'on' : ''}`} aria-hidden>{on && <Icon name="check" size={15} stroke={3} />}</span>
-                <span style={{ flex: 1, textAlign: 'start', fontWeight: 600, fontSize: 15 }}>{PRAYER_LABEL[p][lang === 'ar' ? 'ar' : 'en']}</span>
+                <span style={{ flex: 1, textAlign: 'start', fontWeight: 600, fontSize: 17 }}>{PRAYER_LABEL[p][lang === 'ar' ? 'ar' : 'en']}</span>
                 {on && <span className="chip t-ok" style={{ padding: '1px 8px' }}>{t('done')}</span>}
               </button>
             )
@@ -81,7 +81,7 @@ export default function SpiritualScreen({ go }) {
           <Stat label={t('thisWeek')} value={`${week}/35`} />
           <Card tight style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between', padding: 14 }}>
             <div>
-              <div className="muted" style={{ fontSize: 11.5, fontWeight: 650, textTransform: 'uppercase' }}>{t('quranPages')}</div>
+              <div className="muted" style={{ fontSize: 13.5, fontWeight: 650, textTransform: 'uppercase' }}>{t('quranPages')}</div>
               <b className="tnum" style={{ fontSize: 18 }}>{Number(todayRec?.quran) || 0}</b>
             </div>
             <div style={{ display: 'flex', gap: 6 }}>
@@ -105,7 +105,7 @@ export default function SpiritualScreen({ go }) {
             {days.map(({ d, n }) => (
               <div key={d} title={`${fmtDate(d, lang, settings.dateFormat)} · ${n}/5`} style={{ flex: 1, textAlign: 'center' }}>
                 <div style={{ height: 26, borderRadius: 6, background: shade(n) }} />
-                <div className="muted" style={{ fontSize: 9, marginTop: 3 }}>{new Date(d).getDate()}</div>
+                <div className="muted" style={{ fontSize: 12, marginTop: 3 }}>{new Date(d).getDate()}</div>
               </div>
             ))}
           </div>

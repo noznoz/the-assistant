@@ -80,7 +80,7 @@ export default function PeopleScreen({ go }) {
               const medals = ['🥇', '🥈', '🥉']
               return (
                 <div className="card tight" style={{ margin: '8px 0 4px' }}>
-                  <div style={{ fontSize: 12, color: 'var(--ink-3)', fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 8 }}>{t('leaderboard')}</div>
+                  <div style={{ fontSize: 14, color: 'var(--ink-3)', fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 8 }}>{t('leaderboard')}</div>
                   {board.map((p, i) => (
                     <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '5px 0' }}>
                       <span style={{ fontSize: 18 }}>{medals[i]}</span>
