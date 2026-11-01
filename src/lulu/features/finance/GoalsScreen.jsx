@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Stat, Sheet, Field, Input, TextArea, Select, Button, Chip, Empty, Fab, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
+import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { money, toSar, fmtDate, relativeDay } from '../../lib/format.js'
 import { goalStats } from '../../lib/goals.js'
 import { GROUP_ICONS } from '../../lib/domain.js'
@@ -42,7 +42,7 @@ export default function GoalsScreen({ go }) {
               {goals.items.map(g => {
                 const s = goalStats(g)
                 return (
-                  <SwipeRow key={g.id} onEdit={() => setEditor(g)} onDelete={() => { goals.remove(g.id); toast.show(t('deletedToast')) }}>
+                  <SwipeRow key={g.id} onEdit={() => setEditor(g)} onDelete={() => { goals.remove(g.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                     <Card style={{ marginBottom: 10 }} onClick={() => setEditor(g)}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <span className={s.done ? 'lead t-ok' : 'lead t-brand'} style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}>

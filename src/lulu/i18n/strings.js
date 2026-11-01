@@ -226,7 +226,7 @@ export const STRINGS = {
     noGroups: 'No groups yet', groupsHint: 'Organize people into groups like Family, Friends or Work.',
     addSuggestedGroups: 'Add Family, Friends & Work', member: 'member', members: 'members', icon: 'Icon',
     // finance
-    myFinance: 'My Finance', netThisMonth: 'Net this month',
+    myFinance: 'Money', netThisMonth: 'Net this month',
     income: 'Income', incomeThisMonth: 'Income this month', recurringMonthly: 'Recurring / month',
     sources: 'sources', entries: 'entries', noIncome: 'No income yet',
     incomeHint: 'Add your salary, dividends and other income.', addIncome: 'Add income', editIncome: 'Edit income',
@@ -459,6 +459,7 @@ export const STRINGS = {
     // navigation groups
     grpWork: 'Work & organisation', grpPlan: 'Planner', grpPeople: 'People & network', grpHome: 'Belongings', grpFaith: 'Faith', grpReports: 'Reports & settings',
     favorites: 'Favorites', searchSections: 'Search sections…', pin: 'Pin', allSections: 'All sections', suggested: 'Suggested',
+    addWhat: 'What do you want to add?', addWhatHint: 'Or choose what to add:', cap_note: 'Note',
     textSize: 'Text size', textSizeHint: 'Larger makes text and buttons bigger on every screen.', textStandard: 'Standard', textLarge: 'Larger',
     finOverview: 'Overview', finPlan: 'Plan & save', finGrow: 'Wealth & debt', finTrack: 'Track',
     navigation: 'Navigation', bottomTabs: 'Bottom tabs', bottomTabsHint: 'Choose which sections sit in the bottom bar. Today and More are always shown.',
@@ -689,7 +690,7 @@ export const STRINGS = {
     noGroups: 'لا توجد مجموعات بعد', groupsHint: 'نظّم الأشخاص في مجموعات مثل العائلة والأصدقاء والعمل.',
     addSuggestedGroups: 'إضافة العائلة والأصدقاء والعمل', member: 'عضو', members: 'أعضاء', icon: 'أيقونة',
     // finance
-    myFinance: 'ماليتي', netThisMonth: 'الصافي هذا الشهر',
+    myFinance: 'المال', netThisMonth: 'الصافي هذا الشهر',
     income: 'الدخل', incomeThisMonth: 'دخل هذا الشهر', recurringMonthly: 'متكرر / شهرياً',
     sources: 'مصادر', entries: 'إدخالات', noIncome: 'لا يوجد دخل بعد',
     incomeHint: 'أضف راتبك وأرباح الأسهم والدخل الآخر.', addIncome: 'إضافة دخل', editIncome: 'تعديل الدخل',
@@ -922,6 +923,7 @@ export const STRINGS = {
     // navigation groups
     grpWork: 'العمل والتنظيم', grpPlan: 'المخطِّط', grpPeople: 'الأشخاص والشبكة', grpHome: 'المقتنيات', grpFaith: 'الروحانيات', grpReports: 'التقارير والإعدادات',
     favorites: 'المفضلة', searchSections: 'ابحث في الأقسام…', pin: 'تثبيت', allSections: 'كل الأقسام', suggested: 'مقترحات',
+    addWhat: 'ماذا تريد أن تضيف؟', addWhatHint: 'أو اختر ما تريد إضافته:', cap_note: 'ملاحظة',
     textSize: 'حجم الخط', textSizeHint: 'الخيار «أكبر» يكبّر النصوص والأزرار في كل الشاشات.', textStandard: 'عادي', textLarge: 'أكبر',
     finOverview: 'نظرة عامة', finPlan: 'التخطيط والادخار', finGrow: 'الثروة والديون', finTrack: 'المتابعة',
     navigation: 'التنقّل', bottomTabs: 'أشرطة الأسفل', bottomTabsHint: 'اختر الأقسام التي تظهر في الشريط السفلي. الرئيسية والمزيد تظهران دائماً.',

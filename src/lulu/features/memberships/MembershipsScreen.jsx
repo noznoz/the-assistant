@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Sheet, Field, Input, TextArea, Select, Button, Empty, Fab, Chip, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
+import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { MEMBERSHIP_CATEGORIES, findMembershipCategory, label } from '../../lib/domain.js'
 import { fmtDate, daysUntil } from '../../lib/format.js'
 import { copyText } from '../../lib/share.js'
@@ -30,7 +30,7 @@ export default function MembershipsScreen({ go }) {
               const c = findMembershipCategory(m.category)
               const dd = daysUntil(m.expiry)
               return (
-                <SwipeRow key={m.id} onEdit={() => setEditor(m)} onDelete={() => { memberships.remove(m.id); toast.show(t('deletedToast')) }}>
+                <SwipeRow key={m.id} onEdit={() => setEditor(m)} onDelete={() => { memberships.remove(m.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                 <div className="li" onClick={() => setEditor(m)}>
                   <div className="lead t-brand"><Icon name={c?.icon || 'gift'} size={18} /></div>
                   <div className="body">

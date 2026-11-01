@@ -6,6 +6,7 @@ import { ThemeProvider } from './theme/ThemeProvider.jsx'
 import { I18nProvider, useT } from './i18n/I18nProvider.jsx'
 import { useRouter } from './lib/router.js'
 import { BottomNav, navMiddle } from './ui/AppShell.jsx'
+import AddButton from './features/add/AddButton.jsx'
 import ErrorBoundary from './ui/ErrorBoundary.jsx'
 import Icon from './ui/Icon.jsx'
 import { usePullToRefresh } from './ui/usePullToRefresh.js'
@@ -303,6 +304,8 @@ function Router() {
       </ErrorBoundary>
       <StorageAlert />
       <UpdateBanner />
+      {/* The + is on every screen; the Assistant has its own message box there. */}
+      {tab !== 'assistant' && <AddButton go={go} />}
       <BottomNav tab={activeTab} go={go} />
     </div>
   )

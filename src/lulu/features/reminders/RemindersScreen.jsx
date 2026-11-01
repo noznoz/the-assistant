@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Field, Input, Select, Button, Empty, Chip, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection } from '../../store/StoreProvider.jsx'
+import { useCollection, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { fmtDate, fmtTime, relativeDay } from '../../lib/format.js'
 import { splitReminders, buildReminderFields, snoozeFields, reminderTimes, nextPendingTime, lastTime, pendingCount, MAX_TIMES, REMINDER_REPEATS } from '../../lib/reminders.js'
 import { parseWhen } from '../../lib/parseWhen.js'
@@ -212,7 +212,7 @@ export default function RemindersScreen({ go }) {
             {upcoming.map(r => {
               const more = pendingCount(r) - 1
               return (
-                <SwipeRow key={r.id} onDelete={() => { reminders.remove(r.id); toast.show(t('deletedToast')) }}>
+                <SwipeRow key={r.id} onDelete={() => { reminders.remove(r.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                   <div className="li" onClick={() => startEdit(r)}>
                     <div className="lead t-brand"><Icon name="bell" size={16} /></div>
                     <div className="body">
@@ -227,7 +227,7 @@ export default function RemindersScreen({ go }) {
 
             {past.length > 0 && <h2 className="member-h2" style={{ marginTop: 18 }}>{t('past')}</h2>}
             {past.map(r => (
-              <SwipeRow key={r.id} onDelete={() => { reminders.remove(r.id); toast.show(t('deletedToast')) }}>
+              <SwipeRow key={r.id} onDelete={() => { reminders.remove(r.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                 <div className="li" style={{ opacity: r.done ? 0.6 : 1 }}>
                   <div className={`lead ${r.done ? 't-ok' : 't-warn'}`} onClick={() => startEdit(r)}><Icon name={r.done ? 'check' : 'clock'} size={16} /></div>
                   <div className="body" onClick={() => startEdit(r)}>

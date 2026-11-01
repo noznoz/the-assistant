@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Stat, Sheet, Field, Input, TextArea, Select, Button, Empty, Fab, Chip, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
+import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { categoryOptions, PAYMENT_METHODS, catLabel, label } from '../../lib/domain.js'
 import { money, fmtDate, daysUntil, todayISO, toSar } from '../../lib/format.js'
 import { detectRecurring } from '../../lib/smart.js'
@@ -90,7 +90,7 @@ export default function SubscriptionsScreen({ go }) {
             {sorted.map(s => {
               const dd = daysUntil(s.nextDue)
               return (
-                <SwipeRow key={s.id} onEdit={() => setEditor(s)} onDelete={() => { subs.remove(s.id); toast.show(t('deletedToast')) }}>
+                <SwipeRow key={s.id} onEdit={() => setEditor(s)} onDelete={() => { subs.remove(s.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                 <div className="li">
                   <div className="lead t-brand"><Icon name="wallet" size={18} /></div>
                   <div className="body" onClick={() => setEditor(s)}>

@@ -59,18 +59,17 @@
   position: relative;
   border: 0; background: transparent; color: var(--ink-3);
   display: flex; flex-direction: column; align-items: center; gap: 3px;
-  padding: 8px 2px 6px; font-size: 12.5px; font-weight: 600; letter-spacing: -0.005em;
+  padding: 6px 2px 4px; font-size: 13px; font-weight: 600; letter-spacing: 0;
   min-width: 0; white-space: nowrap;
   transition: color 0.2s var(--ease), transform 0.15s var(--ease);
 }
 .navbtn:active { transform: scale(0.9); }
-@media (max-width: 370px) { .navbtn { font-size: 12px; letter-spacing: -0.01em; } }
+@media (max-width: 370px) { .navbtn { font-size: 12.5px; } }
 .navbtn svg { width: 24px; height: 24px; }
 .navbtn.active { color: var(--brand-600); }
-.navbtn.active::before {
-  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-  width: 5px; height: 5px; border-radius: 50%; background: currentColor;
-}
+/* Active tab: a soft pill behind the icon — clearer than a small dot. */
+.navbtn .nav-ic { width: 56px; height: 30px; border-radius: 15px; display: grid; place-items: center; transition: background 0.2s var(--ease); }
+.navbtn.active .nav-ic { background: var(--brand-tint); }
 [data-theme="dark"] .navbtn.active { color: var(--brand-400); }
 
 /* ---- Cards ---- */
@@ -609,3 +608,19 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ---- The + on every screen (Add panel) ----
+   Hidden whenever the current screen shows its own add button, so there's
+   never two. */
+.app:has(.fab:not(.fab-global)) .fab-global { display: none; }
+.add-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+.add-tile {
+  display: grid; justify-items: center; gap: 8px; min-width: 0;
+  padding: 16px 6px 14px; border-radius: var(--r-md);
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  font-size: var(--fs-sm); font-weight: 600; text-align: center; line-height: 1.25;
+  transition: transform 0.12s var(--ease);
+}
+.add-tile:active { transform: scale(0.96); }
+.add-tile .ic { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; background: var(--brand-tint); color: var(--brand-600); }
+[data-theme="dark"] .add-tile .ic { color: var(--brand-400); }

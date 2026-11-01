@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Section, Bars, Sheet, Field, Input, Select, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
+import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { catLabel } from '../../lib/domain.js'
 import { fmtDate, money, isoDate, expenseSar } from '../../lib/format.js'
 import { share, formatExpenseSummary } from '../../lib/share.js'
@@ -43,7 +43,7 @@ export default function TripsScreen({ go }) {
               const budget = Number(tr.budget) || 0
               const pct = budget ? Math.min(1, spent / budget) : 0
               return (
-                <SwipeRow key={tr.id} onEdit={() => setEditor(tr)} onDelete={() => { trips.remove(tr.id); toast.show(t('deletedToast')) }}>
+                <SwipeRow key={tr.id} onEdit={() => setEditor(tr)} onDelete={() => { trips.remove(tr.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                 <Card className="tight" onClick={() => setViewing(tr)}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span className="lead t-brand" style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="trip" size={18} /></span>
@@ -153,7 +153,7 @@ function TripDetail({ trip, onBack }) {
             <Section title={t('tripExpenses')} count={mine.length} />
             {mine.length === 0 ? <Empty icon="wallet" title={t('nothingHere')} text={t('addExpenseTo')} /> :
               mine.map(e => (
-                <SwipeRow key={e.id} onEdit={() => setAddExp(e)} onDelete={() => { expenses.remove(e.id); toast.show(t('deletedToast')) }}>
+                <SwipeRow key={e.id} onEdit={() => setAddExp(e)} onDelete={() => { expenses.remove(e.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                 <div className="li" onClick={() => setAddExp(e)}>
                   <div className="lead t-brand"><Icon name="receipt" size={18} /></div>
                   <div className="body"><div className="title">{e.merchant || catLabel(e.category, lang)}</div><div className="meta">{catLabel(e.category, lang)} · {fmtDate(e.date, lang, settings.dateFormat)}</div></div>

@@ -11,6 +11,17 @@ const PHOTO_MIG_KEY = 'lulu:v1:photosMigratedToCloud'
 const StoreCtx = createContext(null)
 const SettingsCtx = createContext(null)
 
+// The most recent soft-delete, so a "Deleted" toast anywhere can offer Undo.
+// Deletes are soft (deletedAt), so restoring is just clearing that stamp.
+const lastRemoved = { name: null, id: null }
+const undoHandle = { restore: null }
+
+// Restore whatever was deleted last. Safe to call from any toast action.
+export function undoLastDelete() {
+  if (undoHandle.restore && lastRemoved.name) undoHandle.restore(lastRemoved.name, lastRemoved.id)
+  lastRemoved.name = null; lastRemoved.id = null
+}
+
 export function StoreProvider({ children }) {
   const [data, setData] = useState(() => {
     // Seed sample data on first ever launch (idempotent) BEFORE the first read,
@@ -50,9 +61,20 @@ export function StoreProvider({ children }) {
 
   const remove = useCallback((name, id) => {
     const rec = db.softDelete(name, id)
+    lastRemoved.name = name; lastRemoved.id = id
     reload(name)
     cloud.pushRecord(name, rec)
   }, [reload])
+
+  // Bring a soft-deleted record back (Undo). Pushes the restored row to cloud
+  // sync too, so other devices see it reappear.
+  const restore = useCallback((name, id) => {
+    const rec = db.update(name, id, { deletedAt: null })
+    if (!rec) return
+    reload(name)
+    cloud.pushRecord(name, rec)
+  }, [reload])
+  undoHandle.restore = restore
 
   const updateSettings = useCallback((partial) => {
     setSettings(prev => {
@@ -119,7 +141,7 @@ export function StoreProvider({ children }) {
     return removals.length
   }, [data, reloadAll])
 
-  const store = useMemo(() => ({ data, add, patch, save, remove, reload, reloadAll, cloudSync, removeSampleData }), [data, add, patch, save, remove, reload, reloadAll, cloudSync, removeSampleData])
+  const store = useMemo(() => ({ data, add, patch, save, remove, restore, reload, reloadAll, cloudSync, removeSampleData }), [data, add, patch, save, remove, restore, reload, reloadAll, cloudSync, removeSampleData])
   const settingsValue = useMemo(() => ({ settings, updateSettings }), [settings, updateSettings])
 
   return (

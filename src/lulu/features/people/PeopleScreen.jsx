@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Button, Empty, Fab, Chip, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection } from '../../store/StoreProvider.jsx'
+import { useCollection, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { RELATIONSHIPS, label } from '../../lib/domain.js'
 import { whatsappToPerson, personDigits } from '../../lib/share.js'
 import PersonEditor from './PersonEditor.jsx'
@@ -96,7 +96,7 @@ export default function PeopleScreen({ go }) {
               const rel = RELATIONSHIPS.find(r => r.id === p.relationship)
               const initials = (p.name || '?').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
               return (
-                <SwipeRow key={p.id} onEdit={() => setEditor(p)} onDelete={() => { people.remove(p.id); toast.show(t('deletedToast')) }}>
+                <SwipeRow key={p.id} onEdit={() => setEditor(p)} onDelete={() => { people.remove(p.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                 <div className="li" onClick={() => setViewing(p)}>
                   <div className="lead" style={{ padding: 0, overflow: 'hidden', background: 'var(--brand-tint)', color: 'var(--brand-600)', fontWeight: 750 }}>
                     {p.photo ? <img src={p.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}

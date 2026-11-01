@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { Card, Stat, Section, Sheet, Field, Input, TextArea, Select, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
+import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { PROPERTY_LOG_KINDS, findPropertyLogKind, label } from '../../lib/domain.js'
 import { money, toSar, fmtDate, todayISO } from '../../lib/format.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
@@ -45,7 +45,7 @@ export default function PropertyLedger({ property }) {
         const k = findPropertyLogKind(l.kind)
         const inc = isIncome(l)
         return (
-          <SwipeRow key={l.id} onEdit={() => setEditor(l)} onDelete={() => { logs.remove(l.id); toast.show(t('deletedToast')) }}>
+          <SwipeRow key={l.id} onEdit={() => setEditor(l)} onDelete={() => { logs.remove(l.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
             <div className="li" onClick={() => setEditor(l)}>
               <div className={`lead ${inc ? 't-ok' : 't-warn'}`}><Icon name={k?.icon || 'wallet'} size={18} /></div>
               <div className="body">

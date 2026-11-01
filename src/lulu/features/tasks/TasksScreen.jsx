@@ -3,7 +3,7 @@ import Icon from '../../ui/Icon.jsx'
 import { TopBar } from '../../ui/AppShell.jsx'
 import { Chip, Fab, Sheet, Button, Empty, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
+import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { findPriority, findStatus, findType } from '../../lib/domain.js'
 import { isToday, isOverdue, relativeDay, fmtTime } from '../../lib/format.js'
 import { share, formatTask, formatFollowUp, copyText, whatsappToPerson, formatAssignment, formatNudge, personDigits } from '../../lib/share.js'
@@ -58,7 +58,15 @@ export default function TasksScreen({ param, go }) {
     const spawned = completeTask(task, tasks)
     const assignee = people.items.find(p => p.id === task.assigneeId) || people.items.find(p => p.name === task.assignedTo)
     if (assignee) awardPoints(assignee, done ? -pointsFor(task) : pointsFor(task), people)
-    if (!done) toast.show(spawned ? t('repeatsToast') : '✓ ' + t('completed'))
+    if (done) return
+    // Undo puts everything back: the task's status, the next repeat it
+    // created (if any), and the assignee's points.
+    const undo = () => {
+      tasks.patch(task.id, { status: task.status, completedAt: task.completedAt || null })
+      if (spawned && spawned.id) tasks.remove(spawned.id)
+      if (assignee) people.patch(assignee.id, { points: Number(assignee.points) || 0 })
+    }
+    toast.show(spawned ? t('repeatsToast') : '✓ ' + t('completed'), [{ label: t('undo'), onClick: undo }])
   }
 
   return (
@@ -88,7 +96,7 @@ export default function TasksScreen({ param, go }) {
           <div style={{ marginTop: 10 }}>
             {filtered.map(task => (
               <SwipeRow key={task.id} onEdit={() => setEditor(task)}
-                onDelete={() => { tasks.remove(task.id); toast.show(t('deletedToast')) }}>
+                onDelete={() => { tasks.remove(task.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                 <TaskRow task={task} lang={lang} dateFormat={settings.dateFormat}
                   onToggle={() => toggleComplete(task)} onOpen={() => setSheet({ task })} />
               </SwipeRow>
@@ -108,7 +116,7 @@ export default function TasksScreen({ param, go }) {
           onEdit={() => { setEditor(sheet.task); setSheet(null) }}
           onComplete={() => { toggleComplete(sheet.task); setSheet(null) }}
           onDuplicate={() => { const { id, createdAt, updatedAt, ...rest } = sheet.task; tasks.add({ ...rest, title: rest.title + ' (copy)' }); setSheet(null); toast.show(t('savedToast')) }}
-          onDelete={() => { tasks.remove(sheet.task.id); setSheet(null); toast.show(t('deletedToast')) }}
+          onDelete={() => { tasks.remove(sheet.task.id); setSheet(null); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}
           onCopyFollowUp={async () => { const ok = await copyText(formatFollowUp(sheet.task, lang, settings)); toast.show(ok ? t('copiedToast') : '...'); }}
         />
       )}

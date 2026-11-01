@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Section, Sheet, Field, Input, TextArea, Select, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
+import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { fmtDate, fmtLongDate, todayISO } from '../../lib/format.js'
 import { share, emailShare } from '../../lib/share.js'
 import { uid } from '../../store/db.js'
@@ -38,7 +38,7 @@ function MeetingsList({ go }) {
             {sorted.map(m => {
               const open = (m.actions || []).filter(a => !a.taskId).length
               return (
-                <SwipeRow key={m.id} onEdit={() => setEditor(m)} onDelete={() => { meetings.remove(m.id); toast.show(t('deletedToast')) }}>
+                <SwipeRow key={m.id} onEdit={() => setEditor(m)} onDelete={() => { meetings.remove(m.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                   <div className="li" onClick={() => go(`meetings/${m.id}`)}>
                     <div className="lead t-brand"><Icon name="note" size={18} /></div>
                     <div className="body">

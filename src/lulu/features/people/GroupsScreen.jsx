@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Sheet, Field, Input, TextArea, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection } from '../../store/StoreProvider.jsx'
+import { useCollection, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { GROUP_ICONS, SUGGESTED_GROUPS } from '../../lib/domain.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
 
@@ -22,7 +22,7 @@ export default function GroupsScreen({ go }) {
     people.items.forEach(p => {
       if ((p.groupIds || []).includes(id)) people.patch(p.id, { groupIds: p.groupIds.filter(x => x !== id) })
     })
-    groups.remove(id); toast.show(t('deletedToast'))
+    groups.remove(id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }])
   }
 
   const addSuggested = () => {

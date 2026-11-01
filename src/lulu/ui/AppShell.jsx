@@ -38,8 +38,9 @@ export function BottomNav({ tab, go }) {
       {tabs.map(id => {
         const meta = metaFor(id)
         return (
-          <button key={id} className={`navbtn ${tab === id ? 'active' : ''}`} onClick={() => go(id)}>
-            <Icon name={meta.icon} size={24} stroke={tab === id ? 2.4 : 2} />
+          <button key={id} className={`navbtn ${tab === id ? 'active' : ''}`} onClick={() => go(id)}
+            aria-current={tab === id ? 'page' : undefined}>
+            <span className="nav-ic"><Icon name={meta.icon} size={24} stroke={tab === id ? 2.3 : 2} /></span>
             {t(meta.labelKey || id)}
           </button>
         )

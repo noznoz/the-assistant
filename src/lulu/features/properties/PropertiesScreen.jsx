@@ -3,7 +3,7 @@ import Icon from '../../ui/Icon.jsx'
 import { TopBar } from '../../ui/AppShell.jsx'
 import { DetailHeader, Card, Section, Stat, Sheet, Field, Input, TextArea, Select, Chip, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
+import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { PROPERTY_TYPES, findPropertyType, OWNERSHIP_STATUSES, findOwnership, label } from '../../lib/domain.js'
 import { money, toSar, fmtDate } from '../../lib/format.js'
 import { saveCloudPhoto } from '../../lib/files.js'
@@ -49,7 +49,7 @@ export default function PropertiesScreen({ param, go }) {
                 const ow = findOwnership(p.ownership)
                 const val = toSar(p.currentValue || p.purchasePrice, p.currency || 'SAR', rates)
                 return (
-                  <SwipeRow key={p.id} onEdit={() => setEditor(p)} onDelete={() => { properties.remove(p.id); toast.show(t('deletedToast')) }}>
+                  <SwipeRow key={p.id} onEdit={() => setEditor(p)} onDelete={() => { properties.remove(p.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                   <div className="veh-card" onClick={() => go(`properties/${p.id}`)}>
                     <div className="img">
                       {p.photo ? <img src={p.photo} alt={p.name} style={{ objectPosition: p.photoPos || '50% 50%' }} /> : <Icon name={type?.icon || 'doc'} size={56} stroke={1.4} />}

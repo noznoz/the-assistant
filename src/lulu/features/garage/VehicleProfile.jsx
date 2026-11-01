@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Section, Stat, Bars, Button, Sheet, Field, Input, TextArea, Chip, Empty, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
+import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { findVehicleType, findOwnership, vehicleTitle, label } from '../../lib/domain.js'
 import { money, fmtDate, daysUntil, expenseSar } from '../../lib/format.js'
 import { share, formatVehicle } from '../../lib/share.js'
@@ -240,7 +240,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
               <Empty icon="wrench" title={t('nothingHere')}
                 action={<Button variant="primary" icon="plus" onClick={() => setSvcEditor(true)}>{t('addService')}</Button>} />
             ) : myServices.map(s => (
-              <SwipeRow key={s.id} onEdit={() => setSvcEditor(s)} onDelete={() => { services.remove(s.id); toast.show(t('deletedToast')) }}>
+              <SwipeRow key={s.id} onEdit={() => setSvcEditor(s)} onDelete={() => { services.remove(s.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
               <div className="li" onClick={() => setSvcEditor(s)}>
                 <div className="lead t-brand"><Icon name="wrench" size={18} /></div>
                 <div className="body">
@@ -268,7 +268,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
                 action={<Button variant="primary" icon="plus" onClick={addVehExpense}>{t('addExpense')}</Button>} />
             ) : (
               myExpenses.map(e => (
-                <SwipeRow key={e.id} onEdit={() => setExpEditor(e)} onDelete={() => { expenses.remove(e.id); toast.show(t('deletedToast')) }}>
+                <SwipeRow key={e.id} onEdit={() => setExpEditor(e)} onDelete={() => { expenses.remove(e.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                 <div className="li" onClick={() => setExpEditor(e)}>
                   <div className="lead t-ok"><Icon name="wallet" size={18} /></div>
                   <div className="body">
