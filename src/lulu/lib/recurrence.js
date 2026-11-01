@@ -28,7 +28,8 @@ export function isRecurring(task) {
 
 // Toggle a task's completion. When completing a recurring task, spawn the next
 // occurrence (fresh, not completed) so the series continues automatically.
-// Returns true if a new occurrence was created.
+// Returns the new occurrence (truthy) when one was created, else null — so an
+// Undo can remove it again.
 export function completeTask(task, tasksApi) {
   const done = task.status === 'completed'
   tasksApi.patch(task.id, {
@@ -39,9 +40,8 @@ export function completeTask(task, tasksApi) {
     const nd = nextDate(task.dueDate, task.recurrence)
     if (nd) {
       const { id, createdAt, updatedAt, completedAt, ...rest } = task
-      tasksApi.add({ ...rest, status: 'planned', dueDate: nd, completedAt: null })
-      return true
+      return tasksApi.add({ ...rest, status: 'planned', dueDate: nd, completedAt: null }) || true
     }
   }
-  return false
+  return null
 }

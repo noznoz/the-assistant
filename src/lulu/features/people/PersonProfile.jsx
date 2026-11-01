@@ -60,9 +60,15 @@ export default function PersonProfile({ person, onBack, onDeleted }) {
   const points = Number(person.points) || 0
   const toggle = (task) => {
     const wasDone = task.status === 'completed'
-    completeTask(task, tasks)
+    const spawned = completeTask(task, tasks)
     awardPoints(person, wasDone ? -pointsFor(task) : pointsFor(task), people)
-    toast.show(wasDone ? '↩︎' : `✓ +${pointsFor(task)} ${t('pts')}`)
+    if (wasDone) { toast.show('↩︎'); return }
+    const undo = () => {
+      tasks.patch(task.id, { status: task.status, completedAt: task.completedAt || null })
+      if (spawned && spawned.id) tasks.remove(spawned.id)
+      people.patch(person.id, { points: Number(person.points) || 0 })
+    }
+    toast.show(`✓ +${pointsFor(task)} ${t('pts')}`, [{ label: t('undo'), onClick: undo }])
   }
 
   return (

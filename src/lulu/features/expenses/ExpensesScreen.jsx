@@ -3,7 +3,7 @@ import Icon from '../../ui/Icon.jsx'
 import { TopBar } from '../../ui/AppShell.jsx'
 import { Card, Section, Stat, Segmented, Bars, Fab, Empty, Button, Sheet, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
+import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { findPayment, catLabel, label } from '../../lib/domain.js'
 import { money, fmtDate, isToday, isSameMonth, expenseSar, toSar } from '../../lib/format.js'
 import { isIncluded } from '../../lib/accounts.js'
@@ -213,7 +213,7 @@ export default function ExpensesScreen({ go }) {
           const pm = findPayment(e.method)
           const proj = e.projectId && projects.items.find(p => p.id === e.projectId)
           return (
-            <SwipeRow key={e.id} onEdit={() => setEditor(e)} onDelete={() => { expenses.remove(e.id); toast.show(t('deletedToast')) }}>
+            <SwipeRow key={e.id} onEdit={() => setEditor(e)} onDelete={() => { expenses.remove(e.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
             <div className="li" onClick={() => setEditor(e)}>
               <div className="lead t-brand"><Icon name="receipt" size={18} /></div>
               <div className="body">

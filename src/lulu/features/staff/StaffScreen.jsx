@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Stat, Sheet, Field, Input, TextArea, Select, Button, Empty, Fab, Chip, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
+import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { STAFF_ROLES, findStaffRole, label } from '../../lib/domain.js'
 import { money, toSar, fmtDate, daysUntil, relativeDay } from '../../lib/format.js'
 import { saveCloudPhoto } from '../../lib/files.js'
@@ -40,7 +40,7 @@ export default function StaffScreen({ go }) {
                 const role = findStaffRole(p.role)
                 const iqDd = daysUntil(p.iqamaExpiry)
                 return (
-                  <SwipeRow key={p.id} onEdit={() => setEditor(p)} onDelete={() => { staff.remove(p.id); toast.show(t('deletedToast')) }}>
+                  <SwipeRow key={p.id} onEdit={() => setEditor(p)} onDelete={() => { staff.remove(p.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                     <div className="li" onClick={() => setEditor(p)}>
                       <div className="lead" style={{ overflow: 'hidden', padding: p.photo ? 0 : undefined }}>
                         {p.photo ? <img src={p.photo} alt="" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />

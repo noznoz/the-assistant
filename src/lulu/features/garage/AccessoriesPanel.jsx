@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { Card, Section, Sheet, Field, Input, TextArea, Chip, Button, Empty, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
+import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { money, fmtDate, todayISO } from '../../lib/format.js'
 import { ACCESSORY_STATUSES, accessoryStatus, ACCESSORY_TYPES, accessoryType, accessoryTotal, vehicleTitle, label } from '../../lib/domain.js'
 import { saveCloudPhoto } from '../../lib/files.js'
@@ -87,7 +87,7 @@ export default function AccessoriesPanel({ vehicle }) {
             const ty = typeDef(accessoryType(a))
             const tot = accessoryTotal(a)
             return (
-              <SwipeRow key={a.id} onEdit={() => setEditor(a)} onDelete={() => { accessories.remove(a.id); toast.show(t('deletedToast')) }}>
+              <SwipeRow key={a.id} onEdit={() => setEditor(a)} onDelete={() => { accessories.remove(a.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
               <div className="li" onClick={() => setEditor(a)}>
                 <div className="lead" style={{ padding: 0, overflow: 'hidden', background: 'var(--surface-2)', color: st === 'wishlist' ? 'var(--warn)' : 'var(--brand-600)' }}>
                   {a.photo ? <img src={a.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Icon name={ty.icon} size={18} />}

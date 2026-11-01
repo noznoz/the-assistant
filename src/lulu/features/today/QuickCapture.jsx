@@ -13,7 +13,7 @@ const COLLECTION = { expense: 'expenses', appointment: 'appointments', reminder:
 const SCREEN = { expense: 'expenses', appointment: 'appointments', reminder: 'reminders', task: 'tasks' }
 const ICON = { expense: 'wallet', appointment: 'calendar', reminder: 'bell', task: 'check' }
 
-export default function QuickCapture({ toast, go }) {
+export default function QuickCapture({ toast, go, onAdded, autoFocus = false }) {
   const { t, lang } = useT()
   const { settings } = useSettings()
   const [text, setText] = useState('')
@@ -70,6 +70,7 @@ export default function QuickCapture({ toast, go }) {
     const col = cols[COLLECTION[plan.type]]
     const rec = col.add(plan.fields)
     setText('')
+    onAdded && onAdded(rec)
     toast.show(`${t('cap_' + plan.type)} ${t('added').toLowerCase()}`, [
       { label: t('undo'), onClick: () => rec && rec.id && col.remove(rec.id) },
       { label: t('edit'), onClick: () => go && go(SCREEN[plan.type]) },
@@ -86,6 +87,7 @@ export default function QuickCapture({ toast, go }) {
           onKeyDown={e => { if (e.key === 'Enter') submit() }}
           placeholder={t('addAnything')}
           aria-label={t('addAnything')}
+          autoFocus={autoFocus}
           style={{ flex: 1, border: 0, background: 'transparent', padding: '12px 0', fontSize: 17, color: 'var(--ink-1)', outline: 'none', minWidth: 0 }}
         />
         {voiceOn && (

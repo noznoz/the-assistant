@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Sheet, Field, Input, Select, Button, Empty, Fab, Chip, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
+import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { DOC_CATEGORIES, docCategoryOptions, docCatLabel, VAULT_ICONS, label } from '../../lib/domain.js'
 import { DOC_LINK_TYPES, docItemName, linkTypeOfDoc, resolveDocLink } from '../../lib/docLink.js'
 import { fmtDate, daysUntil } from '../../lib/format.js'
@@ -98,7 +98,7 @@ export default function DocumentsScreen({ go }) {
           <p className="hint center" style={{ marginTop: 16 }}>{t('vaultsHint')}</p>
         </div>
         <Fab onClick={() => setEditor({})} />
-        {vaultEditor && <VaultEditor initial={vaultEditor} onClose={() => setVaultEditor(null)} onSaved={() => toast.show(t('savedToast'))} onDeleted={() => toast.show(t('deletedToast'))} />}
+        {vaultEditor && <VaultEditor initial={vaultEditor} onClose={() => setVaultEditor(null)} onSaved={() => toast.show(t('savedToast'))} onDeleted={() => toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }])} />}
         {editor && <DocEditor initial={editor.id ? editor : {}} onClose={() => setEditor(null)} onSaved={() => toast.show(t('savedToast'))} onToast={toast.show} />}
         {toast.node}
       </>

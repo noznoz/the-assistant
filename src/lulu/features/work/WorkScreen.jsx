@@ -3,7 +3,7 @@ import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Section, Sheet, Field, Input, TextArea, Select, Chip, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
 import AttachmentField from '../../ui/AttachmentField.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
+import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { PRIORITIES, findPriority, findStatus, ROLE_LEVELS, roleLabel, label } from '../../lib/domain.js'
 import { fmtDate, relativeDay, isOverdue, todayISO } from '../../lib/format.js'
 import { whatsappToPerson, formatAssignment, formatTaskDetail, emailShare, share } from '../../lib/share.js'
@@ -204,7 +204,7 @@ function WorkHome({ go }) {
               const pr = findPriority(x.priority)
               const overdue = isOverdue(x.dueDate)
               return (
-                <SwipeRow key={x.id} onEdit={() => setTaskEditor(x)} onDelete={() => { tasks.remove(x.id); toast.show(t('deletedToast')) }}>
+                <SwipeRow key={x.id} onEdit={() => setTaskEditor(x)} onDelete={() => { tasks.remove(x.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                   <div className="li">
                     <button className="check" onClick={() => completeWorkTask(x, tasks)} aria-label={t('markComplete')} />
                     <div className="body" onClick={() => setTaskSheet(x)}>
@@ -233,7 +233,7 @@ function WorkHome({ go }) {
         ) : departments.items.map(d => {
           const head = members.items.find(m => m.id === d.headId)
           return (
-            <SwipeRow key={d.id} onEdit={() => setEditDep(d)} onDelete={() => { departments.remove(d.id); toast.show(t('deletedToast')) }}>
+            <SwipeRow key={d.id} onEdit={() => setEditDep(d)} onDelete={() => { departments.remove(d.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
               <div className="li" onClick={() => go(`work/${d.id}`)}>
                 <div className="lead t-brand"><Icon name="report" size={18} /></div>
                 <div className="body">
@@ -355,7 +355,7 @@ function DepartmentDetail({ dep, go, onBack }) {
               const done = x.status === 'completed'
               const overdue = !done && isOverdue(x.dueDate)
               return (
-                <SwipeRow key={x.id} onEdit={() => setTaskEditor(x)} onDelete={() => { tasks.remove(x.id); toast.show(t('deletedToast')) }}>
+                <SwipeRow key={x.id} onEdit={() => setTaskEditor(x)} onDelete={() => { tasks.remove(x.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                   <div className={`li ${done ? 'done' : ''}`}>
                     <button className={`check ${done ? 'on' : ''}`} onClick={() => done ? tasks.patch(x.id, { status: 'new' }) : completeWorkTask(x, tasks)} aria-label={t('markComplete')}>
                       {done && <Icon name="check" size={16} stroke={3} />}

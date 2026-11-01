@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Stat, Sheet, Field, Input, Select, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
+import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { INVESTMENT_TYPES, findInvestmentType, label } from '../../lib/domain.js'
 import { money, toSar, fmtDate, todayISO } from '../../lib/format.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
@@ -68,7 +68,7 @@ export default function InvestmentsScreen({ go }) {
               const g = value - inv
               const div = dividendFor(v.id)
               return (
-                <SwipeRow key={v.id} onEdit={() => setEditor(v)} onDelete={() => { investments.remove(v.id); toast.show(t('deletedToast')) }}>
+                <SwipeRow key={v.id} onEdit={() => setEditor(v)} onDelete={() => { investments.remove(v.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                 <div className="li" onClick={() => setEditor(v)}>
                   <div className="lead t-brand"><Icon name={type?.icon || 'chart'} size={18} /></div>
                   <div className="body">

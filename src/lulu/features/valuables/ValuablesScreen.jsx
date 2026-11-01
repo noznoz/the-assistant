@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Stat, Sheet, Field, Input, TextArea, Select, Button, Empty, Fab, Chip, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
+import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { VALUABLE_CATEGORIES, findValuableCategory, label } from '../../lib/domain.js'
 import { money, toSar, fmtDate, daysUntil } from '../../lib/format.js'
 import { saveAttachment, removeAttachment } from '../../lib/files.js'
@@ -45,7 +45,7 @@ export default function ValuablesScreen({ go }) {
               const c = findValuableCategory(v.category)
               const dd = daysUntil(v.warrantyExpiry)
               return (
-                <SwipeRow key={v.id} onEdit={() => setEditor(v)} onDelete={() => { valuables.remove(v.id); toast.show(t('deletedToast')) }}>
+                <SwipeRow key={v.id} onEdit={() => setEditor(v)} onDelete={() => { valuables.remove(v.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                 <div className="li" onClick={() => setEditor(v)}>
                   <div className="lead t-brand"><Icon name={c?.icon || 'gift'} size={18} /></div>
                   <div className="body">

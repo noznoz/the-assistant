@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Stat, Sheet, Field, Input, Select, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
+import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { LIABILITY_TYPES, findLiabilityType, label } from '../../lib/domain.js'
 import { money } from '../../lib/format.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
@@ -45,7 +45,7 @@ export default function LiabilitiesScreen({ go }) {
               const balance = Number(l.balance) || 0
               const paidPct = principal > 0 ? Math.min(1, Math.max(0, (principal - balance) / principal)) : 0
               return (
-                <SwipeRow key={l.id} onEdit={() => setEditor(l)} onDelete={() => { liabilities.remove(l.id); toast.show(t('deletedToast')) }}>
+                <SwipeRow key={l.id} onEdit={() => setEditor(l)} onDelete={() => { liabilities.remove(l.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                 <Card className="tight" onClick={() => setEditor(l)}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span className="lead t-danger" style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name={type?.icon || 'wallet'} size={18} /></span>

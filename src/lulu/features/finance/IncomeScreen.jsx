@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Stat, Sheet, Field, Input, Select, Chip, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
+import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { INCOME_SOURCES, findIncomeSource, label } from '../../lib/domain.js'
 import { money, toSar, fmtDate, isSameMonth, todayISO } from '../../lib/format.js'
 import { defaultAccountName } from '../../lib/accounts.js'
@@ -44,7 +44,7 @@ export default function IncomeScreen({ go }) {
             {sorted.map(i => {
               const src = findIncomeSource(i.source)
               return (
-                <SwipeRow key={i.id} onEdit={() => setEditor(i)} onDelete={() => { income.remove(i.id); toast.show(t('deletedToast')) }}>
+                <SwipeRow key={i.id} onEdit={() => setEditor(i)} onDelete={() => { income.remove(i.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                 <div className="li" onClick={() => setEditor(i)}>
                   <div className="lead t-ok"><Icon name={src?.icon || 'wallet'} size={18} /></div>
                   <div className="body">

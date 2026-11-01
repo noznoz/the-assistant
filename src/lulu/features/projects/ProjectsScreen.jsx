@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Section, Stat, Bars, Button, Sheet, Field, Input, TextArea, Empty, Fab, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
+import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { catLabel } from '../../lib/domain.js'
 import { money, fmtDate, expenseSar, todayISO } from '../../lib/format.js'
 import { share, formatExpenseSummary } from '../../lib/share.js'
@@ -41,7 +41,7 @@ export default function ProjectsScreen({ param, go }) {
               const pct = budget ? Math.min(1, total / budget) : 0
               const ended = p.status === 'ended'
               return (
-                <SwipeRow key={p.id} onEdit={() => setEditor(p)} onDelete={() => { projects.remove(p.id); toast.show(t('deletedToast')) }}>
+                <SwipeRow key={p.id} onEdit={() => setEditor(p)} onDelete={() => { projects.remove(p.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                 <Card className="tight" onClick={() => go(`projects/${p.id}`)} style={ended ? { opacity: 0.72 } : undefined}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span className={`lead ${ended ? '' : 't-brand'}`} style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center', background: ended ? 'var(--surface-2)' : undefined }}><Icon name={ended ? 'check' : 'report'} size={18} /></span>
@@ -214,7 +214,7 @@ function ProjectDetail({ project, go, onBack }) {
         {mine.length === 0 ? (
           <Empty icon="wallet" title={t('nothingHere')} text={t('addExpenseTo')} />
         ) : mine.map(e => (
-          <SwipeRow key={e.id} onEdit={() => setAddExp(e)} onDelete={() => { expenses.remove(e.id); toast.show(t('deletedToast')) }}>
+          <SwipeRow key={e.id} onEdit={() => setAddExp(e)} onDelete={() => { expenses.remove(e.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
           <div className="li" onClick={() => setAddExp(e)}>
             <div className="lead t-brand"><Icon name="receipt" size={18} /></div>
             <div className="body">

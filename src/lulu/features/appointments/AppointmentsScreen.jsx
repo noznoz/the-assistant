@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Section, Sheet, Field, Input, TextArea, Select, Button, Empty, Fab, Chip, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
+import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { APPOINTMENT_TYPES, findAppointmentType, label } from '../../lib/domain.js'
 import { fmtDate, fmtTime, relativeDay, daysUntil, todayISO } from '../../lib/format.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
@@ -26,7 +26,7 @@ export default function AppointmentsScreen({ go }) {
     const dd = daysUntil(a.date)
     const who = nameFor(a.personId)
     return (
-      <SwipeRow key={a.id} onEdit={() => setEditor(a)} onDelete={() => { appts.remove(a.id); toast.show(t('deletedToast')) }}>
+      <SwipeRow key={a.id} onEdit={() => setEditor(a)} onDelete={() => { appts.remove(a.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
         <div className="li" onClick={() => setEditor(a)}>
           <div className={`lead ${dd != null && dd >= 0 && dd <= 3 ? 't-warn' : 't-brand'}`}><Icon name={type?.icon || 'calendar'} size={18} /></div>
           <div className="body">
@@ -64,7 +64,7 @@ export default function AppointmentsScreen({ go }) {
   )
 }
 
-function ApptEditor({ initial, onClose, onSaved }) {
+export function ApptEditor({ initial, onClose, onSaved }) {
   const { t, lang } = useT()
   const appts = useCollection('appointments')
   const people = useCollection('people')

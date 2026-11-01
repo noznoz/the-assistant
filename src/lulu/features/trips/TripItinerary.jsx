@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { Card, Section, Sheet, Field, Input, TextArea, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
-import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
+import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { fmtLongDate, fmtTime } from '../../lib/format.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
 
@@ -31,7 +31,7 @@ export default function TripItinerary({ trip }) {
           <Section title={dk === 'nd' ? t('unscheduled') : fmtLongDate(dk, lang)} count={days[dk].length} />
           <Card tight>
             {days[dk].map(x => (
-              <SwipeRow key={x.id} onEdit={() => setEditor(x)} onDelete={() => { itinerary.remove(x.id); toast.show(t('deletedToast')) }}>
+              <SwipeRow key={x.id} onEdit={() => setEditor(x)} onDelete={() => { itinerary.remove(x.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                 <div className="li" onClick={() => setEditor(x)}>
                   <div className="lead t-brand" style={{ minWidth: 52, fontSize: 14, fontWeight: 700 }}>{x.time ? fmtTime(x.time, lang) : '—'}</div>
                   <div className="body">
