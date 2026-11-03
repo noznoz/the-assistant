@@ -44,11 +44,12 @@ export default function DashboardScreen({ go }) {
         <h2 className="member-h2" style={{ marginTop: 14 }}>{t('homeStyle')}</h2>
         <div className="chip-row" style={{ margin: '2px 0 6px' }}>
           {[
+            { id: 'calm', label: t('homeCalm') },
             { id: 'classic', label: t('homeClassic') }, { id: 'focus', label: t('homeFocus') },
             { id: 'cover', label: t('homeCover') }, { id: 'timeline', label: t('homeTimeline') },
             { id: 'bento', label: t('homeBento') },
           ].map(o => (
-            <Chip key={o.id} selectable on={(settings.homeStyle || 'classic') === o.id} onClick={() => updateSettings({ homeStyle: o.id })}>{o.label}</Chip>
+            <Chip key={o.id} selectable on={(settings.homeStyle || 'calm') === o.id} onClick={() => updateSettings({ homeStyle: o.id })}>{o.label}</Chip>
           ))}
         </div>
         <p className="hint" style={{ margin: '0 2px 18px' }}>{t('homeStyleHint')}</p>

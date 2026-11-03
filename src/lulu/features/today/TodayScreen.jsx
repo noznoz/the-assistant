@@ -19,6 +19,8 @@ import { normalizeDashboard } from '../../lib/dashboard.js'
 import PrayerCard from './PrayerCard.jsx'
 import QuickCapture from './QuickCapture.jsx'
 import HomeLayout from './HomeLayouts.jsx'
+import CalmHome from './CalmHome.jsx'
+import TaskDetail from '../tasks/TaskDetail.jsx'
 import WelcomeCard from './WelcomeCard.jsx'
 import { share, formatAgenda } from '../../lib/share.js'
 import { findPriority } from '../../lib/domain.js'
@@ -46,6 +48,8 @@ export default function TodayScreen({ go }) {
   const properties = useCollection('properties')
   const [editor, setEditor] = useState(null)
   const [dayBrief, setDayBrief] = useState(null)
+  const [detail, setDetail] = useState(null)      // task opened from Next up
+  const [editTask, setEditTask] = useState(null)
   const toast = useToast()
 
   const notifFeed = useNotificationFeed()
@@ -316,7 +320,8 @@ export default function TodayScreen({ go }) {
 
   // Alternative full-screen layouts (Cover / Timeline / Bento) share the same
   // computed data, shaped here and handed to HomeLayout.
-  const homeVariant = settings.homeStyle || 'classic'
+  const homeVariant = settings.homeStyle || 'calm'
+  const isCalm = homeVariant === 'calm'
   const isCustomLayout = homeVariant === 'cover' || homeVariant === 'timeline' || homeVariant === 'bento'
   const homeData = (() => {
     const now = new Date()
@@ -365,7 +370,10 @@ export default function TodayScreen({ go }) {
 
       <div className="screen">
         <WelcomeCard go={go} />
-        {isCustomLayout ? (
+        {isCalm ? (
+          <CalmHome data={homeData} go={go} t={t} lang={lang} city={findCity(settings.prayerCity)}
+            notifFeed={notifFeed} shareAgenda={shareAgenda} openTask={setDetail} />
+        ) : isCustomLayout ? (
           <HomeLayout variant={homeVariant} data={homeData} go={go} t={t} lang={lang} toast={toast} />
         ) : (
         <>
@@ -420,6 +428,12 @@ export default function TodayScreen({ go }) {
       {editor === 'note' && <NoteEditor onClose={closeEditor} onSaved={() => toast.show(t('savedToast'))} />}
       {editor === 'snap' && <SnapFile onClose={closeEditor} onSaved={() => toast.show(t('savedToast'))} />}
       {dayBrief != null && <DayBriefSheet brief={dayBrief} onClose={() => setDayBrief(null)} />}
+      {detail && (
+        <TaskDetail task={detail} people={people.items} lang={lang}
+          onClose={() => setDetail(null)}
+          onEdit={() => { setEditTask(detail); setDetail(null) }} />
+      )}
+      {editTask && <TaskEditor initial={editTask} onClose={() => setEditTask(null)} onSaved={() => toast.show(t('savedToast'))} />}
       {toast.node}
     </>
   )

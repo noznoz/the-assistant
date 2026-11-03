@@ -163,7 +163,7 @@ export const DEFAULT_SETTINGS = {
   notificationsSeen: [], // ids of notification-feed items already viewed
   accounts: ['Salary account', 'Other account'], // funding accounts an expense can be paid from
   dashboard: null,       // Today-screen card order/visibility (null = default)
-  homeStyle: 'classic',  // Today-screen layout: 'classic' | 'focus' | 'cover' | 'timeline' | 'bento'
+  homeStyle: 'calm',     // Today-screen layout: 'calm' | 'classic' | 'focus' | 'cover' | 'timeline' | 'bento'
   accent: 'amber',       // color scheme: amber | emerald | sapphire | rose | violet | graphite
   targetAllocation: {},  // desired investment mix by type { [typeId]: percent }
   favorites: [],         // pinned section ids shown at the top of More
@@ -179,8 +179,13 @@ const MODEL_ALIASES = {
 }
 
 export function readSettings() {
-  const s = { ...DEFAULT_SETTINGS, ...safeParse(localStorage.getItem(keyFor('settings')), {}) }
+  const saved = safeParse(localStorage.getItem(keyFor('settings')), {})
+  const s = { ...DEFAULT_SETTINGS, ...saved }
   if (MODEL_ALIASES[s.aiModel]) s.aiModel = MODEL_ALIASES[s.aiModel]
+  // One-time switch to the redesigned (Calm) home. The marker isn't in the
+  // defaults, so it's only present once the settings have been saved after
+  // the switch; picking another layout afterwards is then kept.
+  if (!saved.homeCalmV1) { s.homeStyle = 'calm'; s.homeCalmV1 = true }
   return s
 }
 export function writeSettings(s) {
