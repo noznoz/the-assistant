@@ -136,6 +136,7 @@
   white-space: nowrap;
 }
 .chip.selectable { cursor: pointer; }
+button.chip { font-family: inherit; line-height: inherit; cursor: pointer; }
 .chip.on { background: var(--ink); color: var(--bg); border-color: transparent; }
 [data-theme="dark"] .chip.on { background: var(--brand-500); color:#14110A; }
 .chip .dot { width: 7px; height: 7px; border-radius: 50%; }
@@ -624,3 +625,54 @@
 .add-tile:active { transform: scale(0.96); }
 .add-tile .ic { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; background: var(--brand-tint); color: var(--brand-600); }
 [data-theme="dark"] .add-tile .ic { color: var(--brand-400); }
+
+/* ---- Today: the Calm layout (redesigned home) ---- */
+.calm-greet { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; margin: 18px 0 8px; text-wrap: balance; }
+.calm-sum { font-size: var(--fs-body); color: var(--ink-2); line-height: 1.5; margin: 0 0 14px; text-wrap: pretty; }
+.calm-sum b { color: var(--ink); font-weight: 650; }
+.nb { white-space: nowrap; }
+.nextup { margin-top: 18px; padding: 20px; border-radius: var(--r-lg); background: var(--brand-tint); }
+.nu-l { display: flex; align-items: center; gap: 8px; font-size: var(--fs-sm); font-weight: 650; color: var(--brand-600); }
+[data-theme="dark"] .nu-l { color: var(--brand-400); }
+.nu-l i { width: 8px; height: 8px; border-radius: 50%; background: var(--brand-500); flex-shrink: 0; }
+.nu-t { font-size: 22px; font-weight: 700; line-height: 1.25; letter-spacing: -0.01em; margin: 8px 0 6px; }
+.nu-m { display: flex; align-items: center; gap: 7px; font-size: var(--fs-sm); color: var(--ink-2); }
+.nu-a { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+/* Your day: one timeline, prayers in place, a "Now" line */
+.dl { list-style: none; margin: 0; padding: 0; }
+.dl-i { display: grid; grid-template-columns: 82px 24px minmax(0, 1fr); align-items: start; }
+.dl-time { font-size: var(--fs-sm); color: var(--ink-2); padding-top: 3px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dl-rail { position: relative; align-self: stretch; display: flex; justify-content: center; }
+.dl-rail::before { content: ''; position: absolute; top: 0; bottom: 0; width: 2px; background: var(--line-2); }
+.dl-i:first-child .dl-rail::before { top: 12px; }
+.dl-i:last-child .dl-rail::before { bottom: auto; height: 12px; }
+.dl-dot { position: relative; width: 12px; height: 12px; margin-top: 8px; border-radius: 50%; background: var(--bg); border: 2px solid var(--ink-3); }
+.k-prayer .dl-dot { border-color: var(--brand-500); }
+.k-appt .dl-dot { background: var(--brand-500); border-color: var(--brand-500); }
+.dl-body { display: block; width: 100%; min-width: 0; padding: 0 0 18px; border: 0; background: none; color: var(--ink); text-align: start; border-radius: 10px; font: inherit; }
+.dl-body:active { background: var(--surface-2); }
+.dl-title { display: block; font-size: var(--fs-body); font-weight: 600; line-height: 1.3; }
+.k-prayer .dl-title { font-weight: 450; color: var(--ink-2); }
+.dl-sub { display: flex; align-items: flex-start; gap: 6px; margin-top: 2px; font-size: var(--fs-sm); color: var(--ink-3); }
+.dl-sub svg { margin-top: 3px; flex-shrink: 0; }
+.dl-sub .soon { color: var(--brand-600); font-weight: 650; }
+[data-theme="dark"] .dl-sub .soon { color: var(--brand-400); }
+.dl-i.past { opacity: 0.5; }
+.dl-i.now .dl-time { color: var(--danger); font-weight: 650; }
+.dl-i.now .dl-dot { width: 10px; height: 10px; margin-top: 9px; background: var(--danger); border-color: var(--danger); }
+.dl-now { display: flex; align-items: center; gap: 8px; padding: 3px 0 18px; font-size: var(--fs-sm); font-weight: 650; color: var(--danger); }
+.dl-now::after { content: ''; flex: 1; height: 2px; border-radius: 1px; background: var(--danger); opacity: 0.35; }
+.calm-clear { display: flex; align-items: center; gap: 8px; color: var(--ok); font-weight: 600; margin: 0 2px; }
+
+/* Money at a glance */
+.money-glance { display: block; padding: 18px; cursor: pointer; }
+.mg-top { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; }
+.mg-amt { font-size: 26px; font-weight: 750; letter-spacing: -0.02em; }
+.mg-of { font-size: var(--fs-sm); color: var(--ink-3); }
+.mg-bar { height: 10px; border-radius: 5px; background: var(--bg-2); overflow: hidden; margin: 14px 0 10px; }
+.mg-bar span { display: block; height: 100%; border-radius: inherit; background: var(--brand-500); }
+.mg-bar.over span { background: var(--danger); }
+.mg-row { display: flex; justify-content: space-between; gap: 10px; font-size: var(--fs-sm); color: var(--ink-2); }
+.mg-row b { color: var(--ink); font-weight: 650; }
+.mg-sep { height: 1px; background: var(--line); margin: 14px 0; }

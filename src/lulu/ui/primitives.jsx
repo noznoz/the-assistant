@@ -50,12 +50,14 @@ export function Section({ title, count, action, onAction }) {
 
 // ---------- Chip ----------
 export function Chip({ on, selectable, tint = '', dot, onClick, children }) {
-  return (
-    <span className={`chip ${tint} ${selectable ? 'selectable' : ''} ${on ? 'on' : ''}`} onClick={onClick}>
-      {dot && <span className="dot" style={{ background: dot }} />}
-      {children}
-    </span>
-  )
+  const cls = `chip ${tint} ${selectable ? 'selectable' : ''} ${on ? 'on' : ''}`
+  const inner = (<>{dot && <span className="dot" style={{ background: dot }} />}{children}</>)
+  // A tappable chip is a real button (keyboard + screen reader); a selectable
+  // one also reports whether it's on.
+  if (onClick) {
+    return <button type="button" className={cls} onClick={onClick} aria-pressed={selectable ? !!on : undefined}>{inner}</button>
+  }
+  return <span className={cls}>{inner}</span>
 }
 
 // ---------- Field wrapper ----------
