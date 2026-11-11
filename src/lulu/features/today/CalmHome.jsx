@@ -56,10 +56,11 @@ export default function CalmHome({ data, go, t, lang, city, notifFeed, shareAgen
 
   return (
     <div className="calm">
+      <div className="calm-main">
       <h1 className="calm-greet">{data.greet}{data.name ? `, ${data.name}` : ''}</h1>
       <p className="calm-sum">
         {(nMeet || due || overdue) ? null : <span>{t('noThingsToday')} </span>}
-        {parts.map((p, i) => <React.Fragment key={i}>{i ? ' · ' : ''}{p}</React.Fragment>)}
+        {parts.map((p, i) => <React.Fragment key={i}><span className="nb">{p}{i < parts.length - 1 ? ' ·' : ''}</span>{' '}</React.Fragment>)}
       </p>
       <div className="calm-brief"><Button size="sm" icon="sparkle" onClick={data.openDayBrief}>{t('startMyDay')}</Button></div>
 
@@ -105,6 +106,10 @@ export default function CalmHome({ data, go, t, lang, city, notifFeed, shareAgen
         ))}
         {nowAt === -1 && <NowRow now={now} lang={lang} t={t} />}
       </ol>
+      </div>
+
+      {/* On wide screens this becomes a second column beside the timeline. */}
+      <div className="calm-side">
 
       <Section title={t('needsYou')} count={notifFeed.length || undefined}
         action={notifFeed.length > 3 ? t('viewAll') : undefined} onAction={() => go('notifications')} />
@@ -142,6 +147,7 @@ export default function CalmHome({ data, go, t, lang, city, notifFeed, shareAgen
         <div className="mg-sep" />
         <div className="mg-row"><span>{t('todaysSpending')}</span><b className="tnum">{m(data.spentToday)}</b></div>
       </Pressable>
+      </div>
     </div>
   )
 }

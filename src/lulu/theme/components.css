@@ -4,7 +4,10 @@
 
 /* ---- App shell ---- */
 .app {
-  max-width: 620px;
+  /* --col: the widest the single phone column gets. --rail: width of the side
+     navigation rail on wide screens (0 on phones). See "Adaptive layout". */
+  --col: 700px; --rail: 0px;
+  max-width: var(--col);
   margin: 0 auto;
   min-height: 100%;
   display: flex;
@@ -47,7 +50,7 @@
 /* ---- Bottom nav ---- */
 .bottomnav {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
-  max-width: 620px; margin: 0 auto;
+  max-width: 700px; margin: 0 auto;
   display: grid; grid-template-columns: repeat(5, 1fr);
   padding: 8px 4px calc(8px + env(safe-area-inset-bottom));
   background: color-mix(in srgb, var(--surface) 88%, transparent);
@@ -117,7 +120,7 @@
 /* ---- FAB ---- */
 .fab {
   position: fixed; bottom: calc(78px + env(safe-area-inset-bottom)); z-index: 25;
-  inset-inline-end: max(18px, calc((100vw - 620px)/2 + 18px));
+  inset-inline-end: max(18px, calc((100vw - 700px)/2 + 18px));
   width: 58px; height: 58px; border-radius: 20px;
   background: var(--brand-500); color: #14110A; border: 0;
   box-shadow: 0 10px 30px rgba(200,150,62,0.45);
@@ -258,7 +261,7 @@ button.chip { font-family: inherit; line-height: inherit; cursor: pointer; }
   display: flex; align-items: flex-end; justify-content: center;
 }
 .sheet {
-  width: 100%; max-width: 620px; max-height: 92vh; overflow-y: auto;
+  width: 100%; max-width: 700px; max-height: 92vh; max-height: 92dvh; overflow-y: auto;
   background: var(--bg); border-radius: 26px 26px 0 0;
   border: 1px solid var(--line); border-bottom: 0;
   padding: 10px var(--s5) calc(28px + env(safe-area-inset-bottom));
@@ -676,3 +679,100 @@ button.chip { font-family: inherit; line-height: inherit; cursor: pointer; }
 .mg-row { display: flex; justify-content: space-between; gap: 10px; font-size: var(--fs-sm); color: var(--ink-2); }
 .mg-row b { color: var(--ink); font-weight: 650; }
 .mg-sep { height: 1px; background: var(--line); margin: 14px 0; }
+
+/* ============================================================================
+   Adaptive layout — the app follows the size of whichever screen it is on, so
+   it needs no device detection and re-flows live on rotate or fold/unfold.
+     < 700px   phone column + bottom bar   (iPhone, a foldable's outer screen,
+                                            its inner screen held upright)
+     >= 700px  side rail + wide content    (a foldable's inner screen opened
+                                            flat, a phone on its side, tablets)
+   ========================================================================== */
+/* The Assistant's message box: pinned above the bottom bar on phones. */
+.assist-bar {
+  position: fixed; left: 0; right: 0; bottom: calc(76px + env(safe-area-inset-bottom));
+  max-width: 700px; margin: 0 auto; z-index: 25;
+  background: var(--bg); border-top: 1px solid var(--line);
+  padding: 10px 14px; display: flex; align-items: flex-end; gap: 8px;
+}
+
+@media (min-width: 700px) {
+  .app {
+    --rail: 96px;
+    max-width: none; margin: 0;
+    padding-inline-start: calc(var(--rail) + env(safe-area-inset-left, 0px));
+    padding-inline-end: env(safe-area-inset-right, 0px);
+  }
+  [dir="rtl"] .app {
+    padding-inline-start: calc(var(--rail) + env(safe-area-inset-right, 0px));
+    padding-inline-end: env(safe-area-inset-left, 0px);
+  }
+  /* Centered with padding, not a fixed width, so it still fills its flex row
+     and behaves under the Larger text zoom. */
+  .screen { padding: 0 max(var(--s6), calc((100% - 980px) / 2 + var(--s6))) 96px; }
+  .topbar { padding-inline: max(var(--s6), calc((100% - 980px) / 2 + var(--s6))); }
+
+  /* Bottom bar -> side rail. Saves height on short, wide screens. */
+  .bottomnav {
+    top: 0; bottom: 0; left: 0; right: auto; width: calc(var(--rail) + env(safe-area-inset-left, 0px));
+    max-width: none; margin: 0;
+    grid-template-columns: minmax(0, 1fr) !important; grid-auto-rows: min-content; align-content: center; gap: 6px;
+    padding: calc(10px + env(safe-area-inset-top, 0px)) 6px calc(10px + env(safe-area-inset-bottom, 0px));
+    padding-inline-start: calc(6px + env(safe-area-inset-left, 0px));
+    border-top: 0; border-inline-end: 1px solid var(--line);
+    overflow-y: auto; scrollbar-width: none;
+  }
+  [dir="rtl"] .bottomnav {
+    left: auto; right: 0; width: calc(var(--rail) + env(safe-area-inset-right, 0px));
+    padding-inline-start: calc(6px + env(safe-area-inset-right, 0px));
+  }
+  .navbtn { padding: 8px 0; font-size: 12.5px; text-align: center; line-height: 1.2; }
+
+  /* Things that floated above the bottom bar now sit near the bottom edge,
+     centered on the content area (offset by half the rail). */
+  .fab { bottom: calc(24px + env(safe-area-inset-bottom)); inset-inline-end: max(24px, calc((100vw - var(--rail) - 980px) / 2 + 24px)); }
+  .toast, .storage-alert, .update-banner { bottom: calc(24px + env(safe-area-inset-bottom)); left: calc(50% + var(--rail) / 2); }
+  [dir="rtl"] :is(.toast, .storage-alert, .update-banner) { left: calc(50% - var(--rail) / 2); }
+  .toast { max-width: min(90%, 560px); }
+  .assist-bar {
+    bottom: 0; max-width: none; margin: 0;
+    inset-inline-start: calc(var(--rail) + env(safe-area-inset-left, 0px)); inset-inline-end: 0;
+    padding: 10px max(var(--s6), calc((100% - 980px) / 2 + var(--s6))) calc(10px + env(safe-area-inset-bottom));
+  }
+
+  /* Panels open as centered dialogs instead of full-width bottom sheets. */
+  .scrim { align-items: center; padding: 16px; }
+  .sheet {
+    max-width: 580px; max-height: 88vh; max-height: 88dvh;
+    border-radius: 26px; border-bottom: 1px solid var(--line);
+    padding-bottom: 24px; animation: fade 0.22s var(--ease);
+  }
+  .sheet .grabber { display: none; }
+  .sheet-h { margin-top: 8px; }
+
+  /* Grids use the extra width. */
+  .stat-grid { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+  .qa-grid { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+}
+
+/* Today on wide screens: the day on one side, what needs you and money on the
+   other — both visible without scrolling on a short, wide screen. */
+@media (min-width: 700px) {
+  .calm { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); column-gap: 36px; align-items: start; }
+  .calm-side { position: sticky; top: 84px; }
+  .calm-side > .section-h:first-child { margin-top: 22px; }
+}
+
+/* Plain lists of row-cards flow into columns when the list itself is wide
+   enough (>= 2 x 330px), so a list in a narrow column stays single-file.
+   Only containers whose children are all rows; rows inside a card are left. */
+@media (min-width: 700px) {
+  .screen div:not(.card):has(> :is(.li, .swipe-wrap)):not(:has(> :not(.li, .swipe-wrap))) {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(min(330px, 100%), 1fr)); column-gap: 12px; align-items: stretch;
+  }
+  /* A swipe row stretched to its neighbour's height: the card fills it, so
+     the swipe buttons behind never show below a shorter card. */
+  .swipe-wrap { display: flex; }
+  .swipe-wrap > .swipe-content { flex: 1; min-width: 0; display: flex; }
+  .swipe-wrap > .swipe-content > :is(.li, .card) { flex: 1; min-width: 0; }
+}

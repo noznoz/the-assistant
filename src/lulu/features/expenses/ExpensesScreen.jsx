@@ -91,13 +91,13 @@ export default function ExpensesScreen({ go }) {
         {/* Finance overview — this month */}
         <Card style={{ marginTop: 14 }}>
           <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em', textAlign: 'center' }}>{t('netThisMonth')}</div>
-          <div style={{ fontSize: 32, fontWeight: 780, marginTop: 4, textAlign: 'center' }} className={`tnum ${net >= 0 ? 't-ok' : 't-danger'}`}>
+          <div style={{ fontSize: 32, fontWeight: 780, marginTop: 4, textAlign: 'center', background: 'transparent' }} className={`tnum ${net >= 0 ? 't-ok' : 't-danger'}`}>
             {net >= 0 ? '' : '−'}{money(Math.abs(net), cur, lang)}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 14 }}>
             <button className="qa" style={{ alignItems: 'flex-start', textAlign: 'start' }} onClick={() => go('income')}>
               <span className="muted" style={{ fontSize: 13, fontWeight: 650, textTransform: 'uppercase' }}>{t('income')}</span>
-              <b className="tnum t-ok" style={{ fontSize: 18 }}>{money(monthIncome, cur, lang)}</b>
+              <b className="tnum t-ok" style={{ fontSize: 18, background: 'transparent' }}>{money(monthIncome, cur, lang)}</b>
             </button>
             <div className="qa" style={{ alignItems: 'flex-start', textAlign: 'start', cursor: 'default' }}>
               <span className="muted" style={{ fontSize: 13, fontWeight: 650, textTransform: 'uppercase' }}>{t('expenses')}</span>
