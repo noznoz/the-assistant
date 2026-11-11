@@ -480,12 +480,7 @@ export default function AssistantScreen({ go }) {
             {error && <p className="err" style={{ margin: '8px 2px' }}>{error}</p>}
           </div>
 
-          <div style={{
-            position: 'fixed', left: 0, right: 0, bottom: 'calc(60px + env(safe-area-inset-bottom))',
-            maxWidth: 620, margin: '0 auto', zIndex: 25,
-            background: 'var(--bg)', borderTop: '1px solid var(--line)',
-            padding: '10px 14px', display: 'flex', alignItems: 'flex-end', gap: 8,
-          }}>
+          <div className="assist-bar">
             {speechSupported && (
               <button className="fab" onClick={toggleMic} aria-label={listening ? t('micListening') : t('micStart')}
                 style={{ position: 'static', width: 44, height: 44, flexShrink: 0,

@@ -121,7 +121,7 @@ export default function MoreScreen({ go }) {
 
   const QuickTile = ({ it }) => (
     <button onClick={() => openSection(it.id)} style={{
-      flexShrink: 0, width: 86, display: 'grid', gap: 8, justifyItems: 'center', padding: '14px 8px',
+      flexShrink: 0, width: 104, display: 'grid', gap: 8, justifyItems: 'center', padding: '14px 6px',
       background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--r-lg)', color: 'var(--ink)',
     }}>
       <span className={`lead ${it.tint}`} style={{ width: 44, height: 44, borderRadius: 13, display: 'grid', placeItems: 'center' }}>
