@@ -29,6 +29,7 @@ import GarageScreen from './features/garage/GarageScreen.jsx'
 import ExpensesScreen from './features/expenses/ExpensesScreen.jsx'
 import MoreScreen from './features/more/MoreScreen.jsx'
 
+const PlanScreen = lazy(() => import('./features/plan/PlanScreen.jsx'))
 const InboxScreen = lazy(() => import('./features/inbox/InboxScreen.jsx'))
 const PeopleScreen = lazy(() => import('./features/people/PeopleScreen.jsx'))
 const DocumentsScreen = lazy(() => import('./features/documents/DocumentsScreen.jsx'))
@@ -210,6 +211,7 @@ function Router() {
   const screen = (() => {
     switch (tab) {
       case 'today': return <TodayScreen go={go} />
+      case 'plan': return <PlanScreen go={go} />
       case 'tasks': return <TasksScreen param={param} go={go} />
       case 'garage': return <GarageScreen param={param} go={go} />
       case 'expenses': return <ExpensesScreen go={go} />
@@ -278,13 +280,15 @@ function Router() {
   // Bottom nav highlights whichever tab the current route belongs to. The middle
   // tabs are user-chosen, so a route's "parent" only lights up if it's in the bar;
   // otherwise everything falls back to More.
+  const navSet = new Set(['today', ...navMiddle(settings), 'more'])
   const parentOf = (tb) => {
     if (['projects', 'expensereport', 'budgets', 'subscriptions', 'income', 'investments', 'accounts', 'networth', 'zakat', 'trends', 'liabilities', 'moneycal', 'statement', 'properties', 'forecast', 'goals', 'debtpayoff', 'allocation'].includes(tb)) return 'expenses'
-    if (['work', 'workboard', 'meetings', 'orgchart', 'followup'].includes(tb)) return 'tasks'
+    // Task-related screens light up Tasks when it's in the bar, otherwise Plan.
+    if (['work', 'workboard', 'meetings', 'orgchart', 'followup'].includes(tb)) return navSet.has('tasks') ? 'tasks' : 'plan'
+    if (['tasks', 'reminders', 'appointments', 'calendar', 'week'].includes(tb)) return 'plan'
     if (tb === 'dashboard') return 'today'
     return 'more'
   }
-  const navSet = new Set(['today', ...navMiddle(settings), 'more'])
   const activeTab = navSet.has(tab) ? tab
     : (navSet.has(parentOf(tab)) ? parentOf(tab) : 'more')
 

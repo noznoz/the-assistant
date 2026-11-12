@@ -5,18 +5,8 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { uid } from '../../store/db.js'
 import AttachmentField from '../../ui/AttachmentField.jsx'
-import { buildReminderFields } from '../../lib/reminders.js'
+import { syncTaskReminder } from '../../lib/taskReminder.js'
 
-// The alert time for a task's "Remind me" choice, derived from its due date/time.
-function taskReminderISO(dueDate, dueTime, remind) {
-  if (!dueDate || !remind || remind === 'none') return null
-  const [h, m] = (dueTime || '09:00').split(':').map(Number)
-  if (remind === 'morning') { const d = new Date(dueDate + 'T00:00:00'); d.setHours(9, 0, 0, 0); return d.toISOString() }
-  const due = new Date(dueDate + 'T00:00:00'); due.setHours(h || 9, m || 0, 0, 0)
-  if (remind === 'dayBefore') { due.setDate(due.getDate() - 1); return due.toISOString() }
-  if (remind === 'hourBefore') { due.setHours(due.getHours() - 1); return due.toISOString() }
-  return null
-}
 import { TASK_TYPES, STATUSES, PRIORITIES } from '../../lib/domain.js'
 import { RECURRENCE } from '../../lib/recurrence.js'
 import { todayISO } from '../../lib/format.js'
@@ -60,23 +50,13 @@ export default function TaskEditor({ initial, onClose, onSaved }) {
   const legacyName = !f.assigneeId && f.assignedTo ? f.assignedTo : ''
   const assigneeValue = f.assigneeId || (legacyName ? '__legacy' : '')
 
-  // Keep a task's due-date reminder in sync (its own record, flagged so it never
-  // clashes with a Work task's separate alert times).
-  const syncTaskReminder = (taskId, title, dueDate, dueTime, remind) => {
-    const existing = reminders.items.find(r => r.taskId === taskId && r.dueReminder)
-    const iso = taskReminderISO(dueDate, dueTime, remind)
-    if (!iso) { if (existing) reminders.remove(existing.id); return }
-    const fields = { ...buildReminderFields(title, [iso]), taskId, dueReminder: true, repeat: 'none', done: false }
-    if (existing) reminders.save({ ...existing, ...fields }); else reminders.add(fields)
-  }
-
   const submit = () => {
     if (!f.title.trim()) { setErr(t('required')); return }
     const rec = { ...f, title: f.title.trim() }
     let id = initial?.id
     if (id) tasks.save({ ...rec, id })
     else { const created = tasks.add(rec); id = created && created.id }
-    if (id) syncTaskReminder(id, rec.title, rec.dueDate, rec.dueTime, rec.remind)
+    if (id) syncTaskReminder(reminders, { ...rec, id })
     onSaved && onSaved()
     onClose()
   }

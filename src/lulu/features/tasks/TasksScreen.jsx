@@ -7,10 +7,9 @@ import { useCollection, useSettings, undoLastDelete } from '../../store/StorePro
 import { findPriority, findStatus, findType } from '../../lib/domain.js'
 import { isToday, isOverdue, relativeDay, fmtTime } from '../../lib/format.js'
 import { share, formatTask, formatFollowUp, copyText, whatsappToPerson, formatAssignment, formatNudge, personDigits } from '../../lib/share.js'
-import { completeTask } from '../../lib/recurrence.js'
-import { pointsFor, awardPoints } from '../../lib/points.js'
 import TaskEditor from './TaskEditor.jsx'
 import TaskDetail from './TaskDetail.jsx'
+import { useTaskActions } from './useTaskActions.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
 
 const VIEWS = [
@@ -53,21 +52,11 @@ export default function TasksScreen({ param, go }) {
     }
   }, [tasks.items, view, q])
 
-  const toggleComplete = (task) => {
-    const done = task.status === 'completed'
-    const spawned = completeTask(task, tasks)
-    const assignee = people.items.find(p => p.id === task.assigneeId) || people.items.find(p => p.name === task.assignedTo)
-    if (assignee) awardPoints(assignee, done ? -pointsFor(task) : pointsFor(task), people)
-    if (done) return
-    // Undo puts everything back: the task's status, the next repeat it
-    // created (if any), and the assignee's points.
-    const undo = () => {
-      tasks.patch(task.id, { status: task.status, completedAt: task.completedAt || null })
-      if (spawned && spawned.id) tasks.remove(spawned.id)
-      if (assignee) people.patch(assignee.id, { points: Number(assignee.points) || 0 })
-    }
-    toast.show(spawned ? t('repeatsToast') : '✓ ' + t('completed'), [{ label: t('undo'), onClick: undo }])
-  }
+  const actions = useTaskActions(toast)
+  const toggleComplete = actions.complete
+  // Keep the open details panel in step with edits made from inside it.
+  const liveDetail = detail && (tasks.items.find(x => x.id === detail.id) || detail)
+
 
   return (
     <>
@@ -121,11 +110,14 @@ export default function TasksScreen({ param, go }) {
         />
       )}
 
-      {detail && (
-        <TaskDetail task={detail} people={people.items} lang={lang}
+      {liveDetail && (
+        <TaskDetail task={liveDetail} people={people.items} lang={lang}
           onClose={() => setDetail(null)}
-          onEdit={() => { setEditor(detail); setDetail(null) }}
-        />
+          onEdit={() => { setEditor(liveDetail); setDetail(null) }}
+          onComplete={() => { actions.complete(liveDetail); setDetail(null) }}
+          onSnooze={(when) => { actions.snooze(liveDetail, when); setDetail(null) }}
+          onFollowUp={() => actions.followUp(liveDetail)}
+          onToggleSub={(id) => actions.toggleSub(liveDetail, id)} />
       )}
       {toast.node}
     </>

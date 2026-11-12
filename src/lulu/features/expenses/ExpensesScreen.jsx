@@ -13,6 +13,25 @@ import MoneyReviewSheet from './MoneyReviewSheet.jsx'
 import { buildMoneyReview } from '../../lib/moneyReview.js'
 import SwipeRow from '../../ui/SwipeRow.jsx'
 
+// Everything else in Money, one tap away in a sheet instead of crowding the page.
+const MONEY_GROUPS = [
+  { key: 'finOverview', items: [
+    { id: 'income', icon: 'wallet', tint: 't-ok' }, { id: 'accounts', icon: 'wallet' },
+    { id: 'networth', icon: 'shield', label: 'netWorth' }, { id: 'trends', icon: 'chart' }, { id: 'statement', icon: 'doc', label: 'monthlyStatement' },
+  ] },
+  { key: 'finPlan', items: [
+    { id: 'budgets', icon: 'chart' }, { id: 'goals', icon: 'sparkle', label: 'savingsGoals' }, { id: 'forecast', icon: 'chart', label: 'cashflowForecast' },
+    { id: 'moneycal', icon: 'calendar', label: 'moneyCalendar' }, { id: 'zakat', icon: 'sparkle' },
+  ] },
+  { key: 'finGrow', items: [
+    { id: 'investments', icon: 'chart' }, { id: 'properties', icon: 'doc' },
+    { id: 'liabilities', icon: 'wallet' }, { id: 'debtpayoff', icon: 'chart', label: 'debtPayoff' },
+  ] },
+  { key: 'finTrack', items: [
+    { id: 'subscriptions', icon: 'refresh' }, { id: 'projects', icon: 'report' },
+  ] },
+]
+
 export default function ExpensesScreen({ go }) {
   const { t, lang } = useT()
   const { settings } = useSettings()
@@ -20,11 +39,13 @@ export default function ExpensesScreen({ go }) {
   const expenses = useCollection('expenses')
   const projects = useCollection('projects')
   const income = useCollection('income')
-  const investments = useCollection('investments')
   const accounts = useCollection('accounts')
   const [range, setRange] = useState('month')
   const [editor, setEditor] = useState(null)
   const [review, setReview] = useState(null)
+  const [hub, setHub] = useState(false)          // "More in Money" sheet
+  const [details, setDetails] = useState(false)  // spending details expanded
+  const [allRecent, setAllRecent] = useState(false)
   const toast = useToast()
   const openReview = () => setReview(buildMoneyReview({ expenses: expenses.items, settings, lang }).text)
 
@@ -53,7 +74,6 @@ export default function ExpensesScreen({ go }) {
   const netIncome = income.items.filter(i => isSameMonth(i.date) && isIncluded(i.account, acc)).reduce((s, i) => s + toSar(i.amount, i.currency || 'SAR', rates), 0)
   const netExp = monthExp.filter(e => isIncluded(e.account, acc)).reduce((s, e) => s + expenseSar(e, rates), 0)
   const net = netIncome - netExp
-  const portfolio = investments.items.reduce((s, v) => s + toSar(v.currentValue || v.invested, v.currency || 'SAR', rates), 0)
 
   const byCat = {}
   inRange.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + expenseSar(e, rates) })
@@ -69,7 +89,6 @@ export default function ExpensesScreen({ go }) {
   const merchantBars = Object.entries(byMerchant).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([lbl, v]) => ({ label: lbl, value: v }))
 
   const budget = Number(settings.monthlyBudget) || 0
-  const budgetPct = budget ? Math.min(1, total / budget) : 0
   const recent = [...expenses.items].sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 30)
 
   // Over-budget category alerts (current month, regardless of the range filter).
@@ -78,100 +97,53 @@ export default function ExpensesScreen({ go }) {
   expenses.items.filter(e => isSameMonth(e.date)).forEach(e => { monthByCat[e.category] = (monthByCat[e.category] || 0) + expenseSar(e, rates) })
   const overBudgetCats = Object.keys(catBudgets).filter(id => (Number(catBudgets[id]) || 0) > 0 && (monthByCat[id] || 0) > catBudgets[id])
 
+  const monthCatBars = Object.entries(monthByCat).sort((a, b) => b[1] - a[1]).slice(0, 6)
+    .map(([id, v]) => ({ label: catLabel(id, lang), value: v }))
+  const monthBudgetPct = budget ? Math.min(1, monthExpTotal / budget) : 0
+  const left = budget - monthExpTotal
+
   return (
     <>
       <TopBar title={t('myFinance')} right={
         <>
-          <button className="iconbtn" onClick={openReview} aria-label={t('monthlyReview')}><Icon name="sparkle" size={18} /></button>
           <button className="iconbtn" onClick={() => go('expensereport')} aria-label={t('expenseReport')}><Icon name="chart" size={18} /></button>
           <button className="iconbtn" onClick={() => share(formatExpenseSummary(inRange, lang, settings))} aria-label={t('share')}><Icon name="share" size={18} /></button>
         </>
       } />
       <div className="screen">
-        {/* Finance overview — this month */}
-        <Card style={{ marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em', textAlign: 'center' }}>{t('netThisMonth')}</div>
-          <div style={{ fontSize: 32, fontWeight: 780, marginTop: 4, textAlign: 'center', background: 'transparent' }} className={`tnum ${net >= 0 ? 't-ok' : 't-danger'}`}>
-            {net >= 0 ? '' : '−'}{money(Math.abs(net), cur, lang)}
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 14 }}>
-            <button className="qa" style={{ alignItems: 'flex-start', textAlign: 'start' }} onClick={() => go('income')}>
-              <span className="muted" style={{ fontSize: 13, fontWeight: 650, textTransform: 'uppercase' }}>{t('income')}</span>
-              <b className="tnum t-ok" style={{ fontSize: 18, background: 'transparent' }}>{money(monthIncome, cur, lang)}</b>
-            </button>
-            <div className="qa" style={{ alignItems: 'flex-start', textAlign: 'start', cursor: 'default' }}>
-              <span className="muted" style={{ fontSize: 13, fontWeight: 650, textTransform: 'uppercase' }}>{t('expenses')}</span>
-              <b className="tnum" style={{ fontSize: 18 }}>{money(monthExpTotal, cur, lang)}</b>
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-            <span className="chip" style={{ flex: 1, justifyContent: 'space-between' }}>{t('expMonthly')} <b className="tnum">{money(monthlyExp, cur, lang)}</b></span>
-            <span className="chip" style={{ flex: 1, justifyContent: 'space-between' }}>{t('expSpecial')} <b className="tnum">{money(specialExp, cur, lang)}</b></span>
-          </div>
-        </Card>
-
-        <Button block icon="sparkle" onClick={openReview} style={{ marginTop: 12 }}>{t('monthlyReview')}</Button>
-
-        <div style={{ margin: '14px 0' }}>
-          <Segmented value={range} onChange={setRange} options={[
-            { value: 'today', label: t('today') },
-            { value: 'week', label: t('thisWeek') },
-            { value: 'month', label: t('monthlyTotal') },
-            { value: 'year', label: t('thisYear') },
-          ]} />
-        </div>
-
-        <Card style={{ textAlign: 'center' }}>
-          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            {range === 'month' ? t('monthlyTotal') : range === 'today' ? t('todaysSpending') : range === 'week' ? t('thisWeek') : t('thisYear')}
-          </div>
-          <div style={{ fontSize: 38, fontWeight: 780, marginTop: 6, letterSpacing: '-0.03em' }} className="tnum">{money(total, cur, lang)}</div>
-          {range === 'month' && budget > 0 && (
-            <div style={{ marginTop: 14 }}>
-              <div className="bar-track" style={{ height: 12 }}>
-                <div className="bar-fill" style={{ width: `${budgetPct * 100}%`, background: budgetPct >= 1 ? 'var(--danger)' : budgetPct > 0.8 ? 'var(--warn)' : 'var(--ok)' }} />
+        {/* One calm summary: what this month cost, against the budget. */}
+        <Card className="money-hero" style={{ marginTop: 14 }}>
+          <div className="mh-label">{t('spentThisMonth')}</div>
+          <div className="mh-amount tnum">{money(monthExpTotal, cur, lang)}</div>
+          {budget > 0 ? (
+            <>
+              <div className="bar-track" style={{ height: 10, marginTop: 12 }} role="progressbar"
+                aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(monthBudgetPct * 100)} aria-label={t('budget')}>
+                <div className="bar-fill" style={{ width: `${monthBudgetPct * 100}%`, background: monthBudgetPct >= 1 ? 'var(--danger)' : monthBudgetPct > 0.8 ? 'var(--warn)' : 'var(--ok)' }} />
               </div>
-              <div className="muted" style={{ fontSize: 14, marginTop: 6 }}>
-                {money(total, cur, lang)} {t('spent')} · {t('budget')} {money(budget, cur, lang)}
+              <div className={`mh-sub${left < 0 ? ' t-danger' : ''}`}>
+                {left >= 0
+                  ? <><b className="tnum">{money(left, cur, lang)}</b> {t('leftOfBudget')} <span className="tnum">{money(budget, cur, lang)}</span></>
+                  : <><b className="tnum">{money(-left, cur, lang)}</b> {t('overBudgetBy')}</>}
               </div>
-            </div>
+            </>
+          ) : (
+            <button className="link-btn mh-sub" onClick={() => go('settings')}>{t('noBudgetHint')}</button>
           )}
+          {specialExp > 0 && (
+            <div className="mh-sub">{t('expMonthly')} <span className="tnum">{money(monthlyExp, cur, lang)}</span> · {t('expSpecial')} <span className="tnum">{money(specialExp, cur, lang)}</span></div>
+          )}
+          <div className="mh-split">
+            <button className="mh-cell" onClick={() => go('income')}>
+              <span>{t('income')}</span>
+              <b className="tnum t-ok">{money(monthIncome, cur, lang)}</b>
+            </button>
+            <button className="mh-cell" onClick={() => go('networth')}>
+              <span>{t('netLbl')}</span>
+              <b className={`tnum ${net >= 0 ? 't-ok' : 't-danger'}`}>{net >= 0 ? '' : '−'}{money(Math.abs(net), cur, lang)}</b>
+            </button>
+          </div>
         </Card>
-
-        <div className="stat-grid" style={{ marginTop: 14 }}>
-          <Stat label={lang === 'ar' ? 'عدد العمليات' : 'Transactions'} value={inRange.length} />
-          <Stat label={t('largest')} value={money(Math.max(0, ...inRange.map(e => expenseSar(e, rates))), cur, lang)} />
-        </div>
-
-        {/* Quick access — grouped */}
-        {[
-          { key: 'finOverview', items: [
-            { id: 'income', icon: 'wallet', tint: 't-ok' }, { id: 'accounts', icon: 'wallet' },
-            { id: 'networth', icon: 'shield', label: 'netWorth' }, { id: 'trends', icon: 'chart' }, { id: 'statement', icon: 'doc', label: 'monthlyStatement' },
-          ] },
-          { key: 'finPlan', items: [
-            { id: 'budgets', icon: 'chart' }, { id: 'goals', icon: 'sparkle', label: 'savingsGoals' }, { id: 'forecast', icon: 'chart', label: 'cashflowForecast' },
-            { id: 'moneycal', icon: 'calendar', label: 'moneyCalendar' }, { id: 'zakat', icon: 'sparkle' },
-          ] },
-          { key: 'finGrow', items: [
-            { id: 'investments', icon: 'chart' }, { id: 'properties', icon: 'doc' },
-            { id: 'liabilities', icon: 'wallet' }, { id: 'debtpayoff', icon: 'chart', label: 'debtPayoff' },
-          ] },
-          { key: 'finTrack', items: [
-            { id: 'subscriptions', icon: 'refresh' }, { id: 'projects', icon: 'report' },
-          ] },
-        ].map(grp => (
-          <React.Fragment key={grp.key}>
-            <Section title={t(grp.key)} />
-            <div className="qa-grid" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
-              {grp.items.map(it => (
-                <button key={it.id} className="qa" onClick={() => go(it.id)}>
-                  <span className={`ic ${it.tint || ''}`}><Icon name={it.icon} size={22} /></span>{t(it.label || it.id)}
-                </button>
-              ))}
-            </div>
-          </React.Fragment>
-        ))}
 
         {overBudgetCats.length > 0 && (
           <Card className="tight" style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 10, borderColor: 'var(--danger-tint)' }} onClick={() => go('budgets')}>
@@ -184,32 +156,61 @@ export default function ExpensesScreen({ go }) {
           </Card>
         )}
 
-        {catBars.length > 0 && (
+        <div className="act-row">
+          <button className="act" onClick={openReview}><Icon name="sparkle" size={20} />{t('monthlyReview')}</button>
+          <button className="act" onClick={() => setHub(true)} aria-haspopup="dialog"><Icon name="grid" size={20} />{t('moreInMoney')}</button>
+          <button className="act" onClick={() => go('budgets')}><Icon name="chart" size={20} />{t('budgets')}</button>
+        </div>
+
+        {monthCatBars.length > 0 && (
           <>
             <Section title={t('spendingByCategory')} />
-            <Card><Bars data={catBars} format={(v) => money(v, cur, lang)} /></Card>
+            <Card><Bars data={monthCatBars} format={(v) => money(v, cur, lang)} /></Card>
           </>
         )}
 
-        {merchantBars.length > 0 && (
-          <>
-            <Section title={t('topMerchants')} />
-            <Card><Bars data={merchantBars} format={(v) => money(v, cur, lang)} /></Card>
-          </>
-        )}
-
-        {acctBars.length > 1 && (
-          <>
-            <Section title={t('spendingByAccount')} />
-            <Card><Bars data={acctBars} format={(v) => money(v, cur, lang)} /></Card>
-          </>
+        <button className="link-btn plan-more" aria-expanded={details} onClick={() => setDetails(!details)}>
+          {t('spendingDetails')} <Icon name="chevron" size={14} style={{ transform: details ? 'rotate(90deg)' : 'none', verticalAlign: 'middle' }} />
+        </button>
+        {details && (
+          <div className="money-details">
+            <Segmented value={range} onChange={setRange} options={[
+              { value: 'today', label: t('today') },
+              { value: 'week', label: t('thisWeek') },
+              { value: 'month', label: t('monthlyTotal') },
+              { value: 'year', label: t('thisYear') },
+            ]} />
+            <div className="stat-grid" style={{ marginTop: 12 }}>
+              <Stat label={range === 'month' ? t('monthlyTotal') : range === 'today' ? t('todaysSpending') : range === 'week' ? t('thisWeek') : t('thisYear')} value={money(total, cur, lang)} />
+              <Stat label={lang === 'ar' ? 'عدد العمليات' : 'Transactions'} value={inRange.length} />
+              <Stat label={t('largest')} value={money(Math.max(0, ...inRange.map(e => expenseSar(e, rates))), cur, lang)} />
+            </div>
+            {range !== 'month' && catBars.length > 0 && (
+              <>
+                <Section title={t('spendingByCategory')} />
+                <Card><Bars data={catBars} format={(v) => money(v, cur, lang)} /></Card>
+              </>
+            )}
+            {merchantBars.length > 0 && (
+              <>
+                <Section title={t('topMerchants')} />
+                <Card><Bars data={merchantBars} format={(v) => money(v, cur, lang)} /></Card>
+              </>
+            )}
+            {acctBars.length > 1 && (
+              <>
+                <Section title={t('spendingByAccount')} />
+                <Card><Bars data={acctBars} format={(v) => money(v, cur, lang)} /></Card>
+              </>
+            )}
+          </div>
         )}
 
         <Section title={t('recent')} count={expenses.items.length} />
         {recent.length === 0 ? (
           <Empty icon="wallet" title={t('nothingHere')}
             action={<Button variant="primary" icon="plus" onClick={() => setEditor({})}>{t('newExpense')}</Button>} />
-        ) : recent.map(e => {
+        ) : recent.slice(0, allRecent ? recent.length : 8).map(e => {
           const pm = findPayment(e.method)
           const proj = e.projectId && projects.items.find(p => p.id === e.projectId)
           return (
@@ -236,10 +237,31 @@ export default function ExpensesScreen({ go }) {
             </SwipeRow>
           )
         })}
+        {recent.length > 8 && (
+          <button className="link-btn plan-more" onClick={() => setAllRecent(!allRecent)}>
+            {allRecent ? t('showLess') : `${t('showAll')} (${recent.length})`}
+          </button>
+        )}
       </div>
 
       <Fab onClick={() => setEditor({})} />
       {editor && <ExpenseEditor initial={editor.id ? editor : {}} onClose={() => setEditor(null)} onSaved={() => toast.show(t('savedToast'))} />}
+      {hub && (
+        <Sheet title={t('moreInMoney')} onClose={() => setHub(false)}>
+          {MONEY_GROUPS.map(grp => (
+            <React.Fragment key={grp.key}>
+              <Section title={t(grp.key)} />
+              <div className="qa-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(104px, 1fr))' }}>
+                {grp.items.map(it => (
+                  <button key={it.id} className="qa" onClick={() => { setHub(false); go(it.id) }}>
+                    <span className={`ic ${it.tint || ''}`}><Icon name={it.icon} size={22} /></span>{t(it.label || it.id)}
+                  </button>
+                ))}
+              </div>
+            </React.Fragment>
+          ))}
+        </Sheet>
+      )}
       {review && <MoneyReviewSheet review={review} onClose={() => setReview(null)} />}
       {toast.node}
     </>
