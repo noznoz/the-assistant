@@ -1,18 +1,22 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { Sheet, Button } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { findPriority, findStatus, findType } from '../../lib/domain.js'
 import { relativeDay, fmtTime } from '../../lib/format.js'
 import { shareAttachments } from '../../lib/files.js'
+import { laterTodayTime } from './useTaskActions.js'
 
 const REMIND_KEY = { morning: 'remindMorning', dayBefore: 'remindDayBefore', hourBefore: 'remindHourBefore' }
 
-// Read-only view of everything on a task: status, priority, due, reminder,
-// people, description, checklist, attachments and tags. Opened from the task
-// action sheet via "View details"; an Edit button jumps into editing.
-export default function TaskDetail({ task, people = [], lang, onClose, onEdit }) {
+// Everything on a task in one panel: status, priority, due, reminder, people,
+// description, checklist, attachments and tags — with the actions you need
+// most as large buttons (Mark as done, Snooze, Follow up, Edit). The action
+// props are optional; without them it is a read-only view with Edit.
+export default function TaskDetail({ task, people = [], lang, onClose, onEdit, onComplete, onSnooze, onFollowUp, onToggleSub }) {
   const { t } = useT()
+  const [snoozing, setSnoozing] = useState(false)
+  const done = task.status === 'completed'
   const pr = findPriority(task.priority)
   const st = findStatus(task.status)
   const type = findType(task.type)
@@ -54,9 +58,15 @@ export default function TaskDetail({ task, people = [], lang, onClose, onEdit })
           </div>
           {subs.map(s => (
             <div key={s.id} className="li" style={{ margin: '0 0 8px', padding: '10px 12px' }}>
-              <span className={`check ${s.done ? 'on' : ''}`} style={{ width: 22, height: 22, pointerEvents: 'none' }}>
-                {s.done ? <Icon name="check" size={13} stroke={3} /> : null}
-              </span>
+              {onToggleSub ? (
+                <button className={`check ${s.done ? 'on' : ''}`} onClick={() => onToggleSub(s.id)} aria-pressed={!!s.done} aria-label={s.text}>
+                  {s.done ? <Icon name="check" size={15} stroke={3} /> : null}
+                </button>
+              ) : (
+                <span className={`check ${s.done ? 'on' : ''}`} style={{ width: 22, height: 22, pointerEvents: 'none' }}>
+                  {s.done ? <Icon name="check" size={13} stroke={3} /> : null}
+                </span>
+              )}
               <div className="body"><div className="title" style={{ fontSize: 16, textDecoration: s.done ? 'line-through' : 'none', opacity: s.done ? 0.6 : 1 }}>{s.text}</div></div>
             </div>
           ))}
@@ -84,9 +94,29 @@ export default function TaskDetail({ task, people = [], lang, onClose, onEdit })
         </div>
       )}
 
-      <div style={{ marginTop: 18 }}>
-        <Button block variant="primary" icon="edit" onClick={onEdit}>{t('edit')}</Button>
-      </div>
+      {onComplete ? (
+        <div style={{ marginTop: 20 }}>
+          <Button block variant={done ? '' : 'brand'} icon="check" onClick={onComplete}>{done ? t('markNotDone') : t('markDone')}</Button>
+          <div className="act-row">
+            {!done && onSnooze && (
+              <button className="act" onClick={() => setSnoozing(v => !v)} aria-expanded={snoozing}><Icon name="clock" size={22} />{t('snooze')}</button>
+            )}
+            {onFollowUp && <button className="act" onClick={onFollowUp}><Icon name="whatsapp" size={22} />{t('followUpAct')}</button>}
+            <button className="act" onClick={onEdit}><Icon name="edit" size={22} />{t('edit')}</button>
+          </div>
+          {snoozing && !done && onSnooze && (
+            <div className="chip-row" style={{ marginTop: 10, flexWrap: 'wrap' }}>
+              {laterTodayTime() && <button className="chip selectable big" onClick={() => onSnooze('later')}>{t('laterToday')}</button>}
+              <button className="chip selectable big" onClick={() => onSnooze('tomorrow')}>{t('tomorrow')}</button>
+              <button className="chip selectable big" onClick={() => onSnooze('week')}>{t('nextWeek')}</button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div style={{ marginTop: 18 }}>
+          <Button block variant="primary" icon="edit" onClick={onEdit}>{t('edit')}</Button>
+        </div>
+      )}
     </Sheet>
   )
 }

@@ -22,7 +22,7 @@ const PORT = Number(process.env.PORT) || 5199
 
 // Every route the app's router understands (see src/lulu/LuluApp.jsx).
 const ROUTES = [
-  'today', 'tasks', 'garage', 'expenses', 'more', 'inbox', 'people', 'documents',
+  'today', 'plan', 'tasks', 'garage', 'expenses', 'more', 'inbox', 'people', 'documents',
   'trips', 'reports', 'notifications', 'calendar', 'settings', 'profile', 'notes',
   'projects', 'expensereport', 'budgets', 'subscriptions', 'rewards', 'groups',
   'income', 'investments', 'accounts', 'networth', 'zakat', 'trends', 'liabilities',

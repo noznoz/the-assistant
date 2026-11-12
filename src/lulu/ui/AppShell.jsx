@@ -5,6 +5,7 @@ import { useSettings } from '../store/StoreProvider.jsx'
 
 // Sections that may occupy the middle bottom-bar slots (Today and More are fixed).
 export const NAV_SECTIONS = {
+  plan: { icon: 'calendar' },
   tasks: { icon: 'check' },
   garage: { icon: 'car' },
   expenses: { icon: 'wallet', labelKey: 'myFinance' },
@@ -20,7 +21,7 @@ export const NAV_SECTIONS = {
 }
 // Three middle tabs → five total with Today and More, the comfortable thumb
 // limit on a narrow phone. Users can still add a fourth in Customize.
-export const DEFAULT_NAV = ['tasks', 'expenses', 'documents']
+export const DEFAULT_NAV = ['plan', 'expenses', 'documents']
 
 export function navMiddle(settings) {
   const chosen = (settings?.navTabs && settings.navTabs.length ? settings.navTabs : DEFAULT_NAV)
