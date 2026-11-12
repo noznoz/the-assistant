@@ -186,6 +186,14 @@ export function readSettings() {
   // defaults, so it's only present once the settings have been saved after
   // the switch; picking another layout afterwards is then kept.
   if (!saved.homeCalmV1) { s.homeStyle = 'calm'; s.homeCalmV1 = true }
+  // One-time switch: a saved bottom bar with Tasks gets Plan in that slot
+  // (Plan holds tasks, reminders and appointments; Tasks is one tap inside).
+  if (!saved.navPlanV1) {
+    if (Array.isArray(s.navTabs) && s.navTabs.includes('tasks') && !s.navTabs.includes('plan')) {
+      s.navTabs = s.navTabs.map(id => id === 'tasks' ? 'plan' : id)
+    }
+    s.navPlanV1 = true
+  }
   return s
 }
 export function writeSettings(s) {

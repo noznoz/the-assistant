@@ -21,6 +21,7 @@ import QuickCapture from './QuickCapture.jsx'
 import HomeLayout from './HomeLayouts.jsx'
 import CalmHome from './CalmHome.jsx'
 import TaskDetail from '../tasks/TaskDetail.jsx'
+import { useTaskActions } from '../tasks/useTaskActions.js'
 import WelcomeCard from './WelcomeCard.jsx'
 import { share, formatAgenda } from '../../lib/share.js'
 import { findPriority } from '../../lib/domain.js'
@@ -51,6 +52,8 @@ export default function TodayScreen({ go }) {
   const [detail, setDetail] = useState(null)      // task opened from Next up
   const [editTask, setEditTask] = useState(null)
   const toast = useToast()
+  const taskActions = useTaskActions(toast)
+  const liveDetail = detail && (tasks.items.find(x => x.id === detail.id) || detail)
 
   const notifFeed = useNotificationFeed()
 
@@ -428,10 +431,14 @@ export default function TodayScreen({ go }) {
       {editor === 'note' && <NoteEditor onClose={closeEditor} onSaved={() => toast.show(t('savedToast'))} />}
       {editor === 'snap' && <SnapFile onClose={closeEditor} onSaved={() => toast.show(t('savedToast'))} />}
       {dayBrief != null && <DayBriefSheet brief={dayBrief} onClose={() => setDayBrief(null)} />}
-      {detail && (
-        <TaskDetail task={detail} people={people.items} lang={lang}
+      {liveDetail && (
+        <TaskDetail task={liveDetail} people={people.items} lang={lang}
           onClose={() => setDetail(null)}
-          onEdit={() => { setEditTask(detail); setDetail(null) }} />
+          onEdit={() => { setEditTask(liveDetail); setDetail(null) }}
+          onComplete={() => { taskActions.complete(liveDetail); setDetail(null) }}
+          onSnooze={(when) => { taskActions.snooze(liveDetail, when); setDetail(null) }}
+          onFollowUp={() => taskActions.followUp(liveDetail)}
+          onToggleSub={(id) => taskActions.toggleSub(liveDetail, id)} />
       )}
       {editTask && <TaskEditor initial={editTask} onClose={() => setEditTask(null)} onSaved={() => toast.show(t('savedToast'))} />}
       {toast.node}

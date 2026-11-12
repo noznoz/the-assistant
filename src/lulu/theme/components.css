@@ -358,7 +358,7 @@ button.chip { font-family: inherit; line-height: inherit; cursor: pointer; }
 .bars { display: flex; flex-direction: column; gap: 10px; }
 .bar-row { display: grid; grid-template-columns: 92px 1fr auto; align-items: center; gap: 10px; font-size: var(--fs-sm); }
 .bar-track { height: 10px; background: var(--surface-2); border-radius: 5px; overflow: hidden; }
-.bar-fill { height: 100%; border-radius: 5px; background: var(--brand-500); }
+.bar-fill { display: block; height: 100%; border-radius: 5px; background: var(--brand-500); }
 
 /* ---- Toast ---- */
 .toast {
@@ -802,6 +802,8 @@ button.check::after { content: ''; position: absolute; inset: -10px; }
 }
 .wday:active { transform: scale(0.95); }
 .wday .wd { font-size: var(--fs-xs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+/* Arabic weekday names are full words (الخميس, الثلاثاء); keep them whole. */
+[dir="rtl"] .wday .wd { font-size: 11.5px; letter-spacing: -0.01em; text-overflow: clip; }
 .wday .dd { font-size: 19px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
 .wday .dots { display: flex; gap: 3px; height: 6px; }
 .wday .dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--brand-500); }
@@ -818,3 +820,23 @@ button.check::after { content: ''; position: absolute; inset: -10px; }
 .li-main .body { flex: 1; min-width: 0; }
 .li.done .li-main .title { text-decoration: line-through; color: var(--ink-3); }
 .plan-more { display: block; margin: 2px auto 0; }
+
+/* ── Money overview ─────────────────────────────────────────────── */
+.money-hero { text-align: center; }
+.money-hero .mh-label { color: var(--ink-2); font-size: var(--fs-sm); font-weight: 600; }
+.money-hero .mh-amount { font-size: 36px; font-weight: 760; letter-spacing: -0.02em; margin-top: 2px; line-height: 1.15; overflow-wrap: anywhere; }
+.money-hero .mh-sub { display: block; margin: 8px auto 0; color: var(--ink-2); font-size: var(--fs-sm); }
+.money-hero .mh-sub.t-danger { background: none; color: var(--danger); }
+.money-hero .mh-sub b { color: var(--ink); }
+.money-hero .mh-sub.t-danger b { color: var(--danger); }
+.mh-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-top: 14px; }
+.mh-cell {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: start;
+  background: var(--surface-2); border: 0; border-radius: 14px; padding: 10px 12px; min-height: 56px;
+  color: var(--ink-2); font-size: var(--fs-sm); font-weight: 600; min-width: 0;
+}
+.mh-cell b { font-size: var(--fs-h); font-weight: 720; background: none; max-width: 100%; overflow-wrap: anywhere; }
+.mh-cell:active { transform: scale(0.98); }
+/* Labels of the action tiles may wrap at large text, centered. */
+.act { text-align: center; line-height: 1.25; }
+.money-details { margin-top: 4px; }
