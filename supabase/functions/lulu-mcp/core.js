@@ -606,6 +606,12 @@ export async function sha256Hex(text) {
   return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('')
 }
 
+const STATUS_PAGE = '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width">'
+  + '<title>The Assistant connector</title><body style="font:18px system-ui;margin:40px;max-width:560px">'
+  + '<h1 style="font-size:24px">✅ The Assistant connector is running</h1>'
+  + '<p>This is the address Claude talks to. Next: in the app, More → Settings → Manage cloud &amp; family → '
+  + '<b>Make a Claude link</b>, then add that link in Claude → Settings → Connectors.</p></body>'
+
 const CORS = {
   'access-control-allow-origin': '*',
   'access-control-allow-headers': 'content-type, mcp-protocol-version, mcp-session-id, x-lulu-key, authorization',
@@ -675,6 +681,11 @@ export function createHandler({ store, tz = 'Asia/Riyadh', currency = 'SAR' }) {
 
   return async function handle(req) {
     if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
+    // Opened in a browser: a plain status page, so setup can be checked by
+    // just visiting the address. (MCP clients never ask for text/html.)
+    if (req.method === 'GET' && (req.headers.get('accept') || '').includes('text/html')) {
+      return new Response(STATUS_PAGE, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8' } })
+    }
     // No server-initiated stream: the spec's answer for that is 405.
     if (req.method === 'GET' || req.method === 'DELETE') return new Response(null, { status: 405, headers: { allow: 'POST', ...CORS } })
     if (req.method !== 'POST') return new Response(null, { status: 405, headers: CORS })
