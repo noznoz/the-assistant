@@ -9,6 +9,7 @@ mode on your phone:
 - “Add a task to renew the iqama by the 30th, high priority.”
 - “What’s on today?” · “Mark ‘send the board pack’ as done.”
 - “Move the dentist to 5:30.” · “Save a note: buy dates for the office.”
+- “WhatsApp Ahmed a reminder about the contract.” · “Send my wife today’s agenda on WhatsApp.”
 - Anything else in the app: trips, wishlist, goals, subscriptions, people, vehicles…
 
 Claude asks for your OK before it changes anything (you can choose to always
@@ -54,7 +55,8 @@ paste, **Run**. (It is also in `supabase/claude-connector.sql` and at the end of
   with a Supabase login. The function checks the link itself.
 
 Optional secrets (**Edge Functions → Secrets**): `LULU_TZ` (default
-`Asia/Riyadh`) and `LULU_CURRENCY` (default `SAR`).
+`Asia/Riyadh`), `LULU_CURRENCY` (default `SAR`) and `LULU_COUNTRY_CODE` (default
+`966`, used for local numbers like 05… in WhatsApp links).
 
 **3. Make your link.** In the app: More → Settings → Cloud & family → *Connect Claude* →
 *Make a Claude link* → *Copy link*. It is shown only once.
@@ -85,6 +87,7 @@ signed in, including voice mode on your phone.
 | `add_appointment`, `add_reminder`, `add_note` | Calendar, alerts, notes |
 | `add_expense`, `add_income` | Money in and out |
 | `add_person` | People |
+| `whatsapp_link` | A WhatsApp message ready to send to someone in People (or any number): Claude gives you a link, you tap it and press Send |
 | `add_item` | Any other part of the app (trips, wishlist, goals, subscriptions…) |
 | `update_item`, `delete_item` | Change or delete anything Claude found |
 
@@ -101,3 +104,12 @@ marked `source: 'claude'`). Deletes are the app’s usual soft delete.
   pull down or tap *Sync now*.
 - **Dashboard deploy fails to find `./core.js`:** the second file must be named
   exactly `core.js`, next to `index.ts`.
+
+## WhatsApp
+
+Claude can’t send WhatsApp messages by itself (WhatsApp only allows automatic
+sending from paid Business accounts). Instead it prepares the message: ask
+“WhatsApp Ahmed a reminder about the contract” and Claude gives you a link that
+opens WhatsApp with Ahmed’s chat and the message already typed. Tap Send.
+Numbers come from People (the WhatsApp number if saved, otherwise the mobile);
+local numbers like 055… are turned into 96655….
