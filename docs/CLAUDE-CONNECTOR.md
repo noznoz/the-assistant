@@ -37,7 +37,7 @@ Supabase project, which only reaches your household’s data.
 
 **1. Run the connector SQL.** In the app: More → Settings → Cloud & family → *Connect
 Claude* → *Connector setup SQL* → Copy. In Supabase: **SQL Editor → New query**,
-paste, **Run**. (It is also at the end of `supabase/schema.sql`. Safe to re-run.)
+paste, **Run**. (It is also in `supabase/claude-connector.sql` and at the end of `supabase/schema.sql`. Safe to re-run.)
 
 **2. Deploy the function.** Either way works:
 
