@@ -87,7 +87,7 @@ signed in, including voice mode on your phone.
 | `add_appointment`, `add_reminder`, `add_note` | Calendar, alerts, notes |
 | `add_expense`, `add_income` | Money in and out |
 | `add_person` | People |
-| `whatsapp_link` | A WhatsApp message ready to send to someone in People (or any number): Claude gives you a link, you tap it and press Send |
+| `send_whatsapp` | A WhatsApp message ready to send to someone in People (or any number): Claude gives you a link, you tap it and press Send |
 | `add_item` | Any other part of the app (trips, wishlist, goals, subscriptions…) |
 | `update_item`, `delete_item` | Change or delete anything Claude found |
 

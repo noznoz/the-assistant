@@ -288,9 +288,9 @@ export const TOOLS = [
     },
   },
   {
-    name: 'whatsapp_link',
-    title: 'Prepare a WhatsApp message',
-    description: "Prepare a WhatsApp message to someone: returns a link that opens WhatsApp on the user's phone with the chat and message ready, so they only tap Send. Claude cannot send WhatsApp messages itself — always show the link to the user as a tappable link (in voice mode, say it's on screen). Use for follow-ups, reminders, sharing an appointment, a task, the day's agenda, a note, etc.: look the details up first (search, get_today), then write the message in the user's language. Pass `to` as a name from People (their saved number is used) or as a phone number; leave it out to let the user pick the chat.",
+    name: 'send_whatsapp',
+    title: 'Send a WhatsApp message',
+    description: "Send a WhatsApp message to someone. Use this WHENEVER the user asks to WhatsApp, message, text, remind or share something with a person — never reply that you can't send WhatsApp messages. It returns a link that opens WhatsApp on the user's phone with the chat and the message already typed; the user taps Send. Always show that link to the user as a tappable link (in voice mode, say it's on screen). Write the message yourself in the user's language, looking up details first (search, get_today) when it's about a task, appointment, agenda or note. `to` can be a name from People or a phone number; if the person isn't saved or has no number, the link still works and lets the user pick the chat.",
     inputSchema: {
       type: 'object',
       properties: {
@@ -299,7 +299,7 @@ export const TOOLS = [
       },
       required: ['text'],
     },
-    annotations: { readOnlyHint: true },
+    annotations: { readOnlyHint: true, openWorldHint: true },
   },
   {
     name: 'add_item',
@@ -345,7 +345,7 @@ const INSTRUCTIONS = [
   "This is the user's personal organiser app, The Assistant: tasks and plans, calendar, reminders, notes, money (expenses, income, budgets), people, vehicles, documents, trips and more.",
   'Use get_today before working with relative dates. Dates are YYYY-MM-DD and times 24-hour HH:MM in the user\'s own time zone.',
   'To change or delete something, find it first with search or list_items to get its id.',
-  'To share something on WhatsApp, use whatsapp_link and show the user the link it returns; they tap it and press Send.',
+  'You CAN send WhatsApp messages: when the user asks to WhatsApp, message or share something with someone, call send_whatsapp and show the link it returns — they tap it and press Send. Never say you cannot send WhatsApp messages.',
   'After acting, confirm in one short sentence what changed (the user is often speaking, not reading). Changes appear on their phone within seconds when the app is open.',
 ].join(' ')
 
@@ -568,33 +568,28 @@ export async function callTool(name, args, ctx) {
       return `Added ${name2} to People [id ${rec.id}].`
     }
 
-    case 'whatsapp_link': {
+    case 'send_whatsapp': {
       const text = str(a.text) || fail('Write the message first.')
-      let who = '', digits = ''
+      const picker = `https://wa.me/?text=${encodeURIComponent(text)}`
       const to = str(a.to)
-      if (to) {
-        if (/^[+0-9][0-9\s()-]{6,}$/.test(to)) {
-          digits = waNumber(to, ctx.countryCode)
-          if (!digits) fail(`"${to}" doesn't look like a phone number.`)
-          who = to
-        } else {
-          const people = await store.list(hid, 'people')
-          const n = to.toLowerCase()
-          const exact = people.filter(p => (p.name || '').toLowerCase() === n)
-          const near = exact.length ? exact : people.filter(p => { const x = (p.name || '').toLowerCase(); return x && (x.includes(n) || n.includes(x)) })
-          if (near.length > 1) fail(`Several people match "${to}": ${near.slice(0, 6).map(p => p.name).join(', ')}. Ask which one.`)
-          const person = near[0]
-          if (!person) fail(`No one called "${to}" in People. Ask for their number, or add them with add_person.`)
-          who = person.name
-          digits = waNumber(person.whatsapp || person.mobile || person.phone, ctx.countryCode)
-          if (!digits) {
-            const url = `https://wa.me/?text=${encodeURIComponent(text)}`
-            return `${person.name} has no phone number saved, so this link opens WhatsApp and lets the user pick the chat. Show it to the user:\n${url}`
-          }
-        }
+      if (!to) return `Message ready. Show this link to the user — it opens WhatsApp with the message typed; they choose the chat and tap Send:\n${picker}`
+      if (/^[+0-9][0-9\s()-]{6,}$/.test(to)) {
+        const digits = waNumber(to, ctx.countryCode)
+        if (!digits) fail(`"${to}" doesn't look like a phone number.`)
+        return `Message ready for ${to}. Show this link to the user — it opens WhatsApp with that chat and the message typed; they tap Send:\nhttps://wa.me/${digits}?text=${encodeURIComponent(text)}`
       }
-      const url = digits ? `https://wa.me/${digits}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`
-      return `WhatsApp message ready${who ? ` for ${who}` : ''}. Show this link to the user — tapping it opens WhatsApp with the message typed; they tap Send:\n${url}`
+      const people = await store.list(hid, 'people')
+      const n = to.toLowerCase()
+      const exact = people.filter(p => (p.name || '').toLowerCase() === n)
+      const near = exact.length ? exact : people.filter(p => { const x = (p.name || '').toLowerCase(); return x && (x.includes(n) || n.includes(x)) })
+      if (near.length > 1) fail(`Several people match "${to}": ${near.slice(0, 6).map(p => p.name).join(', ')}. Ask which one, then call send_whatsapp again with the full name.`)
+      const person = near[0]
+      const digits = person ? waNumber(person.whatsapp || person.mobile || person.phone, ctx.countryCode) : ''
+      if (!digits) {
+        const why = person ? `${person.name} has no phone number saved in People` : `"${to}" isn't saved in People`
+        return `Message ready. ${why}, so this link opens WhatsApp and the user picks ${person ? person.name : to}'s chat, then taps Send. Show it to the user (and offer to save their number with add_person / update_item):\n${picker}`
+      }
+      return `Message ready for ${person.name}. Show this link to the user — it opens WhatsApp with ${person.name}'s chat and the message typed; they tap Send:\nhttps://wa.me/${digits}?text=${encodeURIComponent(text)}`
     }
 
     case 'add_item': {
