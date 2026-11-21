@@ -92,6 +92,17 @@ function nextDate(dateStr, freq) {
   return d.toISOString().slice(0, 10)
 }
 
+// A phone number as WhatsApp wants it: international digits, no + or 00.
+// Local numbers get the home country code (Saudi: 05XXXXXXXX → 9665XXXXXXXX).
+export function waNumber(raw, cc = '966') {
+  let d = String(raw || '').replace(/[^0-9]/g, '')
+  if (!d) return ''
+  if (d.startsWith('00')) d = d.slice(2)
+  else if (d.startsWith('0')) d = cc + d.slice(1)
+  else if (d.length <= 9) d = cc + d
+  return d.length >= 8 ? d : ''
+}
+
 // The one human-readable line used for a record in lists and search results.
 export function describe(collection, r, tz) {
   const bits = []
@@ -277,6 +288,20 @@ export const TOOLS = [
     },
   },
   {
+    name: 'whatsapp_link',
+    title: 'Prepare a WhatsApp message',
+    description: "Prepare a WhatsApp message to someone: returns a link that opens WhatsApp on the user's phone with the chat and message ready, so they only tap Send. Claude cannot send WhatsApp messages itself — always show the link to the user as a tappable link (in voice mode, say it's on screen). Use for follow-ups, reminders, sharing an appointment, a task, the day's agenda, a note, etc.: look the details up first (search, get_today), then write the message in the user's language. Pass `to` as a name from People (their saved number is used) or as a phone number; leave it out to let the user pick the chat.",
+    inputSchema: {
+      type: 'object',
+      properties: {
+        to: { type: 'string', description: 'A name from People, or a phone number. Optional.' },
+        text: { type: 'string', description: 'The message, ready to send. WhatsApp formatting works: *bold*, _italic_.' },
+      },
+      required: ['text'],
+    },
+    annotations: { readOnlyHint: true },
+  },
+  {
     name: 'add_item',
     title: 'Add to any part of the app',
     description: `Add a record to any other part of the app (trips, wishlist, goals, subscriptions, documents, vehicles, services, properties, giving, meetings…). Look at an existing record with list_items(full: true) first to copy its field names. Use the dedicated add_ tools for tasks, appointments, reminders, notes, expenses, income and people. Collections: ${COLLECTIONS.filter(c => !NO_GENERIC_WRITE.has(c)).join(', ')}.`,
@@ -320,6 +345,7 @@ const INSTRUCTIONS = [
   "This is the user's personal organiser app, The Assistant: tasks and plans, calendar, reminders, notes, money (expenses, income, budgets), people, vehicles, documents, trips and more.",
   'Use get_today before working with relative dates. Dates are YYYY-MM-DD and times 24-hour HH:MM in the user\'s own time zone.',
   'To change or delete something, find it first with search or list_items to get its id.',
+  'To share something on WhatsApp, use whatsapp_link and show the user the link it returns; they tap it and press Send.',
   'After acting, confirm in one short sentence what changed (the user is often speaking, not reading). Changes appear on their phone within seconds when the app is open.',
 ].join(' ')
 
@@ -542,6 +568,35 @@ export async function callTool(name, args, ctx) {
       return `Added ${name2} to People [id ${rec.id}].`
     }
 
+    case 'whatsapp_link': {
+      const text = str(a.text) || fail('Write the message first.')
+      let who = '', digits = ''
+      const to = str(a.to)
+      if (to) {
+        if (/^[+0-9][0-9\s()-]{6,}$/.test(to)) {
+          digits = waNumber(to, ctx.countryCode)
+          if (!digits) fail(`"${to}" doesn't look like a phone number.`)
+          who = to
+        } else {
+          const people = await store.list(hid, 'people')
+          const n = to.toLowerCase()
+          const exact = people.filter(p => (p.name || '').toLowerCase() === n)
+          const near = exact.length ? exact : people.filter(p => { const x = (p.name || '').toLowerCase(); return x && (x.includes(n) || n.includes(x)) })
+          if (near.length > 1) fail(`Several people match "${to}": ${near.slice(0, 6).map(p => p.name).join(', ')}. Ask which one.`)
+          const person = near[0]
+          if (!person) fail(`No one called "${to}" in People. Ask for their number, or add them with add_person.`)
+          who = person.name
+          digits = waNumber(person.whatsapp || person.mobile || person.phone, ctx.countryCode)
+          if (!digits) {
+            const url = `https://wa.me/?text=${encodeURIComponent(text)}`
+            return `${person.name} has no phone number saved, so this link opens WhatsApp and lets the user pick the chat. Show it to the user:\n${url}`
+          }
+        }
+      }
+      const url = digits ? `https://wa.me/${digits}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`
+      return `WhatsApp message ready${who ? ` for ${who}` : ''}. Show this link to the user — tapping it opens WhatsApp with the message typed; they tap Send:\n${url}`
+    }
+
     case 'add_item': {
       const c = a.collection
       if (!COLLECTIONS.includes(c) || NO_GENERIC_WRITE.has(c)) fail(`Can't add to "${c}" this way.`)
@@ -639,7 +694,7 @@ export function keyFrom(req) {
  *          listAll(hid) → [{collection, data}], get(hid, id) → {collection, data}|null,
  *          put(hid, collection, record) }
  */
-export function createHandler({ store, tz = 'Asia/Riyadh', currency = 'SAR' }) {
+export function createHandler({ store, tz = 'Asia/Riyadh', currency = 'SAR', countryCode = '966' }) {
   async function handleMessage(msg, hid) {
     if (!msg || msg.jsonrpc !== '2.0' || typeof msg.method !== 'string') return rpcError(msg && msg.id, -32600, 'Invalid request')
     const isNotification = msg.id === undefined || msg.id === null
@@ -664,7 +719,7 @@ export function createHandler({ store, tz = 'Asia/Riyadh', currency = 'SAR' }) {
         const tool = TOOLS.find(t => t.name === params.name)
         if (!tool) return rpcError(id, -32602, `Unknown tool: ${params.name}`)
         try {
-          const text = await callTool(params.name, params.arguments || {}, { store, hid, tz, currency })
+          const text = await callTool(params.name, params.arguments || {}, { store, hid, tz, currency, countryCode })
           return { jsonrpc: '2.0', id, result: { content: [{ type: 'text', text }], isError: false } }
         } catch (e) {
           if (e instanceof ToolError) return { jsonrpc: '2.0', id, result: { content: [{ type: 'text', text: e.message }], isError: true } }

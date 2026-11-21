@@ -17,6 +17,7 @@
 //   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 //   LULU_TZ        optional, default Asia/Riyadh
 //   LULU_CURRENCY  optional, default SAR
+//   LULU_COUNTRY_CODE  optional, default 966 (for local numbers like 05…)
 // ============================================================================
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { createHandler } from './core.js'
@@ -62,4 +63,5 @@ Deno.serve(createHandler({
   store,
   tz: Deno.env.get('LULU_TZ') || 'Asia/Riyadh',
   currency: Deno.env.get('LULU_CURRENCY') || 'SAR',
+  countryCode: Deno.env.get('LULU_COUNTRY_CODE') || '966',
 }))
