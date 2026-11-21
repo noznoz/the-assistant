@@ -681,7 +681,7 @@ export function createHandler({ store, tz = 'Asia/Riyadh', currency = 'SAR' }) {
 
     const key = keyFrom(req)
     const hid = key ? await store.household(await sha256Hex(key)) : null
-    if (!hid) return json({ error: 'This connector link is not valid. Make a new one in the app: More → Cloud & family → Connect Claude.' }, 401)
+    if (!hid) return json({ error: 'This connector link is not valid. Make a new one in the app: More → Settings → Cloud & family → Connect Claude.' }, 401)
 
     let body
     try { body = await req.json() } catch { return json(rpcError(null, -32700, 'Parse error'), 400) }

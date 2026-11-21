@@ -156,7 +156,7 @@ export const STRINGS = {
     bgReminders: 'Background reminders', bgRemindersHint: 'Get reminders and due-item alerts (tasks, appointments, expiries…) even when the app is closed.', bgOnState: 'On — reminders and anything due reach you when the app is closed.',
     bgEnable: 'Enable', bgDisable: 'Turn off', bgEnabled: 'Background reminders on',
     bgNotConfigured: 'Not set up yet — background push needs to be configured for this app.',
-    bgNeedsCloud: 'Connect cloud sync first (More → Cloud & Family).',
+    bgNeedsCloud: 'Connect cloud sync first (More → Settings → Cloud & family).',
     bgIosHint: 'On iPhone: add the app to your Home Screen first (Share → Add to Home Screen).',
     testPush: 'Send a test push', testPushSending: 'Sending…',
     testPushSent: 'Test push sent — you should see a banner shortly.',
