@@ -202,7 +202,7 @@ describe('tools write records the app understands', () => {
   })
 })
 
-describe('whatsapp_link', () => {
+describe('send_whatsapp', () => {
   it('normalises phone numbers to international digits', () => {
     expect(waNumber('0551234567')).toBe('966551234567')
     expect(waNumber('+966 55 123 4567')).toBe('966551234567')
@@ -215,7 +215,7 @@ describe('whatsapp_link', () => {
 
   it('addresses a person from People, with the message encoded', async () => {
     await db.put('H1', 'people', { id: 'p1', name: 'Ahmed Al-Sayed', mobile: '055 123 4567', createdAt: '', updatedAt: '' })
-    const r = await call('whatsapp_link', { to: 'ahmed', text: 'مرحبا أحمد، تذكير بالعقد *اليوم*' })
+    const r = await call('send_whatsapp', { to: 'ahmed', text: 'مرحبا أحمد، تذكير بالعقد *اليوم*' })
     expect(r.isError).toBe(false)
     const url = r.text.split('\n').pop()
     expect(url.startsWith('https://wa.me/966551234567?text=')).toBe(true)
@@ -225,20 +225,23 @@ describe('whatsapp_link', () => {
   it('prefers the WhatsApp number, accepts a raw number, and falls back to the chat picker', async () => {
     await db.put('H1', 'people', { id: 'p2', name: 'Sara', mobile: '0500000000', whatsapp: '+971 50 111 2222', createdAt: '', updatedAt: '' })
     await db.put('H1', 'people', { id: 'p3', name: 'Omar', createdAt: '', updatedAt: '' })
-    expect((await call('whatsapp_link', { to: 'Sara', text: 'hi' })).text).toContain('https://wa.me/971501112222?text=hi')
-    expect((await call('whatsapp_link', { to: '0559998888', text: 'hi' })).text).toContain('https://wa.me/966559998888?text=hi')
-    const omar = await call('whatsapp_link', { to: 'Omar', text: 'hi' })
+    expect((await call('send_whatsapp', { to: 'Sara', text: 'hi' })).text).toContain('https://wa.me/971501112222?text=hi')
+    expect((await call('send_whatsapp', { to: '0559998888', text: 'hi' })).text).toContain('https://wa.me/966559998888?text=hi')
+    const omar = await call('send_whatsapp', { to: 'Omar', text: 'hi' })
     expect(omar.text).toContain('no phone number saved')
     expect(omar.text).toContain('https://wa.me/?text=hi')
-    expect((await call('whatsapp_link', { text: 'agenda' })).text).toContain('https://wa.me/?text=agenda')
+    expect((await call('send_whatsapp', { text: 'agenda' })).text).toContain('https://wa.me/?text=agenda')
   })
 
   it('asks when the name is ambiguous or unknown, and needs a message', async () => {
     await db.put('H1', 'people', { id: 'a', name: 'Ahmed Ali', mobile: '0501', createdAt: '', updatedAt: '' })
     await db.put('H1', 'people', { id: 'b', name: 'Ahmed Saleh', mobile: '0502', createdAt: '', updatedAt: '' })
-    const amb = await call('whatsapp_link', { to: 'ahmed', text: 'x' })
+    const amb = await call('send_whatsapp', { to: 'ahmed', text: 'x' })
     expect(amb.isError).toBe(true); expect(amb.text).toMatch(/Several people/)
-    expect((await call('whatsapp_link', { to: 'Nobody', text: 'x' })).isError).toBe(true)
-    expect((await call('whatsapp_link', { to: 'Ahmed Ali', text: '' })).isError).toBe(true)
+    const nobody = await call('send_whatsapp', { to: 'Nobody', text: 'x' })
+    expect(nobody.isError).toBe(false)
+    expect(nobody.text).toContain("isn't saved in People")
+    expect(nobody.text).toContain('https://wa.me/?text=x')
+    expect((await call('send_whatsapp', { to: 'Ahmed Ali', text: '' })).isError).toBe(true)
   })
 })
