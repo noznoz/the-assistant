@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Empty } from '../../ui/primitives.jsx'
+import { DetailHeader, Empty, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useStore } from '../../store/StoreProvider.jsx'
 
@@ -54,11 +54,11 @@ export default function SearchScreen({ go }) {
         {q && results.length === 0 ? (
           <Empty icon="search" title={t('nothingHere')} />
         ) : results.map(r => (
-          <div className="li" key={r.kind + r.id} onClick={() => go(r.target)}>
+          <Pressable className="li" key={r.kind + r.id} onClick={() => go(r.target)}>
             <div className="lead t-brand"><Icon name={r.icon} size={18} /></div>
             <div className="body"><div className="title">{r.label}</div><div className="meta">{r.kind}</div></div>
             <Icon name="chevron" size={16} style={{ color: 'var(--ink-3)' }} />
-          </div>
+          </Pressable>
         ))}
       </div>
     </>

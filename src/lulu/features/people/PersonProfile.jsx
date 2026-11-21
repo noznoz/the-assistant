@@ -83,7 +83,7 @@ export default function PersonProfile({ person, onBack, onDeleted }) {
             {person.photo ? <img src={person.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
           </div>
           <h1 style={{ fontSize: 22 }}>{person.name}</h1>
-          <div className="muted" style={{ fontSize: 15 }}>
+          <div className="muted small">
             {[rel ? label(rel, lang) : '', person.jobTitle, person.company].filter(Boolean).join(' · ')}
           </div>
           {points > 0 && <Chip tint="t-brand" style={{ marginTop: 6 }}><Icon name="sparkle" size={12} /> {points} {t('pts')}</Chip>}

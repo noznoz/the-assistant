@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Stat, Sheet, Field, Input, TextArea, Select, Button, Empty, Fab, Chip, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Stat, Sheet, Field, Input, TextArea, Select, Button, Empty, Fab, Chip, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { STAFF_ROLES, findStaffRole, label } from '../../lib/domain.js'
@@ -41,7 +41,7 @@ export default function StaffScreen({ go }) {
                 const iqDd = daysUntil(p.iqamaExpiry)
                 return (
                   <SwipeRow key={p.id} onEdit={() => setEditor(p)} onDelete={() => { staff.remove(p.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
-                    <div className="li" onClick={() => setEditor(p)}>
+                    <Pressable className="li" onClick={() => setEditor(p)}>
                       <div className="lead" style={{ overflow: 'hidden', padding: p.photo ? 0 : undefined }}>
                         {p.photo ? <img src={p.photo} alt="" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
                           : <span className="t-brand"><Icon name={role?.icon || 'people'} size={18} /></span>}
@@ -55,7 +55,7 @@ export default function StaffScreen({ go }) {
                         </div>
                       </div>
                       {(p.whatsapp || p.mobile) && <button className="iconbtn" aria-label="WhatsApp" onClick={(e) => { e.stopPropagation(); whatsappToPerson(p, '') }}><Icon name="whatsapp" size={16} /></button>}
-                    </div>
+                    </Pressable>
                   </SwipeRow>
                 )
               })}

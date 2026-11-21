@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Stat, Section, Button } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Stat, Section, Button, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { money, toSar, expenseSar, isOverdue, daysUntil, fmtLongDate, relativeDay } from '../../lib/format.js'
@@ -99,8 +99,8 @@ export default function BoardPackScreen({ go }) {
           <Stat label={t('spending')} value={money(r.spend, cur, lang)} onClick={() => go('expenses')} />
         </div>
         <Card style={{ marginTop: 12, textAlign: 'center' }}>
-          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase' }}>{t('net')}</div>
-          <div className={`tnum ${r.net >= 0 ? 't-ok' : 't-danger'}`} style={{ fontSize: 30, fontWeight: 780, marginTop: 4 }}>{money(r.net, cur, lang)}</div>
+          <div className="label">{t('net')}</div>
+          <div className={`hero-amount tnum ${r.net >= 0 ? 't-ok' : 't-danger'}`}>{money(r.net, cur, lang)}</div>
         </Card>
 
         {/* Work */}
@@ -114,11 +114,11 @@ export default function BoardPackScreen({ go }) {
         {r.byDept.length > 0 && (
           <Card tight style={{ marginTop: 12 }}>
             {r.byDept.map(({ dep, open, overdue }) => (
-              <div className="li" key={dep.id} onClick={() => go(`work/${dep.id}`)}>
+              <Pressable className="li" key={dep.id} onClick={() => go(`work/${dep.id}`)}>
                 <div className="lead t-brand"><Icon name="report" size={17} /></div>
                 <div className="body"><div className="title">{dep.name}</div><div className="meta">{open} {t('tasksLower')}{overdue > 0 ? ` · ${overdue} ${t('overdue').toLowerCase()}` : ''}</div></div>
                 <b className="tnum">{open}</b>
-              </div>
+              </Pressable>
             ))}
           </Card>
         )}
@@ -130,30 +130,30 @@ export default function BoardPackScreen({ go }) {
             <div className="muted" style={{ padding: 14, textAlign: 'center' }}>{t('allClear')}</div>
           )}
           {r.renewals.map(({ v, dd }) => (
-            <div className="li" key={'rn' + v.id} onClick={() => go(`garage/${v.id}`)}>
+            <Pressable className="li" key={'rn' + v.id} onClick={() => go(`garage/${v.id}`)}>
               <div className="lead t-warn"><Icon name="shield" size={17} /></div>
               <div className="body"><div className="title">{v.nickname || v.name} — {t('insurance')}</div><div className="meta">{relativeDay(v.policyExpiry, lang)}</div></div>
               <span className={`chip ${dd <= 14 ? 't-danger' : 't-warn'}`}>{dd}d</span>
-            </div>
+            </Pressable>
           ))}
           {r.docsSoon.map(({ dc, dd }) => (
-            <div className="li" key={'dc' + dc.id} onClick={() => go('documents')}>
+            <Pressable className="li" key={'dc' + dc.id} onClick={() => go('documents')}>
               <div className="lead t-warn"><Icon name="doc" size={17} /></div>
               <div className="body"><div className="title">{dc.title}</div><div className="meta">{relativeDay(dc.expiry, lang)}</div></div>
               <span className={`chip ${dd <= 14 ? 't-danger' : 't-warn'}`}>{dd}d</span>
-            </div>
+            </Pressable>
           ))}
           {r.apptsSoon.map(({ a, dd }) => (
-            <div className="li" key={'ap' + a.id} onClick={() => go('appointments')}>
+            <Pressable className="li" key={'ap' + a.id} onClick={() => go('appointments')}>
               <div className="lead t-brand"><Icon name="calendar" size={17} /></div>
               <div className="body"><div className="title">{a.title}</div><div className="meta">{relativeDay(a.date, lang)}{a.time ? ` · ${a.time}` : ''}</div></div>
-            </div>
+            </Pressable>
           ))}
           {r.occasions.map(({ p, dd }) => (
-            <div className="li" key={'oc' + p.id} onClick={() => go('occasions')}>
+            <Pressable className="li" key={'oc' + p.id} onClick={() => go('occasions')}>
               <div className="lead t-brand"><Icon name="cake" size={17} /></div>
               <div className="body"><div className="title">{p.name} — {t('birthdaySoon')}</div><div className="meta">{dd === 0 ? relativeDay(new Date().toISOString(), lang) : relativeDay(new Date(Date.now() + dd * 86400000).toISOString(), lang)}</div></div>
-            </div>
+            </Pressable>
           ))}
         </Card>
 

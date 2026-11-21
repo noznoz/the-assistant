@@ -92,8 +92,8 @@ export default function StatementScreen({ go }) {
         </div>
 
         <Card style={{ textAlign: 'center' }}>
-          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('netThisMonth')}</div>
-          <div style={{ fontSize: 32, fontWeight: 780, marginTop: 4 }} className={`tnum ${S.net >= 0 ? 't-ok' : 't-danger'}`}>{S.net >= 0 ? '' : '−'}{money(Math.abs(S.net), cur, lang)}</div>
+          <div className="label">{t('netThisMonth')}</div>
+          <div className={`hero-amount tnum ${S.net >= 0 ? 't-ok' : 't-danger'}`}>{S.net >= 0 ? '' : '−'}{money(Math.abs(S.net), cur, lang)}</div>
         </Card>
         <div className="stat-grid" style={{ marginTop: 12 }}>
           <Stat label={t('income')} value={money(S.incTotal, cur, lang)} />

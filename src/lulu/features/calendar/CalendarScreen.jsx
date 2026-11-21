@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Empty, Section, Button, Chip, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Empty, Section, Button, Chip, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { fmtLongDate, fmtTime, relativeDay, isOverdue } from '../../lib/format.js'
@@ -119,7 +119,7 @@ export default function CalendarScreen({ go }) {
             {evs.map((e, i) => {
               const pr = e.priority && findPriority(e.priority)
               return (
-                <div className="li" key={i} onClick={() => go(e.go)}>
+                <Pressable className="li" key={i} onClick={() => go(e.go)}>
                   <div className={`lead ${e.kind === 'renewal' ? 't-warn' : e.kind === 'appt' ? 't-brand' : 't-info'}`}>
                     <Icon name={e.kind === 'renewal' ? 'shield' : e.kind === 'appt' ? 'calendar' : 'check'} size={18} />
                   </div>
@@ -128,7 +128,7 @@ export default function CalendarScreen({ go }) {
                     {e.time && <div className="meta">{fmtTime(e.time, lang)}</div>}
                   </div>
                   {pr && <span className="dot" style={{ width: 9, height: 9, borderRadius: 5, background: pr.color }} />}
-                </div>
+                </Pressable>
               )
             })}
           </div>

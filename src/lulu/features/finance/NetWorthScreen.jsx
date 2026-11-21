@@ -83,8 +83,8 @@ export default function NetWorthScreen({ go }) {
       } />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('netWorth')}</div>
-          <div style={{ fontSize: 36, fontWeight: 780, marginTop: 4 }} className={`tnum ${nw.value >= 0 ? '' : 't-danger'}`}>{money(nw.value, cur, lang)}</div>
+          <div className="label">{t('netWorth')}</div>
+          <div className={`hero-amount tnum ${nw.value >= 0 ? '' : 't-danger'}`}>{money(nw.value, cur, lang)}</div>
           {change != null && (
             <div className={`muted ${change >= 0 ? 't-ok' : 't-danger'}`} style={{ fontSize: 15, marginTop: 4, fontWeight: 650 }}>
               {change >= 0 ? '▲' : '▼'} {money(Math.abs(change), cur, lang)} {t('vsLastMonth')}

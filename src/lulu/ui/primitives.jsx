@@ -14,7 +14,10 @@ export function Button({ variant = '', size = '', block, icon, children, ...rest
 
 // ---------- Card ----------
 export function Card({ tight, flat, className = '', children, ...rest }) {
-  return <div className={`card ${tight ? 'tight' : ''} ${flat ? 'flat' : ''} ${className}`} {...rest}>{children}</div>
+  const cls = `card ${tight ? 'tight' : ''} ${flat ? 'flat' : ''} ${className}`
+  // A tappable card is a button for keyboard and screen-reader users too.
+  if (rest.onClick) return <Pressable className={cls} {...rest}>{children}</Pressable>
+  return <div className={cls} {...rest}>{children}</div>
 }
 
 // ---------- Pressable ----------
@@ -25,6 +28,9 @@ export function Card({ tight, flat, className = '', children, ...rest }) {
 export function Pressable({ onClick, className = '', children, disabled, role = 'button', ...rest }) {
   const onKeyDown = (e) => {
     if (disabled || !onClick) return
+    // A key pressed on a button or field inside the row belongs to that
+    // control, not to the row.
+    if (e.target !== e.currentTarget) return
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(e) }
   }
   return (

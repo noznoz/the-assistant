@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Section, Chip, Empty } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Section, Chip, Empty, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { buildRenewals, urgency } from '../../lib/renewals.js'
@@ -58,14 +58,14 @@ export default function RenewalsScreen({ go }) {
                   {g.list.map(it => {
                     const u = urgency(it.days)
                     return (
-                      <div className="li" key={it.id} onClick={() => go(it.go)}>
+                      <Pressable className="li" key={it.id} onClick={() => go(it.go)}>
                         <div className={`lead ${u.tint}`}><Icon name={it.icon} size={18} /></div>
                         <div className="body">
                           <div className="title">{it.title}</div>
                           <div className="meta">{it.sub} · {fmtDate(it.date, lang, settings.dateFormat)}</div>
                         </div>
                         <Chip tint={u.tint}>{it.days < 0 ? t('expired') : relativeDay(it.date, lang)}</Chip>
-                      </div>
+                      </Pressable>
                     )
                   })}
                 </Card>

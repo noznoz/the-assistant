@@ -46,8 +46,8 @@ export default function AllocationScreen({ go }) {
         ) : (
           <>
             <Card style={{ textAlign: 'center', marginTop: 14 }}>
-              <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('portfolioValue')}</div>
-              <div style={{ fontSize: 30, fontWeight: 780, marginTop: 4 }} className="tnum">{money(total, cur, lang)}</div>
+              <div className="label">{t('portfolioValue')}</div>
+              <div className="hero-amount tnum">{money(total, cur, lang)}</div>
             </Card>
 
             {/* Stacked allocation bar */}
@@ -69,10 +69,10 @@ export default function AllocationScreen({ go }) {
                   </div>
                   {editing ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '6px 0 2px 18px' }}>
-                      <span className="muted" style={{ fontSize: 14 }}>{t('target')}</span>
+                      <span className="muted small">{t('target')}</span>
                       <input type="number" inputMode="numeric" className="input" style={{ width: 70, padding: '6px 8px' }}
                         value={(settings.targetAllocation || {})[r.id] ?? ''} onChange={e => setTarget(r.id, e.target.value)} placeholder="0" />
-                      <span className="muted" style={{ fontSize: 14 }}>%</span>
+                      <span className="muted small">%</span>
                     </div>
                   ) : r.target > 0 && (
                     <div style={{ display: 'flex', gap: 8, margin: '4px 0 2px 18px', fontSize: 14 }}>

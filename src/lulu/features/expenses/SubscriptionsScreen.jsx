@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Stat, Sheet, Field, Input, TextArea, Select, Button, Empty, Fab, Chip, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Stat, Sheet, Field, Input, TextArea, Select, Button, Empty, Fab, Chip, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { categoryOptions, PAYMENT_METHODS, catLabel, label } from '../../lib/domain.js'
@@ -55,8 +55,8 @@ export default function SubscriptionsScreen({ go }) {
       <DetailHeader title={t('subscriptions')} onBack={() => go('expenses')} />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('monthlyCommitment')}</div>
-          <div style={{ fontSize: 34, fontWeight: 780, marginTop: 4 }} className="tnum">{money(monthly, cur, lang)}</div>
+          <div className="label">{t('monthlyCommitment')}</div>
+          <div className="hero-amount tnum">{money(monthly, cur, lang)}</div>
           <div className="muted" style={{ fontSize: 14, marginTop: 4 }}>{active.length} {t('active')}</div>
         </Card>
 
@@ -93,13 +93,13 @@ export default function SubscriptionsScreen({ go }) {
                 <SwipeRow key={s.id} onEdit={() => setEditor(s)} onDelete={() => { subs.remove(s.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                 <div className="li">
                   <div className="lead t-brand"><Icon name="wallet" size={18} /></div>
-                  <div className="body" onClick={() => setEditor(s)}>
+                  <Pressable className="body" onClick={() => setEditor(s)}>
                     <div className="title">{s.name}</div>
                     <div className="meta">
                       {money(s.amount, s.currency || cur, lang)} · {t(s.cycle || 'monthly')}
                       {s.nextDue && <span className={dd != null && dd <= 3 ? 't-warn' : ''} style={dd != null && dd <= 3 ? { padding: '1px 6px', borderRadius: 6 } : undefined}>· {t('nextDue')} {fmtDate(s.nextDue, lang, settings.dateFormat)}</span>}
                     </div>
-                  </div>
+                  </Pressable>
                   <button className="btn sm" onClick={() => markPaid(s)}>{t('markPaid')}</button>
                 </div>
                 </SwipeRow>

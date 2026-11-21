@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Stat, Section, Empty } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Stat, Section, Empty, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { isOverdue, isToday, daysUntil, relativeDay } from '../../lib/format.js'
@@ -64,11 +64,11 @@ export default function WorkDashboardScreen({ go }) {
             <Section title={t('byDepartment')} />
             <Card tight>
               {d.byDept.map(({ dep, open, overdue }) => (
-                <div className="li" key={dep.id} onClick={() => go(`work/${dep.id}`)}>
+                <Pressable className="li" key={dep.id} onClick={() => go(`work/${dep.id}`)}>
                   <div className="lead t-brand"><Icon name="report" size={18} /></div>
                   <div className="body"><div className="title">{dep.name}</div><div className="meta">{open} {t('tasksLower')}{overdue > 0 ? ` · ${overdue} ${t('overdue').toLowerCase()}` : ''}</div></div>
                   <b className="tnum">{open}</b>
-                </div>
+                </Pressable>
               ))}
             </Card>
           </>

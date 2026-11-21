@@ -59,7 +59,7 @@ export default function DebtPayoffScreen({ go }) {
             </div>
 
             <Card style={{ textAlign: 'center', marginTop: 16 }}>
-              <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('debtFreeBy')}</div>
+              <div className="label">{t('debtFreeBy')}</div>
               {plan.feasible ? (
                 <>
                   <div style={{ fontSize: 28, fontWeight: 780, marginTop: 4 }}>{fmtDate(date, lang, settings.dateFormat)}</div>

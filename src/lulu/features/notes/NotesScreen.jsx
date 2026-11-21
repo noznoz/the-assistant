@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Empty, Fab, Button, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Empty, Fab, Button, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { fmtDate } from '../../lib/format.js'
@@ -33,13 +33,13 @@ export default function NotesScreen({ go }) {
           <div style={{ marginTop: 14 }}>
             {list.map(n => (
               <SwipeRow key={n.id} onEdit={() => setEditor(n)} onDelete={() => { notes.remove(n.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
-              <div className="li" onClick={() => setEditor(n)} style={{ alignItems: 'flex-start' }}>
+              <Pressable className="li" onClick={() => setEditor(n)} style={{ alignItems: 'flex-start' }}>
                 <div className="lead t-brand" style={{ marginTop: 2 }}><Icon name="note" size={18} /></div>
                 <div className="body">
                   <div className="title" style={{ fontWeight: 500, whiteSpace: 'pre-wrap' }}>{n.text}</div>
                   {n.createdAt && <div className="meta">{fmtDate(n.createdAt, lang)}</div>}
                 </div>
-              </div>
+              </Pressable>
               </SwipeRow>
             ))}
           </div>

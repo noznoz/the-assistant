@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { TopBar } from '../../ui/AppShell.jsx'
-import { DetailHeader, Card, Section, Stat, Sheet, Field, Input, TextArea, Select, Chip, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Section, Stat, Sheet, Field, Input, TextArea, Select, Chip, Button, Empty, Fab, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { PROPERTY_TYPES, findPropertyType, OWNERSHIP_STATUSES, findOwnership, label } from '../../lib/domain.js'
@@ -39,8 +39,8 @@ export default function PropertiesScreen({ param, go }) {
         ) : (
           <>
             <Card style={{ textAlign: 'center', marginTop: 14 }}>
-              <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('portfolioValue')}</div>
-              <div style={{ fontSize: 32, fontWeight: 780, marginTop: 4 }} className="tnum">{money(totalValue, cur, lang)}</div>
+              <div className="label">{t('portfolioValue')}</div>
+              <div className="hero-amount tnum">{money(totalValue, cur, lang)}</div>
               {monthlyRent > 0 && <div className="muted t-ok" style={{ fontSize: 14, marginTop: 4, fontWeight: 650 }}>+{money(monthlyRent, cur, lang)} {t('rentPerMonth')}</div>}
             </Card>
             <div style={{ marginTop: 14 }}>
@@ -50,7 +50,7 @@ export default function PropertiesScreen({ param, go }) {
                 const val = toSar(p.currentValue || p.purchasePrice, p.currency || 'SAR', rates)
                 return (
                   <SwipeRow key={p.id} onEdit={() => setEditor(p)} onDelete={() => { properties.remove(p.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
-                  <div className="veh-card" onClick={() => go(`properties/${p.id}`)}>
+                  <Pressable className="veh-card" onClick={() => go(`properties/${p.id}`)}>
                     <div className="img">
                       {p.photo ? <img src={p.photo} alt={p.name} style={{ objectPosition: p.photoPos || '50% 50%' }} /> : <Icon name={type?.icon || 'doc'} size={56} stroke={1.4} />}
                       <div className="badge" style={{ display: 'flex', gap: 6 }}>
@@ -66,7 +66,7 @@ export default function PropertiesScreen({ param, go }) {
                         {Number(p.monthlyRent) > 0 && <span className="t-ok">+{money(toSar(p.monthlyRent, p.currency || 'SAR', rates), cur, lang)}/{t('perMonth')}</span>}
                       </div>
                     </div>
-                  </div>
+                  </Pressable>
                   </SwipeRow>
                 )
               })}
@@ -130,8 +130,8 @@ function PropertyDetail({ property, go, onBack }) {
         {tab === 'overview' && (
           <>
             <Card style={{ textAlign: 'center', marginBottom: 12 }}>
-              <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase' }}>{t('currentValue')}</div>
-              <div style={{ fontSize: 30, fontWeight: 780, marginTop: 4 }} className="tnum">{money(val, cur, lang)}</div>
+              <div className="label">{t('currentValue')}</div>
+              <div className="hero-amount tnum">{money(val, cur, lang)}</div>
               {gain !== 0 && <div className={`muted ${gain >= 0 ? 't-ok' : 't-danger'}`} style={{ fontSize: 15, marginTop: 2, fontWeight: 650 }}>{gain >= 0 ? '▲' : '▼'} {money(Math.abs(gain), cur, lang)}</div>}
             </Card>
             <Card className="stack">

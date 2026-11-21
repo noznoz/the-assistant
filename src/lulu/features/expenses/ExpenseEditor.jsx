@@ -267,7 +267,7 @@ export default function ExpenseEditor({ initial, onClose, onSaved, autoScan = fa
         <input ref={recRef} type="file" accept="image/*,application/pdf" multiple hidden onChange={e => { addReceipts(e.target.files); e.target.value = '' }} />
         {busy && <p className="muted" style={{ fontSize: 14, margin: '4px 2px' }}><span className="spinner" style={{ width: 14, height: 14, display: 'inline-block', verticalAlign: 'middle' }} /> …</p>}
         {(f.receipts || []).length > 0 && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginTop: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8, marginTop: 8 }}>
             {f.receipts.map(a => (
               <div key={a.id} style={{ position: 'relative', aspectRatio: '1', borderRadius: 10, overflow: 'hidden', border: '1px solid var(--line)', background: 'var(--surface-2)' }}>
                 {a.thumb ? <img src={a.thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />

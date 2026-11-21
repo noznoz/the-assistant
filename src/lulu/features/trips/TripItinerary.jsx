@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { Card, Section, Sheet, Field, Input, TextArea, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
+import { Card, Section, Sheet, Field, Input, TextArea, Button, Empty, Fab, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { fmtLongDate, fmtTime } from '../../lib/format.js'
@@ -32,13 +32,13 @@ export default function TripItinerary({ trip }) {
           <Card tight>
             {days[dk].map(x => (
               <SwipeRow key={x.id} onEdit={() => setEditor(x)} onDelete={() => { itinerary.remove(x.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
-                <div className="li" onClick={() => setEditor(x)}>
+                <Pressable className="li" onClick={() => setEditor(x)}>
                   <div className="lead t-brand" style={{ minWidth: 52, fontSize: 14, fontWeight: 700 }}>{x.time ? fmtTime(x.time, lang) : '—'}</div>
                   <div className="body">
                     <div className="title">{x.title}</div>
                     {x.note && <div className="meta">{x.note}</div>}
                   </div>
-                </div>
+                </Pressable>
               </SwipeRow>
             ))}
           </Card>

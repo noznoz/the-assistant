@@ -27,14 +27,14 @@ export default function PrayerCard() {
         </span>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ fontSize: 14, color: 'var(--ink-3)', fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('prayerTimes')} ·</span>
+            <span style={{ fontSize: 14, color: 'var(--ink-3)', fontWeight: 650 }}>{t('prayerTimes')} ·</span>
             {/* City picker — a compact inline select */}
             <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
               <select
                 aria-label={t('city')}
                 value={city.id}
                 onChange={e => updateSettings({ prayerCity: e.target.value })}
-                style={{ appearance: 'none', WebkitAppearance: 'none', border: 0, background: 'transparent', color: 'var(--brand-600)', fontSize: 14, fontWeight: 750, textTransform: 'uppercase', letterSpacing: '0.04em', padding: '0 14px 0 0', cursor: 'pointer' }}
+                style={{ appearance: 'none', WebkitAppearance: 'none', border: 0, background: 'transparent', color: 'var(--brand-600)', fontSize: 14, fontWeight: 750, padding: '0 14px 0 0', cursor: 'pointer' }}
               >
                 {PRAYER_CITIES.map(c => <option key={c.id} value={c.id}>{cityName(c, lang)}</option>)}
               </select>
@@ -46,7 +46,7 @@ export default function PrayerCard() {
           </div>
         </div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 6 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 6 }}>
         {times.map(p => {
           const isNext = p.name === next.name && p.date.toDateString() === next.date.toDateString()
           return (

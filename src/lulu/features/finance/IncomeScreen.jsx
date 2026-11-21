@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Stat, Sheet, Field, Input, Select, Chip, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Stat, Sheet, Field, Input, Select, Chip, Button, Empty, Fab, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { INCOME_SOURCES, findIncomeSource, label } from '../../lib/domain.js'
@@ -28,8 +28,8 @@ export default function IncomeScreen({ go }) {
       <DetailHeader title={t('income')} onBack={() => go('expenses')} />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('incomeThisMonth')}</div>
-          <div style={{ fontSize: 34, fontWeight: 780, marginTop: 4 }} className="tnum t-ok">{money(monthTotal, cur, lang)}</div>
+          <div className="label">{t('incomeThisMonth')}</div>
+          <div className="hero-amount tnum t-ok">{money(monthTotal, cur, lang)}</div>
         </Card>
         <div className="stat-grid" style={{ marginTop: 12 }}>
           <Stat label={t('recurringMonthly')} value={money(recurringTotal, cur, lang)} sub={`${recurring.length} ${t('sources')}`} />
@@ -45,7 +45,7 @@ export default function IncomeScreen({ go }) {
               const src = findIncomeSource(i.source)
               return (
                 <SwipeRow key={i.id} onEdit={() => setEditor(i)} onDelete={() => { income.remove(i.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
-                <div className="li" onClick={() => setEditor(i)}>
+                <Pressable className="li" onClick={() => setEditor(i)}>
                   <div className="lead t-ok"><Icon name={src?.icon || 'wallet'} size={18} /></div>
                   <div className="body">
                     <div className="title">{i.note || (src ? label(src, lang) : t('income'))}</div>
@@ -58,7 +58,7 @@ export default function IncomeScreen({ go }) {
                     <b className="tnum t-ok">+{money(i.amount, i.currency || cur, lang)}</b>
                     {(i.currency && i.currency !== 'SAR') && <div className="muted tnum" style={{ fontSize: 13 }}>≈ {money(toSar(i.amount, i.currency, rates), 'SAR', lang)}</div>}
                   </div>
-                </div>
+                </Pressable>
                 </SwipeRow>
               )
             })}

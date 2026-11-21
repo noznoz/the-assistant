@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Empty, Button } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Empty, Button, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { teamSize, deptRoots } from '../../lib/org.js'
@@ -48,10 +48,10 @@ export default function OrgChartScreen({ go }) {
             ? <Caret id={m.id} />
             : (depth > 0 && <span style={{ width: 10, color: 'var(--ink-3)', flexShrink: 0 }}>└</span>)}
           <div className={`lead ${dep.headId === m.id ? 't-brand' : ''}`} style={{ background: dep.headId === m.id ? undefined : 'var(--surface-2)' }}><Icon name={dep.headId === m.id ? 'flag' : 'people'} size={16} /></div>
-          <div className="body" onClick={() => go(`work/${dep.id}`)}>
+          <Pressable className="body" onClick={() => go(`work/${dep.id}`)}>
             <div className="title">{m.name}{dep.headId === m.id ? ` · ${t('head')}` : ''}</div>
             <div className="meta">{[m.title, roleLabel(m, lang)].filter(Boolean).join(' · ')}</div>
-          </div>
+          </Pressable>
           {n > 0 && <span className="chip" title={t('teamSizeLabel')}>{n}</span>}
           {(m.whatsapp || m.mobile) && <button className="iconbtn" aria-label="WhatsApp" onClick={() => whatsappToPerson(m, '')}><Icon name="whatsapp" size={15} /></button>}
         </div>
@@ -102,7 +102,7 @@ export default function OrgChartScreen({ go }) {
                       ? <Caret id={dep.id} />
                       : <span style={{ width: 10, color: 'var(--ink-3)', flexShrink: 0 }}>└</span>}
                     <div className="lead" style={{ background: 'var(--brand-tint)', color: 'var(--brand-600)' }} onClick={() => go(`work/${dep.id}`)}><Icon name="report" size={16} /></div>
-                    <div className="body" onClick={() => go(`work/${dep.id}`)}><div className="title" style={{ fontWeight: 700 }}>{dep.name}</div><div className="meta">{team.length} {t('membersLower')}</div></div>
+                    <Pressable className="body" onClick={() => go(`work/${dep.id}`)}><div className="title" style={{ fontWeight: 700 }}>{dep.name}</div><div className="meta">{team.length} {t('membersLower')}</div></Pressable>
                     <button className="iconbtn" aria-label={t('view')} onClick={() => go(`work/${dep.id}`)}><Icon name="chevron" size={15} style={{ color: 'var(--ink-3)' }} /></button>
                   </div>
                   {!isCollapsed(dep.id) && tops.map(m => <Node key={m.id} m={m} team={team} depth={2} dep={dep} />)}

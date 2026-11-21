@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Stat, Section } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Stat, Section, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useStore, useSettings } from '../../store/StoreProvider.jsx'
 import { buildForecast } from '../../lib/forecast.js'
@@ -33,8 +33,8 @@ export default function ForecastScreen({ go }) {
       <DetailHeader title={t('cashflowForecast')} onBack={() => go('expenses')} />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('netMonthly')}</div>
-          <div className={`tnum ${f.netMonthly >= 0 ? 't-ok' : 't-danger'}`} style={{ fontSize: 32, fontWeight: 780, marginTop: 4 }}>
+          <div className="label">{t('netMonthly')}</div>
+          <div className={`hero-amount tnum ${f.netMonthly >= 0 ? 't-ok' : 't-danger'}`}>
             {f.netMonthly >= 0 ? '+' : ''}{money(f.netMonthly, cur, lang)}
           </div>
           <div className="muted" style={{ fontSize: 14, marginTop: 4 }}>{t('perMonthAfterBills')}</div>
@@ -59,11 +59,11 @@ export default function ForecastScreen({ go }) {
         <Section title={t('monthlyRunRate')} />
         <Card tight>
           {rows.map(r => (
-            <div className="li" key={r.label} onClick={() => go(r.go)}>
+            <Pressable className="li" key={r.label} onClick={() => go(r.go)}>
               <div className={`lead ${r.sign > 0 ? 't-ok' : 't-warn'}`}><Icon name={r.sign > 0 ? 'wallet' : 'refresh'} size={17} /></div>
               <div className="body"><div className="title">{r.label}</div></div>
               <b className={`tnum ${r.sign > 0 ? 't-ok' : ''}`}>{r.sign > 0 ? '+' : '−'}{money(r.value, cur, lang)}</b>
-            </div>
+            </Pressable>
           ))}
         </Card>
         <p className="hint center" style={{ marginTop: 10 }}>{t('forecastHint')}</p>

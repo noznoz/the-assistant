@@ -28,8 +28,8 @@ export default function AccountsScreen({ go }) {
       <DetailHeader title={t('accounts')} onBack={() => go('expenses')} />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('totalBalance')}</div>
-          <div style={{ fontSize: 32, fontWeight: 780, marginTop: 4 }} className="tnum">{money(totalRemaining, cur, lang)}</div>
+          <div className="label">{t('totalBalance')}</div>
+          <div className="hero-amount tnum">{money(totalRemaining, cur, lang)}</div>
           <div className="muted" style={{ fontSize: 14, marginTop: 4 }}>{t('inNet')}: {money(netRemaining, cur, lang)}</div>
         </Card>
 
@@ -51,13 +51,13 @@ export default function AccountsScreen({ go }) {
                         {a.name}
                         {a.isDefault && <span className="chip t-ok" style={{ padding: '0 6px' }}>{t('defaultLabel')}</span>}
                       </div>
-                      <div className="muted" style={{ fontSize: 14 }}>{type ? label(type, lang) : ''}{a.includeInNet === false ? ` · ${t('excludedFromNet')}` : ''}</div>
+                      <div className="muted small">{type ? label(type, lang) : ''}{a.includeInNet === false ? ` · ${t('excludedFromNet')}` : ''}</div>
                     </div>
                     <b className="tnum">{money(s.remaining, cur, lang)}</b>
                   </div>
-                  <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-                    <span className="chip" style={{ flex: 1, justifyContent: 'space-between' }}>{t('creditIn')} <b className="tnum t-ok">{money(s.credits, cur, lang)}</b></span>
-                    <span className="chip" style={{ flex: 1, justifyContent: 'space-between' }}>{t('debitOut')} <b className="tnum t-danger">{money(s.debits, cur, lang)}</b></span>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
+                    <span className="chip" style={{ flex: '1 1 140px', justifyContent: 'space-between' }}>{t('creditIn')} <b className="tnum t-ok">{money(s.credits, cur, lang)}</b></span>
+                    <span className="chip" style={{ flex: '1 1 140px', justifyContent: 'space-between' }}>{t('debitOut')} <b className="tnum t-danger">{money(s.debits, cur, lang)}</b></span>
                   </div>
                 </Card>
                 </SwipeRow>

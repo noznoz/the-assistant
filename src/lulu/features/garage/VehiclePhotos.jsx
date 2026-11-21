@@ -76,7 +76,7 @@ export default function VehiclePhotos({ vehicle }) {
       {album.length === 0 ? (
         <Empty icon="camera" title={t('noPhotos')} text={t('photosHint')} />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
           {album.map(a => (
             <button key={a.id} onClick={() => setViewer(a)} style={{
               aspectRatio: '1', borderRadius: 12, overflow: 'hidden', border: '1px solid var(--line)',

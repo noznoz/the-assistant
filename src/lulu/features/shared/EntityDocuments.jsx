@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { Button, Empty, Chip, useToast } from '../../ui/primitives.jsx'
+import { Button, Empty, Chip, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { DOC_CATEGORIES, label } from '../../lib/domain.js'
@@ -49,7 +49,7 @@ export default function EntityDocuments({ filterKey, id, hint }) {
             return (
               <SwipeRow key={d.id} onEdit={() => setEditor(d)}
                 onDelete={async () => { for (const a of d.attachments || []) await removeAttachment(a); docs.remove(d.id); toast.show(t('deletedToast')) }}>
-              <div className="li" onClick={() => setViewing(d)}>
+              <Pressable className="li" onClick={() => setViewing(d)}>
                 <div className="lead" style={{ padding: 0, overflow: 'hidden', background: 'var(--surface-2)' }}>
                   {thumb ? <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Icon name="doc" size={18} />}
                 </div>
@@ -62,7 +62,7 @@ export default function EntityDocuments({ filterKey, id, hint }) {
                   </div>
                 </div>
                 {dd != null && dd <= 30 && <Chip tint={dd <= 7 ? 't-danger' : 't-warn'}>{dd}d</Chip>}
-              </div>
+              </Pressable>
               </SwipeRow>
             )
           })}

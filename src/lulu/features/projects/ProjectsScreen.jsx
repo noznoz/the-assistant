@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Section, Stat, Bars, Button, Sheet, Field, Input, TextArea, Empty, Fab, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Section, Stat, Bars, Button, Sheet, Field, Input, TextArea, Empty, Fab, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { catLabel } from '../../lib/domain.js'
@@ -47,7 +47,7 @@ export default function ProjectsScreen({ param, go }) {
                     <span className={`lead ${ended ? '' : 't-brand'}`} style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center', background: ended ? 'var(--surface-2)' : undefined }}><Icon name={ended ? 'check' : 'report'} size={18} /></span>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>{p.name}{ended && <span className="chip" style={{ fontSize: 12 }}>{t('ended')}</span>}</div>
-                      <div className="muted" style={{ fontSize: 15 }}>{money(total, cur, lang)}{budget ? ` / ${money(budget, cur, lang)}` : ''}</div>
+                      <div className="muted small">{money(total, cur, lang)}{budget ? ` / ${money(budget, cur, lang)}` : ''}</div>
                     </div>
                     <Icon name="chevron" size={18} style={{ color: 'var(--ink-3)' }} />
                   </div>
@@ -158,8 +158,8 @@ function ProjectDetail({ project, go, onBack }) {
         )}
 
         <Card style={{ marginTop: 14, textAlign: 'center' }}>
-          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('projectTotal')}</div>
-          <div style={{ fontSize: 34, fontWeight: 780, marginTop: 4 }} className="tnum">{money(total, cur, lang)}</div>
+          <div className="label">{t('projectTotal')}</div>
+          <div className="hero-amount tnum">{money(total, cur, lang)}</div>
           {budget > 0 && (
             <div style={{ marginTop: 14 }}>
               <div className="bar-track" style={{ height: 12 }}>
@@ -215,14 +215,14 @@ function ProjectDetail({ project, go, onBack }) {
           <Empty icon="wallet" title={t('nothingHere')} text={t('addExpenseTo')} />
         ) : mine.map(e => (
           <SwipeRow key={e.id} onEdit={() => setAddExp(e)} onDelete={() => { expenses.remove(e.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
-          <div className="li" onClick={() => setAddExp(e)}>
+          <Pressable className="li" onClick={() => setAddExp(e)}>
             <div className="lead t-brand"><Icon name="receipt" size={18} /></div>
             <div className="body">
               <div className="title">{e.merchant || catLabel(e.category, lang)}</div>
               <div className="meta">{catLabel(e.category, lang)} · {fmtDate(e.date, lang, settings.dateFormat)}</div>
             </div>
             <b className="tnum">{money(e.amount, e.currency || cur, lang)}</b>
-          </div>
+          </Pressable>
           </SwipeRow>
         ))}
       </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Stat, Sheet, Field, Input, Select, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Stat, Sheet, Field, Input, Select, Button, Empty, Fab, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { INVESTMENT_TYPES, findInvestmentType, label } from '../../lib/domain.js'
@@ -43,8 +43,8 @@ export default function InvestmentsScreen({ go }) {
       } />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('portfolioValue')}</div>
-          <div style={{ fontSize: 34, fontWeight: 780, marginTop: 4 }} className="tnum">{money(portfolio, cur, lang)}</div>
+          <div className="label">{t('portfolioValue')}</div>
+          <div className="hero-amount tnum">{money(portfolio, cur, lang)}</div>
           {invested > 0 && (
             <div className={`muted ${gain >= 0 ? 't-ok' : 't-danger'}`} style={{ fontSize: 15, marginTop: 4, fontWeight: 650 }}>
               {gain >= 0 ? '▲' : '▼'} {money(Math.abs(gain), cur, lang)} ({invested ? Math.round(gain / invested * 100) : 0}%)
@@ -69,7 +69,7 @@ export default function InvestmentsScreen({ go }) {
               const div = dividendFor(v.id)
               return (
                 <SwipeRow key={v.id} onEdit={() => setEditor(v)} onDelete={() => { investments.remove(v.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
-                <div className="li" onClick={() => setEditor(v)}>
+                <Pressable className="li" onClick={() => setEditor(v)}>
                   <div className="lead t-brand"><Icon name={type?.icon || 'chart'} size={18} /></div>
                   <div className="body">
                     <div className="title">{v.name}</div>
@@ -84,7 +84,7 @@ export default function InvestmentsScreen({ go }) {
                     <b className="tnum">{money(value, cur, lang)}</b>
                     <button className="btn sm" style={{ marginTop: 4 }} onClick={(e) => { e.stopPropagation(); setDividend(v) }}>{t('logDividend')}</button>
                   </div>
-                </div>
+                </Pressable>
                 </SwipeRow>
               )
             })}

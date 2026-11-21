@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Section, Bars, Sheet, Field, Input, Select, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Section, Bars, Sheet, Field, Input, Select, Button, Empty, Fab, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { catLabel } from '../../lib/domain.js'
@@ -49,7 +49,7 @@ export default function TripsScreen({ go }) {
                     <span className="lead t-brand" style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="trip" size={18} /></span>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 700 }}>{tr.name}</div>
-                      <div className="muted" style={{ fontSize: 15 }}>{tr.destination}{tr.start ? ` · ${fmtDate(tr.start, lang, settings.dateFormat)}` : ''}</div>
+                      <div className="muted small">{tr.destination}{tr.start ? ` · ${fmtDate(tr.start, lang, settings.dateFormat)}` : ''}</div>
                     </div>
                     <div style={{ textAlign: 'end' }}>
                       <b className="tnum">{money(spent, cur, lang)}</b>
@@ -133,8 +133,8 @@ function TripDetail({ trip, onBack }) {
         {tab === 'overview' && (
           <>
             <Card style={{ textAlign: 'center' }}>
-              <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase' }}>{[trip.destination, veh?.name].filter(Boolean).join(' · ') || t('tripExpenses')}</div>
-              <div style={{ fontSize: 34, fontWeight: 780, marginTop: 4 }} className="tnum">{money(total, cur, lang)}</div>
+              <div className="label">{[trip.destination, veh?.name].filter(Boolean).join(' · ') || t('tripExpenses')}</div>
+              <div className="hero-amount tnum">{money(total, cur, lang)}</div>
               {budget > 0 && (
                 <div style={{ marginTop: 12 }}>
                   <div className="bar-track" style={{ height: 12 }}><div className="bar-fill" style={{ width: `${pct * 100}%`, background: pct >= 1 ? 'var(--danger)' : pct > 0.85 ? 'var(--warn)' : 'var(--ok)' }} /></div>
@@ -154,11 +154,11 @@ function TripDetail({ trip, onBack }) {
             {mine.length === 0 ? <Empty icon="wallet" title={t('nothingHere')} text={t('addExpenseTo')} /> :
               mine.map(e => (
                 <SwipeRow key={e.id} onEdit={() => setAddExp(e)} onDelete={() => { expenses.remove(e.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
-                <div className="li" onClick={() => setAddExp(e)}>
+                <Pressable className="li" onClick={() => setAddExp(e)}>
                   <div className="lead t-brand"><Icon name="receipt" size={18} /></div>
                   <div className="body"><div className="title">{e.merchant || catLabel(e.category, lang)}</div><div className="meta">{catLabel(e.category, lang)} · {fmtDate(e.date, lang, settings.dateFormat)}</div></div>
                   <b className="tnum">{money(e.amount, e.currency || cur, lang)}</b>
-                </div>
+                </Pressable>
                 </SwipeRow>
               ))}
 

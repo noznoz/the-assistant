@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Section, Stat, Bars, Button, Sheet, Field, Input, TextArea, Chip, Empty, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Section, Stat, Bars, Button, Sheet, Field, Input, TextArea, Chip, Empty, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { findVehicleType, findOwnership, vehicleTitle, label } from '../../lib/domain.js'
@@ -124,7 +124,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
                 <div className="lead t-warn" style={{ width: 42, height: 42, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="wrench" size={20} /></div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700 }}>{t('serviceDue')}</div>
-                  <div className="muted" style={{ fontSize: 15 }}>
+                  <div className="muted small">
                     {serviceDue[0].s.work}
                     {serviceDue[0].dDate != null ? ` · ${fmtDate(serviceDue[0].s.nextDate, lang, settings.dateFormat)}` : ''}
                     {serviceDue[0].kmLeft != null ? ` · ${serviceDue[0].kmLeft <= 0 ? t('serviceDue') : `${Math.round(serviceDue[0].kmLeft)} km`}` : ''}
@@ -154,7 +154,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 650 }}>{t('insurance')} · {vehicle.insuranceCompany}</div>
-                  <div className="muted" style={{ fontSize: 15 }}>{t('policyExpiry')}: {fmtDate(vehicle.policyExpiry, lang, settings.dateFormat)}</div>
+                  <div className="muted small">{t('policyExpiry')}: {fmtDate(vehicle.policyExpiry, lang, settings.dateFormat)}</div>
                 </div>
                 {dd != null && <Chip tint={dd <= 14 ? 't-danger' : dd <= 45 ? 't-warn' : 't-ok'}>{dd}d</Chip>}
               </Card>
@@ -170,8 +170,8 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
         {tab === 'costs' && (
           <>
             <Card style={{ textAlign: 'center' }}>
-              <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('totalRunningCost')}</div>
-              <div style={{ fontSize: 32, fontWeight: 780, marginTop: 4 }} className="tnum">{money(runningTotal, cur, lang)}</div>
+              <div className="label">{t('totalRunningCost')}</div>
+              <div className="hero-amount tnum">{money(runningTotal, cur, lang)}</div>
               {perMonthCost != null && <div className="muted" style={{ fontSize: 14.5, marginTop: 4 }}>≈ {money(perMonthCost, cur, lang)} / {t('perMonth')}{monthsOwned ? ` · ${monthsOwned} ${t('monthsOwned')}` : ''}</div>}
             </Card>
             <div className="stat-grid" style={{ marginTop: 12 }}>
@@ -189,7 +189,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
                 <div className="lead t-warn" style={{ width: 42, height: 42, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="wrench" size={20} /></div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700 }}>{t('predictedService')}</div>
-                  <div className="muted" style={{ fontSize: 15 }}>{serviceDue[0].s.work}{serviceDue[0].dDate != null ? ` · ${fmtDate(serviceDue[0].s.nextDate, lang, settings.dateFormat)}` : ''}{serviceDue[0].kmLeft != null ? ` · ${Math.max(0, Math.round(serviceDue[0].kmLeft))} km` : ''}</div>
+                  <div className="muted small">{serviceDue[0].s.work}{serviceDue[0].dDate != null ? ` · ${fmtDate(serviceDue[0].s.nextDate, lang, settings.dateFormat)}` : ''}{serviceDue[0].kmLeft != null ? ` · ${Math.max(0, Math.round(serviceDue[0].kmLeft))} km` : ''}</div>
                 </div>
               </Card>
             )}
@@ -205,7 +205,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
             </div>
             {costPerKm != null && (
               <Card style={{ marginTop: 12, textAlign: 'center' }}>
-                <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase' }}>{t('costPerKm')}</div>
+                <div className="label">{t('costPerKm')}</div>
                 <div style={{ fontSize: 26, fontWeight: 750, marginTop: 4 }} className="tnum">{money(costPerKm, cur, lang)}</div>
               </Card>
             )}
@@ -241,7 +241,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
                 action={<Button variant="primary" icon="plus" onClick={() => setSvcEditor(true)}>{t('addService')}</Button>} />
             ) : myServices.map(s => (
               <SwipeRow key={s.id} onEdit={() => setSvcEditor(s)} onDelete={() => { services.remove(s.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
-              <div className="li" onClick={() => setSvcEditor(s)}>
+              <Pressable className="li" onClick={() => setSvcEditor(s)}>
                 <div className="lead t-brand"><Icon name="wrench" size={18} /></div>
                 <div className="body">
                   <div className="title">{s.work}</div>
@@ -250,7 +250,7 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
                   {s.nextDate && <div className="meta t-warn" style={{ padding: '1px 6px', borderRadius: 6, marginTop: 4 }}>{t('nextService')}: {fmtDate(s.nextDate, lang, settings.dateFormat)}</div>}
                 </div>
                 {s.cost ? <b className="tnum">{money(s.cost, cur, lang)}</b> : null}
-              </div>
+              </Pressable>
               </SwipeRow>
             ))}
           </>
@@ -259,8 +259,8 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
         {tab === 'expenses' && (
           <>
             <Card style={{ textAlign: 'center', marginBottom: 14 }}>
-              <div className="k muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase' }}>{t('totalCost')}</div>
-              <div style={{ fontSize: 30, fontWeight: 750, marginTop: 4 }} className="tnum">{money(totalCost, cur, lang)}</div>
+              <div className="k muted" style={{ fontSize: 14, fontWeight: 650 }}>{t('totalCost')}</div>
+              <div className="hero-amount tnum">{money(totalCost, cur, lang)}</div>
             </Card>
             <Section title={t('vehExpenses')} count={myExpenses.length} action={t('add')} onAction={addVehExpense} />
             {myExpenses.length === 0 ? (
@@ -269,14 +269,14 @@ export default function VehicleProfile({ vehicle, go, onBack }) {
             ) : (
               myExpenses.map(e => (
                 <SwipeRow key={e.id} onEdit={() => setExpEditor(e)} onDelete={() => { expenses.remove(e.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
-                <div className="li" onClick={() => setExpEditor(e)}>
+                <Pressable className="li" onClick={() => setExpEditor(e)}>
                   <div className="lead t-ok"><Icon name="wallet" size={18} /></div>
                   <div className="body">
                     <div className="title">{e.merchant || t('vehExpenses')}</div>
                     <div className="meta">{fmtDate(e.date, lang, settings.dateFormat)}</div>
                   </div>
                   <b className="tnum">{money(e.amount, cur, lang)}</b>
-                </div>
+                </Pressable>
                 </SwipeRow>
               )))}
           </>

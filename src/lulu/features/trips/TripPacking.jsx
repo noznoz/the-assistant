@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { Card, Section, Input, Button } from '../../ui/primitives.jsx'
+import { Card, Section, Input, Button, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { uid } from '../../store/db.js'
@@ -45,13 +45,13 @@ export default function TripPacking({ trip }) {
           <Section title={t('packingList')} count={`${done}/${items.length}`} />
           <Card tight>
             {items.map(i => (
-              <div className="li" key={i.id} onClick={() => toggle(i.id)}>
+              <Pressable className="li" key={i.id} onClick={() => toggle(i.id)}>
                 <div className={`lead ${i.done ? 't-ok' : ''}`} style={{ background: i.done ? undefined : 'var(--surface-2)' }}>
                   {i.done ? <Icon name="check" size={18} /> : <span style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid var(--ink-3)' }} />}
                 </div>
                 <div className="body"><div className="title" style={{ textDecoration: i.done ? 'line-through' : 'none', opacity: i.done ? 0.6 : 1 }}>{i.text}</div></div>
                 <button className="iconbtn" aria-label={t('delete')} onClick={(e) => { e.stopPropagation(); remove(i.id) }}><Icon name="x" size={15} /></button>
-              </div>
+              </Pressable>
             ))}
           </Card>
         </>
