@@ -109,7 +109,11 @@ export function StoreProvider({ children }) {
       if (!cloud.isReady()) return
       cloud.pullAll().then(ch => { if (alive && ch && ch.size) reloadAll() })
     }, 20000)
-    return () => { alive = false; clearInterval(t) }
+    // Coming back to the app (e.g. after asking Claude to add something): sync
+    // straight away instead of waiting for the next poll.
+    const onVisible = () => { if (document.visibilityState === 'visible' && cloud.isReady()) cloudSync() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => { alive = false; clearInterval(t); document.removeEventListener('visibilitychange', onVisible) }
   }, [cloudSync, reloadAll])
 
   // One-time move of legacy on-record photos (accessory / vehicle cover /

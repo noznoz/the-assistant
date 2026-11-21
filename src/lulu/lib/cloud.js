@@ -274,10 +274,55 @@ export async function invokeFunction(name, body) {
 }
 
 // One full two-way sync: push local, then pull remote.
+// Pull first, then push: merging what changed elsewhere (another device, or
+// Claude through the connector) before pushing means this device never sends an
+// older copy over a newer one. (The database also refuses such overwrites —
+// see records_keep_newest in supabase/schema.sql.) A final pull is cheap and
+// picks up anything that landed meanwhile.
 export async function syncNow() {
   if (!isReady()) return null
+  const first = await pullAll()
   await pushAll()
-  return pullAll()
+  const second = await pullAll()
+  if (!first && !second) return null
+  return new Set([...(first || []), ...(second || [])])
+}
+
+// ---- Claude connector keys ----
+// A key lets Claude (through the lulu-mcp Edge Function) read and change this
+// household's data. It's shown once; only its SHA-256 hash is stored.
+async function sha256Hex(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('')
+}
+export function connectorUrl(key) {
+  const cfg = getConfig()
+  return cfg ? `${cfg.url}/functions/v1/lulu-mcp/${key}` : ''
+}
+export async function createAssistantKey(label) {
+  if (!isReady()) throw new Error('Sign in to cloud sync first')
+  const bytes = crypto.getRandomValues(new Uint8Array(32))
+  const key = 'lulu_' + btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  const res = await authFetch('/rest/v1/assistant_keys', {
+    method: 'POST', headers: { Prefer: 'return=minimal' },
+    body: JSON.stringify({ key_hash: await sha256Hex(key), household_id: householdId(), label: label || 'Claude' }),
+  })
+  if (!res.ok) {
+    const txt = await res.text().catch(() => '')
+    throw new Error(/assistant_keys/.test(txt) || res.status === 404 ? 'MISSING_TABLE' : (txt || `HTTP ${res.status}`))
+  }
+  return { key, url: connectorUrl(key) }
+}
+export async function listAssistantKeys() {
+  if (!isReady()) return []
+  try {
+    const res = await authFetch(`/rest/v1/assistant_keys?select=key_hash,label,created_at,last_used_at&household_id=eq.${householdId()}&order=created_at.desc`, { method: 'GET' })
+    return res.ok ? await res.json() : []
+  } catch { return [] }
+}
+export async function deleteAssistantKey(keyHash) {
+  const res = await authFetch(`/rest/v1/assistant_keys?key_hash=eq.${encodeURIComponent(keyHash)}`, { method: 'DELETE' })
+  return res.ok
 }
 
 // ---- Attachment storage (document/receipt/photo binaries) ----
