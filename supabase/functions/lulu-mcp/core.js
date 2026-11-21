@@ -34,6 +34,7 @@ const PAYMENT_METHODS = ['cash', 'debit', 'credit', 'transfer', 'amex', 'apple_p
 const INCOME_SOURCES = ['salary', 'bonus', 'dividend', 'rental', 'business', 'stocks', 'fund', 'realestate', 'crypto', 'savings', 'other']
 const PRIORITIES = ['low', 'medium', 'high', 'critical']
 const TASK_STATUSES = ['inbox', 'new', 'planned', 'in_progress', 'waiting_someone', 'waiting_me', 'on_hold', 'completed', 'cancelled']
+const DOC_CATEGORIES = ['id', 'work', 'vehicle_reg', 'insurance', 'invoice', 'warranty', 'travel', 'financial', 'contract', 'medical', 'property', 'education', 'personal', 'other']
 const APPT_TYPES = ['doctor', 'dentist', 'meeting', 'personal', 'family', 'car', 'government', 'other']
 
 // ---------------------------------------------------------------------------
@@ -302,9 +303,28 @@ export const TOOLS = [
     annotations: { readOnlyHint: true, openWorldHint: true },
   },
   {
+    name: 'add_document',
+    title: 'Add a document',
+    description: "Add a document to the app's Documents (ID, iqama, passport, licence, insurance, registration (istimara), contract, warranty, invoice, medical, certificate…). When the user shares a photo or scan, read it yourself and fill in the details — name, number, holder, issue and expiry dates. The photo itself can't be passed to the app: after adding, tell the user to tap \"Add photo\" on the document in The Assistant → Documents to attach it. The expiry date drives the app's renewal alerts, so include it whenever it's visible.",
+    inputSchema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', description: 'e.g. "Iqama — Ahmed", "Car insurance — Land Cruiser".' },
+        category: { type: 'string', enum: DOC_CATEGORIES, description: 'id = personal IDs (national ID, iqama, passport, licence); vehicle_reg = istimara. Default other.' },
+        number: { type: 'string', description: 'Document / policy / ID number, if visible.' },
+        expiry: { type: 'string', description: 'Expiry date as YYYY-MM-DD (convert Hijri dates to Gregorian).' },
+        issued: { type: 'string', description: 'Issue date as YYYY-MM-DD, if visible.' },
+        person: { type: 'string', description: 'Whose document it is — matched to People by name.' },
+        vehicle: { type: 'string', description: 'Or the vehicle it belongs to — matched by name or plate.' },
+        notes: { type: 'string', description: 'Anything else worth keeping (issuer, place, remarks).' },
+      },
+      required: ['title'],
+    },
+  },
+  {
     name: 'add_item',
     title: 'Add to any part of the app',
-    description: `Add a record to any other part of the app (trips, wishlist, goals, subscriptions, documents, vehicles, services, properties, giving, meetings…). Look at an existing record with list_items(full: true) first to copy its field names. Use the dedicated add_ tools for tasks, appointments, reminders, notes, expenses, income and people. Collections: ${COLLECTIONS.filter(c => !NO_GENERIC_WRITE.has(c)).join(', ')}.`,
+    description: `Add a record to any other part of the app (trips, wishlist, goals, subscriptions, documents, vehicles, services, properties, giving, meetings…). Look at an existing record with list_items(full: true) first to copy its field names. Use the dedicated add_ tools for tasks, appointments, reminders, notes, expenses, income, people and documents. Collections: ${COLLECTIONS.filter(c => !NO_GENERIC_WRITE.has(c)).join(', ')}.`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -590,6 +610,30 @@ export async function callTool(name, args, ctx) {
         return `Message ready. ${why}, so this link opens WhatsApp and the user picks ${person ? person.name : to}'s chat, then taps Send. Show it to the user (and offer to save their number with add_person / update_item):\n${picker}`
       }
       return `Message ready for ${person.name}. Show this link to the user — it opens WhatsApp with ${person.name}'s chat and the message typed; they tap Send:\nhttps://wa.me/${digits}?text=${encodeURIComponent(text)}`
+    }
+
+    case 'add_document': {
+      const title = str(a.title) || fail('A document needs a title.')
+      for (const k of ['expiry', 'issued']) if (a[k] && !isDate(a[k])) fail(`${k} must be YYYY-MM-DD.`)
+      const fields = {
+        title, category: DOC_CATEGORIES.includes(a.category) ? a.category : 'other', vaultId: '',
+        expiry: a.expiry || '', notes: [a.number ? `No. ${str(a.number)}` : '', a.issued ? `Issued ${a.issued}` : '', str(a.notes)].filter(Boolean).join('\n'),
+        attachments: [], source: 'claude',
+      }
+      if (a.number) fields.number = str(a.number)
+      if (a.issued) fields.issued = a.issued
+      let linked = ''
+      const find = (list, q, keys) => { const n = str(q).toLowerCase(); return list.find(x => keys.some(k => (x[k] || '').toLowerCase() === n)) || list.find(x => keys.some(k => { const v = (x[k] || '').toLowerCase(); return v && (v.includes(n) || n.includes(v)) })) }
+      if (a.person) {
+        const p = find(await store.list(hid, 'people'), a.person, ['name'])
+        if (p) { fields.personId = p.id; linked = ` for ${p.name}` } else fields.notes = [fields.notes, `Holder: ${str(a.person)}`].filter(Boolean).join('\n')
+      } else if (a.vehicle) {
+        const v = find(await store.list(hid, 'vehicles'), a.vehicle, ['nickname', 'name', 'plate', 'plateNumber'])
+        if (v) { fields.vehicleId = v.id; linked = ` for ${v.nickname || v.name}` }
+      }
+      const rec = newRecord(fields, now)
+      await store.put(hid, 'documents', rec)
+      return `Added document "${title}"${linked}${rec.expiry ? `, expires ${rec.expiry}` : ''} [id ${rec.id}]. Tell the user: to attach the photo, open The Assistant → Documents and tap "Add photo" on it.`
     }
 
     case 'add_item': {

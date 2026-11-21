@@ -240,12 +240,15 @@ export async function pullAll() {
 export async function savePushSubscription(sub) {
   if (!isReady() || !sub || !sub.endpoint) return
   const ses = getSession()
+  // Returns whether it was stored, so "turn on" can say when it wasn't (e.g.
+  // the push tables haven't been created yet).
   try {
-    await authFetch('/rest/v1/push_subscriptions?on_conflict=household_id,endpoint', {
+    const res = await authFetch('/rest/v1/push_subscriptions?on_conflict=household_id,endpoint', {
       method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
       body: JSON.stringify([{ household_id: householdId(), user_id: ses.user.id, endpoint: sub.endpoint, subscription: sub }]),
     })
-  } catch { /* offline / not set up — safe to ignore */ }
+    return res.ok
+  } catch { return false /* offline */ }
 }
 export async function deletePushSubscription(endpoint) {
   if (!isReady() || !endpoint) return

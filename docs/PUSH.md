@@ -1,87 +1,64 @@
 # Background reminders (web push)
 
-Personal reminders normally fire while the app is open. To have them arrive
-**even when the app is closed**, set up web push. This needs cloud sync on, a
-VAPID key pair, the `send-reminders` Edge Function on a schedule, and — on
-iPhone — the app installed to the Home Screen.
+Reminders and "due today" alerts normally fire while the app is open. With web
+push they also arrive **when the app is closed**, plus a morning brief.
 
-Everything here is optional and self‑contained: with none of it configured the
-app behaves exactly as before.
+The app has a checklist for this: **More → Reminders → Background reminders**.
+Each line gets a ✓ or tells you the one thing to do next, so you can follow it
+instead of this page. The steps below are what it will ask for.
 
-## 1. Generate VAPID keys (once)
+## 1. Deploy the `send-reminders` function (dashboard, no terminal)
 
-```bash
-npx web-push generate-vapid-keys
-# → Public Key:  BEXXpH…   Private Key:  k9…
-```
+1. Supabase → **Edge Functions** → **Deploy a new function** → **Via Editor**.
+2. Replace the sample with `supabase/functions/send-reminders/index.ts` (one file).
+3. Name it exactly `send-reminders`, then **Deploy function**.
+4. Open its **Settings** tab, turn **Verify JWT** off and **Save changes**.
+   The every-minute schedule calls it without a login; the function checks the
+   caller itself wherever it matters (status and test pushes need the signed-in
+   user, and only for their own household).
 
-## 2. Client build
+Already deployed an older version? Open it → **Code**, paste the new file over
+it, **Deploy**, and make sure Verify JWT is off.
 
-Set the **public** key at build time so the app can subscribe:
+CLI alternative: `supabase functions deploy send-reminders --no-verify-jwt`.
 
-```
-VITE_VAPID_PUBLIC_KEY=<public key>
-```
+**Push keys are made for you.** On first use the function generates a VAPID
+key pair and keeps it in `push_config` (readable only by the server). If you
+already set `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` secrets, those are used
+instead. The app asks the function for the public key, so the app no longer
+needs `VITE_VAPID_PUBLIC_KEY` at build time (it is still used as a fallback).
 
-(Alongside `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`.) Rebuild/redeploy.
+## 2. Run the push setup SQL (once)
 
-## 3. Database
+In the app's checklist tap **Push setup SQL → Copy SQL**: it has your project
+address filled in. Paste it into Supabase → **SQL Editor → New query → Run**.
+Safe to run again. It creates the push tables, enables `pg_cron` + `pg_net`,
+schedules `send-reminders` every minute, and adds a small read-only status
+function so the checklist can tell whether the schedule is running. (The same
+SQL, with a placeholder address, is in `src/lulu/lib/pushSql.js`.)
 
-Run `supabase/schema.sql` (it now includes the `push_subscriptions` table +
-row‑level security). Safe to re‑run.
+## 3. On the phone
 
-## 4. Edge Function
+- **iPhone:** add the app to the Home Screen (Safari → Share → *Add to Home
+  Screen*) and open it from that icon. iOS only allows push for Home Screen
+  apps (iOS 16.4+).
+- Checklist → **Turn on** → Allow. Then **Send a test push**.
 
-Deploy the sender and give it the secrets:
+## Optional secrets
 
-```bash
-supabase functions deploy send-reminders
-
-supabase secrets set \
-  VAPID_PUBLIC_KEY=<public key> \
-  VAPID_PRIVATE_KEY=<private key> \
-  VAPID_SUBJECT=mailto:you@example.com
-# SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided to functions automatically.
-```
-
-## 5. Schedule it (every minute)
-
-Using `pg_cron` + `pg_net` (enable both extensions in the dashboard), schedule a
-call to the function. Replace the URL and anon key:
-
-```sql
-select cron.schedule(
-  'send-reminders-every-minute',
-  '* * * * *',
-  $$
-  select net.http_post(
-    url    := 'https://<project-ref>.functions.supabase.co/send-reminders',
-    headers := jsonb_build_object(
-      'Content-Type', 'application/json',
-      'Authorization', 'Bearer <SUPABASE_ANON_KEY>'
-    )
-  );
-  $$
-);
-```
-
-(Or invoke the function from any external cron / scheduler you prefer.)
-
-## 6. On the phone
-
-- Open the app → **More → Reminders → Background reminders → Enable** (grants
-  notification permission and registers this device).
-- **iPhone:** first add the app to the Home Screen (Share → *Add to Home
-  Screen*), open it from there, then enable — iOS only allows web push for
-  installed PWAs (iOS 16.4+).
+`LULU_TZ` (default `Asia/Riyadh`) — your time zone for "today", the 07:30
+morning brief and the daytime window (due-today alerts are sent 07:00–22:00,
+never at night). `VAPID_SUBJECT` (defaults to your project URL).
+`RESEND_API_KEY` + `BRIEF_FROM` to also email the morning brief.
 
 ## How it fits together
 
-- The app stores each device's push subscription in `push_subscriptions`
-  (`lib/push.js` → `cloud.savePushSubscription`).
-- Reminders sync to the cloud as normal records (`collection = 'reminders'`).
-- Every minute the Edge Function finds due reminders, pushes to the household's
-  subscriptions, and marks each reminder `notified` so it fires once. The
-  service worker (`src/sw.js`) shows the notification.
-- The in‑app checker still fires reminders when the app is open; the shared
-  `notified` flag prevents double‑firing.
+- Each device's push subscription is stored in `push_subscriptions`.
+- Reminders sync as normal records (`collection = 'reminders'`).
+- Every minute the function records a heartbeat (`push_config.last_run_at`),
+  pushes due reminders, marks them fired (moving `updatedAt` too, so the phone
+  takes the change and doesn't alert again), rolls repeating ones forward,
+  sends daytime due-today alerts once each (`push_alerts`) and the morning
+  brief. Dead subscriptions (404/410) are removed.
+- The service worker (`src/sw.js`) shows the notification; tapping it opens
+  the screen it is about.

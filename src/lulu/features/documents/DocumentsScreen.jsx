@@ -172,6 +172,24 @@ export default function DocumentsScreen({ go }) {
                     </div>
                   </div>
                   {dd != null && dd <= 30 && <Chip tint={dd <= 7 ? 't-danger' : 't-warn'}>{dd}d</Chip>}
+                  {count === 0 && (
+                    // No photo yet (e.g. added by Claude): one tap opens the camera and attaches it here.
+                    <label className="chip add-photo" onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
+                      <Icon name="camera" size={14} /> {t('addPhoto')}
+                      <input type="file" accept="image/*" capture="environment" className="sr-only"
+                        aria-label={`${t('addPhoto')}: ${d.title}`}
+                        onChange={async e => {
+                          const file = e.target.files && e.target.files[0]
+                          e.target.value = ''
+                          if (!file) return
+                          try {
+                            const att = await saveAttachment(file)
+                            docs.patch(d.id, { attachments: [...(d.attachments || []), att] })
+                            toast.show(t('savedToast'))
+                          } catch { toast.show('Could not add photo') }
+                        }} />
+                    </label>
+                  )}
                 </Pressable>
                 </SwipeRow>
               )
