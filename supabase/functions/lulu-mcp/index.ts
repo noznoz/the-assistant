@@ -5,7 +5,7 @@
 //
 // Setup: docs/CLAUDE-CONNECTOR.md. In short: run the SQL there once, deploy
 //   supabase functions deploy lulu-mcp --no-verify-jwt
-// then in the app: More → Cloud & family → Connect Claude, and paste the link
+// then in the app: More → Settings → Cloud & family → Connect Claude, and paste the link
 // it gives you into Claude → Settings → Connectors → Add custom connector.
 //
 // The link carries a secret key. Only its SHA-256 hash is stored (table

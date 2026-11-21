@@ -33,9 +33,9 @@ Supabase project, which only reaches your household’s data.
 ## One-time setup (about 10 minutes)
 
 **0. Cloud sync must be on.** If it isn’t yet, follow `SETUP-CLOUD.md`
-(More → Cloud & family in the app).
+(More → Settings → Cloud & family in the app).
 
-**1. Run the connector SQL.** In the app: More → Cloud & family → *Connect
+**1. Run the connector SQL.** In the app: More → Settings → Cloud & family → *Connect
 Claude* → *Connector setup SQL* → Copy. In Supabase: **SQL Editor → New query**,
 paste, **Run**. (It is also at the end of `supabase/schema.sql`. Safe to re-run.)
 
@@ -56,7 +56,7 @@ paste, **Run**. (It is also at the end of `supabase/schema.sql`. Safe to re-run.
 Optional secrets (**Edge Functions → Secrets**): `LULU_TZ` (default
 `Asia/Riyadh`) and `LULU_CURRENCY` (default `SAR`).
 
-**3. Make your link.** In the app: More → Cloud & family → *Connect Claude* →
+**3. Make your link.** In the app: More → Settings → Cloud & family → *Connect Claude* →
 *Make a Claude link* → *Copy link*. It is shown only once.
 
 **4. Add it to Claude.** On claude.ai (or the Claude app): **Settings →
@@ -68,7 +68,7 @@ signed in, including voice mode on your phone.
 
 - The link contains a secret key. Anyone who has it can use your data, so don’t
   share it. Only a fingerprint (SHA-256 hash) of the key is stored in Supabase.
-- To cut access: More → Cloud & family → *Connect Claude* → **Remove** next to
+- To cut access: More → Settings → Cloud & family → *Connect Claude* → **Remove** next to
   the link. Claude stops working with the app immediately; make a new link to
   reconnect.
 - *Last used* next to each link shows when Claude last used it.
@@ -97,7 +97,7 @@ marked `source: 'claude'`). Deletes are the app’s usual soft delete.
   Make a new one.
 - **“Make a Claude link” says one-time setup:** step 1 (SQL) hasn’t been run.
 - **Claude connects but the app doesn’t show the change:** check the phone is
-  signed in to the same household (More → Cloud & family shows *Synced*), then
+  signed in to the same household (More → Settings → Cloud & family shows *Synced*), then
   pull down or tap *Sync now*.
 - **Dashboard deploy fails to find `./core.js`:** the second file must be named
   exactly `core.js`, next to `index.ts`.

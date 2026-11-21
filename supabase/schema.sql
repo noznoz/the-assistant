@@ -9,7 +9,7 @@
 -- one shared `records` table as JSONB, scoped to a `household`. Family members
 -- each sign in with their own account and join a household by its code (the
 -- household UUID). This is the schema src/lulu/lib/cloud.js talks to — it is the
--- canonical copy of the SQL also shown in-app under More → Cloud & Family.
+-- canonical copy of the SQL also shown in-app under More → Settings → Cloud & family.
 -- =====================================================================
 
 create extension if not exists pgcrypto;
@@ -197,5 +197,5 @@ drop trigger if exists records_keep_newest on public.records;
 create trigger records_keep_newest before update on public.records
   for each row execute function public.records_keep_newest();;
 
--- Done. In the app: More → Cloud & Family → paste your project URL + anon key,
+-- Done. In the app: More → Settings → Cloud & family → paste your project URL + anon key,
 -- tick the privacy consent, then create an account or sign in.

@@ -8,7 +8,7 @@ The app stores each collection as a JSON array in `localStorage` (see
 > single shared `records` JSONB table scoped to a `household`, so the React UI
 > keeps its exact shape and no per-entity migration is needed. That is the
 > implemented model — the canonical DDL lives in **`supabase/schema.sql`** (also
-> shown in-app under *More → Cloud & Family*), and `src/lulu/lib/cloud.js` is the
+> shown in-app under *More → Settings → Cloud & family*), and `src/lulu/lib/cloud.js` is the
 > client. The normalized per-entity DDL further down this page is an *alternative
 > future design* (useful if you ever want SQL-queryable columns and per-table
 > RLS); it is **not** what the current sync uses. The field lists below describe
