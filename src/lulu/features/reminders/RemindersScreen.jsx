@@ -7,8 +7,7 @@ import { fmtDate, fmtTime, relativeDay } from '../../lib/format.js'
 import { splitReminders, buildReminderFields, snoozeFields, reminderTimes, nextPendingTime, lastTime, pendingCount, MAX_TIMES, REMINDER_REPEATS } from '../../lib/reminders.js'
 import { parseWhen } from '../../lib/parseWhen.js'
 import { notificationPermission, requestNotificationPermission } from '../../lib/notify.js'
-import { pushSupported, pushConfigured, isPushEnabled, enablePush, disablePush, refreshPush } from '../../lib/push.js'
-import * as cloud from '../../lib/cloud.js'
+import BackgroundPush from './BackgroundPush.jsx'
 import SwipeRow from '../../ui/SwipeRow.jsx'
 
 const pad = (n) => String(n).padStart(2, '0')
@@ -43,36 +42,6 @@ export default function RemindersScreen({ go }) {
   const [snoozeId, setSnoozeId] = useState(null)
   const [err, setErr] = useState('')
   const [perm, setPerm] = useState(notificationPermission())
-  const [bg, setBg] = useState(false)
-  const [bgBusy, setBgBusy] = useState(false)
-  const [testBusy, setTestBusy] = useState(false)
-  useEffect(() => { isPushEnabled().then(setBg) }, [])
-
-  const toggleBg = async () => {
-    setBgBusy(true)
-    try {
-      if (bg) { await disablePush(); setBg(false); toast.show(t('savedToast')) }
-      else {
-        const r = await enablePush()
-        if (r.ok) { setBg(true); toast.show(t('bgEnabled')) }
-        else toast.show(r.reason === 'denied' ? t('reminderPermHint') : r.reason === 'not-connected' ? t('bgNeedsCloud') : t('bgNotConfigured'))
-      }
-    } finally { setBgBusy(false) }
-  }
-
-  const sendTest = async () => {
-    setTestBusy(true)
-    try {
-      await refreshPush()
-      const r = await cloud.invokeFunction('send-reminders', { test: true, household_id: cloud.householdId() })
-      if (r && r.sent > 0) toast.show(t('testPushSent'))
-      else if (r && !r.subscriptions) toast.show(t('testPushNoSub'))
-      else toast.show(t('testPushFailed'))
-    } catch {
-      toast.show(t('testPushError'))
-    } finally { setTestBusy(false) }
-  }
-
   const { upcoming, past } = splitReminders(reminders.items)
 
   const resetForm = () => { setText(''); setTimes([defaultWhen()]); setRepeat('none'); setEditingId(null); setErr('') }
@@ -130,27 +99,8 @@ export default function RemindersScreen({ go }) {
           </Card>
         )}
 
-        {/* Background push (deliver while the app is closed) */}
-        {pushSupported() && (
-          <Card className="stack" style={{ marginTop: 12 }}>
-            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-              <span className={`lead ${bg ? 't-ok' : 't-info'}`} style={{ flexShrink: 0 }}><Icon name="bell" size={16} /></span>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, fontSize: 16 }}>{t('bgReminders')}</div>
-                <div className="muted small">{bg ? t('bgOnState') : t('bgRemindersHint')}</div>
-              </div>
-            </div>
-            {!pushConfigured()
-              ? <p className="hint" style={{ margin: '0 2px' }}>{t('bgNotConfigured')}</p>
-              : !cloud.isReady()
-                ? <p className="hint" style={{ margin: '0 2px' }}>{t('bgNeedsCloud')}</p>
-                : <>
-                    <Button variant={bg ? 'ghost' : 'primary'} icon="bell" onClick={toggleBg} disabled={bgBusy}>{bg ? t('bgDisable') : t('bgEnable')}</Button>
-                    {bg && <Button variant="ghost" icon="bell" onClick={sendTest} disabled={testBusy}>{testBusy ? t('testPushSending') : t('testPush')}</Button>}
-                  </>}
-            <p className="hint" style={{ margin: '0 2px' }}>{t('bgIosHint')}</p>
-          </Card>
-        )}
+        {/* Background push (deliver while the app is closed): a setup checklist */}
+        <BackgroundPush />
 
         {/* Add / edit */}
         <Card className="stack" style={{ marginTop: 12 }}>

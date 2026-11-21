@@ -105,8 +105,15 @@ self.addEventListener('notificationclick', (e) => {
     // Opening the app hands the count back to the in-app badge logic; clear the
     // icon badge now so it doesn't linger while the app recomputes it.
     try { if (self.navigator.clearAppBadge) await self.navigator.clearAppBadge() } catch { /* ignore */ }
+    // Open the screen the notification is about (e.g. #/reminders).
+    const target = new URL(e.notification.data?.url || '', self.registration.scope).href
     const cs = await clients.matchAll({ type: 'window', includeUncontrolled: true })
-    if (cs.length) return cs[0].focus()
-    return clients.openWindow(e.notification.data?.url || self.registration.scope)
+    if (cs.length) {
+      const c = cs[0]
+      await c.focus()
+      try { if (c.navigate && c.url !== target) await c.navigate(target) } catch { /* not controlled yet */ }
+      return
+    }
+    return clients.openWindow(target)
   })())
 })

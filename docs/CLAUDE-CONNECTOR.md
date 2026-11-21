@@ -9,6 +9,7 @@ mode on your phone:
 - “Add a task to renew the iqama by the 30th, high priority.”
 - “What’s on today?” · “Mark ‘send the board pack’ as done.”
 - “Move the dentist to 5:30.” · “Save a note: buy dates for the office.”
+- “Add this iqama” (with a photo) → Claude reads the name, number and expiry and adds the document; tap **Add photo** on it in the app.
 - “WhatsApp Ahmed a reminder about the contract.” · “Send my wife today’s agenda on WhatsApp.”
 - Anything else in the app: trips, wishlist, goals, subscriptions, people, vehicles…
 
@@ -87,6 +88,7 @@ signed in, including voice mode on your phone.
 | `add_appointment`, `add_reminder`, `add_note` | Calendar, alerts, notes |
 | `add_expense`, `add_income` | Money in and out |
 | `add_person` | People |
+| `add_document` | A document (ID, iqama, passport, insurance, istimara, contract…). Share a photo with Claude and it reads the details and expiry; then tap **Add photo** on the document in the app to attach the picture |
 | `send_whatsapp` | A WhatsApp message ready to send to someone in People (or any number): Claude gives you a link, you tap it and press Send |
 | `add_item` | Any other part of the app (trips, wishlist, goals, subscriptions…) |
 | `update_item`, `delete_item` | Change or delete anything Claude found |

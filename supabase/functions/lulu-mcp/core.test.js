@@ -245,3 +245,24 @@ describe('send_whatsapp', () => {
     expect((await call('send_whatsapp', { to: 'Ahmed Ali', text: '' })).isError).toBe(true)
   })
 })
+
+describe('add_document', () => {
+  it('creates a document the app understands, linked to a person', async () => {
+    await db.put('H1', 'people', { id: 'p1', name: 'Ahmed Al-Sayed', createdAt: '', updatedAt: '' })
+    const r = await call('add_document', { title: 'Iqama — Ahmed', category: 'id', number: '2345678901', expiry: '2027-03-14', person: 'ahmed' })
+    expect(r.isError).toBe(false)
+    expect(r.text).toMatch(/Add photo/)
+    const [d] = await db.list('H1', 'documents')
+    expect(d).toMatchObject({ title: 'Iqama — Ahmed', category: 'id', expiry: '2027-03-14', personId: 'p1', number: '2345678901', attachments: [], vaultId: '' })
+    expect(d.notes).toContain('No. 2345678901')
+  })
+  it('validates dates and keeps unknown holders in the notes', async () => {
+    expect((await call('add_document', { title: 'x', expiry: '14/03/2027' })).isError).toBe(true)
+    await call('add_document', { title: 'Passport', category: 'travel', person: 'Someone New' })
+    const d = (await db.list('H1', 'documents')).find(x => x.title === 'Passport')
+    expect(d.personId).toBeUndefined()
+    expect(d.notes).toContain('Holder: Someone New')
+    await call('add_document', { title: 'Odd', category: 'nonsense' })
+    expect((await db.list('H1', 'documents')).find(x => x.title === 'Odd').category).toBe('other')
+  })
+})
