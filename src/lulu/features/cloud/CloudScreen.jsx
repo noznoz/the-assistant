@@ -4,6 +4,7 @@ import { DetailHeader, Card, Section, Field, Input, Button, useToast } from '../
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useStore } from '../../store/StoreProvider.jsx'
 import * as cloud from '../../lib/cloud.js'
+import { CLAUDE_SQL } from '../../lib/claudeSql.js'
 
 // The SQL a user runs once in their Supabase project's SQL editor.
 const SETUP_SQL = `-- The Assistant — cloud sync + family. Run once in Supabase → SQL Editor.
@@ -54,7 +55,7 @@ create policy rec_member_all on public.records
   with check (public.is_member(household_id));`
 
 export default function CloudScreen({ go }) {
-  const { t } = useT()
+  const { t, lang } = useT()
   const { cloudSync } = useStore()
   const toast = useToast()
   const [, force] = useState(0)
@@ -70,6 +71,11 @@ export default function CloudScreen({ go }) {
   const [members, setMembers] = useState([])
   const [showSql, setShowSql] = useState(false)
   const [consent, setConsent] = useState(cloud.hasConsent())
+  // Claude connector
+  const [keys, setKeys] = useState([])
+  const [newLink, setNewLink] = useState('')     // shown once, right after it's made
+  const [needSetup, setNeedSetup] = useState(false)
+  const [showClaudeSql, setShowClaudeSql] = useState(false)
 
   const configured = cloud.isConfigured()
   const signedIn = cloud.isSignedIn()
@@ -77,6 +83,23 @@ export default function CloudScreen({ go }) {
   const toggleConsent = (v) => { setConsent(v); cloud.setConsent(v) }
 
   useEffect(() => { if (signedIn) cloud.listMembers().then(setMembers) }, [signedIn])
+  useEffect(() => { if (signedIn) cloud.listAssistantKeys().then(setKeys) }, [signedIn])
+
+  const makeLink = async () => {
+    setErr(''); setBusy(true); setNeedSetup(false)
+    try {
+      const { url } = await cloud.createAssistantKey('Claude')
+      setNewLink(url)
+      cloud.listAssistantKeys().then(setKeys)
+    } catch (e) {
+      if (e.message === 'MISSING_TABLE') { setNeedSetup(true); setShowClaudeSql(true) } else setErr(e.message)
+    } finally { setBusy(false) }
+  }
+  const removeKey = async (hash) => {
+    if (!window.confirm(t('claudeRemoveQ'))) return
+    if (await cloud.deleteAssistantKey(hash)) { setKeys(keys.filter(k => k.key_hash !== hash)); toast.show(t('claudeRemoved')) }
+  }
+  const when = (iso) => iso ? new Date(iso).toLocaleString(lang === 'ar' ? 'ar' : 'en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : ''
 
   const saveConfig = () => {
     cloud.setConfig(url, anonKey)
@@ -169,6 +192,13 @@ export default function CloudScreen({ go }) {
           </>
         )}
 
+        {!signedIn && (
+          <>
+            <Section title={t('claudeConnect')} />
+            <Card><p className="hint" style={{ margin: 0 }}>{t('claudeConnectHint')} {t('claudeNeedCloud')}</p></Card>
+          </>
+        )}
+
         {/* Signed-in controls */}
         {signedIn && (
           <>
@@ -176,6 +206,45 @@ export default function CloudScreen({ go }) {
             <Card className="stack">
               <Button block variant="primary" icon="refresh" onClick={doSync} disabled={busy}>{busy ? t('thinking') + '…' : t('cloudSyncNow')}</Button>
               <p className="hint" style={{ margin: '0 2px' }}>{t('cloudSyncHint')}</p>
+            </Card>
+
+            <Section title={t('claudeConnect')} />
+            <Card className="stack">
+              <p className="hint" style={{ margin: '0 2px' }}>{t('claudeConnectHint')}</p>
+              {newLink ? (
+                <>
+                  <div className="label">{t('claudeLinkReady')}</div>
+                  <div className="mono-box" aria-label={t('claudeLinkReady')}>{newLink}</div>
+                  <Button block variant="primary" icon="copy" onClick={() => copy(newLink)}>{t('claudeCopyLink')}</Button>
+                  <p className="hint" style={{ margin: '0 2px', color: 'var(--warn)' }}>{t('claudeLinkOnce')}</p>
+                  <p className="hint" style={{ margin: '0 2px' }}>{t('claudeSteps')}</p>
+                </>
+              ) : (
+                <Button block variant="primary" icon="sparkle" onClick={makeLink} disabled={busy}>{t('claudeMakeLink')}</Button>
+              )}
+              {needSetup && <p className="err" style={{ margin: '0 2px' }}>{t('claudeNeedSetup')}</p>}
+              {keys.length > 0 && (
+                <>
+                  <div className="label" style={{ marginTop: 4 }}>{t('claudeLinks')}</div>
+                  {keys.map(k => (
+                    <div key={k.key_hash} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <Icon name="sparkle" size={16} style={{ color: 'var(--brand-600)', flexShrink: 0 }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 600 }}>{k.label || 'Claude'} · …{k.key_hash.slice(0, 6)}</div>
+                        <div className="muted small">{k.last_used_at ? `${t('claudeLastUsed')}: ${when(k.last_used_at)}` : t('claudeNeverUsed')}</div>
+                      </div>
+                      <Button icon="trash" onClick={() => removeKey(k.key_hash)}>{t('claudeRemove')}</Button>
+                    </div>
+                  ))}
+                </>
+              )}
+              <button className="link-btn" style={{ alignSelf: 'flex-start' }} onClick={() => setShowClaudeSql(v => !v)}>{t('claudeSetupSql')}</button>
+              {showClaudeSql && (
+                <>
+                  <pre className="sql-box">{CLAUDE_SQL}</pre>
+                  <Button icon="copy" onClick={() => copy(CLAUDE_SQL)}>{t('cloudCopySql')}</Button>
+                </>
+              )}
             </Card>
 
             <Section title={t('cloudFamilyMembers')} />

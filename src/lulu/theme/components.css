@@ -853,3 +853,15 @@ button.check::after { content: ''; position: absolute; inset: -10px; }
 /* Labels of the action tiles may wrap at large text, centered. */
 .act { text-align: center; line-height: 1.25; }
 .money-details { margin-top: 4px; }
+
+/* ── Cloud: long values (connector link, setup SQL) ─────────────── */
+.mono-box {
+  font-family: ui-monospace, Menlo, monospace; font-size: 13px; line-height: 1.45; direction: ltr; text-align: left;
+  padding: 10px 12px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px;
+  overflow-wrap: anywhere; user-select: all;
+}
+.sql-box {
+  max-height: 220px; overflow: auto; direction: ltr; text-align: left;
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px; font-size: 13px; line-height: 1.45; margin: 0;
+}

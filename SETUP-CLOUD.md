@@ -83,3 +83,8 @@ project's data is only ever visible to its own household members.
 - The app pushes each change as you make it and pulls remote changes on open and on a
   short interval. Conflicts resolve last-write-wins by each record's `updatedAt`.
 - Device-only settings (theme, API keys, prayer city) stay local and are never synced.
+
+## Use it from Claude (optional)
+Once cloud sync is on, you can let Claude, including voice mode on your phone,
+add and change your tasks, appointments, reminders, notes and money. See
+**docs/CLAUDE-CONNECTOR.md**.
