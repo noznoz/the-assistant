@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Section, Empty, Button } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Section, Empty, Button, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { isOverdue, daysUntil, relativeDay, fmtDate } from '../../lib/format.js'
@@ -37,14 +37,14 @@ export default function FollowUpScreen({ go }) {
     const asg = firstAssignee(x)
     return (
       <div className="li">
-        <div className="body" onClick={() => x.departmentId ? go(`work/${x.departmentId}`) : go('work')}>
+        <Pressable className="body" onClick={() => x.departmentId ? go(`work/${x.departmentId}`) : go('work')}>
           <div className="title">{x.title}</div>
           <div className="meta">
             {x.assignedTo && <span>{x.assignedTo}</span>}
             {pr && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>· <span style={{ width: 7, height: 7, borderRadius: 4, background: pr.color }} />{t(pr.key)}</span>}
             {x.dueDate && <span className={overdue ? 't-danger' : ''}>· {relativeDay(x.dueDate, lang)}</span>}
           </div>
-        </div>
+        </Pressable>
         {nudge && asg && personDigits(asg) && (
           <button className="iconbtn" style={{ color: 'var(--ok)' }} aria-label={t('nudge')}
             onClick={() => whatsappToPerson(asg, formatTaskDetail(x, lang, settings, { department: '' }))}>
@@ -71,7 +71,7 @@ export default function FollowUpScreen({ go }) {
               <span className="lead t-warn" style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="bell" size={18} /></span>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700 }}>{waitingOnOthers.length} {t('awaitingOthers')}</div>
-                <div className="muted" style={{ fontSize: 14.5 }}>{overdueCount > 0 ? `${overdueCount} ${t('overdue')}` : t('onTrack')}</div>
+                <div className="muted small">{overdueCount > 0 ? `${overdueCount} ${t('overdue')}` : t('onTrack')}</div>
               </div>
             </Card>
 

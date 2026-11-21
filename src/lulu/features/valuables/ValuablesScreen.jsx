@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Stat, Sheet, Field, Input, TextArea, Select, Button, Empty, Fab, Chip, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Stat, Sheet, Field, Input, TextArea, Select, Button, Empty, Fab, Chip, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { VALUABLE_CATEGORIES, findValuableCategory, label } from '../../lib/domain.js'
@@ -28,8 +28,8 @@ export default function ValuablesScreen({ go }) {
       <DetailHeader title={t('valuables')} onBack={() => go('more')} />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('totalValue')}</div>
-          <div style={{ fontSize: 32, fontWeight: 780, marginTop: 4 }} className="tnum">{money(total, cur, lang)}</div>
+          <div className="label">{t('totalValue')}</div>
+          <div className="hero-amount tnum">{money(total, cur, lang)}</div>
         </Card>
         <div className="stat-grid" style={{ marginTop: 12 }}>
           <Stat label={t('items')} value={valuables.items.length} />
@@ -46,7 +46,7 @@ export default function ValuablesScreen({ go }) {
               const dd = daysUntil(v.warrantyExpiry)
               return (
                 <SwipeRow key={v.id} onEdit={() => setEditor(v)} onDelete={() => { valuables.remove(v.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
-                <div className="li" onClick={() => setEditor(v)}>
+                <Pressable className="li" onClick={() => setEditor(v)}>
                   <div className="lead t-brand"><Icon name={c?.icon || 'gift'} size={18} /></div>
                   <div className="body">
                     <div className="title">{v.name}</div>
@@ -59,7 +59,7 @@ export default function ValuablesScreen({ go }) {
                     </div>
                   </div>
                   {Number(v.value) > 0 && <b className="tnum">{money(v.value, v.currency || cur, lang)}</b>}
-                </div>
+                </Pressable>
                 </SwipeRow>
               )
             })}
@@ -132,7 +132,7 @@ function ValuableEditor({ initial, onClose, onSaved }) {
         <input ref={fileRef} type="file" accept="image/*,application/pdf" multiple hidden onChange={e => { addReceipts(e.target.files); e.target.value = '' }} />
         {busy && <p className="muted" style={{ fontSize: 14, margin: '4px 2px' }}><span className="spinner" style={{ width: 14, height: 14, display: 'inline-block', verticalAlign: 'middle' }} /> …</p>}
         {(f.receipts || []).length > 0 && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginTop: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8, marginTop: 8 }}>
             {f.receipts.map(a => (
               <div key={a.id} style={{ position: 'relative', aspectRatio: '1', borderRadius: 10, overflow: 'hidden', border: '1px solid var(--line)', background: 'var(--surface-2)' }}>
                 {a.thumb ? <img src={a.thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ display: 'grid', placeItems: 'center', height: '100%', color: 'var(--ink-3)' }}><Icon name="doc" size={20} /></div>}

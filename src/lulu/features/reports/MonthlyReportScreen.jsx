@@ -93,8 +93,8 @@ export default function MonthlyReportScreen({ go }) {
         </div>
 
         <Card style={{ textAlign: 'center', marginTop: 12 }}>
-          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('netCashflow')}</div>
-          <div style={{ fontSize: 32, fontWeight: 780, marginTop: 4 }} className={`tnum ${report.net >= 0 ? 't-ok' : 't-danger'}`}>{money(report.net, cur, lang)}</div>
+          <div className="label">{t('netCashflow')}</div>
+          <div className={`hero-amount tnum ${report.net >= 0 ? 't-ok' : 't-danger'}`}>{money(report.net, cur, lang)}</div>
         </Card>
 
         <div className="stat-grid" style={{ marginTop: 12 }}>

@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Section, Empty, Button, Chip } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Section, Empty, Button, Chip, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { money, toSar, fmtLongDate, fmtDate, relativeDay, daysUntil, isOverdue, isToday } from '../../lib/format.js'
@@ -109,7 +109,7 @@ export default function WeekScreen({ go }) {
               <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 3, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Icon name="sparkle" size={16} style={{ color: 'var(--brand-600)' }} /> {t('planWeekTitle')}
               </div>
-              <div className="muted" style={{ fontSize: 15 }}>{planParts || t('allClear')}</div>
+              <div className="muted small">{planParts || t('allClear')}</div>
               {(d.dueOut > 0 || d.expectIn > 0) && (
                 <div style={{ fontSize: 14.5, marginTop: 6, fontWeight: 600 }}>
                   {d.dueOut > 0 && <span style={{ color: 'var(--danger)' }}>−{money(d.dueOut, cur, lang)}</span>}
@@ -128,11 +128,11 @@ export default function WeekScreen({ go }) {
             {view === 'grouped' && <>
             <div className="stat-grid" style={{ marginTop: 8 }}>
               <div className="card" style={{ textAlign: 'center', padding: 14 }}>
-                <div className="muted" style={{ fontSize: 13, fontWeight: 650, textTransform: 'uppercase' }}>{t('dueOut')}</div>
+                <div className="label">{t('dueOut')}</div>
                 <b className="tnum t-danger" style={{ fontSize: 18 }}>{money(d.dueOut, cur, lang)}</b>
               </div>
               <div className="card" style={{ textAlign: 'center', padding: 14 }}>
-                <div className="muted" style={{ fontSize: 13, fontWeight: 650, textTransform: 'uppercase' }}>{t('expectedIn')}</div>
+                <div className="label">{t('expectedIn')}</div>
                 <b className="tnum t-ok" style={{ fontSize: 18 }}>{money(d.expectIn, cur, lang)}</b>
               </div>
             </div>
@@ -145,11 +145,11 @@ export default function WeekScreen({ go }) {
                     const pr = findPriority(x.priority)
                     const over = isOverdue(x.dueDate)
                     return (
-                      <div key={x.id} className="li" style={{ margin: 0, border: 0, borderRadius: 0 }} onClick={() => go('tasks')}>
+                      <Pressable key={x.id} className="li" style={{ margin: 0, border: 0, borderRadius: 0 }} onClick={() => go('tasks')}>
                         <span style={{ width: 8, height: 8, borderRadius: 4, background: pr?.color || 'var(--ink-3)', flexShrink: 0 }} />
                         <div className="body"><div className="title" style={{ fontSize: 16 }}>{x.title}</div></div>
                         <span className={`meta ${over ? 't-danger' : ''}`}>{relativeDay(x.dueDate, lang)}</span>
-                      </div>
+                      </Pressable>
                     )
                   })}
                 </Card>
@@ -173,10 +173,10 @@ export default function WeekScreen({ go }) {
               <>
                 <Section title={t('appointments')} count={d.weekAppts.length} action={t('view')} onAction={() => go('appointments')} />
                 {d.weekAppts.map(a => (
-                  <div className="li" key={'ap' + a.id} onClick={() => go('appointments')}>
+                  <Pressable className="li" key={'ap' + a.id} onClick={() => go('appointments')}>
                     <div className="lead t-brand"><Icon name="calendar" size={18} /></div>
                     <div className="body"><div className="title">{a.title}{nameFor(a.personId) ? ` · ${nameFor(a.personId)}` : ''}</div><div className="meta">{relativeDay(a.date, lang)}{a.time ? ` · ${a.time}` : ''}</div></div>
-                  </div>
+                  </Pressable>
                 ))}
               </>
             )}
@@ -185,16 +185,16 @@ export default function WeekScreen({ go }) {
               <>
                 <Section title={t('upcoming')} />
                 {d.birthdays.map(x => (
-                  <div className="li" key={'b' + x.p.id} onClick={() => go('people')}>
+                  <Pressable className="li" key={'b' + x.p.id} onClick={() => go('people')}>
                     <div className="lead t-brand"><Icon name="cake" size={18} /></div>
                     <div className="body"><div className="title">{x.p.name} — {t('birthdaySoon')}</div><div className="meta">{x.dd === 0 ? relativeDay(new Date().toISOString(), lang) : relativeDay(new Date(Date.now() + x.dd * 86400000).toISOString(), lang)}</div></div>
-                  </div>
+                  </Pressable>
                 ))}
                 {d.upTrips.map(tr => (
-                  <div className="li" key={'t' + tr.id} onClick={() => go('trips')}>
+                  <Pressable className="li" key={'t' + tr.id} onClick={() => go('trips')}>
                     <div className="lead t-info"><Icon name="trip" size={18} /></div>
                     <div className="body"><div className="title">{tr.name}</div><div className="meta">{tr.destination}{tr.start ? ` · ${relativeDay(tr.start, lang)}` : ''}</div></div>
-                  </div>
+                  </Pressable>
                 ))}
               </>
             )}
@@ -221,11 +221,11 @@ function TimelineView({ agenda, upTrips, lang, cur, go, t }) {
   const laterTrips = (upTrips || []).filter(tr => tr.start && tr.start > today && daysUntil(tr.start) > 7)
 
   const Rows = ({ items }) => items.map(it => (
-    <div key={it.key} className="li" onClick={() => go(it.go)}>
+    <Pressable key={it.key} className="li" onClick={() => go(it.go)}>
       <div className={`lead ${it.tint}`}>{it.pr ? <span style={{ width: 9, height: 9, borderRadius: 5, background: it.pr.color }} /> : <Icon name={it.icon} size={17} />}</div>
       <div className="body"><div className="title" style={{ fontSize: 16 }}>{it.title}</div>{it.meta && <div className="meta">{it.meta}</div>}</div>
       {it.amount > 0 && <b className={`tnum ${it.kind === 'income' ? 't-ok' : ''}`} style={{ fontSize: 15 }}>{it.kind === 'income' ? '+' : ''}{money(it.amount, cur, lang)}</b>}
-    </div>
+    </Pressable>
   ))
 
   const DayBlock = ({ dt, label, danger }) => (
@@ -258,10 +258,10 @@ function TimelineView({ agenda, upTrips, lang, cur, go, t }) {
             <span style={{ flex: 1, height: 1, background: 'var(--line)' }} />
           </div>
           <Card tight>{laterTrips.map(tr => (
-            <div key={'lt' + tr.id} className="li" onClick={() => go('trips')}>
+            <Pressable key={'lt' + tr.id} className="li" onClick={() => go('trips')}>
               <div className="lead t-info"><Icon name="trip" size={17} /></div>
               <div className="body"><div className="title" style={{ fontSize: 16 }}>{tr.name}</div><div className="meta">{tr.destination}{tr.start ? ` · ${relativeDay(tr.start, lang)}` : ''}</div></div>
-            </div>
+            </Pressable>
           ))}</Card>
         </>
       )}

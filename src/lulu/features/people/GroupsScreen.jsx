@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Sheet, Field, Input, TextArea, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Sheet, Field, Input, TextArea, Button, Empty, Fab, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { GROUP_ICONS, SUGGESTED_GROUPS } from '../../lib/domain.js'
@@ -47,14 +47,14 @@ export default function GroupsScreen({ go }) {
           <div style={{ marginTop: 14 }}>
             {groups.items.map(g => (
               <SwipeRow key={g.id} onEdit={() => setEditor(g)} onDelete={() => deleteGroup(g.id)}>
-              <div className="li" onClick={() => setEditor(g)}>
+              <Pressable className="li" onClick={() => setEditor(g)}>
                 <div className="lead t-brand"><Icon name={g.icon || 'people'} size={18} /></div>
                 <div className="body">
                   <div className="title">{g.name}</div>
                   <div className="meta">{countFor(g.id)} {countFor(g.id) === 1 ? t('member') : t('members')}</div>
                 </div>
                 <Icon name="chevron" size={16} style={{ color: 'var(--ink-3)' }} />
-              </div>
+              </Pressable>
               </SwipeRow>
             ))}
           </div>
@@ -103,7 +103,7 @@ function GroupEditor({ initial, onClose, onSaved }) {
         <Input value={f.name} onChange={e => setF({ ...f, name: e.target.value })} placeholder={t('groupNamePlaceholder')} autoFocus />
       </Field>
       <Field label={t('icon')}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 8 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: 8 }}>
           {GROUP_ICONS.map(name => {
             const on = f.icon === name
             return (

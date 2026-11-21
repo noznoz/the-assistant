@@ -71,11 +71,11 @@ export default function MoneyCalendarScreen({ go }) {
           <>
             <div className="stat-grid" style={{ marginTop: 14 }}>
               <div className="card" style={{ textAlign: 'center', padding: 14 }}>
-                <div className="muted" style={{ fontSize: 13, fontWeight: 650, textTransform: 'uppercase' }}>{t('dueOut')}</div>
+                <div className="label">{t('dueOut')}</div>
                 <b className="tnum t-danger" style={{ fontSize: 18 }}>{money(totalOut, cur, lang)}</b>
               </div>
               <div className="card" style={{ textAlign: 'center', padding: 14 }}>
-                <div className="muted" style={{ fontSize: 13, fontWeight: 650, textTransform: 'uppercase' }}>{t('expectedIn')}</div>
+                <div className="label">{t('expectedIn')}</div>
                 <b className="tnum t-ok" style={{ fontSize: 18 }}>{money(totalIn, cur, lang)}</b>
               </div>
             </div>

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { TopBar } from '../../ui/AppShell.jsx'
-import { Chip, Fab, Sheet, Button, Empty, useToast } from '../../ui/primitives.jsx'
+import { Chip, Fab, Sheet, Button, Empty, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { findPriority, findStatus, findType } from '../../lib/domain.js'
@@ -139,7 +139,7 @@ function TaskRow({ task, lang, dateFormat, onToggle, onOpen }) {
       <button className={`check ${done ? 'on' : ''}`} onClick={onToggle} aria-label={t('markComplete')}>
         {done && <Icon name="check" size={16} stroke={3} />}
       </button>
-      <div className="body" onClick={onOpen}>
+      <Pressable className="body" onClick={onOpen}>
         <div className="title">{task.title}</div>
         <div className="meta">
           {pr && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
@@ -156,7 +156,7 @@ function TaskRow({ task, lang, dateFormat, onToggle, onOpen }) {
           {task.assignedTo && <span>· {task.assignedTo}</span>}
           {!done && st && task.status !== 'new' && <span>· {t(st.key)}</span>}
         </div>
-      </div>
+      </Pressable>
     </div>
   )
 }

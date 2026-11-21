@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Stat, Section, Sheet, Field, Input, TextArea, Select, Button, Chip, Empty, Fab, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Stat, Section, Sheet, Field, Input, TextArea, Select, Button, Chip, Empty, Fab, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { GIVING_TYPES, GIVING_CAUSES, findGivingType, label } from '../../lib/domain.js'
@@ -40,8 +40,8 @@ export default function GivingScreen({ go }) {
       } />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('givenThisYear')}{hy ? ` · ${hy} ${t('ah')}` : ''}</div>
-          <div style={{ fontSize: 32, fontWeight: 780, marginTop: 4 }} className="tnum">{money(stats.total, cur, lang)}</div>
+          <div className="label">{t('givenThisYear')}{hy ? ` · ${hy} ${t('ah')}` : ''}</div>
+          <div className="hero-amount tnum">{money(stats.total, cur, lang)}</div>
         </Card>
         <div className="stat-grid" style={{ marginTop: 12 }}>
           <Stat label={t('zakatPaid')} value={money(stats.zakat, cur, lang)} onClick={() => go('zakat')} />
@@ -57,14 +57,14 @@ export default function GivingScreen({ go }) {
               const ty = findGivingType(g.type)
               return (
                 <SwipeRow key={g.id} onEdit={() => setEditor(g)} onDelete={() => { giving.remove(g.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
-                  <div className="li" onClick={() => setEditor(g)}>
+                  <Pressable className="li" onClick={() => setEditor(g)}>
                     <div className="lead t-brand"><Icon name={ty?.icon || 'gift'} size={18} /></div>
                     <div className="body">
                       <div className="title">{g.cause || (ty ? label(ty, lang) : t('giving'))}</div>
                       <div className="meta">{ty ? label(ty, lang) : ''} · {fmtDate(g.date, lang, settings.dateFormat)}</div>
                     </div>
                     <b className="tnum">{money(g.amount, g.currency || cur, lang)}</b>
-                  </div>
+                  </Pressable>
                 </SwipeRow>
               )
             })}

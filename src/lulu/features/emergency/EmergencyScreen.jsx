@@ -61,7 +61,7 @@ export default function EmergencyScreen({ go }) {
             <Card style={{ marginTop: 14, background: 'var(--brand-tint)', borderColor: 'transparent' }}>
               <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                 <span className="t-brand" style={{ width: 42, height: 42, borderRadius: 12, display: 'grid', placeItems: 'center', background: 'var(--surface)' }}><Icon name="shield" size={22} /></span>
-                <div><div style={{ fontWeight: 750 }}>{t('emergencyCard')}</div><div className="muted" style={{ fontSize: 14.5 }}>{t('emergencyIntro')}</div></div>
+                <div><div style={{ fontWeight: 750 }}>{t('emergencyCard')}</div><div className="muted small">{t('emergencyIntro')}</div></div>
               </div>
             </Card>
 
@@ -69,7 +69,7 @@ export default function EmergencyScreen({ go }) {
               <Card key={p.id} style={{ marginTop: 12 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
                   <div style={{ fontWeight: 750, fontSize: 18 }}>{p.name}</div>
-                  {p.jobTitle && <div className="muted" style={{ fontSize: 14.5 }}>{p.jobTitle}</div>}
+                  {p.jobTitle && <div className="muted small">{p.jobTitle}</div>}
                 </div>
                 <div className="stack" style={{ gap: 6 }}>
                   {rows(p).map(([k, v]) => (

@@ -164,8 +164,8 @@ export default function ExpenseReportScreen({ go }) {
 
         {/* Result */}
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{scopeLabel}</div>
-          <div style={{ fontSize: 38, fontWeight: 780, marginTop: 6, letterSpacing: '-0.03em' }} className="tnum">{money(total, cur, lang)}</div>
+          <div className="label">{scopeLabel}</div>
+          <div className="hero-amount tnum">{money(total, cur, lang)}</div>
         </Card>
 
         <div className="stat-grid" style={{ marginTop: 14 }}>

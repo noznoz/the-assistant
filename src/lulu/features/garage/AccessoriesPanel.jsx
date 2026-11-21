@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { Card, Section, Sheet, Field, Input, TextArea, Chip, Button, Empty, useToast } from '../../ui/primitives.jsx'
+import { Card, Section, Sheet, Field, Input, TextArea, Chip, Button, Empty, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { money, fmtDate, todayISO } from '../../lib/format.js'
@@ -63,7 +63,7 @@ export default function AccessoriesPanel({ vehicle }) {
       </div>
 
       <Card style={{ textAlign: 'center', marginBottom: 12 }}>
-        <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase' }}>{sectionLabel}{section === 'wishlist' ? ` · ${t('total').toLowerCase()}` : ` · ${t('value') || 'value'}`}</div>
+        <div className="label">{sectionLabel}{section === 'wishlist' ? ` · ${t('total').toLowerCase()}` : ` · ${t('value') || 'value'}`}</div>
         <div style={{ fontSize: 28, fontWeight: 750, marginTop: 4 }} className="tnum">{money(sectionTotal, cur, lang)}</div>
         <div className="muted" style={{ fontSize: 14, marginTop: 2 }}>{shown.length} {t('items').toLowerCase()}</div>
       </Card>
@@ -88,7 +88,7 @@ export default function AccessoriesPanel({ vehicle }) {
             const tot = accessoryTotal(a)
             return (
               <SwipeRow key={a.id} onEdit={() => setEditor(a)} onDelete={() => { accessories.remove(a.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
-              <div className="li" onClick={() => setEditor(a)}>
+              <Pressable className="li" onClick={() => setEditor(a)}>
                 <div className="lead" style={{ padding: 0, overflow: 'hidden', background: 'var(--surface-2)', color: st === 'wishlist' ? 'var(--warn)' : 'var(--brand-600)' }}>
                   {a.photo ? <img src={a.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Icon name={ty.icon} size={18} />}
                 </div>
@@ -105,7 +105,7 @@ export default function AccessoriesPanel({ vehicle }) {
                 </div>
                 {a.website && <button className="iconbtn" aria-label={t('website')} onClick={(e) => { e.stopPropagation(); window.open(normUrl(a.website), '_blank') }}><Icon name="globe" size={16} /></button>}
                 {tot > 0 ? <b className="tnum">{money(tot, cur, lang)}</b> : null}
-              </div>
+              </Pressable>
               </SwipeRow>
             )
           })}
@@ -269,7 +269,7 @@ function ReportSheet({ vehicle, accessories, onClose, onToast }) {
 
       {/* Live dashboard preview */}
       <Card style={{ textAlign: 'center', marginBottom: 12 }}>
-        <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase' }}>{t('total')}</div>
+        <div className="label">{t('total')}</div>
         <div style={{ fontSize: 28, fontWeight: 780, marginTop: 4 }} className="tnum">{money(grand, cur, lang)}</div>
         <div className="muted" style={{ fontSize: 14, marginTop: 2 }}>{rows.length} {t('items')}</div>
       </Card>

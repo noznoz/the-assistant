@@ -74,7 +74,7 @@ export default function MessageScreen({ go }) {
             <span className="lead t-ok" style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="whatsapp" size={18} /></span>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 700 }}>{recipient.name}</div>
-              <div className="muted" style={{ fontSize: 14 }} dir="ltr">+{recipient.digits}</div>
+              <div className="muted small" dir="ltr">+{recipient.digits}</div>
             </div>
             <button className="iconbtn" aria-label={t('clear')} onClick={() => { setPicked(null); setManual('') }}><Icon name="x" size={16} /></button>
           </Card>

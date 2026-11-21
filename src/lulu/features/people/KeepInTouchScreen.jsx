@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Section, Chip, Empty, Button, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Section, Chip, Empty, Button, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { daysUntil, relativeDay, todayISO, fmtDate } from '../../lib/format.js'
@@ -36,14 +36,14 @@ export default function KeepInTouchScreen({ go }) {
         {p.photo ? <img src={p.photo} alt="" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
           : <span className="t-brand"><Icon name="people" size={18} /></span>}
       </div>
-      <div className="body" onClick={() => go('people')}>
+      <Pressable className="body" onClick={() => go('people')}>
         <div className="title">{p.name}</div>
         <div className="meta">
           {p.company || p.jobTitle || ''}
           <span className={days <= 0 ? 't-warn' : ''}>· {days <= 0 ? t('dueNow') : relativeDay(new Date(Date.now() + days * 86400000).toISOString(), lang)}</span>
           {p.lastContacted && <span>· {t('lastLabel')} {fmtDate(p.lastContacted, lang, settings.dateFormat)}</span>}
         </div>
-      </div>
+      </Pressable>
       {personDigits(p) && <button className="iconbtn" aria-label="WhatsApp" onClick={() => { whatsappToPerson(p, ''); markContacted(p) }}><Icon name="whatsapp" size={16} /></button>}
       <button className="btn sm" onClick={() => markContacted(p)}>{t('contacted')}</button>
     </div>

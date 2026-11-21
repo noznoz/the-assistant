@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Sheet, Field, Input, Select, Button, Empty, Fab, Chip, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Sheet, Field, Input, Select, Button, Empty, Fab, Chip, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { DOC_CATEGORIES, docCategoryOptions, docCatLabel, VAULT_ICONS, label } from '../../lib/domain.js'
@@ -76,7 +76,7 @@ export default function DocumentsScreen({ go }) {
           </span>
           <span style={{ minWidth: 0 }}>
             <span style={{ display: 'block', fontWeight: 700, fontSize: 16.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{name}</span>
-            {count != null && <span className="muted" style={{ fontSize: 14 }}>{count} {count === 1 ? t('documentTitle') : t('attachments')}</span>}
+            {count != null && <span className="muted small">{count} {count === 1 ? t('documentTitle') : t('attachments')}</span>}
           </span>
         </button>
       )
@@ -87,7 +87,7 @@ export default function DocumentsScreen({ go }) {
           <button className="iconbtn" onClick={() => setVaultEditor({})} aria-label={t('newVault')}><Icon name="plus" size={18} /></button>
         } />
         <div className="screen">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 12, marginTop: 14 }}>
             <Tile icon="grid" name={t('allDocuments')} count={docs.items.length} onClick={() => setActiveVault('all')} />
             {vaults.items.filter(v => !v.parentId).map(v => (
               <Tile key={v.id} icon={v.icon || 'doc'} name={v.name} count={vaultDocCount(v.id)} onClick={() => setActiveVault(v.id)} onLongPress={() => setVaultEditor(v)} />
@@ -124,7 +124,7 @@ export default function DocumentsScreen({ go }) {
       } />
       <div className="screen">
         {subVaults.length > 0 && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 12, marginTop: 14 }}>
             {subVaults.map(sv => (
               <button key={sv.id} onClick={() => setActiveVault(sv.id)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 12, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--r-lg)', color: 'var(--ink)', textAlign: 'start' }}>
                 <span className="lead t-brand" style={{ width: 36, height: 36, borderRadius: 11, display: 'grid', placeItems: 'center' }}><Icon name={sv.icon || 'doc'} size={18} /></span>
@@ -158,7 +158,7 @@ export default function DocumentsScreen({ go }) {
               return (
                 <SwipeRow key={d.id} onEdit={() => setEditor(d)}
                   onDelete={async () => { for (const a of d.attachments || []) await removeAttachment(a); docs.remove(d.id); toast.show(t('deletedToast')) }}>
-                <div className="li" onClick={() => setViewing(d)}>
+                <Pressable className="li" onClick={() => setViewing(d)}>
                   <div className="lead" style={{ padding: 0, overflow: 'hidden', background: 'var(--surface-2)' }}>
                     {thumb ? <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Icon name="doc" size={18} />}
                   </div>
@@ -172,7 +172,7 @@ export default function DocumentsScreen({ go }) {
                     </div>
                   </div>
                   {dd != null && dd <= 30 && <Chip tint={dd <= 7 ? 't-danger' : 't-warn'}>{dd}d</Chip>}
-                </div>
+                </Pressable>
                 </SwipeRow>
               )
             })}
@@ -350,7 +350,7 @@ export function DocEditor({ initial, onClose, onSaved, onToast }) {
       {busy && <p className="muted" style={{ fontSize: 14, margin: '4px 2px' }}><span className="spinner" style={{ width: 14, height: 14, display: 'inline-block', verticalAlign: 'middle' }} /> …</p>}
 
       {(f.attachments || []).length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, margin: '8px 0 16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10, margin: '8px 0 16px' }}>
           {f.attachments.map(a => (
             <div key={a.id} style={{ position: 'relative', aspectRatio: '1', borderRadius: 12, overflow: 'hidden', border: '1px solid var(--line)', background: 'var(--surface-2)' }}>
               {a.thumb
@@ -500,7 +500,7 @@ export function DocumentViewer({ doc, onBack, onEdit, onDelete, onToast }) {
                     <div className="lead t-danger" style={{ width: 44, height: 44, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="doc" size={22} /></div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 650 }}>{a.name}</div>
-                      <div className="muted" style={{ fontSize: 14 }}>PDF · {humanSize(a.size)}</div>
+                      <div className="muted small">PDF · {humanSize(a.size)}</div>
                     </div>
                     <Button size="sm" icon="upload" onClick={() => openOne(a)}>{t('openFile')}</Button>
                   </div>

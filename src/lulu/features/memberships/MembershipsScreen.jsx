@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Sheet, Field, Input, TextArea, Select, Button, Empty, Fab, Chip, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Sheet, Field, Input, TextArea, Select, Button, Empty, Fab, Chip, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { MEMBERSHIP_CATEGORIES, findMembershipCategory, label } from '../../lib/domain.js'
@@ -31,7 +31,7 @@ export default function MembershipsScreen({ go }) {
               const dd = daysUntil(m.expiry)
               return (
                 <SwipeRow key={m.id} onEdit={() => setEditor(m)} onDelete={() => { memberships.remove(m.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
-                <div className="li" onClick={() => setEditor(m)}>
+                <Pressable className="li" onClick={() => setEditor(m)}>
                   <div className="lead t-brand"><Icon name={c?.icon || 'gift'} size={18} /></div>
                   <div className="body">
                     <div className="title">{m.name}{m.tier ? ` · ${m.tier}` : ''}</div>
@@ -41,7 +41,7 @@ export default function MembershipsScreen({ go }) {
                     </div>
                   </div>
                   {m.number && <button className="iconbtn" aria-label={t('copy')} onClick={(e) => { e.stopPropagation(); copyNumber(m) }}><Icon name="duplicate" size={16} /></button>}
-                </div>
+                </Pressable>
                 </SwipeRow>
               )
             })}

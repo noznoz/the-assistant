@@ -76,7 +76,7 @@ export default function TaskDetail({ task, people = [], lang, onClose, onEdit, o
       {atts.length > 0 && (
         <div style={{ marginTop: 12 }}>
           <div className="section-h" style={{ margin: '4px 2px 8px' }}><h2>{t('attachments')}</h2><span className="count">{atts.length}</span></div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8 }}>
             {atts.map(a => (
               <button key={a.id} onClick={() => shareAttachments([a])} aria-label={a.name || t('attachments')}
                 style={{ all: 'unset', cursor: 'pointer', aspectRatio: '1', borderRadius: 10, overflow: 'hidden', border: '1px solid var(--line)', background: 'var(--surface-2)', display: 'block' }}>

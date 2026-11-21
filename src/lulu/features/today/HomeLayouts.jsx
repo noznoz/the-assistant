@@ -1,6 +1,6 @@
 import React from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { Button } from '../../ui/primitives.jsx'
+import { Button, Pressable } from '../../ui/primitives.jsx'
 import { money } from '../../lib/format.js'
 import QuickCapture from './QuickCapture.jsx'
 
@@ -65,10 +65,10 @@ function CoverHome({ data, go, t, lang, toast }) {
       <div className="cover-agenda">
         {agenda.length > 0 && <div className="cover-lbl">{t('laterToday')}</div>}
         {agenda.map((e, i) => (
-          <div className="cover-arow" key={i} onClick={() => go(e.kind === 'rem' ? 'reminders' : 'calendar')}>
+          <Pressable className="cover-arow" key={i} onClick={() => go(e.kind === 'rem' ? 'reminders' : 'calendar')}>
             <span className="tm">{e.kind === 'rem' ? <Icon name="bell" size={14} /> : e.time}</span>
             <span className="ti">{e.title}</span>
-          </div>
+          </Pressable>
         ))}
         <div className="cover-actions">
           <Button variant="brand" icon="sparkle" onClick={data.openDayBrief}>{t('startMyDay')}</Button>
@@ -90,15 +90,15 @@ function TimelineHome({ data, go, t, lang, toast }) {
       <div className="tl-rail">
         {events.length === 0 && <div className="tl-empty">{t('dayOpen')}</div>}
         {events.map((e, i) => (
-          <div className={`tl-ev ${e.kind === 'prayer' ? 'on' : ''} ${e.min < nowMin ? 'past' : ''}`} key={i}
+          <Pressable className={`tl-ev ${e.kind === 'prayer' ? 'on' : ''} ${e.min < nowMin ? 'past' : ''}`} key={i}
             onClick={() => go(e.kind === 'rem' ? 'reminders' : e.kind === 'prayer' ? 'spiritual' : 'calendar')}>
             <div className="tm">{e.time}</div>
             <div className="ti">{e.kind === 'prayer' ? '🕌 ' : ''}{e.title}</div>
             {e.sub && <div className="sb">{e.sub}</div>}
-          </div>
+          </Pressable>
         ))}
         {(counts.due + counts.overdue + counts.waiting) > 0 && (
-          <div className="tl-ev tasks" onClick={() => go('tasks')}>
+          <Pressable className="tl-ev tasks" onClick={() => go('tasks')}>
             <div className="tm">{t('tasksLabel')}</div>
             <div className="tl-card">
               <div className="tl-card-t">{counts.due} {t('dueToday')}</div>
@@ -108,7 +108,7 @@ function TimelineHome({ data, go, t, lang, toast }) {
                 {counts.waiting > 0 && <span>{counts.waiting} {t('waitingForMe')}</span>}
               </div>
             </div>
-          </div>
+          </Pressable>
         )}
       </div>
       <div className="tl-foot">
@@ -132,33 +132,33 @@ function BentoHome({ data, go, t, lang, toast }) {
       <QuickCapture toast={toast} go={go} />
       <div className="bento">
         {next && (
-          <div className="bt next wide" onClick={() => go(next.kind === 'rem' ? 'reminders' : next.kind === 'prayer' ? 'spiritual' : 'calendar')}>
+          <Pressable className="bt next wide" onClick={() => go(next.kind === 'rem' ? 'reminders' : next.kind === 'prayer' ? 'spiritual' : 'calendar')}>
             <div className="lbl">{t('nextUp')} · {next.time}</div>
             <div><div className="big">{next.kind === 'prayer' ? '🕌 ' : ''}{next.title}</div>{next.sub && <div className="sm">{next.sub}</div>}</div>
-          </div>
+          </Pressable>
         )}
-        <div className="bt" onClick={() => go('notifications')}>
+        <Pressable className="bt" onClick={() => go('notifications')}>
           <div className="lbl">{t('needsYou')}</div><div className="num">{counts.needsYou}</div>
           <div className="sm">{counts.overdue} {t('overdue')}{counts.waiting ? ` · ${counts.waiting} ${t('waitingShort')}` : ''}</div>
-        </div>
+        </Pressable>
         {data.prayer && (
-          <div className="bt" onClick={() => go('spiritual')}>
+          <Pressable className="bt" onClick={() => go('spiritual')}>
             <div className="lbl">🕌 {t('nextPrayer')}</div>
             <div><div className="big">{data.prayer.name}</div><div className="sm tnum">{data.prayer.time} · {until(data.prayer.date)}</div></div>
-          </div>
+          </Pressable>
         )}
-        <div className="bt" onClick={() => go('expenses')}>
+        <Pressable className="bt" onClick={() => go('expenses')}>
           <div className="lbl">{t('spentToday')}</div>
           <div className="big tnum">{money(data.spentToday, cur, lang)}</div>
           {budget > 0 && <div className="sm">{t('ofLabel')} {money(budget, cur, lang)}</div>}
-        </div>
-        <div className="bt" onClick={() => go('reminders')}>
+        </Pressable>
+        <Pressable className="bt" onClick={() => go('reminders')}>
           <div className="lbl">{t('reminders')}</div><div className="num">{data.remindersCount}</div>
           <div className="sm">{data.rems[0] ? data.rems[0].text : t('allCaughtUp')}</div>
-        </div>
-        <div className="bt brand wide" onClick={data.openDayBrief}>
+        </Pressable>
+        <Pressable className="bt brand wide" onClick={data.openDayBrief}>
           <Icon name="sparkle" size={18} /> {t('startMyDay')}
-        </div>
+        </Pressable>
       </div>
     </div>
   )

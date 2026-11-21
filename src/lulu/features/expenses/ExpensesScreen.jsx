@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { TopBar } from '../../ui/AppShell.jsx'
-import { Card, Section, Stat, Segmented, Bars, Fab, Empty, Button, Sheet, useToast } from '../../ui/primitives.jsx'
+import { Card, Section, Stat, Segmented, Bars, Fab, Empty, Button, Sheet, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { findPayment, catLabel, label } from '../../lib/domain.js'
@@ -150,7 +150,7 @@ export default function ExpensesScreen({ go }) {
             <span className="lead t-danger" style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="flag" size={18} /></span>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700 }}>{overBudgetCats.length} {t('overBudgetAlert')}</div>
-              <div className="muted" style={{ fontSize: 15 }}>{overBudgetCats.map(c => catLabel(c, lang)).slice(0, 3).join(' · ')}</div>
+              <div className="muted small">{overBudgetCats.map(c => catLabel(c, lang)).slice(0, 3).join(' · ')}</div>
             </div>
             <Icon name="chevron" size={18} style={{ color: 'var(--ink-3)' }} />
           </Card>
@@ -215,7 +215,7 @@ export default function ExpensesScreen({ go }) {
           const proj = e.projectId && projects.items.find(p => p.id === e.projectId)
           return (
             <SwipeRow key={e.id} onEdit={() => setEditor(e)} onDelete={() => { expenses.remove(e.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
-            <div className="li" onClick={() => setEditor(e)}>
+            <Pressable className="li" onClick={() => setEditor(e)}>
               <div className="lead t-brand"><Icon name="receipt" size={18} /></div>
               <div className="body">
                 <div className="title">{e.item || e.merchant || catLabel(e.category, lang)}</div>
@@ -233,7 +233,7 @@ export default function ExpensesScreen({ go }) {
                 <b className="tnum">{money(e.amount, e.currency || cur, lang)}</b>
                 {(e.currency && e.currency !== 'SAR') && <div className="muted tnum" style={{ fontSize: 13 }}>≈ {money(expenseSar(e, rates), 'SAR', lang)}</div>}
               </div>
-            </div>
+            </Pressable>
             </SwipeRow>
           )
         })}

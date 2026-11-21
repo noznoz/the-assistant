@@ -219,9 +219,12 @@ button.chip { font-family: inherit; line-height: inherit; cursor: pointer; }
 .stat .v { font-size: 24px; font-weight: 750; margin-top: 4px; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; overflow-wrap: break-word; }
 [data-text="large"] .stat .v { font-size: 21px; }
 .stat .v small { font-size: 15px; color: var(--ink-3); font-weight: 600; }
+@media (max-width: 359px) { .stat .v, [data-text="large"] .stat .v { font-size: 18px; } }
 
 /* ---- Quick actions ---- */
-.qa-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.qa-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+/* Four tiles don't fit a 320px phone; three do. */
+@media (max-width: 359px) { .qa-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .qa {
   background: var(--surface); border: 1px solid var(--line);
   border-radius: var(--r-md); padding: 14px 6px 10px;
@@ -229,6 +232,7 @@ button.chip { font-family: inherit; line-height: inherit; cursor: pointer; }
   color: var(--ink-2); font-size: 13px; font-weight: 600;
   box-shadow: var(--card-edge);
   transition: transform 0.12s var(--ease);
+  min-width: 0; overflow-wrap: break-word; text-align: center;
 }
 .qa:active { transform: scale(0.95); }
 .qa .ic { width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center; background: var(--brand-tint); color: var(--brand-600); }
@@ -252,7 +256,9 @@ button.chip { font-family: inherit; line-height: inherit; cursor: pointer; }
 .textarea { resize: vertical; min-height: 84px; line-height: 1.5; }
 .field .hint { font-size: var(--fs-xs); color: var(--ink-3); margin: 6px 2px 0; }
 .field .err { font-size: var(--fs-xs); color: var(--danger); margin: 6px 2px 0; font-weight: 600; }
-.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+/* Side-by-side buttons may wrap their label rather than push off-screen. */
+.row2 > .btn { min-width: 0; padding-inline: 12px; line-height: 1.2; text-align: center; }
 
 /* ---- Sheet / modal ---- */
 .scrim {
@@ -370,6 +376,13 @@ button.chip { font-family: inherit; line-height: inherit; cursor: pointer; }
 
 /* ---- Misc ---- */
 .muted { color: var(--ink-3); }
+/* Shared small text: a summary label (“Total value”, “Today”) and small muted copy.
+   Sized from the type scale so the Larger text setting scales them too. */
+.label { color: var(--ink-2); font-size: var(--fs-sm); font-weight: 600; }
+/* The big total at the top of a screen (Net worth, Income, Zakat due…). One
+   size everywhere, shrinking on narrow phones so it stays inside its card. */
+.hero-amount { font-size: clamp(26px, 9vw, 36px); font-weight: 760; letter-spacing: -0.02em; line-height: 1.15; margin-top: 4px; overflow-wrap: anywhere; }
+.small { font-size: var(--fs-sm); }
 .center { text-align: center; }
 .stack > * + * { margin-top: 12px; }
 /* Assistant "Thinking…" pulse */
@@ -515,7 +528,7 @@ button.chip { font-family: inherit; line-height: inherit; cursor: pointer; }
 .cover-pray { color: var(--brand-600); font-weight: 600; }
 [data-theme="dark"] .cover-pray { color: var(--brand-400); }
 .cover-agenda { margin-top: 24px; display: flex; flex-direction: column; gap: 13px; }
-.cover-lbl { font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; color: var(--ink-3); }
+.cover-lbl { font-size: var(--fs-xs); font-weight: 650; color: var(--ink-2); }
 .cover-arow { display: flex; align-items: center; gap: 12px; font-size: 17px; cursor: pointer; }
 .cover-arow .tm { width: 48px; color: var(--ink-3); font-weight: 600; font-variant-numeric: tabular-nums; display: flex; align-items: center; }
 .cover-arow .ti { color: var(--ink); }
@@ -534,7 +547,7 @@ button.chip { font-family: inherit; line-height: inherit; cursor: pointer; }
 .tl-ev::before { content: ''; position: absolute; inset-inline-start: -19px; top: 3px; width: 11px; height: 11px; border-radius: 50%; background: var(--surface); border: 2px solid var(--ink-3); }
 .tl-ev.on::before { background: var(--brand-500); border-color: var(--brand-500); box-shadow: 0 0 0 4px var(--brand-tint); }
 .tl-ev.past { opacity: 0.5; }
-.tl-ev .tm { font-size: 13px; font-weight: 700; letter-spacing: 0.04em; color: var(--ink-3); font-variant-numeric: tabular-nums; text-transform: uppercase; }
+.tl-ev .tm { font-size: 13px; font-weight: 700; letter-spacing: 0.04em; color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .tl-ev .ti { font-size: 17px; font-weight: 600; color: var(--ink); margin-top: 2px; }
 .tl-ev .sb { font-size: 14px; color: var(--ink-3); margin-top: 1px; }
 .tl-ev.on .ti { color: var(--brand-600); }
@@ -559,7 +572,7 @@ button.chip { font-family: inherit; line-height: inherit; cursor: pointer; }
 .bento { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; margin-top: 8px; }
 .bt { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--card-edge); padding: 14px; min-height: 100px; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; cursor: pointer; transition: transform 0.12s var(--ease); overflow: hidden; }
 .bt:active { transform: scale(0.98); }
-.bt .lbl { font-size: 12px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-3); font-weight: 700; }
+.bt .lbl { font-size: var(--fs-xs); color: var(--ink-2); font-weight: 650; }
 .bt .big { font-size: 20px; font-weight: 750; letter-spacing: -0.02em; color: var(--ink); }
 .bt .sm { font-size: 14px; color: var(--ink-2); }
 .bt .num { font-size: 34px; font-weight: 780; line-height: 1; letter-spacing: -0.03em; color: var(--brand-600); }
@@ -824,7 +837,7 @@ button.check::after { content: ''; position: absolute; inset: -10px; }
 /* ── Money overview ─────────────────────────────────────────────── */
 .money-hero { text-align: center; }
 .money-hero .mh-label { color: var(--ink-2); font-size: var(--fs-sm); font-weight: 600; }
-.money-hero .mh-amount { font-size: 36px; font-weight: 760; letter-spacing: -0.02em; margin-top: 2px; line-height: 1.15; overflow-wrap: anywhere; }
+.money-hero .mh-amount { font-size: clamp(26px, 9vw, 36px); font-weight: 760; letter-spacing: -0.02em; margin-top: 2px; line-height: 1.15; overflow-wrap: anywhere; }
 .money-hero .mh-sub { display: block; margin: 8px auto 0; color: var(--ink-2); font-size: var(--fs-sm); }
 .money-hero .mh-sub.t-danger { background: none; color: var(--danger); }
 .money-hero .mh-sub b { color: var(--ink); }

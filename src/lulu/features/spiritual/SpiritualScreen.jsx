@@ -55,7 +55,7 @@ export default function SpiritualScreen({ go }) {
       <DetailHeader title={t('spiritual')} onBack={() => go('more')} />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('prayerStreak')}</div>
+          <div className="label">{t('prayerStreak')}</div>
           <div style={{ fontSize: 34, fontWeight: 780, marginTop: 4 }}>🔥 {streak}</div>
           <div className="muted" style={{ fontSize: 14.5, marginTop: 2 }}>{hijriDate(new Date(), lang)}</div>
         </Card>
@@ -79,9 +79,9 @@ export default function SpiritualScreen({ go }) {
 
         <div className="stat-grid" style={{ marginTop: 12 }}>
           <Stat label={t('thisWeek')} value={`${week}/35`} />
-          <Card tight style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between', padding: 14 }}>
+          <Card tight style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, justifyContent: 'space-between', padding: 14 }}>
             <div>
-              <div className="muted" style={{ fontSize: 13.5, fontWeight: 650, textTransform: 'uppercase' }}>{t('quranPages')}</div>
+              <div className="label">{t('quranPages')}</div>
               <b className="tnum" style={{ fontSize: 18 }}>{Number(todayRec?.quran) || 0}</b>
             </div>
             <div style={{ display: 'flex', gap: 6 }}>

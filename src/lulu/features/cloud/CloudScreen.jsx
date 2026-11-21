@@ -121,7 +121,7 @@ export default function CloudScreen({ go }) {
             </span>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700 }}>{signedIn ? t('cloudOn') : configured ? t('cloudNotSignedIn') : t('cloudOff')}</div>
-              <div className="muted" style={{ fontSize: 14 }}>
+              <div className="muted small">
                 {signedIn ? (cloud.currentUser()?.email || '') : t('cloudOffHint')}
               </div>
             </div>

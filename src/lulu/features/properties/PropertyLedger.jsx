@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { Card, Stat, Section, Sheet, Field, Input, TextArea, Select, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
+import { Card, Stat, Section, Sheet, Field, Input, TextArea, Select, Button, Empty, Fab, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { PROPERTY_LOG_KINDS, findPropertyLogKind, label } from '../../lib/domain.js'
@@ -34,7 +34,7 @@ export default function PropertyLedger({ property }) {
         <Stat label={t('runningCosts')} value={money(costOut, cur, lang)} />
       </div>
       <Card style={{ textAlign: 'center', marginTop: 12 }}>
-        <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('netIncome')}</div>
+        <div className="label">{t('netIncome')}</div>
         <div className={`tnum ${net >= 0 ? 't-ok' : 't-danger'}`} style={{ fontSize: 28, fontWeight: 780, marginTop: 4 }}>{net >= 0 ? '+' : ''}{money(net, cur, lang)}</div>
       </Card>
 
@@ -46,14 +46,14 @@ export default function PropertyLedger({ property }) {
         const inc = isIncome(l)
         return (
           <SwipeRow key={l.id} onEdit={() => setEditor(l)} onDelete={() => { logs.remove(l.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
-            <div className="li" onClick={() => setEditor(l)}>
+            <Pressable className="li" onClick={() => setEditor(l)}>
               <div className={`lead ${inc ? 't-ok' : 't-warn'}`}><Icon name={k?.icon || 'wallet'} size={18} /></div>
               <div className="body">
                 <div className="title">{l.note || (k ? label(k, lang) : '')}</div>
                 <div className="meta">{k ? label(k, lang) : ''} · {fmtDate(l.date, lang, settings.dateFormat)}</div>
               </div>
               <b className={`tnum ${inc ? 't-ok' : ''}`}>{inc ? '+' : '−'}{money(l.amount, l.currency || cur, lang)}</b>
-            </div>
+            </Pressable>
           </SwipeRow>
         )
       })}

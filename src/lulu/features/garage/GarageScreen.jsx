@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { TopBar } from '../../ui/AppShell.jsx'
-import { Fab, Chip, Empty, Button, useToast } from '../../ui/primitives.jsx'
+import { Fab, Chip, Empty, Button, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { findVehicleType, VEHICLE_TYPES, findOwnership, vehicleTitle, label } from '../../lib/domain.js'
@@ -55,7 +55,7 @@ function VehicleCard({ v, lang, cur, onClick }) {
   const vt = findVehicleType(v.type)
   const dd = daysUntil(v.policyExpiry)
   return (
-    <div className="veh-card" onClick={onClick}>
+    <Pressable className="veh-card" onClick={onClick}>
       <div className="img">
         {v.photo ? <img src={v.photo} alt={v.name} style={{ objectPosition: v.photoPos || '50% 50%' }} /> : <Icon name={vt?.icon || 'car'} size={64} stroke={1.4} />}
         <div className="badge" style={{ display: 'flex', gap: 6 }}>
@@ -76,6 +76,6 @@ function VehicleCard({ v, lang, cur, onClick }) {
           {v.currentValue && <span>{t('currentValue')}: <b>{money(v.currentValue, cur, lang)}</b></span>}
         </div>
       </div>
-    </div>
+    </Pressable>
   )
 }

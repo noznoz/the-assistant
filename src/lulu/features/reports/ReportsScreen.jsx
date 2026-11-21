@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Segmented, Stat, Section, Button } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Segmented, Stat, Section, Button, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings } from '../../store/StoreProvider.jsx'
 import { money, isToday, isOverdue, daysUntil, expenseSar } from '../../lib/format.js'
@@ -90,19 +90,19 @@ export default function ReportsScreen({ go }) {
           <Stat label={t('delegated')} value={r.delegated.length} />
         </div>
         <Card style={{ marginTop: 14, textAlign: 'center' }}>
-          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase' }}>{lang === 'ar' ? 'الإنفاق' : 'Spending'}</div>
-          <div style={{ fontSize: 30, fontWeight: 780, marginTop: 4 }} className="tnum">{money(r.spend, cur, lang)}</div>
+          <div className="label">{lang === 'ar' ? 'الإنفاق' : 'Spending'}</div>
+          <div className="hero-amount tnum">{money(r.spend, cur, lang)}</div>
         </Card>
 
         {r.renewals.length > 0 && (
           <>
             <Section title={t('renewals')} count={r.renewals.length} />
             {r.renewals.map(({ v, dd }) => (
-              <div className="li" key={v.id} onClick={() => go(`garage/${v.id}`)}>
+              <Pressable className="li" key={v.id} onClick={() => go(`garage/${v.id}`)}>
                 <div className="lead t-warn"><Icon name="shield" size={18} /></div>
                 <div className="body"><div className="title">{v.nickname || v.name}</div><div className="meta">{t('insurance')}</div></div>
                 <span className="chip t-warn">{dd}d</span>
-              </div>
+              </Pressable>
             ))}
           </>
         )}

@@ -70,8 +70,8 @@ export default function ZakatScreen({ go }) {
       } />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('zakatDue')} · 2.5%</div>
-          <div style={{ fontSize: 36, fontWeight: 780, marginTop: 4 }} className="tnum t-brand">{money(calc.due, cur, lang)}</div>
+          <div className="label">{t('zakatDue')} · 2.5%</div>
+          <div className="hero-amount tnum t-brand">{money(calc.due, cur, lang)}</div>
           <div className={`muted ${calc.meetsNisab ? 't-ok' : ''}`} style={{ fontSize: 14, marginTop: 4 }}>
             {calc.meetsNisab ? t('meetsNisab') : t('belowNisab')} · {t('nisab')} {money(calc.nisab, cur, lang)}
           </div>

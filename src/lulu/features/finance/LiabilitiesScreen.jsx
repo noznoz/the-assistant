@@ -26,8 +26,8 @@ export default function LiabilitiesScreen({ go }) {
       } />
       <div className="screen">
         <Card style={{ textAlign: 'center', marginTop: 14 }}>
-          <div className="muted" style={{ fontSize: 14, fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('totalOwed')}</div>
-          <div style={{ fontSize: 34, fontWeight: 780, marginTop: 4 }} className="tnum t-danger">{money(totalOwed, cur, lang)}</div>
+          <div className="label">{t('totalOwed')}</div>
+          <div className="hero-amount tnum t-danger">{money(totalOwed, cur, lang)}</div>
         </Card>
         <div className="stat-grid" style={{ marginTop: 12 }}>
           <Stat label={t('monthlyPayments')} value={money(monthly, cur, lang)} />
@@ -51,7 +51,7 @@ export default function LiabilitiesScreen({ go }) {
                     <span className="lead t-danger" style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name={type?.icon || 'wallet'} size={18} /></span>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 700 }}>{l.name}</div>
-                      <div className="muted" style={{ fontSize: 14 }}>{[type ? label(type, lang) : '', l.lender].filter(Boolean).join(' · ')}</div>
+                      <div className="muted small">{[type ? label(type, lang) : '', l.lender].filter(Boolean).join(' · ')}</div>
                     </div>
                     <div style={{ textAlign: 'end' }}>
                       <b className="tnum">{money(balance, cur, lang)}</b>

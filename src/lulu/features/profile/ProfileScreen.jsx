@@ -78,7 +78,7 @@ export default function ProfileScreen({ go }) {
           </button>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 750, fontSize: 18 }}>{form.fullName || settings.name || t('yourName')}</div>
-            <div className="muted" style={{ fontSize: 15 }}>
+            <div className="muted small">
               {[form.jobTitle, form.nationalId && `${t('nationalId')} ${form.nationalId}`].filter(Boolean).join(' · ') || t('tapToComplete')}
             </div>
           </div>

@@ -58,7 +58,7 @@ export default function OccasionsScreen({ go }) {
                     </span>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 700 }}>{o.person.name} · {o.kind}</div>
-                      <div className="muted" style={{ fontSize: 14.5 }}>{fmtDate(o.date, lang, settings.dateFormat)}{o.age > 0 ? ` · ${t('turning')} ${o.age}` : ''}</div>
+                      <div className="muted small">{fmtDate(o.date, lang, settings.dateFormat)}{o.age > 0 ? ` · ${t('turning')} ${o.age}` : ''}</div>
                     </div>
                     <Chip tint={o.days <= 14 ? 't-brand' : 't-info'}>{o.days === 0 ? t('today') : `${o.days}${lang === 'ar' ? '' : 'd'}`}</Chip>
                   </div>

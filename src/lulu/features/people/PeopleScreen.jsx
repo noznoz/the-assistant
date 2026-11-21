@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Button, Empty, Fab, Chip, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Button, Empty, Fab, Chip, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { RELATIONSHIPS, label } from '../../lib/domain.js'
@@ -80,7 +80,7 @@ export default function PeopleScreen({ go }) {
               const medals = ['🥇', '🥈', '🥉']
               return (
                 <div className="card tight" style={{ margin: '8px 0 4px' }}>
-                  <div style={{ fontSize: 14, color: 'var(--ink-3)', fontWeight: 650, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 8 }}>{t('leaderboard')}</div>
+                  <div style={{ fontSize: 14, color: 'var(--ink-3)', fontWeight: 650, marginBottom: 8 }}>{t('leaderboard')}</div>
                   {board.map((p, i) => (
                     <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '5px 0' }}>
                       <span style={{ fontSize: 18 }}>{medals[i]}</span>
@@ -97,7 +97,7 @@ export default function PeopleScreen({ go }) {
               const initials = (p.name || '?').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
               return (
                 <SwipeRow key={p.id} onEdit={() => setEditor(p)} onDelete={() => { people.remove(p.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
-                <div className="li" onClick={() => setViewing(p)}>
+                <Pressable className="li" onClick={() => setViewing(p)}>
                   <div className="lead" style={{ padding: 0, overflow: 'hidden', background: 'var(--brand-tint)', color: 'var(--brand-600)', fontWeight: 750 }}>
                     {p.photo ? <img src={p.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
                   </div>
@@ -119,7 +119,7 @@ export default function PeopleScreen({ go }) {
                       <Icon name="whatsapp" size={18} />
                     </button>
                   )}
-                </div>
+                </Pressable>
                 </SwipeRow>
               )
             })}

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Stat, Section, Sheet, Field, Input, TextArea, Select, Button, Chip, Empty, Fab, Segmented, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Stat, Section, Sheet, Field, Input, TextArea, Select, Button, Chip, Empty, Fab, Segmented, useToast, Pressable } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { WISH_CATEGORIES, WISH_PRIORITIES, findWishCategory, findWishPriority, label } from '../../lib/domain.js'
@@ -77,7 +77,7 @@ export default function WishlistScreen({ go }) {
                 const p = findWishPriority(x.priority)
                 return (
                   <SwipeRow key={x.id} onEdit={() => setEditor(x)} onDelete={() => { wishlist.remove(x.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
-                    <div className="li" onClick={() => setEditor(x)}>
+                    <Pressable className="li" onClick={() => setEditor(x)}>
                       <div className="lead" style={{ overflow: 'hidden', padding: x.image ? 0 : undefined }}>
                         {x.image ? <img src={x.image} alt="" style={{ width: 40, height: 40, borderRadius: 10, objectFit: 'cover' }} />
                           : <span className="t-brand"><Icon name={c?.icon || 'gift'} size={18} /></span>}
@@ -96,7 +96,7 @@ export default function WishlistScreen({ go }) {
                           {x.purchased ? t('moveBack') : t('markBought')}
                         </button>
                       </div>
-                    </div>
+                    </Pressable>
                   </SwipeRow>
                 )
               })}

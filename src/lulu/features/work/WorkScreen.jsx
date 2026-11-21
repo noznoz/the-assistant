@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Icon from '../../ui/Icon.jsx'
-import { DetailHeader, Card, Section, Sheet, Field, Input, TextArea, Select, Chip, Button, Empty, Fab, useToast } from '../../ui/primitives.jsx'
+import { DetailHeader, Card, Section, Sheet, Field, Input, TextArea, Select, Chip, Button, Empty, Fab, useToast, Pressable } from '../../ui/primitives.jsx'
 import AttachmentField from '../../ui/AttachmentField.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, useSettings, undoLastDelete } from '../../store/StoreProvider.jsx'
@@ -156,7 +156,7 @@ function WorkHome({ go }) {
             <span className="lead t-brand" style={{ width: 42, height: 42, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="people" size={20} /></span>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 750 }}>{boss || t('setYourManager')}</div>
-              {settings.profile?.managerTitle && <div className="muted" style={{ fontSize: 14.5 }}>{settings.profile.managerTitle}</div>}
+              {settings.profile?.managerTitle && <div className="muted small">{settings.profile.managerTitle}</div>}
             </div>
             {(settings.profile?.managerWhatsapp || settings.profile?.managerMobile) && (
               <button className="iconbtn" aria-label="WhatsApp" onClick={() => whatsappToPerson({ whatsapp: settings.profile.managerWhatsapp, mobile: settings.profile.managerMobile }, '')}><Icon name="whatsapp" size={18} /></button>
@@ -207,7 +207,7 @@ function WorkHome({ go }) {
                 <SwipeRow key={x.id} onEdit={() => setTaskEditor(x)} onDelete={() => { tasks.remove(x.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
                   <div className="li">
                     <button className="check" onClick={() => completeWorkTask(x, tasks)} aria-label={t('markComplete')} />
-                    <div className="body" onClick={() => setTaskSheet(x)}>
+                    <Pressable className="body" onClick={() => setTaskSheet(x)}>
                       <div className="title">{x.title}</div>
                       <div className="meta">
                         {x.assignedTo && <span>{x.assignedTo}</span>}
@@ -216,7 +216,7 @@ function WorkHome({ go }) {
                         {x.dueDate && <span className={overdue ? 't-danger' : ''}>· {relativeDay(x.dueDate, lang)}</span>}
                         {x.repeat && <span>· ↻</span>}
                       </div>
-                    </div>
+                    </Pressable>
                     <Icon name="chevron" size={15} style={{ color: 'var(--ink-3)' }} />
                   </div>
                 </SwipeRow>
@@ -234,14 +234,14 @@ function WorkHome({ go }) {
           const head = members.items.find(m => m.id === d.headId)
           return (
             <SwipeRow key={d.id} onEdit={() => setEditDep(d)} onDelete={() => { departments.remove(d.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
-              <div className="li" onClick={() => go(`work/${d.id}`)}>
+              <Pressable className="li" onClick={() => go(`work/${d.id}`)}>
                 <div className="lead t-brand"><Icon name="report" size={18} /></div>
                 <div className="body">
                   <div className="title">{d.name}</div>
                   <div className="meta">{head ? `${t('head')}: ${head.name}` : t('noHead')} · {depCount(d.id)} {t('membersLower')} · {depOpen(d.id)} {t('tasksLower')}</div>
                 </div>
                 <Icon name="chevron" size={16} style={{ color: 'var(--ink-3)' }} />
-              </div>
+              </Pressable>
             </SwipeRow>
           )
         })}
@@ -266,13 +266,13 @@ function BossRow({ task, lang, onOpen, onDone }) {
   return (
     <div className="li">
       <button className="check" onClick={onDone} aria-label={t('markComplete')} />
-      <div className="body" onClick={onOpen}>
+      <Pressable className="body" onClick={onOpen}>
         <div className="title">{task.title}</div>
         <div className="meta">
           {pr && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><span style={{ width: 7, height: 7, borderRadius: 4, background: pr.color }} />{t(pr.key)}</span>}
           {task.dueDate && <span className={overdue ? 't-danger' : ''}>· {relativeDay(task.dueDate, lang)}</span>}
         </div>
-      </div>
+      </Pressable>
     </div>
   )
 }
@@ -307,7 +307,7 @@ function DepartmentDetail({ dep, go, onBack }) {
         {head && (
           <Card style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 12 }}>
             <span className="lead t-brand" style={{ width: 40, height: 40, borderRadius: 12, display: 'grid', placeItems: 'center' }}><Icon name="flag" size={18} /></span>
-            <div style={{ flex: 1 }}><div style={{ fontWeight: 700 }}>{head.name}</div><div className="muted" style={{ fontSize: 14.5 }}>{[head.title, t('departmentHead')].filter(Boolean).join(' · ')}</div></div>
+            <div style={{ flex: 1 }}><div style={{ fontWeight: 700 }}>{head.name}</div><div className="muted small">{[head.title, t('departmentHead')].filter(Boolean).join(' · ')}</div></div>
             {(head.whatsapp || head.mobile) && <button className="iconbtn" aria-label="WhatsApp" onClick={() => whatsappToPerson(head, '')}><Icon name="whatsapp" size={16} /></button>}
           </Card>
         )}
@@ -360,7 +360,7 @@ function DepartmentDetail({ dep, go, onBack }) {
                     <button className={`check ${done ? 'on' : ''}`} onClick={() => done ? tasks.patch(x.id, { status: 'new' }) : completeWorkTask(x, tasks)} aria-label={t('markComplete')}>
                       {done && <Icon name="check" size={16} stroke={3} />}
                     </button>
-                    <div className="body" onClick={() => setTaskSheet(x)}>
+                    <Pressable className="body" onClick={() => setTaskSheet(x)}>
                       <div className="title">{x.title}</div>
                       <div className="meta">
                         {x.assignedTo && <span>{x.assignedTo}</span>}
@@ -369,7 +369,7 @@ function DepartmentDetail({ dep, go, onBack }) {
                         {(() => { const p = subProgress(x); return p.total > 0 ? <span>· ☑ {p.done}/{p.total}</span> : null })()}
                         {x.repeat && <span>· ↻ {t(x.repeat)}</span>}
                       </div>
-                    </div>
+                    </Pressable>
                     {(() => { const asg = members.items.find(mm => mm.id === x.memberId); return asg && (asg.whatsapp || asg.mobile) ? <button className="iconbtn" aria-label="WhatsApp" onClick={() => whatsappToPerson(asg, formatAssignment(x, asg, lang, settings))}><Icon name="whatsapp" size={16} /></button> : null })()}
                   </div>
                 </SwipeRow>
@@ -416,14 +416,14 @@ function WorkBoard({ tasks, lang, tasksCol, onOpen }) {
                 const overdue = x.status !== 'completed' && isOverdue(x.dueDate)
                 return (
                   <div key={x.id} className="card tight" style={{ padding: 10 }}>
-                    <div onClick={() => onOpen(x)}>
+                    <Pressable onClick={() => onOpen(x)}>
                       <div style={{ fontWeight: 650, fontSize: 16 }}>{x.title}</div>
                       <div className="muted" style={{ fontSize: 14, marginTop: 3 }}>
                         {[x.assignedTo, x.dueDate && relativeDay(x.dueDate, lang)].filter(Boolean).join(' · ')}
                         {overdue && <span className="t-danger"> · {t('overdue')}</span>}
                         {x.repeat && <span> · ↻</span>}
                       </div>
-                    </div>
+                    </Pressable>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
                       <button className="iconbtn" aria-label={t('moveBack')} disabled={idx(s) === 0} style={{ opacity: idx(s) === 0 ? 0.3 : 1 }} onClick={() => move(x, -1)}><Icon name="chevron" size={16} style={{ transform: 'rotate(180deg)' }} /></button>
                       {pr && <span style={{ width: 8, height: 8, borderRadius: 4, background: pr.color }} />}
@@ -486,10 +486,10 @@ function OrgTree({ team, dep, depth = 0, parentId = '', members, departments, on
       <div className="li" style={{ marginInlineStart: depth * 16 }}>
         {depth > 0 && <span style={{ width: 10, color: 'var(--ink-3)', flexShrink: 0 }}>└</span>}
         <div className={`lead ${dep.headId === m.id ? 't-brand' : ''}`} style={{ background: dep.headId === m.id ? undefined : 'var(--surface-2)' }}><Icon name={dep.headId === m.id ? 'flag' : 'people'} size={17} /></div>
-        <div className="body" onClick={() => onEdit(m)}>
+        <Pressable className="body" onClick={() => onEdit(m)}>
           <div className="title">{m.name}{dep.headId === m.id ? ` · ${t('head')}` : ''}</div>
           <div className="meta">{[m.title, roleLabel(m, lang), m.mobile].filter(Boolean).join(' · ')}</div>
-        </div>
+        </Pressable>
         {(() => { const n = teamSize(m.id, team); return n > 0 ? <span className="chip" title={t('teamSizeLabel')}>{n}</span> : null })()}
         <button className="iconbtn" aria-label={t('addReport')} onClick={() => onAddReport(m.id)}><Icon name="plus" size={16} /></button>
         {(m.whatsapp || m.mobile) && <button className="iconbtn" aria-label="WhatsApp" onClick={() => whatsappToPerson(m, '')}><Icon name="whatsapp" size={16} /></button>}
@@ -752,7 +752,7 @@ function OrgMemberPicker({ departments, members, value, onSelect, onAddMember, t
         ) : (
           groups.map(({ dep, team }) => (
             <div key={dep.id}>
-              <div style={{ fontSize: 13.5, fontWeight: 750, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.04em', padding: '8px 12px 4px', background: 'var(--surface-2)' }}>{dep.name}</div>
+              <div style={{ fontSize: 13.5, fontWeight: 750, color: 'var(--ink-3)', padding: '8px 12px 4px', background: 'var(--surface-2)' }}>{dep.name}</div>
               {flattenDeptTree(dep, team).map(({ member, depth }) => <Row key={member.id} member={member} depth={depth} />)}
             </div>
           ))
@@ -974,7 +974,7 @@ function WorkTaskEditor({ mode, departmentId, members = [], initial, onClose, on
                   return (
                     <div key={dep.id} style={{ marginBottom: 10 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '2px 2px 6px' }}>
-                        <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink-2)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>{dep.name}</span>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink-2)' }}>{dep.name}</span>
                         <Chip selectable on={deptAllOn(dep.id)} onClick={() => toggleDept(dep.id)}><Icon name="people" size={12} /> {t('everyone')}</Chip>
                       </div>
                       <div className="chip-row">{dm.map(renderMember)}</div>
