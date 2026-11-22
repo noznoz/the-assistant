@@ -4,7 +4,7 @@ import { DetailHeader, Card, Field, Input, Select, Button, Empty, Chip, useToast
 import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection, undoLastDelete } from '../../store/StoreProvider.jsx'
 import { fmtDate, fmtTime, relativeDay } from '../../lib/format.js'
-import { splitReminders, buildReminderFields, snoozeFields, reminderTimes, nextPendingTime, lastTime, pendingCount, MAX_TIMES, REMINDER_REPEATS } from '../../lib/reminders.js'
+import { splitReminders, buildReminderFields, snoozeFields, reminderTimes, nextPendingTime, lastTime, pendingCount, MAX_TIMES, REMINDER_REPEATS, REMINDER_STATUSES, reminderStatus, statusFields } from '../../lib/reminders.js'
 import { parseWhen } from '../../lib/parseWhen.js'
 import { notificationPermission, requestNotificationPermission } from '../../lib/notify.js'
 import BackgroundPush from './BackgroundPush.jsx'
@@ -42,9 +42,44 @@ export default function RemindersScreen({ go }) {
   const [snoozeId, setSnoozeId] = useState(null)
   const [err, setErr] = useState('')
   const [perm, setPerm] = useState(notificationPermission())
-  const { upcoming, past } = splitReminders(reminders.items)
+  const split = splitReminders(reminders.items)
+  // In progress gets its own section at the top, whatever its time.
+  const inProgress = reminders.items.filter(r => !r.deletedAt && reminderStatus(r) === 'in_progress')
+  const upcoming = split.upcoming.filter(r => reminderStatus(r) !== 'in_progress')
+  const past = split.past.filter(r => reminderStatus(r) !== 'in_progress')
+  const [statusFor, setStatusFor] = useState(null)   // reminder whose status picker is open
+  const [formStatus, setFormStatus] = useState('todo')
 
-  const resetForm = () => { setText(''); setTimes([defaultWhen()]); setRepeat('none'); setEditingId(null); setErr('') }
+  const STATUS_ICON = { todo: 'bell', in_progress: 'clock', done: 'check' }
+  const STATUS_LABEL = { todo: 'statusTodo', in_progress: 'st_in_progress', done: 'statusDone' }
+  const setStatus = (r, st) => {
+    const before = reminderStatus(r)
+    setStatusFor(null)
+    if (st === before) return
+    reminders.patch(r.id, statusFields(st))
+    toast.show(`${t('statusSetTo')} ${t(STATUS_LABEL[st])}`, [{ label: t('undo'), onClick: () => reminders.patch(r.id, statusFields(before)) }])
+  }
+  // The status button on a row, and the three choices under it when open.
+  const statusButton = (r) => {
+    const st = reminderStatus(r)
+    return (
+      <button className={`rs-btn rs-${st}`} aria-expanded={statusFor === r.id} aria-label={`${t('status')}: ${t(STATUS_LABEL[st])} — ${r.text}`}
+        onClick={e => { e.stopPropagation(); setStatusFor(statusFor === r.id ? null : r.id) }}>
+        <Icon name={STATUS_ICON[st]} size={14} /> {t(STATUS_LABEL[st])}
+      </button>
+    )
+  }
+  const statusPicker = (r) => statusFor === r.id && (
+    <div className="chip-row rs-pick" role="group" aria-label={t('status')} onClick={e => e.stopPropagation()}>
+      {REMINDER_STATUSES.map(st => (
+        <Chip key={st} selectable on={reminderStatus(r) === st} onClick={() => setStatus(r, st)}>
+          <Icon name={STATUS_ICON[st]} size={13} /> {t(STATUS_LABEL[st])}
+        </Chip>
+      ))}
+    </div>
+  )
+
+  const resetForm = () => { setText(''); setTimes([defaultWhen()]); setRepeat('none'); setEditingId(null); setFormStatus('todo'); setErr('') }
 
   // Snooze options for a past-due reminder — reschedule to a single future time.
   const snoozeOpts = () => {
@@ -54,7 +89,7 @@ export default function RemindersScreen({ go }) {
     const tm = new Date(); tm.setDate(tm.getDate() + 1); tm.setHours(9, 0, 0, 0)
     return [{ key: 'inHour', iso: mk(h) }, { key: 'tonight', iso: mk(tn) }, { key: 'tomorrow', iso: mk(tm) }]
   }
-  const doSnooze = (r, iso) => { reminders.patch(r.id, { ...snoozeFields(r.text, iso), repeat: r.repeat || 'none', done: false }); setSnoozeId(null); toast.show(t('reminderSet')) }
+  const doSnooze = (r, iso) => { reminders.patch(r.id, { ...snoozeFields(r.text, iso), repeat: r.repeat || 'none', ...statusFields(reminderStatus(r) === 'in_progress' ? 'in_progress' : 'todo') }); setSnoozeId(null); toast.show(t('reminderSet')) }
 
   const setTimeAt = (i, v) => setTimes(ts => ts.map((x, j) => j === i ? v : x))
   const addTime = () => setTimes(ts => ts.length < MAX_TIMES ? [...ts, defaultWhen()] : ts)
@@ -65,8 +100,12 @@ export default function RemindersScreen({ go }) {
     const isoTimes = times.map(inputToIso).filter(Boolean)
     if (!isoTimes.length) { setErr(t('required')); return }
     const fields = { ...buildReminderFields(text.trim(), isoTimes), repeat }
-    if (editingId) { reminders.patch(editingId, fields); toast.show(t('savedToast')) }
-    else { reminders.add({ ...fields, done: false }); toast.show(t('reminderSet')) }
+    if (editingId) {
+      const cur = reminders.items.find(x => x.id === editingId)
+      reminders.patch(editingId, reminderStatus(cur) === formStatus ? fields : { ...fields, ...statusFields(formStatus) })
+      toast.show(t('savedToast'))
+    }
+    else { reminders.add({ ...fields, ...statusFields('todo') }); toast.show(t('reminderSet')) }
     resetForm()
   }
 
@@ -76,6 +115,7 @@ export default function RemindersScreen({ go }) {
     const ts = reminderTimes(r).map(isoToInput).filter(Boolean)
     setTimes(ts.length ? ts : [defaultWhen()])
     setRepeat(r.repeat || 'none')
+    setFormStatus(reminderStatus(r))
     setErr('')
     try { window.scrollTo({ top: 0, behavior: 'smooth' }) } catch { /* ignore */ }
   }
@@ -108,6 +148,15 @@ export default function RemindersScreen({ go }) {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span style={{ fontWeight: 700, fontSize: 16 }}>{t('editReminder')}</span>
               <button className="link-btn" style={{ color: 'var(--ink-3)', fontSize: 15 }} onClick={resetForm}>{t('cancel')}</button>
+            </div>
+          )}
+          {editingId && (
+            <div className="chip-row" role="group" aria-label={t('status')}>
+              {REMINDER_STATUSES.map(st => (
+                <Chip key={st} selectable on={formStatus === st} onClick={() => setFormStatus(st)}>
+                  <Icon name={STATUS_ICON[st]} size={13} /> {t(STATUS_LABEL[st])}
+                </Chip>
+              ))}
             </div>
           )}
           <Field label={t('reminderWhat')} required error={err}>
@@ -154,23 +203,40 @@ export default function RemindersScreen({ go }) {
         </Card>
 
         {/* Lists */}
-        {upcoming.length === 0 && past.length === 0 ? (
+        {upcoming.length === 0 && past.length === 0 && inProgress.length === 0 ? (
           <Empty icon="bell" title={t('noReminders')} text={t('remindersHint')} />
         ) : (
           <>
+            {inProgress.length > 0 && <h2 className="member-h2" style={{ marginTop: 18 }}>{t('st_in_progress')}</h2>}
+            {[...inProgress].sort((x, y) => String(nextPendingTime(x) || lastTime(x)).localeCompare(String(nextPendingTime(y) || lastTime(y)))).map(r => {
+              const next = nextPendingTime(r)
+              return (
+                <SwipeRow key={r.id} onDelete={() => { reminders.remove(r.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
+                  <div className="li rs-row">
+                    <Pressable className="body" onClick={() => startEdit(r)}>
+                      <div className="title">{r.text}</div>
+                      <div className="meta">{next ? whenLabel(next) : `${fmtDate(lastTime(r), lang)} · ${fmtTime(lastTime(r), lang)}`}{r.repeat && r.repeat !== 'none' ? ` · ↻ ${t('rec_' + r.repeat)}` : ''}</div>
+                      {statusPicker(r)}
+                    </Pressable>
+                    {statusButton(r)}
+                  </div>
+                </SwipeRow>
+              )
+            })}
+
             {upcoming.length > 0 && <h2 className="member-h2" style={{ marginTop: 18 }}>{t('upcoming')}</h2>}
             {upcoming.map(r => {
               const more = pendingCount(r) - 1
               return (
                 <SwipeRow key={r.id} onDelete={() => { reminders.remove(r.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
-                  <Pressable className="li" onClick={() => startEdit(r)}>
-                    <div className="lead t-brand"><Icon name="bell" size={16} /></div>
-                    <div className="body">
+                  <div className="li rs-row">
+                    <Pressable className="body" onClick={() => startEdit(r)}>
                       <div className="title">{r.text}</div>
                       <div className="meta">{whenLabel(nextPendingTime(r))}{more > 0 ? ` · +${more} ${t('moreTimes')}` : ''}{r.repeat && r.repeat !== 'none' ? ` · ↻ ${t('rec_' + r.repeat)}` : ''}</div>
-                    </div>
-                    <button className="iconbtn" aria-label={t('markComplete')} onClick={e => { e.stopPropagation(); reminders.patch(r.id, { done: true }); toast.show('✓') }}><Icon name="check" size={16} /></button>
-                  </Pressable>
+                      {statusPicker(r)}
+                    </Pressable>
+                    {statusButton(r)}
+                  </div>
                 </SwipeRow>
               )
             })}
@@ -178,11 +244,11 @@ export default function RemindersScreen({ go }) {
             {past.length > 0 && <h2 className="member-h2" style={{ marginTop: 18 }}>{t('past')}</h2>}
             {past.map(r => (
               <SwipeRow key={r.id} onDelete={() => { reminders.remove(r.id); toast.show(t('deletedToast'), [{ label: t('undo'), onClick: undoLastDelete }]) }}>
-                <div className="li" style={{ opacity: r.done ? 0.6 : 1 }}>
-                  <div className={`lead ${r.done ? 't-ok' : 't-warn'}`} onClick={() => startEdit(r)}><Icon name={r.done ? 'check' : 'clock'} size={16} /></div>
+                <div className="li rs-row" style={{ opacity: r.done ? 0.7 : 1 }}>
                   <Pressable className="body" onClick={() => startEdit(r)}>
                     <div className="title" style={{ textDecoration: r.done ? 'line-through' : 'none' }}>{r.text}</div>
                     <div className="meta">{fmtDate(lastTime(r), lang)} · {fmtTime(lastTime(r), lang)}{r.repeat && r.repeat !== 'none' ? ` · ↻ ${t('rec_' + r.repeat)}` : ''}</div>
+                    {statusPicker(r)}
                     {snoozeId === r.id && (
                       <div className="chip-row" style={{ marginTop: 6 }} onClick={e => e.stopPropagation()}>
                         {snoozeOpts().map(o => <Chip key={o.key} selectable onClick={() => doSnooze(r, o.iso)}>{t(o.key)}</Chip>)}
@@ -190,11 +256,9 @@ export default function RemindersScreen({ go }) {
                     )}
                   </Pressable>
                   {!r.done && (
-                    <>
-                      <button className="iconbtn" aria-label={t('snooze')} onClick={e => { e.stopPropagation(); setSnoozeId(snoozeId === r.id ? null : r.id) }}><Icon name="clock" size={16} /></button>
-                      <button className="iconbtn" aria-label={t('markComplete')} onClick={e => { e.stopPropagation(); reminders.patch(r.id, { done: true }) }}><Icon name="check" size={16} /></button>
-                    </>
+                    <button className="iconbtn" aria-label={t('snooze')} aria-expanded={snoozeId === r.id} onClick={e => { e.stopPropagation(); setSnoozeId(snoozeId === r.id ? null : r.id) }}><Icon name="clock" size={16} /></button>
                   )}
+                  {statusButton(r)}
                 </div>
               </SwipeRow>
             ))}

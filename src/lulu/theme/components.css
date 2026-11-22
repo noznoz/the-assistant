@@ -883,3 +883,16 @@ button.check::after { content: ''; position: absolute; inset: -10px; }
 .chip.add-photo { cursor: pointer; flex-shrink: 0; gap: 5px; background: var(--brand-tint); color: var(--brand-600); border-color: transparent; }
 [data-theme="dark"] .chip.add-photo { color: var(--brand-400); }
 .chip.add-photo:focus-within { outline: 2px solid var(--brand-500); outline-offset: 2px; }
+
+/* ── Reminder status ────────────────────────────────────────────── */
+.rs-row { align-items: center; }
+.rs-btn {
+  display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; min-height: 34px;
+  padding: 6px 11px; border-radius: var(--r-pill); border: 1px solid var(--line-2);
+  background: var(--surface); color: var(--ink-2); font-size: var(--fs-xs); font-weight: 650; white-space: nowrap;
+}
+.rs-btn.rs-in_progress { background: var(--brand-tint); color: var(--brand-600); border-color: transparent; }
+[data-theme="dark"] .rs-btn.rs-in_progress { color: var(--brand-400); }
+.rs-btn.rs-done { background: var(--ok-tint, rgba(46,160,90,.14)); color: var(--ok); border-color: transparent; }
+.rs-btn[aria-expanded="true"] { outline: 2px solid var(--brand-500); outline-offset: 1px; }
+.rs-pick { margin-top: 8px; flex-wrap: wrap; }

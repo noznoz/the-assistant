@@ -6,7 +6,7 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useCollection } from '../../store/StoreProvider.jsx'
 import { findPriority } from '../../lib/domain.js'
 import { todayISO, isoDate, fmtTime, fmtLongDate, relativeDay } from '../../lib/format.js'
-import { nextPendingTime } from '../../lib/reminders.js'
+import { nextPendingTime, statusFields, reminderStatus } from '../../lib/reminders.js'
 import { useTaskActions, addDays } from '../tasks/useTaskActions.js'
 import TaskDetail from '../tasks/TaskDetail.jsx'
 import TaskEditor from '../tasks/TaskEditor.jsx'
@@ -83,8 +83,9 @@ export default function PlanScreen({ go }) {
     ].filter(g => g.list.length)
 
   const doneReminder = (r) => {
-    reminders.patch(r.id, { done: true })
-    toast.show('✓ ' + t('completed'), [{ label: t('undo'), onClick: () => reminders.patch(r.id, { done: false }) }])
+    const before = reminderStatus(r)
+    reminders.patch(r.id, statusFields('done'))
+    toast.show('✓ ' + t('completed'), [{ label: t('undo'), onClick: () => reminders.patch(r.id, statusFields(before)) }])
   }
 
   // What to show under a row's title. Inside a single day the date is implied.
@@ -93,7 +94,7 @@ export default function PlanScreen({ go }) {
     const multiDay = g.id === 'overdue' || g.id === 'week' || g.id === 'later'
     if (multiDay && it.date) parts.push(relativeDay(it.date, lang))
     if (it.time) parts.push(fmtTime(it.time, lang))
-    if (it.kind === 'rem') parts.push(t('cap_reminder'))
+    if (it.kind === 'rem') parts.push(reminderStatus(it.ref) === 'in_progress' ? t('st_in_progress') : t('cap_reminder'))
     if (it.kind === 'appt') parts.push(it.ref.location || t('cap_appointment'))
     if (it.kind === 'task' && it.ref.assignedTo) parts.push(it.ref.assignedTo)
     return parts.join(' · ')

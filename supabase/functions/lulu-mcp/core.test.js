@@ -266,3 +266,19 @@ describe('add_document', () => {
     expect((await db.list('H1', 'documents')).find(x => x.title === 'Odd').category).toBe('other')
   })
 })
+
+describe('reminder status', () => {
+  it('sets in progress, done and back, keeping done in step', async () => {
+    await call('add_reminder', { text: 'Send tickets', at: addDays(todayIn('Asia/Riyadh'), 1) + 'T20:00' })
+    const [r] = await db.list('H1', 'reminders')
+    expect(r).toMatchObject({ status: 'todo', done: false })
+    await call('update_item', { collection: 'reminders', id: r.id, changes: { status: 'in_progress' } })
+    expect((await db.get('H1', r.id)).data).toMatchObject({ status: 'in_progress', done: false })
+    expect((await call('list_items', { collection: 'reminders' })).text).toContain('in progress')
+    await call('update_item', { collection: 'reminders', id: r.id, changes: { done: true } })
+    expect((await db.get('H1', r.id)).data).toMatchObject({ status: 'done', done: true })
+    await call('update_item', { collection: 'reminders', id: r.id, changes: { status: 'todo' } })
+    expect((await db.get('H1', r.id)).data).toMatchObject({ status: 'todo', done: false, doneAt: null })
+    expect((await call('update_item', { collection: 'reminders', id: r.id, changes: { status: 'maybe' } })).isError).toBe(true)
+  })
+})

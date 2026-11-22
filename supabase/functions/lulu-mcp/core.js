@@ -119,7 +119,7 @@ export function describe(collection, r, tz) {
     if (r.location) bits.push(r.location)
   } else if (collection === 'reminders') {
     if (r.remindAt) bits.push(`at ${isoToLocal(r.remindAt, tz)}`)
-    if (r.done) bits.push('done')
+    bits.push(r.done ? 'done' : r.status === 'in_progress' ? 'in progress' : 'to do')
   } else if (collection === 'expenses' || collection === 'income' || collection === 'giving') {
     if (r.amount != null) bits.push(`${r.amount} ${r.currency || ''}`.trim())
     if (r.category) bits.push(r.category)
@@ -337,7 +337,7 @@ export const TOOLS = [
   {
     name: 'update_item',
     title: 'Change an item',
-    description: 'Change fields of an existing record — for example move an appointment, rename a task, fix an amount. Only the fields given change. Get the id from search or list_items.',
+    description: 'Change fields of an existing record — for example move an appointment, rename a task, fix an amount, or set a reminder\'s status ({"status": "todo" | "in_progress" | "done"}; a task\'s status is e.g. "in_progress" or "completed"). Only the fields given change. Get the id from search or list_items.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -534,7 +534,7 @@ export async function callTool(name, args, ctx) {
       // Same fields as buildReminderFields() in the app (src/lulu/lib/reminders.js).
       const rec = newRecord({
         text, times: [iso], firedCount: past ? 1 : 0, remindAt: iso, notified: past,
-        repeat: ['daily', 'weekly', 'monthly'].includes(a.repeat) ? a.repeat : 'none', done: false, source: 'claude',
+        repeat: ['daily', 'weekly', 'monthly'].includes(a.repeat) ? a.repeat : 'none', done: false, status: 'todo', source: 'claude',
       }, now)
       await store.put(hid, 'reminders', rec)
       return `Reminder set for ${isoToLocal(iso, tz)}: "${text}"${past ? ' (that time has already passed, so it will not ring)' : ''} [id ${rec.id}].`
@@ -654,6 +654,12 @@ export async function callTool(name, args, ctx) {
       if (!cur || cur.collection !== c || cur.data.deletedAt) fail(`No ${c} item with id ${a.id}. Use search to find it.`)
       const { id, createdAt, updatedAt, deletedAt, ...changes } = a.changes
       let next = { ...cur.data, ...changes, updatedAt: now }
+      // Reminders: `status` (todo | in_progress | done) and `done` move together.
+      if (c === 'reminders' && ('status' in changes || 'done' in changes)) {
+        const st = 'status' in changes ? changes.status : (changes.done ? 'done' : (cur.data.status === 'in_progress' ? 'in_progress' : 'todo'))
+        if (!['todo', 'in_progress', 'done'].includes(st)) fail('A reminder status is todo, in_progress or done.')
+        next = { ...next, status: st, done: st === 'done', doneAt: st === 'done' ? now : null }
+      }
       // A reminder moved to a new time must ring again at that time.
       if (c === 'reminders' && (changes.at || changes.remindAt)) {
         const iso = changes.at ? localToISO(changes.at, tz) : changes.remindAt
