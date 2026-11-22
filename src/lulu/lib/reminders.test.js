@@ -103,3 +103,19 @@ describe('multi-time reminders', () => {
     expect(firedCountOf(fired)).toBe(1)
   })
 })
+
+import { reminderStatus, statusFields } from './reminders.js'
+describe('reminder status', () => {
+  test('reads old and new records', () => {
+    expect(reminderStatus({})).toBe('todo')
+    expect(reminderStatus({ done: true })).toBe('done')
+    expect(reminderStatus({ done: true, status: 'in_progress' })).toBe('done')
+    expect(reminderStatus({ status: 'in_progress' })).toBe('in_progress')
+  })
+  test('writes done and status together, and can go back', () => {
+    expect(statusFields('done')).toMatchObject({ status: 'done', done: true })
+    expect(statusFields('in_progress')).toMatchObject({ status: 'in_progress', done: false, doneAt: null })
+    expect(statusFields('todo')).toMatchObject({ status: 'todo', done: false })
+    expect(statusFields('nonsense').status).toBe('todo')
+  })
+})

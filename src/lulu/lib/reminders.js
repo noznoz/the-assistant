@@ -138,3 +138,18 @@ export function splitReminders(items = []) {
     .sort((a, b) => new Date(lastTime(b)) - new Date(lastTime(a)))
   return { upcoming, past }
 }
+
+// ---- Status: To do → In progress → Done ----
+// `done` stays the source of truth for "finished" (alerts, sync and older
+// records rely on it); `status` adds "in progress". Any status can be changed
+// back at any time.
+export const REMINDER_STATUSES = ['todo', 'in_progress', 'done']
+export function reminderStatus(r) {
+  if (!r) return 'todo'
+  if (r.done) return 'done'
+  return r.status === 'in_progress' ? 'in_progress' : 'todo'
+}
+export function statusFields(status) {
+  const st = REMINDER_STATUSES.includes(status) ? status : 'todo'
+  return { status: st, done: st === 'done', doneAt: st === 'done' ? new Date().toISOString() : null }
+}
