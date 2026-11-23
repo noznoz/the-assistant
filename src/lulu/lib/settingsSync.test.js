@@ -1,61 +1,78 @@
 import { describe, test, expect } from 'vitest'
-import { mergeSettings, pickSynced } from './settingsSync.js'
+import { mergeSettings, pickSynced, payload, changedEntries } from './settingsSync.js'
 
-const phone = {
-  language: 'ar', theme: 'dark', settingsSyncedOnce: true, settingsUpdatedAt: '2026-11-23T10:00:00.000Z',
-  name: 'Nizar', currency: 'SAR', monthlyBudget: 3000,
-  profile: { fullName: 'Nizar', photo: 'data:image/jpeg;base64,AAA', photoId: 'x1', mobile: '0550000000' },
-}
-const remoteOf = (s) => ({ values: pickSynced(s), updatedAt: s.settingsUpdatedAt })
+const PHOTO = 'data:image/jpeg;base64,AAA'
+const T = (h) => `2026-11-23T${String(h).padStart(2, '0')}:00:00.000Z`
+// Apply a merge result to a device, like the store does.
+const apply = (dev, r) => (r.patch ? { ...dev, ...r.patch } : dev)
 
-describe('settings sync', () => {
+describe('settings sync — field by field', () => {
   test('only personal data travels, not device preferences', () => {
-    const v = pickSynced(phone)
-    expect(v.profile.photo).toBeTruthy()
+    const v = pickSynced({ language: 'ar', theme: 'dark', profile: { photo: PHOTO }, currency: 'SAR' })
+    expect(v.profile.photo).toBe(PHOTO)
     expect(v.language).toBeUndefined()
     expect(v.theme).toBeUndefined()
   })
 
-  test('a fresh MacBook gets the photo and profile from the phone', () => {
-    const mac = { language: 'en', profile: {}, monthlyBudget: 0, name: '' }
-    const r = mergeSettings(mac, remoteOf(phone), '2026-11-23T11:00:00.000Z')
-    expect(r.patch.profile).toEqual(phone.profile)
-    expect(r.patch.monthlyBudget).toBe(3000)
-    expect(r.patch.name).toBe('Nizar')
-    expect(r.patch.language).toBeUndefined() // the Mac keeps its own language
+  test('the reported case: the Mac changed something later, the photo still reaches it and the phone keeps it', () => {
+    // Phone: profile with a photo from before stamps; synced once at 10:00.
+    let phone = { language: 'ar', profile: { fullName: 'Nizar', photo: PHOTO }, monthlyBudget: 3000, currency: 'SAR', settingsSyncedOnce: true, settingsUpdatedAt: T(10) }
+    // Mac: synced first with nothing, then changed the currency at 12:00.
+    let mac = { language: 'en', profile: {}, currency: 'USD', settingsSyncedOnce: true, settingsUpdatedAt: T(12), settingsStamps: { currency: T(12) } }
+    // Cloud currently holds the Mac's copy (newer whole-copy time).
+    let cloud = payload(mac)
+
+    // Phone syncs: it must NOT lose the photo, and must upload it.
+    const rp = mergeSettings(phone, cloud); phone = apply(phone, rp)
+    expect(phone.profile.photo).toBe(PHOTO)
+    expect(phone.currency).toBe('USD') // the newer currency change does arrive
+    expect(rp.push).toBe(true)
+    cloud = payload(phone)
+
+    // Mac syncs: gets the photo, keeps its language.
+    mac = apply(mac, mergeSettings(mac, cloud))
+    expect(mac.profile.photo).toBe(PHOTO)
+    expect(mac.profile.fullName).toBe('Nizar')
+    expect(mac.monthlyBudget).toBe(3000)
+    expect(mac.language).toBe('en')
+  })
+
+  test('a fresh device never wipes a filled profile, whichever syncs first', () => {
+    const emptyMacFirst = payload({ profile: {}, name: '' })
+    let phone = { profile: { fullName: 'Nizar', photo: PHOTO } }
+    const r = mergeSettings(phone, emptyMacFirst); phone = apply(phone, r)
+    expect(phone.profile.photo).toBe(PHOTO)
     expect(r.push).toBe(true)
   })
 
-  test('a fresh device that synced first can never wipe a filled profile', () => {
-    // The empty Mac uploaded first; then the phone (never synced) pulls it.
-    const emptyMac = { values: { profile: {}, monthlyBudget: 0, name: '' }, updatedAt: '2026-11-23T09:00:00.000Z' }
-    const neverSyncedPhone = { ...phone, settingsSyncedOnce: undefined, settingsUpdatedAt: undefined }
-    const r = mergeSettings(neverSyncedPhone, emptyMac, '2026-11-23T12:00:00.000Z')
-    expect(r.patch.profile).toEqual(phone.profile)
-    expect(r.patch.monthlyBudget).toBeUndefined() // phone's 3000 kept as is
-    expect(r.push).toBe(true)
+  test('an old-style cloud copy (from the previous version) merges safely', () => {
+    const oldStyle = { values: { profile: { fullName: 'Old name' }, currency: 'SAR' }, updatedAt: T(9) }
+    let mac = { profile: {} }
+    mac = apply(mac, mergeSettings(mac, oldStyle))
+    expect(mac.profile.fullName).toBe('Old name')
+    let phone = { profile: { photo: PHOTO }, settingsSyncedOnce: true, settingsUpdatedAt: T(10) }
+    phone = apply(phone, mergeSettings(phone, oldStyle))
+    expect(phone.profile.photo).toBe(PHOTO) // photo kept
+    expect(phone.profile.fullName).toBe('Old name') // missing field filled
   })
 
-  test('first sync merges field by field inside the profile', () => {
-    const local = { profile: { fullName: 'Nizar', mobile: '' } }
-    const remote = { values: { profile: { fullName: 'Old', mobile: '0551112222', photo: 'data:x' } }, updatedAt: 't' }
-    expect(mergeSettings(local, remote).patch.profile).toEqual({ fullName: 'Nizar', mobile: '0551112222', photo: 'data:x' })
+  test('newer edits win per field, both ways', () => {
+    let a = { profile: { fullName: 'N', photo: PHOTO }, settingsSyncedOnce: true, settingsStamps: { 'profile.fullName': T(9), 'profile.photo': T(9) } }
+    let b = { profile: { fullName: 'Nizar B.', photo: PHOTO }, settingsSyncedOnce: true, settingsStamps: { 'profile.fullName': T(11), 'profile.photo': T(9) } }
+    a = apply(a, mergeSettings(a, payload(b)))
+    expect(a.profile.fullName).toBe('Nizar B.')
+    // b removes the photo later → removal travels
+    b = { ...b, profile: { fullName: 'Nizar B.', photo: '' }, settingsStamps: { ...b.settingsStamps, 'profile.photo': T(13) } }
+    a = apply(a, mergeSettings(a, payload(b)))
+    expect(a.profile.photo).toBe('')
   })
 
-  test('after the first sync, the newer copy wins', () => {
-    const mac = { ...phone, settingsUpdatedAt: '2026-11-23T09:00:00.000Z', profile: { fullName: 'Old' } }
-    const newer = mergeSettings(mac, remoteOf(phone))
-    expect(newer.patch.profile).toEqual(phone.profile)
-    expect(newer.push).toBe(false)
-    const older = mergeSettings(phone, { values: { profile: {} }, updatedAt: '2026-11-22T00:00:00.000Z' })
-    expect(older.patch).toBe(null)
-    expect(older.push).toBe(true)
-    expect(mergeSettings(phone, remoteOf(phone))).toEqual({ patch: null, stamp: phone.settingsUpdatedAt, push: false })
+  test('identical copies: nothing to do', () => {
+    const d = { profile: { photo: PHOTO }, settingsSyncedOnce: true, settingsStamps: { 'profile.photo': T(9) } }
+    expect(mergeSettings(d, payload(d))).toEqual({ patch: null, push: false })
   })
 
-  test('nothing in the cloud yet: upload ours', () => {
-    const r = mergeSettings({ profile: { fullName: 'N' } }, null, 'now')
-    expect(r.push).toBe(true)
-    expect(r.patch.settingsSyncedOnce).toBe(true)
+  test('changedEntries finds the exact fields edited', () => {
+    expect(changedEntries({ profile: { a: 1, photo: 'x' }, currency: 'SAR' }, { profile: { a: 1, photo: 'y' }, currency: 'SAR' })).toEqual(['profile.photo'])
   })
 })

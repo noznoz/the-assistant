@@ -327,13 +327,16 @@ export async function pullSettings() {
     return rows && rows[0] ? rows[0].data : null
   } catch { return undefined }
 }
-export async function pushSettings(values, updatedAt) {
+export async function pushSettings(p) {
   const id = settingsId()
-  if (!isReady() || !hasConsent() || !id) return false
+  if (!isReady() || !hasConsent() || !id || !p) return false
+  // updated_at is "now": per-field times live inside the data, and the copy
+  // being sent was just merged with the latest one, so it's the newest.
+  const at = new Date().toISOString()
   try {
     const res = await authFetch('/rest/v1/records?on_conflict=household_id,id', {
       method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-      body: JSON.stringify([{ household_id: householdId(), id, collection: '_settings', data: { id, values, updatedAt }, updated_at: updatedAt }]),
+      body: JSON.stringify([{ household_id: householdId(), id, collection: '_settings', data: { id, values: p.values, stamps: p.stamps, updatedAt: p.updatedAt || at }, updated_at: at }]),
     })
     return res.ok
   } catch { return false }

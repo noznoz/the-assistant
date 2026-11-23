@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import * as db from './db.js'
-import { SYNCED_SETTINGS, pickSynced, mergeSettings } from '../lib/settingsSync.js'
+import { mergeSettings, payload, changedEntries } from '../lib/settingsSync.js'
 import * as cloud from '../lib/cloud.js'
 import { syncAttachments } from '../lib/files.js'
 import { migrateCardPhotos } from '../lib/photoMigrate.js'
@@ -84,22 +84,26 @@ export function StoreProvider({ children }) {
     clearTimeout(settingsPushT.current)
     settingsPushT.current = setTimeout(() => {
       const s = db.readSettings()
-      if (s.settingsSyncedOnce && s.settingsUpdatedAt) cloud.pushSettings(pickSynced(s), s.settingsUpdatedAt)
+      if (s.settingsSyncedOnce) cloud.pushSettings(payload(s))
     }, 800)
   }, [])
   const updateSettings = useCallback((partial) => {
-    // Only a real change counts (screens may re-save the same values on open,
-    // which must not make a stale copy look newer than another device's edit).
+    // Stamp exactly the synced fields that really changed (screens may re-save
+    // the same values on open; that must not count as a change).
     const cur = db.readSettings()
-    const changedSynced = Object.keys(partial || {}).some(k =>
-      SYNCED_SETTINGS.includes(k) && JSON.stringify(cur[k] ?? null) !== JSON.stringify(partial[k] ?? null))
+    const changed = changedEntries(cur, { ...cur, ...partial })
     setSettings(prev => {
       const next = { ...prev, ...partial }
-      if (changedSynced && prev.settingsSyncedOnce) next.settingsUpdatedAt = new Date().toISOString()
+      if (changed.length) {
+        const now = new Date().toISOString()
+        next.settingsStamps = { ...(prev.settingsStamps || {}) }
+        changed.forEach(e => { next.settingsStamps[e] = now })
+        next.settingsUpdatedAt = now
+      }
       db.writeSettings(next)
       return next
     })
-    if (changedSynced) queueSettingsPush()
+    if (changed.length) queueSettingsPush()
   }, [queueSettingsPush])
 
   // Pull this person's settings from the cloud and merge (first time: fill
@@ -114,10 +118,7 @@ export function StoreProvider({ children }) {
       db.writeSettings(next)
       setSettings(next)
     }
-    if (r.push) {
-      const s = db.readSettings()
-      await cloud.pushSettings(pickSynced(s), s.settingsUpdatedAt || r.stamp)
-    }
+    if (r.push) await cloud.pushSettings(payload(db.readSettings()))
   }, [])
 
   const reloadAll = useCallback(() => {
