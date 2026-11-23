@@ -42,7 +42,8 @@ const store = {
     return live(data).map((r: any) => r.data)
   },
   async listAll(hid: string) {
-    const { data, error } = await supabase.from('records').select('collection,data').eq('household_id', hid)
+    // File pieces and per-person settings aren't searchable items.
+    const { data, error } = await supabase.from('records').select('collection,data').eq('household_id', hid).not('collection', 'in', '(_files,_settings)')
     if (error) throw new Error(error.message)
     return live(data).map((r: any) => ({ collection: r.collection, data: r.data }))
   },
