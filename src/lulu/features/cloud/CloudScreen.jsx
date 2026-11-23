@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Icon from '../../ui/Icon.jsx'
 import { DetailHeader, Card, Section, Field, Input, Button, useToast } from '../../ui/primitives.jsx'
 import { useT } from '../../i18n/I18nProvider.jsx'
@@ -54,9 +54,9 @@ create policy rec_member_all on public.records
   for all using (public.is_member(household_id))
   with check (public.is_member(household_id));`
 
-export default function CloudScreen({ go }) {
+export default function CloudScreen({ go, param }) {
   const { t, lang } = useT()
-  const { cloudSync } = useStore()
+  const { cloudSync, removeSampleData } = useStore()
   const toast = useToast()
   const [, force] = useState(0)
   useEffect(() => cloud.onStatus(() => force(n => n + 1)), [])
@@ -76,6 +76,27 @@ export default function CloudScreen({ go }) {
   const [newLink, setNewLink] = useState('')     // shown once, right after it's made
   const [needSetup, setNeedSetup] = useState(false)
   const [showClaudeSql, setShowClaudeSql] = useState(false)
+
+  // Opened from a "Use on another device" link: fill the project in, take the
+  // key out of the address bar, and leave only "sign in".
+  // Kept for the tab's session so it survives the screen being re-created.
+  const LINK_FLAG = 'lulu:fromDeviceLink'
+  const flag = (v) => { try { v ? sessionStorage.setItem(LINK_FLAG, '1') : sessionStorage.removeItem(LINK_FLAG) } catch { /* ignore */ } }
+  const [fromLink, setFromLinkState] = useState(() => { try { return sessionStorage.getItem(LINK_FLAG) === '1' && !cloud.isSignedIn() } catch { return false } })
+  const setFromLink = (v) => { flag(v); setFromLinkState(v) }
+  const linkDone = useRef(false)
+  useEffect(() => {
+    if (linkDone.current) return
+    linkDone.current = true
+    const link = cloud.readDeviceLink(param)
+    if (!link) return
+    try { history.replaceState(null, '', location.pathname + location.search + '#/cloud') } catch { /* ignore */ }
+    if (cloud.isSignedIn()) return
+    cloud.setConfig(link.url, link.anonKey)
+    setUrl(link.url); setAnonKey(link.anonKey)
+    cloud.setConsent(true); setConsent(true) // they chose cloud sync on the device that shared the link
+    setFromLink(true)
+  }, [param])
 
   const configured = cloud.isConfigured()
   const signedIn = cloud.isSignedIn()
@@ -113,9 +134,13 @@ export default function CloudScreen({ go }) {
       if (kind === 'up') await cloud.signUp(email, pass)
       else await cloud.signIn(email, pass)
       setPass('')
+      // A new device joining through the link: drop its sample data so only
+      // the real, synced data shows.
+      if (fromLink) removeSampleData()
       await cloudSync()
       cloud.listMembers().then(setMembers)
-      toast.show(t('cloudConnected'))
+      toast.show(fromLink ? t('deviceLinkDone') : t('cloudConnected'))
+      if (fromLink) { setFromLink(false); go('today') }
     } catch (e) { setErr(e.message || t('aiError')) } finally { setBusy(false) }
   }
 
@@ -151,8 +176,15 @@ export default function CloudScreen({ go }) {
           </div>
         </Card>
 
+        {fromLink && !signedIn && (
+          <Card className="stack" style={{ marginTop: 12, borderColor: 'var(--brand-500)' }}>
+            <div style={{ fontWeight: 700 }}>{t('deviceLinkAlmost')}</div>
+            <p className="hint" style={{ margin: 0 }}>{t('deviceLinkSignIn')}</p>
+          </Card>
+        )}
+
         {/* Project config */}
-        {!signedIn && (
+        {!signedIn && !fromLink && (
           <>
             <Section title={t('cloudProject')} />
             <Card className="stack">
@@ -206,6 +238,19 @@ export default function CloudScreen({ go }) {
             <Card className="stack">
               <Button block variant="primary" icon="refresh" onClick={doSync} disabled={busy}>{busy ? t('thinking') + '…' : t('cloudSyncNow')}</Button>
               <p className="hint" style={{ margin: '0 2px' }}>{t('cloudSyncHint')}</p>
+            </Card>
+
+            <Section title={t('deviceLinkTitle')} />
+            <Card className="stack">
+              <p className="hint" style={{ margin: '0 2px' }}>{t('deviceLinkHint')}</p>
+              <div className="row2">
+                <Button variant="primary" icon="share" onClick={async () => {
+                  const url = cloud.deviceLink()
+                  try { if (navigator.share) { await navigator.share({ title: 'The Assistant', url }); return } } catch { return }
+                  copy(url)
+                }}>{t('share')}</Button>
+                <Button icon="copy" onClick={() => copy(cloud.deviceLink())}>{t('copy')}</Button>
+              </div>
             </Card>
 
             <Section title={t('claudeConnect')} />

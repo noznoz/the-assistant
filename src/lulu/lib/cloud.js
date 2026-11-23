@@ -33,6 +33,28 @@ export function getSession() { return read(SES_KEY, null) }
 function setSession(s) { if (s) write(SES_KEY, s); else localStorage.removeItem(SES_KEY); emit() }
 
 export function isConfigured() { return !!getConfig() }
+
+// ---- "Use on another device" link ----
+// Carries this app's address plus the project URL and its public (anon /
+// publishable) key — the same values every copy of the app ships with, safe to
+// share; never the password or session. Opening it on another device fills the
+// project in, so only "sign in" is left.
+const b64u = (s) => btoa(unescape(encodeURIComponent(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+const unb64u = (s) => decodeURIComponent(escape(atob(s.replace(/-/g, '+').replace(/_/g, '/'))))
+export function deviceLink(base = (typeof location !== 'undefined' ? location.origin + location.pathname : '')) {
+  const cfg = getConfig()
+  if (!cfg) return ''
+  return `${base}#/cloud/connect.${b64u(JSON.stringify({ u: cfg.url, k: cfg.anonKey }))}`
+}
+export function readDeviceLink(param) {
+  const m = /^connect\.([A-Za-z0-9_-]+)$/.exec(param || '')
+  if (!m) return null
+  try {
+    const { u, k } = JSON.parse(unb64u(m[1]))
+    if (typeof u !== 'string' || !/^https:\/\/[a-z0-9.-]+(:\d+)?\/?$/i.test(u) || typeof k !== 'string' || k.length < 20) return null
+    return { url: u, anonKey: k }
+  } catch { return null }
+}
 export function isSignedIn() { const s = getSession(); return !!(s && s.access_token && s.householdId) }
 export function isReady() { return isConfigured() && isSignedIn() }
 
