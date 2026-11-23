@@ -41,7 +41,7 @@ export default function BackgroundPush() {
     setBusy(true)
     try {
       await refreshPush()
-      const r = await cloud.invokeFunction('send-reminders', { test: true, household_id: cloud.householdId() })
+      const r = await cloud.invokeFunction('lulu-mcp/push', { action: 'test', household_id: cloud.householdId() })
       toast.show(r && r.sent > 0 ? t('testPushSent') : r && !r.subscriptions ? t('testPushNoSub') : t('testPushFailed'))
     } catch { toast.show(t('testPushError')) } finally { setBusy(false) }
   }

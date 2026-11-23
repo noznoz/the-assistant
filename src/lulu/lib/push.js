@@ -6,7 +6,7 @@
 // for users who don't enable it.
 //
 // Setup (see docs/PUSH.md): set VITE_VAPID_PUBLIC_KEY at build time, deploy the
-// send-reminders Edge Function with the matching private key, run the SQL, and
+// lulu-mcp Edge Function (which holds the matching private key), run the SQL, and
 // (on iPhone) install the app to the Home Screen.
 // ============================================================================
 import * as cloud from './cloud.js'
@@ -20,14 +20,14 @@ export function pushSupported() {
     typeof window !== 'undefined' && 'PushManager' in window && 'Notification' in window
 }
 // The key the phone subscribes with must match the server's private key, so
-// ask the send-reminders function for it (it makes a pair on first use). A key
+// ask the lulu-mcp function for it (its pair is derived from the project's secret). A key
 // built into the app (VITE_VAPID_PUBLIC_KEY) is only a fallback.
 let serverKey = ''
 export async function serverPublicKey() {
   if (serverKey) return serverKey
   if (!cloud.isReady || !cloud.isReady()) return ''
   try {
-    const r = await cloud.invokeFunction('send-reminders', { action: 'key' })
+    const r = await cloud.invokeFunction('lulu-mcp/push', { action: 'key' })
     if (r && r.publicKey) serverKey = r.publicKey
   } catch { /* not deployed yet */ }
   return serverKey
@@ -125,7 +125,7 @@ export async function pushFacts() {
   }
   if (facts.cloud) {
     try {
-      facts.server = await cloud.invokeFunction('send-reminders', { action: 'status', household_id: cloud.householdId(), endpoint: sub ? sub.endpoint : '' })
+      facts.server = await cloud.invokeFunction('lulu-mcp/push', { action: 'status', household_id: cloud.householdId(), endpoint: sub ? sub.endpoint : '' })
       if (facts.server && facts.server.publicKey) serverKey = facts.server.publicKey
     } catch (e) { facts.serverErr = (e && e.message) || 'error' }
   }

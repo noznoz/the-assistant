@@ -366,6 +366,7 @@ const INSTRUCTIONS = [
   'Use get_today before working with relative dates. Dates are YYYY-MM-DD and times 24-hour HH:MM in the user\'s own time zone.',
   'To change or delete something, find it first with search or list_items to get its id.',
   'You CAN send WhatsApp messages: when the user asks to WhatsApp, message or share something with someone, call send_whatsapp and show the link it returns — they tap it and press Send. Never say you cannot send WhatsApp messages.',
+  'Email: if the user also has an email connector (e.g. Gmail), you can bring things from their inbox into the app when they ask. Flight/hotel bookings → a trip with add_item(collection "trips", {name, destination, start, end, notes}) plus each flight or check-in as add_item(collection "itinerary", {tripId, date, time, title, note}); appointment or meeting invitations → add_appointment; bills and receipts → add_expense (or add_item "subscriptions" with {name, amount, currency, cycle, nextDue} for recurring ones); documents (IDs, insurance, contracts) → add_document. Search the app first so you don\'t add something twice, and say what you added.',
   'After acting, confirm in one short sentence what changed (the user is often speaking, not reading). Changes appear on their phone within seconds when the app is open.',
 ].join(' ')
 
@@ -698,6 +699,214 @@ function stripHeavy(r) {
   return out
 }
 
+
+// ===========================================================================
+// A. Apple Calendar feed — GET …/lulu-mcp/<lulucal_ key>/calendar.ics
+// A read-only link (its own key, prefix lulucal_) that Calendar subscribes to.
+// UIDs are stable, so Calendar updates events in place instead of duplicating.
+// ===========================================================================
+const icsEsc = (v) => String(v ?? '').replace(/\\/g, '\\\\').replace(/;/g, '\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n')
+const icsFold = (line) => {
+  if (line.length <= 73) return line
+  let out = line.slice(0, 73), rest = line.slice(73)
+  while (rest.length > 72) { out += '\r\n ' + rest.slice(0, 72); rest = rest.slice(72) }
+  return out + '\r\n ' + rest
+}
+const icsUtc = (iso) => new Date(iso).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
+const icsDate = (d) => d.replace(/-/g, '')
+
+// data: { appointments, tasks, reminders, documents } (live records only)
+export function buildCalendar(data, tz, now = new Date()) {
+  const today = todayIn(tz, now), from = addDays(today, -30), to = addDays(today, 400)
+  const inRange = (d) => d && d >= from && d <= to
+  const ev = []
+  const timed = (uid, startIso, mins, summary, extra = {}) => ev.push({ uid, start: startIso, end: new Date(Date.parse(startIso) + mins * 60000).toISOString(), summary, ...extra })
+  const allDay = (uid, date, summary, extra = {}) => ev.push({ uid, date, summary, ...extra })
+  for (const a of data.appointments || []) {
+    const d = (a.date || '').slice(0, 10); if (!inRange(d)) continue
+    const extra = { location: a.location, desc: a.note }
+    if (isTime(a.time)) timed(`appt-${a.id}`, localToISO(`${d}T${a.time}`, tz), 60, a.title || 'Appointment', extra)
+    else allDay(`appt-${a.id}`, d, a.title || 'Appointment', extra)
+  }
+  for (const t of data.tasks || []) {
+    if (t.status === 'completed' || t.status === 'cancelled') continue
+    const d = (t.dueDate || '').slice(0, 10); if (!inRange(d)) continue
+    const summary = `☐ ${t.title || 'Task'}`
+    if (isTime(t.dueTime)) timed(`task-${t.id}`, localToISO(`${d}T${t.dueTime}`, tz), 30, summary, { desc: t.description })
+    else allDay(`task-${t.id}`, d, summary, { desc: t.description })
+  }
+  for (const r of data.reminders || []) {
+    if (r.done) continue
+    const times = Array.isArray(r.times) && r.times.length ? r.times : (r.remindAt ? [r.remindAt] : [])
+    times.forEach((iso, i) => { const d = isoToLocal(iso, tz).slice(0, 10); if (inRange(d)) timed(`rem-${r.id}-${i}`, iso, 15, `🔔 ${r.text || 'Reminder'}`) })
+  }
+  for (const doc of data.documents || []) {
+    const d = (doc.expiry || '').slice(0, 10); if (!inRange(d)) continue
+    allDay(`doc-${doc.id}`, d, `📄 ${doc.title || 'Document'} expires`)
+  }
+  const stamp = icsUtc(now.toISOString())
+  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//The Assistant//Calendar feed//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+    'X-WR-CALNAME:The Assistant', `X-WR-TIMEZONE:${tz}`, 'REFRESH-INTERVAL;VALUE=DURATION:PT15M', 'X-PUBLISHED-TTL:PT15M']
+  for (const e of ev) {
+    L.push('BEGIN:VEVENT', `UID:${e.uid}@the-assistant`, `DTSTAMP:${stamp}`)
+    if (e.date) {
+      const next = addDays(e.date, 1)
+      L.push(`DTSTART;VALUE=DATE:${icsDate(e.date)}`, `DTEND;VALUE=DATE:${icsDate(next)}`)
+    } else L.push(`DTSTART:${icsUtc(e.start)}`, `DTEND:${icsUtc(e.end)}`)
+    L.push(`SUMMARY:${icsEsc(e.summary)}`)
+    if (e.location) L.push(`LOCATION:${icsEsc(e.location)}`)
+    if (e.desc) L.push(`DESCRIPTION:${icsEsc(e.desc)}`)
+    L.push('END:VEVENT')
+  }
+  L.push('END:VCALENDAR')
+  return { text: L.map(icsFold).join('\r\n') + '\r\n', count: ev.length }
+}
+
+// ===========================================================================
+// C. Background push — every minute (…/lulu-mcp/cron) send due reminders,
+// due-today alerts (daytime only) and the morning brief to the household's
+// devices. Everything lives in the records table (no extra tables):
+//   _pushsub   one per device subscription   (written by the app)
+//   _pushalert one per alert already sent    (de-duplication)
+//   _pushcfg   'pushcfg': last run time      (for the app's checklist)
+// ===========================================================================
+export const PUSH_SUB = '_pushsub', PUSH_ALERT = '_pushalert', PUSH_CFG = '_pushcfg'
+const dateOnly = (v) => (typeof v === 'string' && v.length >= 10 ? v.slice(0, 10) : null)
+
+function localMinutes(tz, now) { const t = isoToLocal(now.toISOString(), tz).slice(11); return Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5)) }
+
+export function computeDueAlerts(by, today) {
+  const out = []
+  const of = (c) => (by[c] || []).filter(x => x && !x.deletedAt)
+  for (const x of of('tasks')) {
+    if (x.status === 'completed' || x.status === 'cancelled') continue
+    const dd = dateOnly(x.dueDate); if (!dd || dd > today) continue
+    out.push({ key: `task:${x.id}:${dd}`, title: dd < today ? 'Overdue task' : 'Task due today', body: x.title || 'Task', url: '#/plan' })
+  }
+  for (const x of of('appointments')) {
+    const dd = dateOnly(x.date); if (dd !== today) continue
+    out.push({ key: `appt:${x.id}:${dd}`, title: 'Appointment today', body: `${x.title || 'Appointment'}${x.time ? ` · ${x.time}` : ''}`, url: '#/plan' })
+  }
+  for (const x of of('subscriptions')) {
+    if (x.active === false) continue
+    const dd = dateOnly(x.nextDue); if (!dd || dd > today) continue
+    out.push({ key: `sub:${x.id}:${dd}`, title: 'Payment due', body: x.name || 'Subscription', url: '#/subscriptions' })
+  }
+  for (const x of of('documents')) {
+    const dd = dateOnly(x.expiry); if (!dd || dd > today) continue
+    out.push({ key: `doc:${x.id}:${dd}`, title: 'Document expiring', body: x.title || 'Document', url: '#/documents' })
+  }
+  const year = today.slice(0, 4)
+  for (const x of of('people')) {
+    const b = dateOnly(x.birthday)
+    if (b && b.slice(5) === today.slice(5)) out.push({ key: `bd:${x.id}:${year}`, title: 'Birthday today', body: x.name || 'Someone', url: '#/people' })
+  }
+  return out
+}
+
+export function briefBody(by, today) {
+  const of = (c) => (by[c] || []).filter(x => x && !x.deletedAt)
+  const open = of('tasks').filter(t => t.status !== 'completed' && t.status !== 'cancelled')
+  const dueToday = open.filter(t => dateOnly(t.dueDate) === today)
+  const overdue = open.filter(t => { const d = dateOnly(t.dueDate); return d && d < today })
+  const appts = of('appointments').filter(a => dateOnly(a.date) === today).sort((a, b) => (a.time || '').localeCompare(b.time || ''))
+  const parts = []
+  if (dueToday.length) parts.push(`${dueToday.length} due today`)
+  if (overdue.length) parts.push(`${overdue.length} overdue`)
+  if (appts.length) parts.push(`${appts[0].time ? appts[0].time + ' ' : ''}${appts[0].title}${appts.length > 1 ? ` +${appts.length - 1}` : ''}`)
+  return parts.length ? parts.join(' · ') : 'Your day is clear.'
+}
+
+// push: { send(subscription, payloadString) } — throws { statusCode } on failure.
+async function pushToDevices(store, push, hid, subs, payload) {
+  let delivered = 0
+  for (const s of subs) {
+    try { await push.send(s.subscription, JSON.stringify(payload)); delivered++ }
+    catch (e) { if (e && (e.statusCode === 404 || e.statusCode === 410)) { try { await store.del(hid, s.id) } catch { /* ignore */ } } }
+  }
+  return delivered
+}
+
+export async function runPushCron({ store, push, tz, now = new Date() }) {
+  const nowIso = now.toISOString(), nowMs = now.getTime()
+  const today = todayIn(tz, now), mins = localMinutes(tz, now)
+  const subsAll = await store.listCollectionAll(PUSH_SUB)
+  const byHouse = new Map()
+  for (const r of subsAll) { if (!r.data || r.data.deletedAt || !r.data.subscription) continue; if (!byHouse.has(r.household_id)) byHouse.set(r.household_id, []); byHouse.get(r.household_id).push({ id: r.id, subscription: r.data.subscription }) }
+  const households = await store.listHouseholds()
+  const totals = { households: households.length, devices: subsAll.length, reminders: 0, alerts: 0, briefs: 0 }
+  for (const hid of households) {
+    // Heartbeat, so the app can show "runs every minute".
+    await store.put(hid, PUSH_CFG, { id: 'pushcfg', lastRunAt: nowIso, createdAt: nowIso, updatedAt: nowIso, deletedAt: null })
+    const subs = byHouse.get(hid) || []
+    if (!subs.length) continue
+
+    // Reminders: up to 3 times each (`times`), `firedCount` of them alerted.
+    for (const d of await store.list(hid, 'reminders')) {
+      if (d.done) continue
+      const times = (Array.isArray(d.times) && d.times.length ? [...new Set(d.times.filter(Boolean))].sort() : (d.remindAt ? [d.remindAt] : []))
+      const fired = typeof d.firedCount === 'number' ? d.firedCount : (d.notified ? times.length : 0)
+      const passed = times.filter(t => t <= nowIso).length
+      if (passed <= fired) continue
+      if (!(await pushToDevices(store, push, hid, subs, { title: 'Reminder', body: d.text || '', tag: 'reminder-' + d.id, url: '#/reminders' }))) continue
+      totals.reminders++
+      let next
+      if (passed >= times.length && d.repeat && d.repeat !== 'none') {
+        const ds = times.map(t => new Date(t))
+        let guard = 0
+        do { ds.forEach(x => { d.repeat === 'monthly' ? x.setUTCMonth(x.getUTCMonth() + 1) : x.setUTCDate(x.getUTCDate() + (d.repeat === 'weekly' ? 7 : 1)) }); guard++ }
+        while (Math.max(...ds.map(x => x.getTime())) <= nowMs && guard < 400)
+        const nt = ds.map(x => x.toISOString())
+        next = { ...d, times: nt, firedCount: 0, remindAt: nt[0], notified: false, notifiedAt: nowIso, updatedAt: nowIso }
+      } else {
+        next = { ...d, firedCount: passed, remindAt: times[Math.min(passed, times.length - 1)] || null, notified: passed >= times.length, notifiedAt: nowIso, updatedAt: nowIso }
+      }
+      await store.put(hid, 'reminders', next) // updatedAt moves: the phone takes this copy
+    }
+
+    // Due-today alerts (07:00–22:00 local) and the morning brief (07:30–10:00).
+    const daytime = mins >= 7 * 60 && mins < 22 * 60
+    const briefTime = mins >= 7 * 60 + 30 && mins < 10 * 60
+    if (!daytime) continue
+    const by = {}
+    for (const c of ['tasks', 'appointments', 'subscriptions', 'documents', 'people']) by[c] = await store.list(hid, c)
+    const seen = new Set((await store.list(hid, PUSH_ALERT)).map(a => a.key))
+    const items = computeDueAlerts(by, today).filter(i => !seen.has(i.key))
+    if (briefTime && !seen.has(`brief:${today}`)) items.unshift({ key: `brief:${today}`, title: '☀️ Good morning', body: briefBody(by, today), url: '#/today' })
+    for (const it of items) {
+      if (await pushToDevices(store, push, hid, subs, { title: it.title, body: it.body, tag: 'due-' + it.key, url: it.url })) {
+        it.key.startsWith('brief:') ? totals.briefs++ : totals.alerts++
+        await store.put(hid, PUSH_ALERT, { id: 'alert:' + it.key, key: it.key, sentAt: nowIso, createdAt: nowIso, updatedAt: nowIso, deletedAt: null })
+      }
+    }
+  }
+  return totals
+}
+
+// The app's push requests (POST …/lulu-mcp/push, signed-in user):
+//   { action: 'key' } · { action: 'status', household_id, endpoint } · { action: 'test', household_id }
+async function handlePush(req, { store, push }) {
+  let body = {}
+  try { body = await req.json() } catch { /* empty */ }
+  if (body.action === 'key') return json({ publicKey: push.publicKey })
+  const hid = body.household_id
+  const token = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '').trim()
+  const user = token ? await store.userFromToken(token) : null
+  if (!user || !hid || !(await store.isMember(hid, user.id))) return json({ error: 'not-allowed' }, 403)
+  const subs = (await store.list(hid, PUSH_SUB)).filter(s => s.subscription)
+  if (body.action === 'status') {
+    const cfg = (await store.list(hid, PUSH_CFG))[0]
+    let cron = null
+    try { cron = await store.cronStatus() } catch { cron = null }
+    return json({ ok: true, publicKey: push.publicKey, subscriptions: subs.length, registered: !!(body.endpoint && subs.some(s => s.endpoint === body.endpoint)), lastRun: cfg ? cfg.lastRunAt : null, cron, now: new Date().toISOString() })
+  }
+  if (body.action === 'test') {
+    const sent = await pushToDevices(store, push, hid, subs.map(s => ({ id: s.id, subscription: s.subscription })), { title: 'Test push ✅', body: 'Background reminders are working.', tag: 'lulu-test', url: '#/reminders' })
+    return json({ test: true, subscriptions: subs.length, sent })
+  }
+  return json({ error: 'unknown action' }, 400)
+}
+
 // ---------------------------------------------------------------------------
 // HTTP + JSON-RPC
 // ---------------------------------------------------------------------------
@@ -739,7 +948,7 @@ export function keyFrom(req) {
  *          listAll(hid) → [{collection, data}], get(hid, id) → {collection, data}|null,
  *          put(hid, collection, record) }
  */
-export function createHandler({ store, tz = 'Asia/Riyadh', currency = 'SAR', countryCode = '966' }) {
+export function createHandler({ store, push = /** @type {any} */ (null), tz = 'Asia/Riyadh', currency = 'SAR', countryCode = '966' }) {
   async function handleMessage(msg, hid) {
     if (!msg || msg.jsonrpc !== '2.0' || typeof msg.method !== 'string') return rpcError(msg && msg.id, -32600, 'Invalid request')
     const isNotification = msg.id === undefined || msg.id === null
@@ -781,6 +990,27 @@ export function createHandler({ store, tz = 'Asia/Riyadh', currency = 'SAR', cou
 
   return async function handle(req) {
     if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
+    const parts = new URL(req.url).pathname.split('/').filter(Boolean)
+    const at = parts.lastIndexOf('lulu-mcp')
+    const rest = at >= 0 ? parts.slice(at + 1) : []
+
+    // A. Calendar feed: …/lulu-mcp/<lulucal_ key>/calendar.ics (read-only key).
+    if (rest[0] && rest[0].startsWith('lulucal_') && /\.ics$/.test(rest[1] || '')) {
+      const hidCal = await store.household(await sha256Hex(rest[0]))
+      if (!hidCal) return new Response('This calendar link was removed. Make a new one in The Assistant.', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } })
+      const [appointments, tasks, reminders, documents] = await Promise.all(['appointments', 'tasks', 'reminders', 'documents'].map(c => store.list(hidCal, c)))
+      const cal = buildCalendar({ appointments, tasks, reminders, documents }, tz)
+      return new Response(cal.text, { status: 200, headers: { 'content-type': 'text/calendar; charset=utf-8', 'cache-control': 'no-cache', ...CORS } })
+    }
+    // C. Background push: the app's requests, and the every-minute run.
+    if (rest[0] === 'push' && req.method === 'POST') {
+      if (!push) return json({ error: 'push-unavailable' }, 503)
+      return handlePush(req, { store, push })
+    }
+    if (rest[0] === 'cron') {
+      if (!push) return json({ error: 'push-unavailable' }, 503)
+      return json(await runPushCron({ store, push, tz }))
+    }
     // Opened in a browser: a plain status page, so setup can be checked by
     // just visiting the address. (MCP clients never ask for text/html.)
     if (req.method === 'GET' && (req.headers.get('accept') || '').includes('text/html')) {

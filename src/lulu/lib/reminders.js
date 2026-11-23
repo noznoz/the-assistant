@@ -1,7 +1,7 @@
 // Personal reminders: the user writes anything + up to 3 alert times, and the
 // app fires an on-device notification as each time comes due. This works while
 // the app is open or freshly reopened; delivery while the app is fully closed
-// needs background web push (the send-reminders Edge Function).
+// needs background web push (the lulu-mcp Edge Function, every minute).
 //
 // Model: a reminder carries `times` (1–3 ISO strings, ascending) and
 // `firedCount` (how many of the earliest times have already alerted). `done`

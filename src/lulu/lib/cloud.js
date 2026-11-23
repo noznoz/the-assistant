@@ -245,8 +245,9 @@ export async function pushAll() {
 export async function pullAll() {
   if (!isReady()) return null
   try {
-    // File pieces ('_files') are fetched only when a file is opened.
-    const res = await authFetch(`/rest/v1/records?select=collection,data&household_id=eq.${householdId()}&collection=neq._files`, { method: 'GET' })
+    // File pieces ('_files') are fetched only when a file is opened; push
+    // bookkeeping is the server's business.
+    const res = await authFetch(`/rest/v1/records?select=collection,data&household_id=eq.${householdId()}&collection=not.in.(_files,_pushsub,_pushalert,_pushcfg)`, { method: 'GET' })
     if (!res.ok) return null
     const rows = await res.json().catch(() => [])
     const byCollection = {}
@@ -261,27 +262,31 @@ export async function pullAll() {
 // ---- Web-push subscriptions (background reminders) ----
 // Store this device's push subscription in the household so the scheduled
 // Edge Function can deliver reminders even when the app is closed.
+// One record per device ('_pushsub'), so background push needs no extra
+// tables; the lulu-mcp function reads them every minute.
+async function pushSubId(endpoint) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(endpoint))
+  return 'push:' + [...new Uint8Array(buf)].slice(0, 16).map(b => b.toString(16).padStart(2, '0')).join('')
+}
 export async function savePushSubscription(sub) {
   if (!isReady() || !sub || !sub.endpoint) return
   const ses = getSession()
-  // Returns whether it was stored, so "turn on" can say when it wasn't (e.g.
-  // the push tables haven't been created yet).
   try {
-    const res = await authFetch('/rest/v1/push_subscriptions?on_conflict=household_id,endpoint', {
+    const id = await pushSubId(sub.endpoint), at = new Date().toISOString()
+    const res = await authFetch('/rest/v1/records?on_conflict=household_id,id', {
       method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-      body: JSON.stringify([{ household_id: householdId(), user_id: ses.user.id, endpoint: sub.endpoint, subscription: sub }]),
+      body: JSON.stringify([{ household_id: householdId(), id, collection: '_pushsub', updated_at: at,
+        data: { id, endpoint: sub.endpoint, subscription: sub, userId: ses.user && ses.user.id, createdAt: at, updatedAt: at, deletedAt: null } }]),
     })
     return res.ok
   } catch { return false /* offline */ }
 }
 export async function deletePushSubscription(endpoint) {
   if (!isReady() || !endpoint) return
-  try {
-    await authFetch(`/rest/v1/push_subscriptions?household_id=eq.${householdId()}&endpoint=eq.${encodeURIComponent(endpoint)}`, { method: 'DELETE' })
-  } catch { /* ignore */ }
+  try { await authFetch(`/rest/v1/records?household_id=eq.${householdId()}&id=eq.${await pushSubId(endpoint)}`, { method: 'DELETE' }) } catch { /* ignore */ }
 }
 
-// Invoke a deployed Edge Function (e.g. send-reminders) with the signed-in
+// Invoke a deployed Edge Function (e.g. lulu-mcp/push) with the signed-in
 // user's token. Used by the in-app "test push" so we can exercise the whole
 // background pipeline on demand. Returns the parsed JSON, or throws with a
 // readable message. The function must send CORS headers to allow this.
@@ -344,6 +349,21 @@ export async function pushSettings(p) {
   } catch { return false }
 }
 
+// ---- Apple Calendar feed ----
+// A read-only key (prefix lulucal_): it can only read the calendar feed, never
+// change anything. The feed address is kept on this device so the button can
+// open it again without making a new one.
+const CAL_KEY = `${NS}:calendarUrl`
+export function calendarFeedUrl() { try { return localStorage.getItem(CAL_KEY) || '' } catch { return '' } }
+export async function createCalendarFeed() {
+  const { key } = await createAssistantKey('Calendar', 'lulucal_')
+  const cfg = getConfig()
+  const url = `${cfg.url}/functions/v1/lulu-mcp/${key}/calendar.ics`
+  try { localStorage.setItem(CAL_KEY, url) } catch { /* ignore */ }
+  return url
+}
+export function forgetCalendarFeed() { try { localStorage.removeItem(CAL_KEY) } catch { /* ignore */ } }
+
 // ---- Claude connector keys ----
 // A key lets Claude (through the lulu-mcp Edge Function) read and change this
 // household's data. It's shown once; only its SHA-256 hash is stored.
@@ -355,10 +375,10 @@ export function connectorUrl(key) {
   const cfg = getConfig()
   return cfg ? `${cfg.url}/functions/v1/lulu-mcp/${key}` : ''
 }
-export async function createAssistantKey(label) {
+export async function createAssistantKey(label, prefix = 'lulu_') {
   if (!isReady()) throw new Error('Sign in to cloud sync first')
   const bytes = crypto.getRandomValues(new Uint8Array(32))
-  const key = 'lulu_' + btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  const key = prefix + btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
   const res = await authFetch('/rest/v1/assistant_keys', {
     method: 'POST', headers: { Prefer: 'return=minimal' },
     body: JSON.stringify({ key_hash: await sha256Hex(key), household_id: householdId(), label: label || 'Claude' }),
