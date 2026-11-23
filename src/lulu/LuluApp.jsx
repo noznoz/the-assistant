@@ -271,7 +271,7 @@ function Router() {
       case 'keepintouch': return <KeepInTouchScreen go={go} />
       case 'navtabs': return <NavTabsScreen go={go} />
       case 'assistant': return <AssistantScreen go={go} />
-      case 'cloud': return <CloudScreen go={go} />
+      case 'cloud': return <CloudScreen go={go} param={param} />
       case 'search': return <SearchScreen go={go} />
       default: return <TodayScreen go={go} />
     }
