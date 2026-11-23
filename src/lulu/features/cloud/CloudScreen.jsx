@@ -117,7 +117,7 @@ export default function CloudScreen({ go, param }) {
     setStore('checking')
     const st = await cloud.storageCheck()
     setStore(st)
-    if (st === 'ok') { setBusy(true); try { await syncAttachments() } finally { setBusy(false) } }
+    if (st === 'ok' || st === 'ok-table') { setBusy(true); try { await syncAttachments() } finally { setBusy(false) } }
     setPending(await pendingUploads())
   }
   useEffect(() => { if (signedIn) checkStorage() }, [signedIn]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -259,23 +259,23 @@ export default function CloudScreen({ go, param }) {
             <Section title={t('filesTitle')} />
             <Card className="stack">
               <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                <span className={`lead ${store === 'ok' ? 't-ok' : store === 'checking' || !store ? 't-info' : 't-warn'}`} style={{ width: 36, height: 36, borderRadius: 11, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-                  <Icon name={store === 'ok' ? 'check' : 'doc'} size={16} />
+                <span className={`lead ${store === 'ok' || store === 'ok-table' ? 't-ok' : store === 'checking' || !store ? 't-info' : 't-warn'}`} style={{ width: 36, height: 36, borderRadius: 11, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                  <Icon name={store === 'ok' || store === 'ok-table' ? 'check' : 'doc'} size={16} />
                 </span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700 }}>{store === 'ok' ? t('filesOk') : store === 'checking' || !store ? t('pushChecking') : t('filesNotSet')}</div>
+                  <div style={{ fontWeight: 700 }}>{store === 'ok' || store === 'ok-table' ? t('filesOk') : store === 'checking' || !store ? t('pushChecking') : t('filesNotSet')}</div>
                   <div className="muted small">
                     {store === 'no-bucket' || store === 'denied' ? t('filesRunSql')
                       : store === 'error' ? t('filesError')
-                      : pending > 0 ? `${pending} ${t('filesWaiting')}` : store === 'ok' ? t('filesAllUp') : ''}
+                      : pending > 0 ? `${pending} ${t('filesWaiting')}` : store === 'ok' || store === 'ok-table' ? t('filesAllUp') : ''}
                   </div>
                 </div>
               </div>
               <div className="row2">
-                <Button icon="refresh" onClick={checkStorage} disabled={busy || store === 'checking'}>{store === 'ok' && pending > 0 ? t('filesUploadNow') : t('pushCheckAgain')}</Button>
+                <Button icon="refresh" onClick={checkStorage} disabled={busy || store === 'checking'}>{(store === 'ok' || store === 'ok-table') && pending > 0 ? t('filesUploadNow') : t('pushCheckAgain')}</Button>
                 <Button icon="doc" onClick={() => setShowStorageSql(v => !v)}>{t('filesSql')}</Button>
               </div>
-              {(showStorageSql || store === 'no-bucket' || store === 'denied') && (
+              {showStorageSql && (
                 <>
                   <p className="hint" style={{ margin: 0 }}>{t('filesSqlHint')}</p>
                   <pre className="sql-box">{STORAGE_SQL}</pre>

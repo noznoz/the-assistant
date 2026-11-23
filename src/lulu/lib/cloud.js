@@ -12,6 +12,7 @@
 // ============================================================================
 
 import * as db from '../store/db.js'
+import { FILE_COLLECTION, splitBase64, joinBase64, blobToBase64, base64ToBlob } from './fileChunks.js'
 
 const NS = 'lulu:v1:cloud'
 const CFG_KEY = `${NS}:config`   // { url, anonKey }
@@ -244,7 +245,8 @@ export async function pushAll() {
 export async function pullAll() {
   if (!isReady()) return null
   try {
-    const res = await authFetch(`/rest/v1/records?select=collection,data&household_id=eq.${householdId()}`, { method: 'GET' })
+    // File pieces ('_files') are fetched only when a file is opened.
+    const res = await authFetch(`/rest/v1/records?select=collection,data&household_id=eq.${householdId()}&collection=neq._files`, { method: 'GET' })
     if (!res.ok) return null
     const rows = await res.json().catch(() => [])
     const byCollection = {}
@@ -404,48 +406,90 @@ export function isUploaded(id) { return !!uploadedState().ids[id] }
 export function markUploaded(id) { const s = uploadedState(); s.ids[id] = 1; write(UP_KEY, s) }
 
 // Upload one blob (upsert — safe to repeat). Returns whether it persisted.
+// Where files go: the private 'attachments' storage bucket when the project
+// has it; otherwise — no setup needed — the records table, in small pieces
+// (lib/fileChunks.js). Once the bucket is known to be missing we go straight
+// to the table.
+const NOBUCKET_KEY = `${NS}:nobucket`
+const bucketMissing = () => { try { return localStorage.getItem(NOBUCKET_KEY) === '1' } catch { return false } }
+const setBucketMissing = (v) => { try { v ? localStorage.setItem(NOBUCKET_KEY, '1') : localStorage.removeItem(NOBUCKET_KEY) } catch { /* ignore */ } }
+const looksLikeNoBucket = async (res) => {
+  if (res.status === 404) return true
+  const txt = (await res.clone().text().catch(() => '')).toLowerCase()
+  return /bucket not found|bucket.*(does not exist|not exist)/.test(txt) || (res.status === 400 && /bucket/.test(txt))
+}
+
+async function uploadToBucket(id, blob) {
+  const res = await authFetch(`/storage/v1/object/${BUCKET}/${attachPath(id)}`, {
+    method: 'POST',
+    headers: { 'content-type': blob.type || 'application/octet-stream', 'x-upsert': 'true' },
+    body: blob,
+  })
+  if (res.ok) return 'ok'
+  return (await looksLikeNoBucket(res)) ? 'no-bucket' : 'fail'
+}
+async function uploadToTable(id, blob) {
+  const rows = splitBase64(id, blob.type || 'application/octet-stream', await blobToBase64(blob))
+  const at = new Date().toISOString()
+  for (let i = 0; i < rows.length; i += 3) { // ~1 MB per request
+    const batch = rows.slice(i, i + 3).map(r => ({ household_id: householdId(), id: r.id, collection: FILE_COLLECTION, data: r.data, updated_at: at }))
+    // eslint-disable-next-line no-await-in-loop
+    const res = await authFetch('/rest/v1/records?on_conflict=household_id,id', {
+      method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify(batch),
+    })
+    if (!res.ok) return false
+  }
+  return true
+}
+async function downloadFromTable(id) {
+  const res = await authFetch(`/rest/v1/records?select=data&household_id=eq.${householdId()}&collection=eq.${FILE_COLLECTION}&id=like.${encodeURIComponent(`file:${id}:`)}*`, { method: 'GET' })
+  if (!res.ok) return null
+  const got = joinBase64(await res.json().catch(() => []))
+  return got ? base64ToBlob(got.b64, got.type) : null
+}
+
+// Upload one file (safe to repeat). Returns whether it's now in the cloud.
 export async function uploadFile(id, blob) {
   if (!storageReady() || !id || !blob) return false
   try {
-    const res = await authFetch(`/storage/v1/object/${BUCKET}/${attachPath(id)}`, {
-      method: 'POST',
-      headers: { 'content-type': blob.type || 'application/octet-stream', 'x-upsert': 'true' },
-      body: blob,
-    })
-    return res.ok
+    if (!bucketMissing()) {
+      const r = await uploadToBucket(id, blob)
+      if (r === 'ok') return true
+      if (r === 'no-bucket') setBucketMissing(true)
+    }
+    return await uploadToTable(id, blob)
   } catch { return false }
 }
 
-// Fetch one blob back from the bucket (private → authenticated endpoint + token).
+// Fetch one file back (bucket first unless it's known missing, then the table).
 export async function downloadFile(id) {
   if (!storageReady() || !id) return null
   try {
-    const res = await authFetch(`/storage/v1/object/authenticated/${BUCKET}/${attachPath(id)}`, { method: 'GET' })
-    if (!res.ok) return null
-    return await res.blob()
+    if (!bucketMissing()) {
+      const res = await authFetch(`/storage/v1/object/authenticated/${BUCKET}/${attachPath(id)}`, { method: 'GET' })
+      if (res.ok) return await res.blob()
+    }
+    return await downloadFromTable(id)
   } catch { return null }
 }
 
-// Can this device store files in the cloud? Uploads a tiny marker into the
-// household's folder. 'ok' | 'no-bucket' (run the file storage SQL) |
-// 'denied' (policies missing) | 'off' (cloud/consent off) | 'error'.
+// Can files sync? 'ok' (storage bucket) | 'ok-table' (through the records
+// table — works without any setup) | 'off' (cloud/consent off) | 'error'.
 export async function storageCheck() {
   if (!storageReady()) return 'off'
   try {
-    const res = await authFetch(`/storage/v1/object/${BUCKET}/${householdId()}/.check`, {
-      method: 'POST', headers: { 'content-type': 'text/plain', 'x-upsert': 'true' }, body: 'ok',
-    })
-    if (res.ok) return 'ok'
-    const txt = (await res.text().catch(() => '')).toLowerCase()
-    if (/bucket not found|not.?found/.test(txt) || res.status === 404) return 'no-bucket'
-    if (res.status === 400 && /bucket/.test(txt)) return 'no-bucket'
-    if (res.status === 401 || res.status === 403 || /row-level security|policy|unauthorized/.test(txt)) return 'denied'
-    return 'error'
+    if (!bucketMissing()) {
+      const r = await uploadToBucket('.check', new Blob(['ok'], { type: 'text/plain' }))
+      if (r === 'ok') return 'ok'
+      if (r === 'no-bucket') setBucketMissing(true)
+    }
+    return (await uploadToTable('.check', new Blob(['ok'], { type: 'text/plain' }))) ? 'ok-table' : 'error'
   } catch { return 'error' }
 }
 
 // Best-effort remote delete when an attachment is removed locally.
 export async function deleteFileRemote(id) {
   if (!storageReady() || !id) return
-  try { await authFetch(`/storage/v1/object/${BUCKET}/${attachPath(id)}`, { method: 'DELETE' }) } catch { /* ignore */ }
+  try { if (!bucketMissing()) await authFetch(`/storage/v1/object/${BUCKET}/${attachPath(id)}`, { method: 'DELETE' }) } catch { /* ignore */ }
+  try { await authFetch(`/rest/v1/records?household_id=eq.${householdId()}&collection=eq.${FILE_COLLECTION}&id=like.${encodeURIComponent(`file:${id}:`)}*`, { method: 'DELETE' }) } catch { /* ignore */ }
 }
