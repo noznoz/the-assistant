@@ -21,6 +21,11 @@ export default function ProfileScreen({ go }) {
   // settings.profile on change (functional update = no stale-keystroke bugs).
   const [form, setForm] = useState(() => ({ ...(settings.profile || {}) }))
   useEffect(() => { updateSettings({ profile: form }) }, [form]) // eslint-disable-line react-hooks/exhaustive-deps
+  // The profile arrived from another device while this screen is open: show it.
+  useEffect(() => {
+    const p = settings.profile || {}
+    if (JSON.stringify(p) !== JSON.stringify(form)) setForm({ ...p })
+  }, [settings.profile]) // eslint-disable-line react-hooks/exhaustive-deps
   const set = (k) => (e) => { const v = e.target.value; setForm(prev => ({ ...prev, [k]: v })) }
 
   const photo = usePhotoEditor()
