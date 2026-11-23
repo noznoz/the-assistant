@@ -1,5 +1,5 @@
 // The background-push checklist: turn what we can observe (this phone, cloud,
-// the send-reminders function and its schedule) into ordered steps, each ok or
+// the lulu-mcp function and its schedule) into ordered steps, each ok or
 // not, with the one thing to do next. Pure, so it's unit-tested; gathering the
 // facts lives in lib/push.js (pushFacts).
 //
@@ -24,7 +24,7 @@ export function pushSteps(f) {
   const s = f.server
   let serverHint = 'pstServerDeploy'
   if (s && s.error === 'setup-sql') serverHint = 'pstServerSql'
-  else if (f.serverErr && !/404|not.?found/i.test(f.serverErr)) serverHint = 'pstServerError'
+  else if (f.serverErr && !/404|not.?found|connector link|unknown action/i.test(f.serverErr)) serverHint = 'pstServerError'
   steps.push({ id: 'server', ok: !!(s && s.ok), hint: serverHint, detail: serverHint === 'pstServerError' ? f.serverErr : undefined, needsSql: serverHint === 'pstServerSql' })
 
   steps.push({ id: 'allow', ok: f.perm === 'granted', hint: f.perm === 'denied' ? 'pstAllowDenied' : 'pstAllowHint', action: f.perm === 'denied' ? undefined : 'enable' })

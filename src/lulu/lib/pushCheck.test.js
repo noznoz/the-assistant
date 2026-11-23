@@ -51,7 +51,7 @@ describe('background push checklist', () => {
   it('setup SQL carries the project address and nothing unsafe', () => {
     const sql = pushSetupSql("https://abc.supabase.co/'; drop table x; --")
     expect(sql).not.toContain("'; drop")
-    expect(pushSetupSql('https://abc.supabase.co/')).toContain("url := 'https://abc.supabase.co/functions/v1/send-reminders'")
+    expect(pushSetupSql('https://abc.supabase.co/')).toContain("url := 'https://abc.supabase.co/functions/v1/lulu-mcp/cron'")
     expect(pushSetupSql()).toContain('YOUR-PROJECT')
   })
 })

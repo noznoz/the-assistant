@@ -113,6 +113,21 @@ export default function CloudScreen({ go, param }) {
   const [store, setStore] = useState(null)      // 'ok' | 'no-bucket' | 'denied' | 'off' | 'error'
   const [pending, setPending] = useState(0)
   const [showStorageSql, setShowStorageSql] = useState(false)
+  // Apple Calendar feed
+  const [calUrl, setCalUrl] = useState(() => cloud.calendarFeedUrl())
+  const [calErr, setCalErr] = useState('')
+  const subscribeCalendar = async () => {
+    setCalErr(''); setBusy(true)
+    try {
+      const url = calUrl || await cloud.createCalendarFeed()
+      setCalUrl(url)
+      // webcal:// opens Calendar's "Subscribe" dialog on Mac and iPhone.
+      const a = document.createElement('a')
+      a.href = url.replace(/^https:/, 'webcal:'); a.rel = 'noopener'
+      document.body.appendChild(a); a.click(); a.remove()
+    } catch (e) { setCalErr(e.message === 'MISSING_TABLE' ? t('claudeNeedSetup') : (e.message || t('aiError'))) }
+    finally { setBusy(false) }
+  }
   const checkStorage = async () => {
     setStore('checking')
     const st = await cloud.storageCheck()
@@ -134,7 +149,11 @@ export default function CloudScreen({ go, param }) {
   }
   const removeKey = async (hash) => {
     if (!window.confirm(t('claudeRemoveQ'))) return
-    if (await cloud.deleteAssistantKey(hash)) { setKeys(keys.filter(k => k.key_hash !== hash)); toast.show(t('claudeRemoved')) }
+    const k = keys.find(x => x.key_hash === hash)
+    if (await cloud.deleteAssistantKey(hash)) {
+      setKeys(keys.filter(x => x.key_hash !== hash)); toast.show(t('claudeRemoved'))
+      if (k && k.label === 'Calendar') { cloud.forgetCalendarFeed(); setCalUrl('') }
+    }
   }
   const when = (iso) => iso ? new Date(iso).toLocaleString(lang === 'ar' ? 'ar' : 'en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : ''
 
@@ -282,6 +301,20 @@ export default function CloudScreen({ go, param }) {
                   <Button icon="copy" onClick={() => copy(STORAGE_SQL)}>{t('cloudCopySql')}</Button>
                 </>
               )}
+            </Card>
+
+            <Section title={t('calTitle')} />
+            <Card className="stack">
+              <p className="hint" style={{ margin: '0 2px' }}>{t('calHint')}</p>
+              <Button block variant="primary" icon="calendar" onClick={subscribeCalendar} disabled={busy}>{t('calAdd')}</Button>
+              {calUrl && (
+                <>
+                  <p className="hint" style={{ margin: 0 }}>{t('calManual')}</p>
+                  <div className="mono-box">{calUrl}</div>
+                  <Button icon="copy" onClick={() => copy(calUrl)}>{t('calCopy')}</Button>
+                </>
+              )}
+              {calErr && <p className="err" style={{ margin: 0 }}>{calErr}</p>}
             </Card>
 
             <Section title={t('deviceLinkTitle')} />

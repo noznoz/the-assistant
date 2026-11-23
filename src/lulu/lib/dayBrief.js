@@ -74,7 +74,7 @@ export function buildDayBrief({ tasks = [], expenses = [], appointments = [], re
 }
 
 // A one-line summary for a notification (the app icon / a push body has little
-// room). Mirrored server-side by the send-reminders Edge Function so the 7:30
+// room). Mirrored server-side by the lulu-mcp Edge Function so the 7:30
 // daily push reads the same. Kept deliberately short.
 export function briefSummary({ tasks = [], appointments = [], reminders = [], now = new Date(), lang = 'en' } = {}) {
   const today = now.toISOString().slice(0, 10)

@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect, beforeEach } from 'vitest'
-import { createHandler, sha256Hex, localToISO, isoToLocal, todayIn, addDays, TOOLS, waNumber } from './core.js'
+import { createHandler, sha256Hex, localToISO, isoToLocal, todayIn, addDays, TOOLS, waNumber, buildCalendar, runPushCron } from './core.js'
 
 const KEY = 'lulu_testkey123'
 let db, handle, hash
@@ -13,8 +13,15 @@ function memoryStore() {
     async household(h) { return this.keys.get(h) || null },
     async list(hid, c) { return [...rows.values()].filter(r => r.hid === hid && r.collection === c && !r.data.deletedAt).map(r => structuredClone(r.data)) },
     async listAll(hid) { return [...rows.values()].filter(r => r.hid === hid && !r.data.deletedAt).map(r => ({ collection: r.collection, data: structuredClone(r.data) })) },
-    async get(hid, id) { const r = rows.get(id); return r && r.hid === hid ? { collection: r.collection, data: structuredClone(r.data) } : null },
-    async put(hid, collection, data) { rows.set(data.id, { hid, collection, data: structuredClone(data) }) },
+    async get(hid, id) { const r = rows.get(hid + '/' + id); return r ? { collection: r.collection, data: structuredClone(r.data) } : null },
+    async put(hid, collection, data) { rows.set(hid + '/' + data.id, { hid, collection, data: structuredClone(data) }) },
+    async del(hid, id) { rows.delete(hid + '/' + id) },
+    async listHouseholds() { return [...new Set([...rows.values()].map(r => r.hid).concat(['H1']))] },
+    async listCollectionAll(c) { return [...rows.values()].filter(r => r.collection === c).map(r => ({ household_id: r.hid, id: r.data.id, data: structuredClone(r.data) })) },
+    users: {}, members: [],
+    async userFromToken(t) { return this.users[t] || null },
+    async isMember(hid, uid) { return this.members.some(m => m.hid === hid && m.uid === uid) },
+    async cronStatus() { return { scheduled: true, last_status: 200 } },
   }
 }
 
@@ -280,5 +287,111 @@ describe('reminder status', () => {
     await call('update_item', { collection: 'reminders', id: r.id, changes: { status: 'todo' } })
     expect((await db.get('H1', r.id)).data).toMatchObject({ status: 'todo', done: false, doneAt: null })
     expect((await call('update_item', { collection: 'reminders', id: r.id, changes: { status: 'maybe' } })).isError).toBe(true)
+  })
+})
+
+// ---------------------------------------------------------------------------
+describe('Apple Calendar feed', () => {
+  const tz = 'Asia/Riyadh'
+  it('builds a valid feed with stable ids, local times and all-day items', () => {
+    const today = todayIn(tz)
+    const { text, count } = buildCalendar({
+      appointments: [{ id: 'a1', title: 'Dentist, Dr. Sara', date: addDays(today, 2), time: '16:30', location: 'Clinic' }, { id: 'a2', title: 'Family day', date: addDays(today, 3) }],
+      tasks: [{ id: 't1', title: 'Renew iqama', dueDate: addDays(today, 5), status: 'planned' }, { id: 't2', title: 'Done thing', dueDate: today, status: 'completed' }],
+      reminders: [{ id: 'r1', text: 'Call bank', times: [localToISO(`${addDays(today, 1)}T09:00`, tz)], done: false }],
+      documents: [{ id: 'd1', title: 'Passport', expiry: addDays(today, 60) }],
+    }, tz)
+    expect(count).toBe(5) // the completed task is left out
+    expect(text.startsWith('BEGIN:VCALENDAR\r\n')).toBe(true)
+    expect(text.trim().endsWith('END:VCALENDAR')).toBe(true)
+    expect(text).toContain('UID:appt-a1@the-assistant')
+    expect(text).toContain('SUMMARY:Dentist\\, Dr. Sara') // commas escaped
+    const d = addDays(today, 2).replace(/-/g, '')
+    expect(text).toContain(`DTSTART:${d}T133000Z`) // 16:30 Riyadh = 13:30 UTC
+    expect(text).toContain(`DTSTART;VALUE=DATE:${addDays(today, 3).replace(/-/g, '')}`)
+    expect(text).toContain('SUMMARY:📄 Passport expires')
+    expect(text).not.toContain('Done thing')
+    expect(text.split('\r\n').every(l => l.length <= 75)).toBe(true) // folded
+  })
+
+  it('is served by a read-only calendar link, which cannot be used as a Claude link', async () => {
+    const CAL = 'lulucal_testcalendarkey'
+    db.keys.set(await sha256Hex(CAL), 'H1')
+    await call('add_appointment', { title: 'Lunch', date: addDays(todayIn('Asia/Riyadh'), 1), time: '13:00' })
+    const res = await handle(new Request(`https://x/functions/v1/lulu-mcp/${CAL}/calendar.ics`, { method: 'GET' }))
+    expect(res.status).toBe(200)
+    expect(res.headers.get('content-type')).toContain('text/calendar')
+    expect(await res.text()).toContain('SUMMARY:Lunch')
+    // The calendar key can't drive Claude's tools…
+    const mcp = await handle(new Request(`https://x/functions/v1/lulu-mcp/${CAL}`, { method: 'POST', body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }) }))
+    expect(mcp.status).toBe(401)
+    // …and a Claude key or a removed key doesn't open the feed.
+    expect((await handle(new Request(`https://x/functions/v1/lulu-mcp/${KEY}/calendar.ics`, { method: 'GET' }))).status).not.toBe(200)
+    expect((await handle(new Request(`https://x/functions/v1/lulu-mcp/lulucal_removed/calendar.ics`, { method: 'GET' }))).status).toBe(404)
+  })
+})
+
+describe('background push', () => {
+  const tz = 'Asia/Riyadh'
+  let sent, dead, push
+  beforeEach(() => {
+    sent = []; dead = new Set()
+    push = { publicKey: 'PUBKEY', async send(sub, payload) { if (dead.has(sub.endpoint)) { const e = new Error('gone'); e.statusCode = 410; throw e } sent.push({ to: sub.endpoint, ...JSON.parse(payload) }) } }
+    handle = createHandler({ store: db, push, tz })
+    db.users.tok = { id: 'u1' }; db.members = [{ hid: 'H1', uid: 'u1' }]
+  })
+  const sub = (id, endpoint) => db.put('H1', '_pushsub', { id, endpoint, subscription: { endpoint }, createdAt: '', updatedAt: '', deletedAt: null })
+  const post = async (path, body, token) => {
+    const r = await handle(new Request(`https://x/functions/v1/lulu-mcp/${path}`, { method: 'POST', headers: token ? { authorization: 'Bearer ' + token } : {}, body: JSON.stringify(body) }))
+    return { status: r.status, json: await r.json() }
+  }
+
+  it('app requests: key is public; status and test need a signed-in member', async () => {
+    await sub('push:a', 'https://push/phone')
+    expect((await post('push', { action: 'key' })).json.publicKey).toBe('PUBKEY')
+    expect((await post('push', { action: 'status', household_id: 'H1' })).status).toBe(403)
+    expect((await post('push', { action: 'status', household_id: 'H2' }, 'tok')).status).toBe(403)
+    const st = await post('push', { action: 'status', household_id: 'H1', endpoint: 'https://push/phone' }, 'tok')
+    expect(st.json).toMatchObject({ ok: true, registered: true, subscriptions: 1, publicKey: 'PUBKEY' })
+    const t = await post('push', { action: 'test', household_id: 'H1' }, 'tok')
+    expect(t.json.sent).toBe(1)
+  })
+
+  it('every minute: a due reminder is sent once, marked fired, and the phone will take the change', async () => {
+    await sub('push:a', 'https://push/phone')
+    const past = new Date(Date.now() - 60000).toISOString()
+    await db.put('H1', 'reminders', { id: 'r1', text: 'Call bank', times: [past], remindAt: past, firedCount: 0, done: false, updatedAt: '2026-01-01T00:00:00.000Z' })
+    const night = new Date('2026-11-23T00:30:00Z') // 03:30 Riyadh: reminders yes, due-today alerts no
+    await runPushCron({ store: db, push, tz, now: night })
+    // reminder time is "1 minute before real now", so use real now for it:
+    await runPushCron({ store: db, push, tz, now: new Date() })
+    expect(sent.filter(x => x.body === 'Call bank')).toHaveLength(1)
+    const r = (await db.get('H1', 'r1')).data
+    expect(r).toMatchObject({ firedCount: 1, notified: true })
+    expect(r.updatedAt > '2026-01-01').toBe(true)
+    await runPushCron({ store: db, push, tz, now: new Date() })
+    expect(sent.filter(x => x.body === 'Call bank')).toHaveLength(1) // not again
+    expect((await db.list('H1', '_pushcfg'))[0].lastRunAt).toBeTruthy() // heartbeat
+  })
+
+  it('due-today alerts only in the daytime, once each; morning brief once; dead phones removed', async () => {
+    await sub('push:a', 'https://push/phone'); await sub('push:b', 'https://push/old'); dead.add('https://push/old')
+    const day = '2026-11-23'
+    await db.put('H1', 'appointments', { id: 'a1', title: 'Dentist', date: day, time: '16:00' })
+    await runPushCron({ store: db, push, tz, now: new Date('2026-11-23T00:30:00Z') }) // 03:30 local
+    expect(sent.some(x => x.title === 'Appointment today')).toBe(false)
+    await runPushCron({ store: db, push, tz, now: new Date('2026-11-23T05:00:00Z') }) // 08:00 local
+    expect(sent.filter(x => x.title === 'Appointment today')).toHaveLength(1)
+    expect(sent.filter(x => x.title === '☀️ Good morning')).toHaveLength(1)
+    await runPushCron({ store: db, push, tz, now: new Date('2026-11-23T05:01:00Z') })
+    expect(sent.filter(x => x.title === 'Appointment today')).toHaveLength(1)
+    expect(sent.filter(x => x.title === '☀️ Good morning')).toHaveLength(1)
+    expect((await db.list('H1', '_pushsub')).map(s => s.endpoint)).toEqual(['https://push/phone'])
+  })
+
+  it('the schedule route runs it', async () => {
+    const r = await post('cron', {})
+    expect(r.status).toBe(200)
+    expect(r.json).toHaveProperty('households')
   })
 })

@@ -186,7 +186,7 @@ function Router() {
     // Alarm + notification for anything dated that's due today or overdue (deduped).
     runDueAlerts(feed, { enabled: settings.notifications, heading: t('dueToday'), sound: settings.soundAlerts !== false })
     // Morning brief: fire once per day, the first time the app is open at/after
-    // 7:30am. (While the app is closed, the send-reminders Edge Function pushes
+    // 7:30am. (While the app is closed, the lulu-mcp Edge Function pushes
     // the same brief at 7:30 — see docs/PUSH.md.)
     const mins = new Date().getHours() * 60 + new Date().getMinutes()
     if (mins >= 7 * 60 + 30) {

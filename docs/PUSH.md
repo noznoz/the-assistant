@@ -1,64 +1,42 @@
 # Background reminders (web push)
 
 Reminders and "due today" alerts normally fire while the app is open. With web
-push they also arrive **when the app is closed**, plus a morning brief.
+push they also arrive **when the app is closed**, plus a 7:30 morning brief.
 
-The app has a checklist for this: **More → Reminders → Background reminders**.
-Each line gets a ✓ or tells you the one thing to do next, so you can follow it
-instead of this page. The steps below are what it will ask for.
+Background push runs inside the **lulu-mcp** Edge Function (the same one the
+Claude connector and the Apple Calendar feed use), so there is nothing extra to
+deploy and no extra tables: device subscriptions, sent-alert bookkeeping and
+the "last run" heartbeat are records in the `records` table (`_pushsub`,
+`_pushalert`, `_pushcfg`). The push keys are derived from the project's own
+service-role secret, so there are no keys to create (set `VAPID_PUBLIC_KEY` /
+`VAPID_PRIVATE_KEY` secrets to use your own).
 
-## 1. Deploy the `send-reminders` function (dashboard, no terminal)
+The app has a checklist: **More → Reminders → Background reminders**. Each line
+gets a ✓ or says the one thing to do next.
 
-1. Supabase → **Edge Functions** → **Deploy a new function** → **Via Editor**.
-2. Replace the sample with `supabase/functions/send-reminders/index.ts` (one file).
-3. Name it exactly `send-reminders`, then **Deploy function**.
-4. Open its **Settings** tab, turn **Verify JWT** off and **Save changes**.
-   The every-minute schedule calls it without a login; the function checks the
-   caller itself wherever it matters (status and test pushes need the signed-in
-   user, and only for their own household).
+## Setup (once)
 
-Already deployed an older version? Open it → **Code**, paste the new file over
-it, **Deploy**, and make sure Verify JWT is off.
+1. **Deploy the newest lulu-mcp** — Supabase → Edge Functions → lulu-mcp →
+   Code → paste the single-file build → Deploy. ("Verify JWT" stays off, as for
+   the connector.)
+2. **Schedule it every minute** — in the checklist tap **Push setup SQL → Copy
+   SQL** (your project address is filled in), paste into Supabase → SQL Editor
+   → Run. It enables `pg_cron` + `pg_net`, schedules `…/lulu-mcp/cron` every
+   minute (replacing the older `send-reminders` job if there was one), and adds
+   a read-only status function for the checklist. Safe to run again.
+3. **On each device** — iPhone: open the app from its Home Screen icon. Then
+   checklist → **Turn on** → Allow → **Send a test push**.
 
-CLI alternative: `supabase functions deploy send-reminders --no-verify-jwt`.
+## What it sends
 
-**Push keys are made for you.** On first use the function generates a VAPID
-key pair and keeps it in `push_config` (readable only by the server). If you
-already set `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` secrets, those are used
-instead. The app asks the function for the public key, so the app no longer
-needs `VITE_VAPID_PUBLIC_KEY` at build time (it is still used as a fallback).
+- **Reminders** at their times (up to 3 per reminder; repeating ones roll
+  forward). Each is marked fired with `updatedAt` moved, so devices take the
+  change and don't alert again.
+- **Due today** (07:00–22:00 local only, never at night): tasks due/overdue,
+  appointments, payments, document expiries, birthdays — once each.
+- **Morning brief** once between 07:30 and 10:00.
 
-## 2. Run the push setup SQL (once)
+`LULU_TZ` (default `Asia/Riyadh`) sets "today" and these windows. Tapping a
+notification opens the screen it is about.
 
-In the app's checklist tap **Push setup SQL → Copy SQL**: it has your project
-address filled in. Paste it into Supabase → **SQL Editor → New query → Run**.
-Safe to run again. It creates the push tables, enables `pg_cron` + `pg_net`,
-schedules `send-reminders` every minute, and adds a small read-only status
-function so the checklist can tell whether the schedule is running. (The same
-SQL, with a placeholder address, is in `src/lulu/lib/pushSql.js`.)
-
-## 3. On the phone
-
-- **iPhone:** add the app to the Home Screen (Safari → Share → *Add to Home
-  Screen*) and open it from that icon. iOS only allows push for Home Screen
-  apps (iOS 16.4+).
-- Checklist → **Turn on** → Allow. Then **Send a test push**.
-
-## Optional secrets
-
-`LULU_TZ` (default `Asia/Riyadh`) — your time zone for "today", the 07:30
-morning brief and the daytime window (due-today alerts are sent 07:00–22:00,
-never at night). `VAPID_SUBJECT` (defaults to your project URL).
-`RESEND_API_KEY` + `BRIEF_FROM` to also email the morning brief.
-
-## How it fits together
-
-- Each device's push subscription is stored in `push_subscriptions`.
-- Reminders sync as normal records (`collection = 'reminders'`).
-- Every minute the function records a heartbeat (`push_config.last_run_at`),
-  pushes due reminders, marks them fired (moving `updatedAt` too, so the phone
-  takes the change and doesn't alert again), rolls repeating ones forward,
-  sends daytime due-today alerts once each (`push_alerts`) and the morning
-  brief. Dead subscriptions (404/410) are removed.
-- The service worker (`src/sw.js`) shows the notification; tapping it opens
-  the screen it is about.
+The older standalone `supabase/functions/send-reminders` is no longer needed.

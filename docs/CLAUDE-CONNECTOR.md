@@ -115,3 +115,23 @@ sending from paid Business accounts). Instead it prepares the message: ask
 opens WhatsApp with Ahmed’s chat and the message already typed. Tap Send.
 Numbers come from People (the WhatsApp number if saved, otherwise the mobile);
 local numbers like 055… are turned into 96655….
+
+## Apple Calendar
+
+The same function serves a **read-only calendar feed**: appointments, tasks with
+due dates, reminders and document expiries. In the app: Settings → Manage cloud
+& family → **Add to Apple Calendar** — Calendar opens and asks to subscribe. On
+the Mac choose **iCloud** as the location so it also appears on your iPhone.
+It refreshes by itself (every 15 minutes, or as often as Calendar is set to).
+The feed has its own key (`lulucal_…`), separate from Claude's link: it can only
+read the calendar and can be removed under "Links in use".
+
+## Email
+
+With Gmail (or another email connector) also connected in Claude, just ask:
+- “Find my flight booking in my email and add it as a trip.”
+- “Add this month's bills from my inbox as expenses.”
+- “Check my email for appointments next week and add them.”
+Claude reads the email, then adds trips (with flights and hotels in the
+itinerary), appointments, expenses, subscriptions or documents here — after
+checking it hasn't added them already.
