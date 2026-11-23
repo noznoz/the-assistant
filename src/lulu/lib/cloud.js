@@ -313,6 +313,32 @@ export async function syncNow() {
   return new Set([...(first || []), ...(second || [])])
 }
 
+// ---- Personal settings (profile, budgets…) — one record per person ----
+// Stored in `records` as collection '_settings' (the app's collection merge
+// ignores it), id 'settings-<user id>', so each family member has their own.
+function settingsId() { const u = currentUser(); return u && u.id ? `settings-${u.id}` : '' }
+export async function pullSettings() {
+  const id = settingsId()
+  if (!isReady() || !id) return undefined
+  try {
+    const res = await authFetch(`/rest/v1/records?select=data&household_id=eq.${householdId()}&id=eq.${encodeURIComponent(id)}`, { method: 'GET' })
+    if (!res.ok) return undefined // unknown — don't treat as "nothing in the cloud"
+    const rows = await res.json().catch(() => [])
+    return rows && rows[0] ? rows[0].data : null
+  } catch { return undefined }
+}
+export async function pushSettings(values, updatedAt) {
+  const id = settingsId()
+  if (!isReady() || !hasConsent() || !id) return false
+  try {
+    const res = await authFetch('/rest/v1/records?on_conflict=household_id,id', {
+      method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify([{ household_id: householdId(), id, collection: '_settings', data: { id, values, updatedAt }, updated_at: updatedAt }]),
+    })
+    return res.ok
+  } catch { return false }
+}
+
 // ---- Claude connector keys ----
 // A key lets Claude (through the lulu-mcp Edge Function) read and change this
 // household's data. It's shown once; only its SHA-256 hash is stored.

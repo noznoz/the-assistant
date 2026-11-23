@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import * as db from './db.js'
+import { SYNCED_SETTINGS, pickSynced, mergeSettings } from '../lib/settingsSync.js'
 import * as cloud from '../lib/cloud.js'
 import { syncAttachments } from '../lib/files.js'
 import { migrateCardPhotos } from '../lib/photoMigrate.js'
@@ -76,12 +77,47 @@ export function StoreProvider({ children }) {
   }, [reload])
   undoHandle.restore = restore
 
+  // Personal settings (profile, budgets…) follow you to your other devices;
+  // a change is uploaded shortly after it's made (see lib/settingsSync.js).
+  const settingsPushT = useRef(null)
+  const queueSettingsPush = useCallback(() => {
+    clearTimeout(settingsPushT.current)
+    settingsPushT.current = setTimeout(() => {
+      const s = db.readSettings()
+      if (s.settingsSyncedOnce && s.settingsUpdatedAt) cloud.pushSettings(pickSynced(s), s.settingsUpdatedAt)
+    }, 800)
+  }, [])
   const updateSettings = useCallback((partial) => {
+    // Only a real change counts (screens may re-save the same values on open,
+    // which must not make a stale copy look newer than another device's edit).
+    const cur = db.readSettings()
+    const changedSynced = Object.keys(partial || {}).some(k =>
+      SYNCED_SETTINGS.includes(k) && JSON.stringify(cur[k] ?? null) !== JSON.stringify(partial[k] ?? null))
     setSettings(prev => {
       const next = { ...prev, ...partial }
+      if (changedSynced && prev.settingsSyncedOnce) next.settingsUpdatedAt = new Date().toISOString()
       db.writeSettings(next)
       return next
     })
+    if (changedSynced) queueSettingsPush()
+  }, [queueSettingsPush])
+
+  // Pull this person's settings from the cloud and merge (first time: fill
+  // empty fields only; after that the newer copy wins), uploading if ours is newer.
+  const syncSettings = useCallback(async () => {
+    if (!cloud.isReady()) return
+    const remote = await cloud.pullSettings()
+    if (remote === undefined) return // couldn't tell — try again next time
+    const r = mergeSettings(db.readSettings(), remote)
+    if (r.patch) {
+      const next = { ...db.readSettings(), ...r.patch }
+      db.writeSettings(next)
+      setSettings(next)
+    }
+    if (r.push) {
+      const s = db.readSettings()
+      await cloud.pushSettings(pickSynced(s), s.settingsUpdatedAt || r.stamp)
+    }
   }, [])
 
   const reloadAll = useCallback(() => {
@@ -97,9 +133,10 @@ export function StoreProvider({ children }) {
     if (!cloud.isReady()) return
     const changed = await cloud.syncNow()
     if (changed && changed.size) reloadAll()
+    await syncSettings()
     // Mirror document/receipt binaries after the records they belong to.
     syncAttachments().catch(() => {})
-  }, [reloadAll])
+  }, [reloadAll, syncSettings])
 
   // On launch: sync once, then poll for remote changes while the app is open.
   useEffect(() => {
@@ -108,13 +145,14 @@ export function StoreProvider({ children }) {
     const t = setInterval(() => {
       if (!cloud.isReady()) return
       cloud.pullAll().then(ch => { if (alive && ch && ch.size) reloadAll() })
+      syncSettings()
     }, 20000)
     // Coming back to the app (e.g. after asking Claude to add something): sync
     // straight away instead of waiting for the next poll.
     const onVisible = () => { if (document.visibilityState === 'visible' && cloud.isReady()) cloudSync() }
     document.addEventListener('visibilitychange', onVisible)
     return () => { alive = false; clearInterval(t); document.removeEventListener('visibilitychange', onVisible) }
-  }, [cloudSync, reloadAll])
+  }, [cloudSync, reloadAll, syncSettings])
 
   // One-time move of legacy on-record photos (accessory / vehicle cover /
   // avatars) into the cloud bucket, freeing the localStorage budget. Runs only
