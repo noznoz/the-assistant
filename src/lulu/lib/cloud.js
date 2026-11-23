@@ -426,6 +426,24 @@ export async function downloadFile(id) {
   } catch { return null }
 }
 
+// Can this device store files in the cloud? Uploads a tiny marker into the
+// household's folder. 'ok' | 'no-bucket' (run the file storage SQL) |
+// 'denied' (policies missing) | 'off' (cloud/consent off) | 'error'.
+export async function storageCheck() {
+  if (!storageReady()) return 'off'
+  try {
+    const res = await authFetch(`/storage/v1/object/${BUCKET}/${householdId()}/.check`, {
+      method: 'POST', headers: { 'content-type': 'text/plain', 'x-upsert': 'true' }, body: 'ok',
+    })
+    if (res.ok) return 'ok'
+    const txt = (await res.text().catch(() => '')).toLowerCase()
+    if (/bucket not found|not.?found/.test(txt) || res.status === 404) return 'no-bucket'
+    if (res.status === 400 && /bucket/.test(txt)) return 'no-bucket'
+    if (res.status === 401 || res.status === 403 || /row-level security|policy|unauthorized/.test(txt)) return 'denied'
+    return 'error'
+  } catch { return 'error' }
+}
+
 // Best-effort remote delete when an attachment is removed locally.
 export async function deleteFileRemote(id) {
   if (!storageReady() || !id) return

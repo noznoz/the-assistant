@@ -448,17 +448,18 @@ export function DocumentViewer({ doc, onBack, onEdit, onDelete, onToast }) {
   const catText = docCatLabel(doc.category, lang)
   const attachments = doc.attachments || []
   const [urls, setUrls] = useState({})   // id -> objectURL
+  const [missing, setMissing] = useState({}) // id -> true when the file isn't on this device or in the cloud yet
 
   useEffect(() => {
     let live = true
     const created = []
     ;(async () => {
-      const map = {}
+      const map = {}, miss = {}
       for (const a of attachments) {
         const file = await getAttachmentFile(a)
-        if (file) { const u = URL.createObjectURL(file); map[a.id] = u; created.push(u) }
+        if (file) { const u = URL.createObjectURL(file); map[a.id] = u; created.push(u) } else miss[a.id] = true
       }
-      if (live) setUrls(map)
+      if (live) { setUrls(map); setMissing(miss) }
     })()
     return () => { live = false; created.forEach(u => URL.revokeObjectURL(u)) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -474,16 +475,18 @@ export function DocumentViewer({ doc, onBack, onEdit, onDelete, onToast }) {
     const res = await shareAttachments(attachments, shareText)
     if (res === 'downloaded') onToast && onToast(t('downloadedToast'))
     else if (res === 'shared') onToast && onToast(t('sharedToast'))
-    else if (res === 'empty') onToast && onToast(t('noAttachments'))
+    else if (res === 'empty') onToast && onToast(t('fileNotHere'))
   }
 
   const openOne = async (a) => {
     const u = urls[a.id]
     if (u) window.open(u, '_blank')
+    else onToast && onToast(t('fileNotHere'))
   }
   const downloadOne = async (a) => {
     const file = await getAttachmentFile(a)
     if (file) { downloadBlob(file, a.name); onToast && onToast(t('downloadedToast')) }
+    else onToast && onToast(t('fileNotHere'))
   }
 
   const dd = daysUntil(doc.expiry)
@@ -521,6 +524,16 @@ export function DocumentViewer({ doc, onBack, onEdit, onDelete, onToast }) {
                       <div className="muted small">PDF · {humanSize(a.size)}</div>
                     </div>
                     <Button size="sm" icon="upload" onClick={() => openOne(a)}>{t('openFile')}</Button>
+                  </div>
+                ) : missing[a.id] ? (
+                  // Not on this device and not in the cloud yet: say why, show the small preview if any.
+                  <div style={{ padding: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
+                    {a.thumb ? <img src={a.thumb} alt="" style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 10, flexShrink: 0 }} />
+                      : <span className="lead t-warn" style={{ width: 44, height: 44, borderRadius: 12, display: 'grid', placeItems: 'center', flexShrink: 0 }}><Icon name="doc" size={20} /></span>}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 650 }}>{t('fileNotHereTitle')}</div>
+                      <div className="muted small">{t('fileNotHereHint')}</div>
+                    </div>
                   </div>
                 ) : (
                   <div style={{ padding: 20 }} className="muted">{a.name}</div>
