@@ -151,8 +151,9 @@ export async function cloudPhotoURL(photoId) {
 // bucket doesn't have yet. Called after a record sync so files follow their
 // metadata across devices. No-op when cloud/consent is off.
 export async function syncAttachments() {
-  if (!cloud.storageReady()) return
+  if (!cloud.storageReady()) return { uploaded: 0, failed: 0 }
   const ids = await listFileIds()
+  let uploaded = 0, failed = 0
   for (const id of ids) {
     if (cloud.isUploaded(id)) continue
     // eslint-disable-next-line no-await-in-loop
@@ -160,8 +161,14 @@ export async function syncAttachments() {
     if (!blob) continue
     // eslint-disable-next-line no-await-in-loop
     const ok = await cloud.uploadFile(id, blob)
-    if (ok) cloud.markUploaded(id)
+    if (ok) { cloud.markUploaded(id); uploaded++ } else failed++
   }
+  return { uploaded, failed }
+}
+
+// Files on this device that haven't reached the cloud yet.
+export async function pendingUploads() {
+  try { return (await listFileIds()).filter(id => !cloud.isUploaded(id)).length } catch { return 0 }
 }
 
 export function downloadBlob(blob, name) {

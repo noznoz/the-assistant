@@ -5,6 +5,8 @@ import { useT } from '../../i18n/I18nProvider.jsx'
 import { useStore } from '../../store/StoreProvider.jsx'
 import * as cloud from '../../lib/cloud.js'
 import { CLAUDE_SQL } from '../../lib/claudeSql.js'
+import { STORAGE_SQL } from '../../lib/storageSql.js'
+import { pendingUploads, syncAttachments } from '../../lib/files.js'
 
 // The SQL a user runs once in their Supabase project's SQL editor.
 const SETUP_SQL = `-- The Assistant — cloud sync + family. Run once in Supabase → SQL Editor.
@@ -52,7 +54,7 @@ create policy hh_create on public.households
   for insert with check (true);
 create policy rec_member_all on public.records
   for all using (public.is_member(household_id))
-  with check (public.is_member(household_id));`
+  with check (public.is_member(household_id));` + '\n\n' + STORAGE_SQL
 
 export default function CloudScreen({ go, param }) {
   const { t, lang } = useT()
@@ -105,6 +107,20 @@ export default function CloudScreen({ go, param }) {
 
   useEffect(() => { if (signedIn) cloud.listMembers().then(setMembers) }, [signedIn])
   useEffect(() => { if (signedIn) cloud.listAssistantKeys().then(setKeys) }, [signedIn])
+
+  // File storage (documents, receipts, photos): does upload work, and how many
+  // files on this device are still waiting to go up?
+  const [store, setStore] = useState(null)      // 'ok' | 'no-bucket' | 'denied' | 'off' | 'error'
+  const [pending, setPending] = useState(0)
+  const [showStorageSql, setShowStorageSql] = useState(false)
+  const checkStorage = async () => {
+    setStore('checking')
+    const st = await cloud.storageCheck()
+    setStore(st)
+    if (st === 'ok') { setBusy(true); try { await syncAttachments() } finally { setBusy(false) } }
+    setPending(await pendingUploads())
+  }
+  useEffect(() => { if (signedIn) checkStorage() }, [signedIn]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const makeLink = async () => {
     setErr(''); setBusy(true); setNeedSetup(false)
@@ -238,6 +254,34 @@ export default function CloudScreen({ go, param }) {
             <Card className="stack">
               <Button block variant="primary" icon="refresh" onClick={doSync} disabled={busy}>{busy ? t('thinking') + '…' : t('cloudSyncNow')}</Button>
               <p className="hint" style={{ margin: '0 2px' }}>{t('cloudSyncHint')}</p>
+            </Card>
+
+            <Section title={t('filesTitle')} />
+            <Card className="stack">
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                <span className={`lead ${store === 'ok' ? 't-ok' : store === 'checking' || !store ? 't-info' : 't-warn'}`} style={{ width: 36, height: 36, borderRadius: 11, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                  <Icon name={store === 'ok' ? 'check' : 'doc'} size={16} />
+                </span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700 }}>{store === 'ok' ? t('filesOk') : store === 'checking' || !store ? t('pushChecking') : t('filesNotSet')}</div>
+                  <div className="muted small">
+                    {store === 'no-bucket' || store === 'denied' ? t('filesRunSql')
+                      : store === 'error' ? t('filesError')
+                      : pending > 0 ? `${pending} ${t('filesWaiting')}` : store === 'ok' ? t('filesAllUp') : ''}
+                  </div>
+                </div>
+              </div>
+              <div className="row2">
+                <Button icon="refresh" onClick={checkStorage} disabled={busy || store === 'checking'}>{store === 'ok' && pending > 0 ? t('filesUploadNow') : t('pushCheckAgain')}</Button>
+                <Button icon="doc" onClick={() => setShowStorageSql(v => !v)}>{t('filesSql')}</Button>
+              </div>
+              {(showStorageSql || store === 'no-bucket' || store === 'denied') && (
+                <>
+                  <p className="hint" style={{ margin: 0 }}>{t('filesSqlHint')}</p>
+                  <pre className="sql-box">{STORAGE_SQL}</pre>
+                  <Button icon="copy" onClick={() => copy(STORAGE_SQL)}>{t('cloudCopySql')}</Button>
+                </>
+              )}
             </Card>
 
             <Section title={t('deviceLinkTitle')} />
